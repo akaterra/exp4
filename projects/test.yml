@@ -1,0 +1,210 @@
+name: "test"
+
+definitions:
+  none: null
+
+integrations:
+  github:
+    type: "github"
+    config:
+      org: "getpackageltd"
+  githubDev:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "develop"
+  githubStg:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "test-v${version.major}.${version.minor}.${version.patch}"
+  githubProduction:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "master"
+
+storages:
+  github:
+    type: "github"
+    config:
+      integration: "github"
+
+versionings:
+  release: &versioningRelease
+    type: "semver"
+    config:
+      namespace: "release"
+      storage: "github"
+  hotfix: &versioningHotfix
+    type: "semver"
+    config:
+      namespace: "hotfix"
+      storage: "github"
+  current: &versioningCurrent
+    type: "semver"
+    config:
+      namespace: "current"
+      storage: "github"
+
+flows:
+  dev:
+    description: ""
+    targets:
+      - dev
+    actions:
+      release:
+        description: "Create release"
+        steps:
+          - type: "version:release"
+            description: "Increase minor version"
+            targets:
+              - "stg"
+          - type: "moveTo"
+            description: "Create release branch"
+            targets:
+              - "stg"
+      test:
+        description: "Run tests"
+        steps:
+          - type: "runAction"
+            description: "Run tests"
+            config:
+              name: "test"
+
+  release:
+    description: ""
+    targets:
+      - stg
+    actions:
+      release:
+        description: "Release to production"
+        steps:
+          - type: "moveTo"
+            description: ""
+            targets:
+              - "production"
+          - type: "version:override"
+            description: ""
+            targets:
+              - "production"
+      mergeToDev:
+        description: "Release to develop"
+        steps:
+          - type: "moveTo"
+            description: ""
+            targets:
+              - "dev"
+      mergeFromDev:
+        description: "Fetch latest develop"
+        steps:
+          - type: "moveFrom"
+            description: ""
+            targets:
+              - "dev"
+      test:
+        description: "Run tests"
+        steps:
+          - type: "runAction"
+            description: "Run tests"
+            config:
+              name: "test"
+
+  hotfix:
+    description: ""
+    targets:
+      - stgHotfix
+    actions:
+      release:
+        description: "Release to production"
+        steps:
+          - type: "moveTo"
+            description: ""
+            targets:
+              - "production"
+          - type: "version:override"
+            description: ""
+            targets:
+              - "production"
+
+  production:
+    description: ""
+    targets:
+      - production
+    actions:
+      hotfix:
+        description: "Create hotfix"
+        steps:
+          - type: "version:override"
+            description: ""
+            targets:
+              - "stgHotfix"
+          - type: "version:patch"
+            description: ""
+            targets:
+              - "stgHotfix"
+          - type: "moveTo"
+            description: ""
+            targets:
+              - "stgHotfix"
+
+targets:
+  dev:
+    description: "Development"
+    streams:
+      gp-deliveries-service:
+        type: "github"
+        description: "Deliveries"
+        config:
+          integration: "githubDev"
+      gp-deliveries-history-service:
+        type: "github"
+        description: "Deliveries history"
+        config:
+          integration: "githubDev"
+    versioning: "release"
+
+  stg:
+    description: "QA"
+    streams:
+      gp-deliveries-crud-service:
+        type: "github"
+        description: "Deliveries CRUD"
+        config:
+          integration: "githubStg"
+      gp-deliveries-service:
+        type: "github"
+        description: "Deliveries"
+        config:
+          integration: "githubStg"
+      gp-deliveries-history-service:
+        type: "github"
+        description: "Deliveries history"
+        config:
+          integration: "githubStg"
+      gp-uam-service:
+        type: "github"
+        description: "UAM"
+        config:
+          integration: "githubStg"
+    versioning: "release"
+
+  stgHotfix:
+    description: "QA Hot Fix"
+    streams:
+      gp-deliveries-service:
+        type: "github"
+        description: "Deliveries"
+        config:
+          integration: "github"
+    versioning: "hotfix"
+
+  production:
+    description: "Production"
+    streams:
+      gp-deliveries-service:
+        type: "github"
+        description: "Deliveries"
+        config:
+          integration: "githubProduction"
+    versioning: "current"
