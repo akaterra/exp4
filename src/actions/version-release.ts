@@ -4,12 +4,10 @@ import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
 import { iter } from '../utils';
 import { EntityService } from '../entities.service';
-import { VersioningsService } from '../versionings.service';
 
 @Service()
 export class VersionReleaseActionService extends EntityService implements IActionService {
   @Inject() protected projectsService: ProjectsService;
-  @Inject() protected versioningsService: VersioningsService;
 
   get type() {
     return 'version:release';
@@ -21,7 +19,7 @@ export class VersionReleaseActionService extends EntityService implements IActio
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
       const target = project.getTargetByTargetId(tId);
 
-      await this.versioningsService.getByTarget(target).release(target);
+      await project.getVersioningByTarget(target).release(target);
     }
   }
 }

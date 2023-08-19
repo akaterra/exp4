@@ -1,9 +1,13 @@
 import Container from 'typedi';
 import * as _ from 'lodash';
 
-export function Autowired(name?: string) {
+export function Autowired(name?: any | (() => any)) {
   return function(target: Object, propertyName: string){
-      target[propertyName] = Container.get(name ?? Reflect.getMetadata('design:type', target, propertyName));
+    if (typeof name === 'function') {
+      name = name();
+    }
+
+    target[propertyName] = Container.get(name ?? Reflect.getMetadata('design:type', target, propertyName));
   }
 }
 

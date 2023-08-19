@@ -26,9 +26,7 @@ export type IGithubStream = IStream<{
 export class GithubStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'github';
 
-  // @Autowired() protected integrationsService: IntegrationsService;
   @Autowired() protected projectsService: ProjectsService;
-  // @Autowired() protected versioningsService: VersioningsService;
   protected client = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   });
@@ -128,9 +126,7 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   private getIntegration(stream: IGithubTargetStream) {
-    const project = this.projectsService.get(stream.projectId);
-
-    return project.getIntegraionByTargetStream<GithubIntegrationService>(stream);
+    return this.projectsService.get(stream.projectId).getIntegraionByTargetStream<GithubIntegrationService>(stream);
   }
 
   private async getBranch(stream: IGithubTargetStream) {

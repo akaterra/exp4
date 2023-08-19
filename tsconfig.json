@@ -15,9 +15,12 @@
     "esModuleInterop": true,
     "allowJs": true,
     "types": ["reflect-metadata", "node"],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "jsx": "react",
+    "jsxFactory": "h"
   },
   "exclude": [
-    "./dist"
+    "./dist",
+    "./src/ui"
   ]
 }

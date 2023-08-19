@@ -3,10 +3,12 @@ import { IntegrationsService } from './integrations.service';
 import { IIntegrationService } from './integrations/integration.service';
 import { StoragesService } from './storages.service';
 import { StreamsService } from './streams.service';
+import { IStreamService } from './streams/stream.service';
 import { TargetsService } from './targets.service';
 import { VersioningsService } from './versionings.service';
 
 export interface IProjectDef {
+  id?: string;
   type: string;
 
   config?: any;
@@ -262,6 +264,14 @@ export class Project implements IProject {
 
   getIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef) {
     return this.env.integrations.get<T>(stream.config?.integration as string);
+  }
+
+  getStorageByStorageId(storageId: IProjectTargetDef['id']) {
+    return this.env.storages.get(storageId);
+  }
+
+  getStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef) {
+    return this.env.streams.get(stream.type);
   }
 
   getVersioningByTargetId(targetId: IProjectTargetDef['id']) {

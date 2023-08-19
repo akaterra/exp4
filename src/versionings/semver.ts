@@ -1,7 +1,6 @@
 import { Inject, Service } from 'typedi';
 import semver from 'semver';
 import { IVersioningService } from './versioning.service';
-import { StoragesService } from '../storages.service';
 import { IProjectTargetDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IStorageService } from '../storages/storage.service';
@@ -18,14 +17,13 @@ export class SemverVersioningService extends EntityService implements IVersionin
   static readonly type: string = 'semver';
 
   @Autowired() protected projectsService: ProjectsService;
-  @Autowired() protected storagesService: StoragesService;
 
   constructor(public readonly config?: ISemverConfig) {
     super();
   }
 
   async getCurrent(target: IProjectTargetDef): Promise<string> {
-    return this.getStorage().varGet(
+    return this.getStorage(target).varGet(
       target,
       [ 'version', target.projectId, this.config?.namespace ?? target.id ],
       null,
@@ -48,7 +46,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   async override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string> {
     const sourceVersion = await this.getCurrent(source);
 
-    await this.getStorage().varSet(
+    await this.getStorage(target).varSet(
       target,
       [ 'version', target.projectId, this.config?.namespace ?? target.id ],
       sourceVersion,
@@ -66,7 +64,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
       version = '0.0.1';
     }
 
-    await this.getStorage().varSet(
+    await this.getStorage(target).varSet(
       target,
       [ 'version', target.projectId, this.config?.namespace ?? target.id ],
       version,
@@ -84,7 +82,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
       version = '0.1.0';
     }
 
-    await this.getStorage().varSet(
+    await this.getStorage(target).varSet(
       target,
       [ 'version', target.projectId, this.config?.namespace ?? target.id ],
       version,
@@ -108,7 +106,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     throw new Error(`Unknown action: ${action}`);
   }
 
-  private getStorage(): IStorageService {
-    return this.storagesService.get(this.config?.storage ?? 'default');
+  private getStorage(target: IProjectTargetDef): IStorageService {
+    return this.projectsService.get(target.projectId).getStorageByStorageId(this.config?.storage ?? 'default');
   }
 }

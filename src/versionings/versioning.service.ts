@@ -12,7 +12,5 @@ export interface IVersioningService extends IService {
 
   release(target: IProjectTargetDef): Promise<string>;
 
-  exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string> {
-
-  }
+  exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string>;
 }

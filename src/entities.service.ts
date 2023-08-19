@@ -33,3 +33,21 @@ export class EntitiesService<T extends EntityService = EntityService> {
     return this;
   }
 }
+
+export class EntitiesServiceWithFactory<T extends EntityService = EntityService> extends EntitiesService<T> {
+  protected factories: Record<string, { new (...args): T, type: string }> = {};
+
+  addFactory(cls: { new (...args): T, type: string }) {
+    this.factories[cls.type] = cls;
+
+    return this;
+  }
+
+  getInstance(type: string, ...args): T {
+    if (!this.factories[type]) {
+      throw `${this.domain} "${type}" is not registered`;
+    }
+
+    return new this.factories[type](...args);
+  }
+}

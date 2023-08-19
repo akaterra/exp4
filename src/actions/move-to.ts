@@ -2,13 +2,11 @@ import { Inject, Service } from 'typedi';
 import { IProjectFlowActionDef } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
-import { StreamsService } from '../streams.service';
 import { EntityService } from '../entities.service';
 
 @Service()
 export class MoveToActionService extends EntityService implements IActionService {
   @Inject() protected projectsService: ProjectsService;
-  @Inject() protected streamsService: StreamsService;
 
   get type() {
     return 'moveTo';
@@ -33,9 +31,8 @@ export class MoveToActionService extends EntityService implements IActionService
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
-            await this.streamsService
-              .get(targetStream.type)
-              .streamMove(sourceStream, targetStream);
+            await project.getStreamByTargetStream(sourceStream)
+              .streamMove(targetStream, sourceStream);
           }
         }
       }

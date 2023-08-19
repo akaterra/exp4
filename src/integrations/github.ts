@@ -2,6 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { IIntegrationService } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
+import fetch from 'node-fetch-native';
 
 export interface IGithubConfig {
   branch?: string;
@@ -21,6 +22,9 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
 
     this.client = new Octokit({
       auth: config?.token ?? process.env.GITHUB_TOKEN,
+      request: {
+        fetch,
+      },
     });
   }
 
@@ -45,7 +49,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
       return Promise.reject(err);
     })).data;
 
-    return res ? res.value : res;
+    return res ? res.value : null;
   }
 
   async orgVarUpdate(key: string, val: any, org?) {
@@ -95,7 +99,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
 
   async gitMerge(base, head, commitMessage?, repo?, org?) {
     return (await this.client.repos.merge({
-      owner: this.org(org), repo: this.repo(repo), base, head: head ?? this.branch(head), commit_message: commitMessage,
+      owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), commit_message: commitMessage,
     })).data;
   }
 

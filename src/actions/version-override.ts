@@ -3,12 +3,10 @@ import { IProjectFlowActionDef } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
-import { VersioningsService } from '../versionings.service';
 
 @Service()
 export class VersionOverrideActionService extends EntityService implements IActionService {
   @Inject() protected projectsService: ProjectsService;
-  @Inject() protected versioningsService: VersioningsService;
 
   get type() {
     return 'version:override';
@@ -25,7 +23,7 @@ export class VersionOverrideActionService extends EntityService implements IActi
         const source = project.getTargetByTargetId(tIdOfSource);
         const target = project.getTargetByTargetId(tIdOfTarget);
 
-        await this.versioningsService.getByTarget(target).override(source, target);
+        await project.getVersioningByTarget(target).override(source, target);
       }
     }
   }

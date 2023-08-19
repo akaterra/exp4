@@ -1,11 +1,9 @@
 import { Service } from 'typedi';
 import { IIntegrationService } from './integrations/integration.service';
-import { EntitiesService } from './entities.service';
+import { EntitiesServiceWithFactory } from './entities.service';
 
 @Service()
-export class IntegrationsService extends EntitiesService<IIntegrationService> {
-  protected factories: Record<string, { new (...args): IIntegrationService, type: string }> = {};
-
+export class IntegrationsService extends EntitiesServiceWithFactory<IIntegrationService> {
   get domain() {
     return 'Integration';
   }
@@ -18,19 +16,5 @@ export class IntegrationsService extends EntitiesService<IIntegrationService> {
     }
 
     return entity as T;
-  }
-
-  addFactory(cls: { new (...args): IIntegrationService, type: string }) {
-    this.factories[cls.type] = cls;
-
-    return this;
-  }
-
-  getInstance(type: string, ...args): IIntegrationService {
-    if (!this.factories[type]) {
-      throw new Error(`${this.domain} "${type}" is not registered`);
-    }
-
-    return new this.factories[type](...args);
   }
 }

@@ -1,8 +1,7 @@
 import { Inject, Service } from 'typedi';
 import { IStorageService } from './storage.service';
-import { GithubStreamService, IGithubTargetStream } from '../streams/github';
 import { Cache } from '../cache';
-import { IProjectTarget } from '../project';
+import { IProjectTargetDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
@@ -23,7 +22,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     super();
   }
 
-  async varGet<D extends any = any>(target: IProjectTarget<Record<string, unknown>>, key: string | string[], def: D = null): Promise<D> {
+  async varGet<D extends any = any>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = GithubStorageService.getKey(key);
     
     if (this.cache.has(intKey)) {
@@ -39,7 +38,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return val !== undefined ? val : def;
   }
 
-  async varSet<D extends any = any>(target: IProjectTarget<Record<string, unknown>>, key: string | string[], val: D = null): Promise<void> {
+  async varSet<D extends any = any>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = GithubStorageService.getKey(key);
 
     if (await this.varGet(target, key) === null) {
