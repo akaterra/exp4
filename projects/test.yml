@@ -7,22 +7,22 @@ integrations:
   github:
     type: "github"
     config:
-      org: "akaterra"
+      org: "getpackageltd"
   githubDev:
     type: "github"
     config:
-      org: "akaterra"
+      org: "getpackageltd"
       branch: "develop"
   githubStg:
     type: "github"
     config:
-      org: "akaterra"
+      org: "getpackageltd"
       branch: "test-v${version.major}.${version.minor}.${version.patch}"
   githubProduction:
     type: "github"
     config:
-      org: "akaterra"
-      branch: "main"
+      org: "getpackageltd"
+      branch: "master"
 
 storages:
   github:
@@ -152,12 +152,12 @@ targets:
   dev:
     description: "Development"
     streams:
-      testa:
+      gp-deliveries-service:
         type: "github"
         description: "Deliveries"
         config:
           integration: "githubDev"
-      testb:
+      gp-deliveries-history-service:
         type: "github"
         description: "Deliveries history"
         config:
@@ -167,22 +167,22 @@ targets:
   stg:
     description: "QA"
     streams:
-      testa:
+      gp-deliveries-crud-service:
         type: "github"
         description: "Deliveries CRUD"
         config:
           integration: "githubStg"
-      testb:
+      gp-deliveries-service:
         type: "github"
         description: "Deliveries"
         config:
           integration: "githubStg"
-      testc:
+      gp-deliveries-history-service:
         type: "github"
         description: "Deliveries history"
         config:
           integration: "githubStg"
-      testd:
+      gp-uam-service:
         type: "github"
         description: "UAM"
         config:
@@ -192,7 +192,7 @@ targets:
   stgHotfix:
     description: "QA Hot Fix"
     streams:
-      testa:
+      gp-deliveries-service:
         type: "github"
         description: "Deliveries"
         config:
@@ -202,7 +202,7 @@ targets:
   production:
     description: "Production"
     streams:
-      testa:
+      gp-deliveries-service:
         type: "github"
         description: "Deliveries"
         config:

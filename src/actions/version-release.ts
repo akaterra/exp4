@@ -14,7 +14,7 @@ export class VersionReleaseActionService extends EntityService implements IActio
   }
 
   async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
-    const project = this.projectsService.get(action.projectId);
+    const project = this.projectsService.get(action.ref.projectId);
 
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
       const target = project.getTargetByTargetId(tId);

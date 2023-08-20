@@ -55,8 +55,8 @@ export class GithubStreamService extends EntityService implements IStreamService
       id: stream.id,
       type: this.type,
 
-      projectId: stream.projectId,
-      targetId: stream.targetId,
+      projectId: stream.ref.projectId,
+      targetId: stream.ref.targetId,
 
       history: {
         action: workflowRuns ? workflowRuns.map((w) => ({
@@ -94,9 +94,9 @@ export class GithubStreamService extends EntityService implements IStreamService
 
   async streamMove(sourceStream: IGithubTargetStream, targetStream: IGithubTargetStream) {
     const source = await this.streamGetState(sourceStream);
-    const sourceIntegration = this.projectsService.get(sourceStream.projectId).getIntegraionByTargetStream<GithubIntegrationService>(sourceStream);
+    const sourceIntegration = this.projectsService.get(sourceStream.ref.projectId).getIntegraionByTargetStream<GithubIntegrationService>(sourceStream);
     const sourceBranchName = await this.getBranch(sourceStream);
-    const targetIntegration = this.projectsService.get(targetStream.projectId).getIntegraionByTargetStream<GithubIntegrationService>(targetStream);
+    const targetIntegration = this.projectsService.get(targetStream.ref.projectId).getIntegraionByTargetStream<GithubIntegrationService>(targetStream);
     const targetBranchName = await this.getBranch(targetStream);
 
     if (!await sourceIntegration.gitGetBranch(
@@ -126,11 +126,11 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   private getIntegration(stream: IGithubTargetStream) {
-    return this.projectsService.get(stream.projectId).getIntegraionByTargetStream<GithubIntegrationService>(stream);
+    return this.projectsService.get(stream.ref.projectId).getIntegraionByTargetStream<GithubIntegrationService>(stream);
   }
 
   private async getBranch(stream: IGithubTargetStream) {
-    const project = this.projectsService.get(stream.projectId);
+    const project = this.projectsService.get(stream.ref.projectId);
     const integration = project.getIntegraionByTargetStream<GithubIntegrationService>(stream);
     const target = project.getTargetByTargetStream(stream);
     const branch = await project.getVersioningByTarget(target)

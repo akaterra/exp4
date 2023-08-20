@@ -15,15 +15,15 @@ export class TargetsService {
     return 'Target';
   }
 
-  async getState(ref: IProjectTargetDef) {
-    const key = `${ref.projectId}:${ref.id}`;
-    const entity = this.cache.get(key) ?? { id: ref.id, type: null };
+  async getState(target: IProjectTargetDef) {
+    const key = `${target.ref.projectId}:${target.id}`;
+    const entity = this.cache.get(key) ?? { id: target.id, type: null };
 
     if (entity) {
-      const versioning = this.projectsService.get(ref.projectId).getTargetVersioning(ref.id);
+      const versioning = this.projectsService.get(target.ref.projectId).getTargetVersioning(target.id);
 
       entity.version = await this.versioningsService.get(versioning).getCurrent(
-        this.projectsService.get(ref.projectId).getTargetByTargetId(ref.id),
+        this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.id),
       );
     }
 

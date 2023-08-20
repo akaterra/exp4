@@ -13,10 +13,10 @@ export class MoveToActionService extends EntityService implements IActionService
   }
 
   async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
-    const project = this.projectsService.get(action.projectId);
+    const project = this.projectsService.get(action.ref.projectId);
     const sourceTargetIds = targetsStreams
       ? Object.keys(targetsStreams)
-      : project.getFlow(action.flowId).targets;
+      : project.getFlow(action.ref.flowId).targets;
 
     for (const tIdOfSource of sourceTargetIds) {
       const streamIds = targetsStreams

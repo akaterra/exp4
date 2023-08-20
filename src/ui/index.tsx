@@ -3,7 +3,9 @@
 import * as ReactDOM from 'react-dom/client';
 import * as React from 'react';
 import type { Theme } from 'theme-ui';
-import { ThemeUIProvider } from 'theme-ui';
+import { Box, Container, Grid, Heading, NavLink, Paragraph, ThemeUIProvider } from 'theme-ui';
+import { BG, GAP, P, P_SECTION } from './const';
+import { Navigation } from './components/navigation';
 
 export const theme: Theme = {
   fonts: {
@@ -20,14 +22,16 @@ export const theme: Theme = {
 
 export const App = () => (
   <ThemeUIProvider theme={ theme }>
-    <h1
-      sx={{
-        color: 'primary',
-        fontFamily: 'heading',
-      }}
-    >
-      Hello
-    </h1>
+    <Container p={ P } bg={ BG }>
+      <Grid gap={ 0 } columns={[ '300px 1fr' ]}>
+        <Paragraph p={ P_SECTION }>
+          <Navigation />
+        </Paragraph>
+        <Paragraph p={ P_SECTION }>
+          Content
+        </Paragraph>
+      </Grid>
+    </Container>
   </ThemeUIProvider>
 );
 

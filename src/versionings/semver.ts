@@ -25,7 +25,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   async getCurrent(target: IProjectTargetDef): Promise<string> {
     return this.getStorage(target).varGet(
       target,
-      [ 'version', target.projectId, this.config?.namespace ?? target.id ],
+      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       null,
     );
   }
@@ -48,7 +48,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
     await this.getStorage(target).varSet(
       target,
-      [ 'version', target.projectId, this.config?.namespace ?? target.id ],
+      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       sourceVersion,
     );
 
@@ -66,7 +66,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
     await this.getStorage(target).varSet(
       target,
-      [ 'version', target.projectId, this.config?.namespace ?? target.id ],
+      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       version,
     );
 
@@ -84,7 +84,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
     await this.getStorage(target).varSet(
       target,
-      [ 'version', target.projectId, this.config?.namespace ?? target.id ],
+      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       version,
     );
 
@@ -107,6 +107,6 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   private getStorage(target: IProjectTargetDef): IStorageService {
-    return this.projectsService.get(target.projectId).getStorageByStorageId(this.config?.storage ?? 'default');
+    return this.projectsService.get(target.ref.projectId).getStorageByStorageId(this.config?.storage ?? 'default');
   }
 }

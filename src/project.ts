@@ -26,8 +26,7 @@ export interface IProjectFlowActionStep<C extends (Record<string, unknown> | str
   id?: string;
   type: T;
 
-  projectId: string;
-  flowId: string;
+  ref?: { flowId: string; projectId: string; };
 
   config?: C;
   description?: string;
@@ -38,8 +37,7 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
   id?: string;
   type: T;
 
-  flowId: string;
-  projectId: string;
+  ref?: { flowId: string; projectId: string; };
 
   description?: string;
   steps?: IProjectFlowActionStep<C>[];
@@ -50,7 +48,9 @@ export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
 
 export interface IProjectFlow<C extends (Record<string, unknown> | string) = string> {
   id: string;
-  projectId: string;
+  type: string;
+
+  ref?: { projectId: string; };
 
   description?: string;
   actions: Record<string, IProjectFlowAction<C>>;
@@ -63,8 +63,7 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
   id?: string;
   type: T;
 
-  projectId: string;
-  targetId: string;
+  ref?: { projectId: string; targetId: string; };
 
   config?: C;
   description?: string;
@@ -75,7 +74,9 @@ export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknow
 
 export interface IProjectTarget<C extends (Record<string, unknown> | string) = string> {
   id: string;
-  projectId: string;
+  type: string;
+
+  ref?: { projectId: string; };
 
   description?: string;
   streams: Record<string, IProjectTargetStream<C>>;
@@ -146,7 +147,8 @@ export class Project implements IProject {
       for (const [ key, def ] of Object.entries(config.flows)) {
         this.flows[key] = {
           id: key,
-          projectId: this.name,
+          type: 'flow',
+          ref: { projectId: this.name },
           description: def.description,
           targets: def.targets ?? [],
           actions: Object
@@ -155,14 +157,12 @@ export class Project implements IProject {
               acc[actKey] = {
                 id: actDef.id,
                 type: actDef.type,
-                projectId: this.name,
-                flowId: key,
+                ref: { flowId: key, projectId: this.name },
                 description: actDef.description,
                 steps: actDef.steps.map((step) => ({
                   id: step.id ?? actKey,
                   type: step.type,
-                  projectId: this.name,
-                  flowId: key,
+                  ref: { flowId: key, projectId: this.name },
                   config: this.getDefinition(step.config),
                   description: step.description,
                   targets: step.targets ?? actDef.targets ?? [],
@@ -179,7 +179,8 @@ export class Project implements IProject {
       for (const [ key, def ] of Object.entries(config.targets)) {
         this.targets[key] = {
           id: key,
-          projectId: this.name,
+          type: 'target',
+          ref: { projectId: this.name },
           description: def.description,
           versioning: def.versioning,
           streams: Object
@@ -188,8 +189,7 @@ export class Project implements IProject {
               acc[actKey] = {
                 id: actDef.id ?? actKey,
                 type: actDef.type,
-                projectId: this.name,
-                targetId: key,
+                ref: { projectId: this.name, targetId: key },
                 config: this.getDefinition(actDef.config),
                 description: actDef.description,
                 targets: actDef.targets ?? [],
@@ -221,7 +221,7 @@ export class Project implements IProject {
   }
 
   getTargetByTargetStream(stream: IProjectTargetStreamDef) {
-    return this.getTargetByTargetId(stream.targetId);
+    return this.getTargetByTargetId(stream.ref.targetId);
   }
 
   getTargetStreamByTargetIdAndStreamId<S extends IProjectTargetStream<Record<string, unknown>> = IProjectTargetStream<Record<string, unknown>>>(targetId: string, streamId: string, unsafe?: boolean): S {
@@ -280,6 +280,19 @@ export class Project implements IProject {
 
   getVersioningByTarget(target: IProjectTargetDef) {
     return this.env.versionings.get(target.versioning);
+  }
+
+  toJSON() {
+    return {
+      id: this.name,
+
+      definitions: this.definitions,
+      flows: this.flows,
+      integrations: this.integrations,
+      storages: this.storages,
+      targets: this.targets,
+      versionings: this.versionings,
+    };
   }
 
   private getDefinition(mixed: string | Record<string, unknown>): Record<string, unknown> {

@@ -19,15 +19,15 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     return 'Stream';
   }
 
-  async getState(ref: IProjectTargetStreamDef) {
-    const key = `${ref.projectId}:${ref.targetId}`;
-    const entity = this.cache.get(key) ?? await this.get(ref.type).streamGetState(ref);
+  async getState(stream: IProjectTargetStreamDef) {
+    const key = `${stream.ref.projectId}:${stream.ref.targetId}`;
+    const entity = this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream);
 
     if (entity) {
-      const versioning = this.projectsService.get(ref.projectId).getTargetVersioning(ref.targetId);
+      const versioning = this.projectsService.get(stream.ref.projectId).getTargetVersioning(stream.ref.targetId);
 
       entity.version = await this.versioningsService.get(versioning).getCurrent(
-        this.projectsService.get(ref.projectId).getTargetByTargetId(ref.targetId),
+        this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId),
       );
     }
 
