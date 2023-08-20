@@ -1,12 +1,14 @@
 /** @jsxImportSource theme-ui */
 
+import { observer } from "mobx-react-lite";
 import * as ReactDOM from 'react-dom/client';
 import * as React from 'react';
 import * as UI from 'theme-ui';
 import { BG, GAP, P } from '../../const';
+import { ProjectsStore } from '../../stores/projects';
 
-export const Navigation = () => (
-  <div>
+export const Navigation = observer(({ store }: { store: ProjectsStore }) => {
+  return <div>
     <UI.Grid gap={ 2 } columns={[ '1fr' ]}>
       <UI.NavLink href="#!" p={ 0 }>
         Statistics
@@ -14,12 +16,11 @@ export const Navigation = () => (
     </UI.Grid>
     <UI.Heading as='h3' p={ 0 } mt={ 3 } mb={ 3 }>Projects</UI.Heading>
     <UI.Grid gap={ 2 } columns={[ '1fr' ]}>
-      <UI.NavLink href="#!" p={ 0 }>
-        Test 1
-      </UI.NavLink>
-      <UI.NavLink href="#!" p={ 0 }>
-        Test 2
-      </UI.NavLink>
+      {
+        store.projectsList.map((e, i) => <UI.NavLink href="#!" p={ 0 } key={ i }>
+          { e.id }
+        </UI.NavLink>)
+      }
     </UI.Grid>
-  </div>
-);
+  </div>;
+});

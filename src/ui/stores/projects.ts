@@ -1,21 +1,26 @@
 import { makeObservable, observable, computed, action, flow } from "mobx"
 import { RestApiService } from '../services/rest-api.service';
 import { ProjectDto } from './dto/project';
+import { ProjectsService } from '../services/projects.service';
 
 export class ProjectsStore {
-  protected rest = new RestApiService();
+  protected service = new ProjectsService();
 
-  protected projects: Record<string, ProjectDto> = {};
+  projects: Record<string, ProjectDto> = {};
 
-  constructor(value) {
+  get projectsList() {
+    return Object.values(this.projects);
+  }
+
+  constructor(value?) {
     makeObservable(this, {
       fetch: flow,
       projects: observable,
+      projectsList: computed,
     });
   }
 
   *fetch() {
-    const response = yield this.rest.get("/api/projects");
-    this.value = response.json();
+    this.projects = yield this.service.list();
   }
 }

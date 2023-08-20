@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import 'universal-dotenv/register';
+import cors from 'cors';
 import { loadFromFile } from './project-loader';
 import { GithubStreamService, IGithubTargetStream } from './streams/github';
 import Container from 'typedi';
@@ -62,6 +63,7 @@ import { SemverVersioningService } from './versionings/semver';
   // await versioning.patch(stream);
 
   const app = express();
+  app.use(cors());
 
   function error(err, req, res, next) {
     console.error(err, err.stack);

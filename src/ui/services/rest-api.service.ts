@@ -1,7 +1,7 @@
 export class PublicRestApiService {
   constructor(
     private domain = 'http://127.0.0.1:7000',
-    private rootPath = 'api',
+    private rootPath = '',
   ) {
   }
 
@@ -9,8 +9,8 @@ export class PublicRestApiService {
       return this.doRequest(path, 'delete');
   }
 
-  get(path: string) {
-      return this.doRequest(path, 'get');
+  get(path: string, query?: Record<string, any>) {
+      return this.doRequest(path, 'get', undefined, query);
   }
 
   post(path: string, data?: any) {
@@ -21,20 +21,20 @@ export class PublicRestApiService {
       return this.doRequest(path, 'put', data);
   }
 
-  protected doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?) {
+  protected doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, any>) {
       const headers = this.doRequestHeaders();
 
       if (data !== undefined) {
           headers['Content-Type'] = 'application/json';
 
-          return fetch(`${this.domain}/api/${path}`, {
+          return fetch(`${this.domain}/${this.rootPath}${path}?${encodeQuery(query)}`, {
               method,
               body: JSON.stringify(data),
               headers,
           }).then((res) => res.json());
       }
 
-      return fetch(`${this.domain}/${this.rootPath}/${path}`, { method, headers }).then((res) => res.json());
+      return fetch(`${this.domain}/${this.rootPath}${path}`, { method, headers }).then((res) => res.json());
   }
 
   protected doRequestHeaders() {
@@ -64,4 +64,18 @@ export class RestApiService extends PublicRestApiService {
 
       return headers;
   }
+}
+
+function encodeQuery(query: Record<string, any>) {
+    if (query && typeof query === 'object') {
+        return Object.entries(query).map(([ key, val ]) => {
+            if (Array.isArray(val)) {
+                return `${key}=${val.map((val) => encodeURIComponent(val)).join(',')}`;
+            }
+
+            return `${key}=${encodeURIComponent(val)}`;
+        }).join('&');
+    }
+
+    return '';
 }

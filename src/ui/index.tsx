@@ -6,6 +6,7 @@ import type { Theme } from 'theme-ui';
 import { Box, Container, Grid, Heading, NavLink, Paragraph, ThemeUIProvider } from 'theme-ui';
 import { BG, GAP, P, P_SECTION } from './const';
 import { Navigation } from './components/navigation';
+import { ProjectsStore } from './stores/projects';
 
 export const theme: Theme = {
   fonts: {
@@ -25,7 +26,7 @@ export const App = () => (
     <Container p={ P } bg={ BG }>
       <Grid gap={ 0 } columns={[ '300px 1fr' ]}>
         <Paragraph p={ P_SECTION }>
-          <Navigation />
+          <Navigation store={ projectsStore } />
         </Paragraph>
         <Paragraph p={ P_SECTION }>
           Content
@@ -35,6 +36,12 @@ export const App = () => (
   </ThemeUIProvider>
 );
 
-const root = ReactDOM.createRoot(document.getElementById('container'));
+const projectsStore = new ProjectsStore();
 
-root.render(<App />);
+(async () => {
+  const root = ReactDOM.createRoot(document.getElementById('container'));
+  
+  root.render(<App />);
+
+  await projectsStore.fetch();
+})();

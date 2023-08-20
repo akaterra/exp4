@@ -1,4 +1,4 @@
-export interface ProjectFlowActionStep = {
+export interface ProjectFlowActionStep {
   id: string;
   type: string;
 
@@ -8,7 +8,7 @@ export interface ProjectFlowActionStep = {
   targets: string[];
 }
 
-export interface ProjectFlowAction = {
+export interface ProjectFlowAction {
   id: string;
   type: string;
 
@@ -18,7 +18,7 @@ export interface ProjectFlowAction = {
   steps: ProjectFlowActionStep[];
 }
 
-export interface ProjectFlow = {
+export interface ProjectFlow {
   id: string;
   type: string;
 
@@ -27,7 +27,7 @@ export interface ProjectFlow = {
   targets: string[];
 }
 
-export interface ProjectTargetStream = {
+export interface ProjectTargetStream {
   id: string;
   type: string;
 
@@ -37,7 +37,7 @@ export interface ProjectTargetStream = {
   targets: string[];
 }
 
-export interface ProjectTarget = {
+export interface ProjectTarget {
   id: string;
   type: string;
 
@@ -48,7 +48,7 @@ export interface ProjectTarget = {
   versioning: string;
 }
 
-export interface ProjectDto = {
+export interface ProjectDto {
   id: string;
   type: string;
 
