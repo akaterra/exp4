@@ -1,3 +1,7 @@
+import { makeObservable, observable, computed, action, flow } from 'mobx';
+import { RestApiService } from "../services/rest-api.service";
+import { ProjectDto } from "./dto/project";
+
 export class ProjectStore {
   protected rest = new RestApiService();
 
@@ -13,5 +17,9 @@ export class ProjectStore {
       projects: observable,
       projectsList: computed,
     });
+  }
+
+  *fetch() {
+
   }
 }

@@ -1,0 +1,33 @@
+.padding.frame {
+    padding: 0.25em 0.75em;
+}
+
+.padding.horGap {
+    display: flex;
+    flex-direction: row;
+}
+
+.padding.horGap>* {
+    margin-left: 0.75em;
+    margin-right: 0.75em;
+}
+
+.padding.horPad {
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+}
+
+.padding.verGap {
+    display: flex;
+    flex-direction: column;
+}
+
+.padding.verGap>* {
+    padding-bottom: 0.25em;
+    padding-top: 0.25em;
+}
+
+.padding.verPad {
+    padding-bottom: 0.25em;
+    padding-top: 0.25em;
+}

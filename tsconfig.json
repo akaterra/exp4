@@ -16,8 +16,7 @@
     "allowJs": true,
     "types": ["reflect-metadata", "node"],
     "useDefineForClassFields": false,
-    "jsx": "react-jsx",
-    "jsxImportSource": "theme-ui"
+    "jsx": "react-jsx"
   },
   "exclude": [
     "./dist",

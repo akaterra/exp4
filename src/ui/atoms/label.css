@@ -1,0 +1,3 @@
+.label.with-fictive-content:before {
+    content: '\00A0';
+}

@@ -12,7 +12,6 @@
         "baseUrl": "./src/ui",
         "resolveJsonModule": true,
         "incremental": true,
-        "jsx": "react-jsx",
-        "jsxImportSource": "theme-ui"
+        "jsx": "react-jsx"
     }
 }

@@ -1,40 +1,29 @@
 /** @jsxImportSource theme-ui */
 
 import * as ReactDOM from 'react-dom/client';
-import * as React from 'react';
-import type { Theme } from 'theme-ui';
-import { Box, Container, Grid, Heading, NavLink, Paragraph, ThemeUIProvider } from 'theme-ui';
-import { BG, GAP, P, P_SECTION } from './const';
-import { Navigation } from './components/navigation';
+import React from 'react';
+import './mini.min.css';
+import 'normalize.css';
+import { Navigation } from './blocks/navigation';
 import { ProjectsStore } from './stores/projects';
+import { Row } from './atoms/row';
 
-export const theme: Theme = {
-  fonts: {
-    body: 'system-ui, sans-serif',
-    heading: '"Avenir Next", sans-serif',
-    monospace: 'Menlo, monospace',
-  },
-  colors: {
-    text: '#000',
-    background: '#fff',
-    primary: '#33e',
-  },
-};
-
-export const App = () => (
-  <ThemeUIProvider theme={ theme }>
-    <Container p={ P } bg={ BG }>
-      <Grid gap={ 0 } columns={[ '300px 1fr' ]}>
-        <Paragraph p={ P_SECTION }>
-          <Navigation store={ projectsStore } />
-        </Paragraph>
-        <Paragraph p={ P_SECTION }>
-          Content
-        </Paragraph>
-      </Grid>
-    </Container>
-  </ThemeUIProvider>
-);
+export const App = () => {
+  return <Row.M>
+    <div className='c-3 -s-'>
+        <Navigation projects={ projectsStore } />
+    </div>
+    {/* <div className='c15 -s-'>
+        <Router>
+            <FeedsApp default path="/feeds/:selectedFeedId?" />
+            <ProjectsApp path="/projects/:selectedProjectId?" />
+            <SubscriptionsApp path="/subscriptions/:selectedProjectUserStateId?" />
+            <UsersApp path="/users/:selectedUserId?" />
+            <div path="/error">Error!</div>
+        </Router>
+    </div> */}
+  </Row.M>;
+}
 
 const projectsStore = new ProjectsStore();
 

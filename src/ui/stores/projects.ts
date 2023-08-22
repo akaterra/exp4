@@ -1,4 +1,4 @@
-import { makeObservable, observable, computed, action, flow } from "mobx"
+import { makeObservable, observable, computed, action, flow } from 'mobx';
 import { RestApiService } from '../services/rest-api.service';
 import { ProjectDto } from './dto/project';
 import { ProjectsService } from '../services/projects.service';
