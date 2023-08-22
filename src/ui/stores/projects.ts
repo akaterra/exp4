@@ -21,6 +21,8 @@ export class ProjectsStore {
   }
 
   *fetch() {
-    this.projects = yield this.service.list();
+    const res = yield this.service.list();
+
+    this.projects = res;
   }
 }

@@ -1,11 +1,11 @@
-.link .linkRow {
+.link {
     cursor: pointer;
 }
 
-.link:hover .linkRow:hover {
+.link:hover {
     cursor: pointer;
 }
 
-.linkRow:hover {
-    background-color: white;
+.link {
+    text-decoration: none;
 }

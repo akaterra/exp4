@@ -11,7 +11,9 @@ import { Row } from './atoms/row';
 export const App = () => {
   return <Row.M>
     <div className='c-3 -s-'>
-        <Navigation projects={ projectsStore } />
+        <div className='paragraph paragraph-lrg'>
+          <Navigation projects={ projectsStore } />
+        </div>
     </div>
     {/* <div className='c15 -s-'>
         <Router>

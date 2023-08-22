@@ -11,9 +11,9 @@ export const Navigation = observer(({ projects }: { projects: ProjectsStore }) =
         </Link></SubTitle>
         <Title>Projects</Title>
         {
-            projects.projectsList.map((e) => {
-                return <SubTitle><Link activeClassName="link active" href="projects" className='link'>
-                    { e.description }
+            projects.projectsList.map((e, i) => {
+                return <SubTitle key={ i }><Link activeClassName="link active" href={ `projects/${e.id}` } className='link'>
+                    { e.id }
                 </Link></SubTitle>
             })
         }

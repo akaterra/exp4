@@ -1,6 +1,6 @@
 import { ProjectTargetStream } from './project';
 
-export interface ProjectTargetStreamState {
+export interface ProjectTargetStreamStateDto {
   id: ProjectTargetStream['id'];
   type: ProjectTargetStream['id'];
 
@@ -35,6 +35,8 @@ export interface ProjectTargetStreamState {
   version: string;
 }
 
-export type ProjectTarget = Record<string, ProjectTargetStreamState>;
+export type ProjectTargetStateDto = Record<string, ProjectTargetStreamStateDto>;
 
-export type ProjectTargets = Record<string, ProjectTarget>;
+export type ProjectStateDto = {
+  targets: Record<string, ProjectTargetStateDto>;
+};

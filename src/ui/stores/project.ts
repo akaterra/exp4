@@ -1,25 +1,44 @@
 import { makeObservable, observable, computed, action, flow } from 'mobx';
-import { RestApiService } from "../services/rest-api.service";
 import { ProjectDto } from "./dto/project";
+import { ProjectStateDto } from './dto/project-target-stream.state';
+import { ProjectsService } from '../services/projects.service';
 
 export class ProjectStore {
-  protected rest = new RestApiService();
+  protected service = new ProjectsService();
 
-  projects: Record<string, ProjectDto> = {};
+  project: Partial<ProjectDto> & { id: ProjectDto['id'] };
+  projectTargetsState: ProjectStateDto['targets'];
 
-  get projectsList() {
-    return Object.values(this.projects);
-  }
-
-  constructor(value?) {
+  constructor(state?: { project?: ProjectDto, projectState?: ProjectStateDto['targets'] }) {
     makeObservable(this, {
-      fetch: flow,
-      projects: observable,
-      projectsList: computed,
+      fetchState: flow,
+      projectTargetsState: observable,
     });
+
+    if (state?.project) {
+      this.project = state.project;
+    }
+
+    if (state?.projectState) {
+      this.projectTargetsState = state.projectState;
+    }
+
+    if (this.project && !this.projectTargetsState) {
+      this.fetchState();
+    }
   }
 
-  *fetch() {
+  getTargetByTargetId(targetId) {
+    return this.project?.targets?.[targetId];
+  }
 
+  getTargetStreamByTargetIdAndStreamId(targetId, streamId) {
+    return this.project?.targets?.[targetId]?.streams?.[streamId];
+  }
+
+  *fetchState() {
+    const res = yield this.service.listState(this.project.id);
+
+    this.projectTargetsState = res;
   }
 }
