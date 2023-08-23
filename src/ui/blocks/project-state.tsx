@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { ProjectStore } from '../stores/project';
 import { ProjectTargetStateDto, ProjectTargetStreamStateDto } from '../stores/dto/project-target-stream.state';
 
-export const ProjectTargerState = observer(({ project, target }: { project: ProjectStore, stream: ProjectTargetStateDto }) => {
+export const ProjectTargerState = observer(({ project, stream }: { project: ProjectStore, stream: ProjectTargetStateDto }) => {
     return <div className='block'>
         <SubTitle>{ stream.id }</SubTitle>
         <SubSubTitle>Actions</SubSubTitle>

@@ -20,6 +20,10 @@ export class ProjectsStore {
     });
   }
 
+  getById(id) {
+    return this.projects?.[id];
+  }
+
   *fetch() {
     const res = yield this.service.list();
 
