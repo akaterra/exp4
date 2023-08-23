@@ -34,5 +34,5 @@ const projectsStore = new ProjectsStore();
   
   root.render(<App />);
 
-  await projectsStore.fetch();
+  // await projectsStore.fetch();
 })();
