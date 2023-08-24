@@ -7,22 +7,22 @@ integrations:
   github:
     type: "github"
     config:
-      org: "akaterra"
+      org: "getpackageltd"
   githubDev:
     type: "github"
     config:
-      org: "akaterra"
+      org: "getpackageltd"
       branch: "develop"
   githubStg:
     type: "github"
     config:
-      org: "akaterra"
+      org: "getpackageltd"
       branch: "test-v${version.major}.${version.minor}.${version.patch}"
   githubProduction:
     type: "github"
     config:
-      org: "akaterra"
-      branch: "main"
+      org: "getpackageltd"
+      branch: "master"
 
 storages:
   github:
@@ -54,18 +54,18 @@ flows:
       - dev
     actions:
       release:
-        description: "Create release"
+        title: "Create release"
         steps:
           - type: "version:release"
-            description: "Increase minor version"
+            title: "Increase minor version"
             targets:
               - "stg"
           - type: "moveTo"
-            description: "Create release branch"
+            title: "Create release branch"
             targets:
               - "stg"
       test:
-        description: "Run tests"
+        title: "Run tests"
         steps:
           - type: "runAction"
             description: "Run tests"
@@ -78,52 +78,52 @@ flows:
       - stg
     actions:
       release:
-        description: "Release to production"
+        title: "Release to production"
         steps:
           - type: "moveTo"
-            description: ""
+            title: ""
             targets:
               - "production"
           - type: "version:override"
-            description: ""
+            title: ""
             targets:
               - "production"
       mergeToDev:
-        description: "Release to develop"
+        title: "Release to develop"
         steps:
           - type: "moveTo"
-            description: ""
+            title: ""
             targets:
               - "dev"
       mergeFromDev:
-        description: "Fetch latest develop"
+        title: "Fetch latest develop"
         steps:
           - type: "moveFrom"
-            description: ""
+            title: ""
             targets:
               - "dev"
       test:
-        description: "Run tests"
+        title: "Run tests"
         steps:
           - type: "runAction"
-            description: "Run tests"
+            title: "Run tests"
             config:
               name: "test"
 
   hotfix:
-    description: ""
+    title: ""
     targets:
       - stgHotfix
     actions:
       release:
-        description: "Release to production"
+        title: "Release to production"
         steps:
           - type: "moveTo"
-            description: ""
+            title: ""
             targets:
               - "production"
           - type: "version:override"
-            description: ""
+            title: ""
             targets:
               - "production"
 
@@ -133,78 +133,78 @@ flows:
       - production
     actions:
       hotfix:
-        description: "Create hotfix"
+        title: "Create hotfix"
         steps:
           - type: "version:override"
-            description: ""
+            title: ""
             targets:
               - "stgHotfix"
           - type: "version:patch"
-            description: ""
+            title: ""
             targets:
               - "stgHotfix"
           - type: "moveTo"
-            description: ""
+            title: ""
             targets:
               - "stgHotfix"
 
 targets:
   dev:
-    description: "Development"
+    title: "Development"
     streams:
-      testa:
+      gp-deliveries-service:
         type: "github"
-        description: "Deliveries"
+        title: "Deliveries"
         config:
           integration: "githubDev"
-      testb:
+      gp-deliveries-history-service:
         type: "github"
-        description: "Deliveries history"
+        title: "Deliveries history"
         config:
           integration: "githubDev"
     versioning: "release"
 
   stg:
-    description: "QA"
+    title: "QA"
     streams:
-      testa:
+      gp-deliveries-crud-service:
         type: "github"
-        description: "Deliveries CRUD"
+        title: "Deliveries CRUD"
         config:
           integration: "githubStg"
-      testb:
+      gp-deliveries-service:
         type: "github"
-        description: "Deliveries"
+        title: "Deliveries"
         config:
           integration: "githubStg"
-      testc:
+      gp-deliveries-history-service:
         type: "github"
-        description: "Deliveries history"
+        title: "Deliveries history"
         config:
           integration: "githubStg"
-      testd:
+      gp-uam-service:
         type: "github"
-        description: "UAM"
+        title: "UAM"
         config:
           integration: "githubStg"
     versioning: "release"
 
   stgHotfix:
-    description: "QA Hot Fix"
+    title: "QA Hot Fix"
     streams:
-      testa:
+      gp-deliveries-service:
         type: "github"
-        description: "Deliveries"
+        title: "Deliveries"
         config:
           integration: "github"
     versioning: "hotfix"
 
   production:
-    description: "Production"
+    title: "Production"
     streams:
-      testa:
+      gp-deliveries-service:
         type: "github"
-        description: "Deliveries"
+        title: "Deliveries"
         config:
           integration: "githubProduction"
     versioning: "current"

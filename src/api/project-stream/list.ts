@@ -5,5 +5,5 @@ const projectsService = Container.get(ProjectsService);
 
 // /projects/:projectId/streams
 export async function projectStreamList(req, res) {
-  res.json(await projectsService.streamGetStateAll(req.params.projectId, req.query.targetId?.split(',')));
+  res.json(await projectsService.getState(req.params.projectId, req.query.targetId?.split(',')));
 }

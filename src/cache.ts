@@ -29,7 +29,7 @@ export class Cache<T = any> {
     let expire;
 
     if (!updTtl) {
-      if (this.cache.has(key)) {
+      if (this.has(key)) {
         [ expire, ] = this.cache.get(key);
       }
     }

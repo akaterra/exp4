@@ -10,7 +10,7 @@ export const componentSingleStyle = {
 };
 
 export const Checkbox = ({ children, currentValue = undefined, onChange = undefined, style = undefined }: any) => {
-    return <label><input
+    return <label className='flex flex-start'><input
         checked={ currentValue }
         style={ { margin: '4px' } }
         type='checkbox'

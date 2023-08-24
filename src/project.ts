@@ -12,6 +12,7 @@ export interface IProjectDef {
   type: string;
 
   config?: any;
+  title?: string;
   description?: string;
 }
 
@@ -29,6 +30,7 @@ export interface IProjectFlowActionStep<C extends (Record<string, unknown> | str
   ref?: { flowId: string; projectId: string; };
 
   config?: C;
+  title?: string;
   description?: string;
   targets?: string[];
 }
@@ -39,6 +41,7 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
 
   ref?: { flowId: string; projectId: string; };
 
+  title?: string;
   description?: string;
   steps?: IProjectFlowActionStep<C>[];
   targets?: string[];
@@ -52,6 +55,7 @@ export interface IProjectFlow<C extends (Record<string, unknown> | string) = str
 
   ref?: { projectId: string; };
 
+  title?: string;
   description?: string;
   actions: Record<string, IProjectFlowAction<C>>;
   targets: string[];
@@ -66,6 +70,7 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
   ref?: { projectId: string; targetId: string; };
 
   config?: C;
+  title?: string;
   description?: string;
   targets?: string[];
 }
@@ -78,6 +83,7 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 
   ref?: { projectId: string; };
 
+  title?: string;
   description?: string;
   streams: Record<string, IProjectTargetStream<C>>;
   versioning?: string;
@@ -149,6 +155,7 @@ export class Project implements IProject {
           id: key,
           type: 'flow',
           ref: { projectId: this.name },
+          title: def.title,
           description: def.description,
           targets: def.targets ?? [],
           actions: Object
@@ -158,6 +165,7 @@ export class Project implements IProject {
                 id: actDef.id,
                 type: actDef.type,
                 ref: { flowId: key, projectId: this.name },
+                title: actDef.title,
                 description: actDef.description,
                 steps: actDef.steps.map((step) => ({
                   id: step.id ?? actKey,
@@ -181,6 +189,7 @@ export class Project implements IProject {
           id: key,
           type: 'target',
           ref: { projectId: this.name },
+          title: def.title,
           description: def.description,
           versioning: def.versioning,
           streams: Object
@@ -191,6 +200,7 @@ export class Project implements IProject {
                 type: actDef.type,
                 ref: { projectId: this.name, targetId: key },
                 config: this.getDefinition(actDef.config),
+                title: actDef.title,
                 description: actDef.description,
                 targets: actDef.targets ?? [],
               };

@@ -1,5 +1,5 @@
-import { ProjectDto, ProjectTarget } from '../stores/dto/project';
-import { ProjectStateDto } from '../stores/dto/project-target-stream.state';
+import { ProjectDto, ProjectTargetDto } from '../stores/dto/project';
+import { ProjectStateDto } from '../stores/dto/project-state';
 import { RestApiService } from './rest-api.service';
 
 export class ProjectsService {
@@ -10,8 +10,8 @@ export class ProjectsService {
   }
 
   listState(projectId: ProjectDto['id'], filter?: {
-    targetId?: ProjectTarget['id'][],
-  }): Promise<ProjectStateDto['targets']> {
+    targetId?: ProjectTargetDto['id'][],
+  }): Promise<ProjectStateDto> {
     return this.rest.get(`projects/${projectId}/streams`, filter);
   }
 }

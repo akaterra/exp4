@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
+import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
 import { StreamsService } from './streams.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
@@ -14,6 +14,7 @@ export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => ActionsService) protected actionsService: ActionsService;
   @Inject(() => StreamsService) protected streamsService: StreamsService;
   @Inject(() => TargetsService) protected targetsService: TargetsService;
+  @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
 
   get domain() {
     return 'Project';
@@ -35,6 +36,36 @@ export class ProjectsService extends EntitiesService<Project> {
     return true;
   }
 
+  async getState(projectId: string, targetId?: string | string[]) {
+    const state: {
+      id: IProjectDef['id'];
+      targets: Record<string, {
+        id: IProjectTargetDef['id'];
+        streams: Record<string, IStream>;
+        version: string;
+      }>;
+    } = {
+      id: projectId,
+      targets: {},
+    };
+    const project = this.get(projectId);
+
+    for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
+      const target = project.getTargetByTargetId(tId);
+      state.targets[tId] = {
+        id: tId,
+        streams: {},
+        version: await this.versioningsService.getByTarget(target).getCurrent(target),
+      };
+
+      for (const [ sId, stream ] of Object.entries(target.streams)) {
+        state.targets[tId].streams[sId] = await this.streamGetState(stream);
+      }
+    }
+
+    return state;
+  }
+
   streamGetState(stream: IProjectTargetStreamDef): Promise<IStream>;
 
   streamGetState(projectId: string, targetId: string, streamId: string): Promise<IStream>;
@@ -45,21 +76,6 @@ export class ProjectsService extends EntitiesService<Project> {
       : await this.streamsService.getState(mixed);
 
     return stream;
-  }
-
-  async streamGetStateAll(projectId: string, targetId?: string | string[]) {
-    const targets: Record<string, Record<string, IStream>> = {};
-    const project = this.get(projectId);
-
-    for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
-      targets[tId] = {};
-
-      for (const [ sId, stream ] of Object.entries(project.getTargetByTargetId(tId).streams)) {
-        targets[tId][sId] = await this.streamGetState(stream);
-      }
-    }
-
-    return targets;
   }
 
   targetGetState(stream: IProjectTargetDef): Promise<ITarget>;

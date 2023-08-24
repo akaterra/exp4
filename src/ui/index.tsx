@@ -7,13 +7,20 @@ import 'normalize.css';
 import { Navigation } from './blocks/navigation';
 import { ProjectsStore } from './stores/projects';
 import { Row } from './atoms/row';
+import { Project } from './blocks/project';
+import { observer } from 'mobx-react-lite';
 
-export const App = () => {
+export const App = observer(() => {
   return <Row.M>
     <div className='c-3 -s-'>
         <div className='paragraph paragraph-lrg'>
           <Navigation projects={ projectsStore } />
         </div>
+    </div>
+    <div className='c15 -s-'>
+      <div className='paragraph paragraph-lrg'>
+          <Project project={ projectsStore.selectedProjectStore } />
+      </div>
     </div>
     {/* <div className='c15 -s-'>
         <Router>
@@ -25,7 +32,7 @@ export const App = () => {
         </Router>
     </div> */}
   </Row.M>;
-}
+});
 
 const projectsStore = new ProjectsStore();
 

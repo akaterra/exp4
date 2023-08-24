@@ -12,10 +12,12 @@ export class ProjectsStore extends BaseStore {
   projects: Record<string, ProjectDto> = {};
   @observable
   projectsStores: Record<string, ProjectStore> = {};
+  @observable
+  selectedProjectId: string;
 
   @computed
   get selectedProjectStore() {
-    return this.selectedProjectId ? this.projectsStores?.[this.selectedProjectId] : null;
+    return this.selectedProjectId ? this.projectsStores?.[this.selectedProjectId] : undefined;
   }
 
   @computed
@@ -23,9 +25,13 @@ export class ProjectsStore extends BaseStore {
     return Object.values(this.projects);
   }
 
-  constructor(public selectedProjectId?: string) {
+  constructor(selectedProjectId: string = 'test') {
     super();
     makeObservable(this);
+
+    if (selectedProjectId) {
+      this.selectedProjectId = selectedProjectId;
+    }
 
     this.fetch();
   }
@@ -47,6 +53,6 @@ export class ProjectsStore extends BaseStore {
         : new ProjectStore(this, payload);
     }, this.projectsStores);
 
-    console.log(this.projectsStores)
+    console.log(this)
   }
 }

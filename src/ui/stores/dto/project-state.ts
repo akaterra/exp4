@@ -1,10 +1,10 @@
-import { ProjectTargetStream } from './project';
+import { ProjectDto, ProjectTargetDto, ProjectTargetStreamDto } from './project';
 
 export interface ProjectTargetStreamStateDto {
-  id: ProjectTargetStream['id'];
-  type: ProjectTargetStream['id'];
+  id: ProjectTargetStreamDto['id'];
+  type: ProjectTargetStreamDto['id'];
 
-  ref: ProjectTargetStream['ref'];
+  ref: ProjectTargetStreamDto['ref'];
 
   history: {
     action: {
@@ -35,8 +35,13 @@ export interface ProjectTargetStreamStateDto {
   version: string;
 }
 
-export type ProjectTargetStateDto = Record<string, ProjectTargetStreamStateDto>;
+export type ProjectTargetStateDto = {
+  id: ProjectTargetDto['id'];
+  streams: Record<string, ProjectTargetStreamStateDto>;
+  version: string;
+};
 
 export type ProjectStateDto = {
+  id: ProjectDto['id'];
   targets: Record<string, ProjectTargetStateDto>;
 };
