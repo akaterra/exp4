@@ -6,28 +6,47 @@ import { ProjectsStore } from './projects';
 import { BaseStore, processing } from './base-store';
 
 export class ProjectTargetStore extends BaseStore {
+  @observable projectTargetState: { id: string };
+
   @computed
-  get targetState() {
-    return this.projectStore.projectTargetsStores[this.projectTargetState.id];
+  get target() {
+    return this.projectStore.project?.targets?.[this.projectTargetState.id];
   }
 
-  constructor(public projectStore: ProjectStore, public projectTargetState: { id: string, streams: ProjectTargetStateDto }) {
+  @computed
+  get targetState() {
+    return this.projectStore.projectTargetsStores?.[this.projectTargetState.id];
+  }
+
+  constructor(public projectStore: ProjectStore, projectTargetState: { id: string }) {
     super();
     makeObservable(this);
+
+    this.update(projectTargetState);
+  }
+
+  update(state?: { id: string }) {
+    if (state) {
+      this.projectTargetState = state;
+    }
+
+    return this;
   }
 }
 
 export class ProjectStore extends BaseStore {
   @observable
-  project: Partial<ProjectDto> & { id: ProjectDto['id'] };
+  project: ProjectDto;
   @observable
   projectTargetsStores: Record<string, ProjectTargetStore> = {};
 
-  constructor(public projectsStore: ProjectsStore, public projectState?: ProjectStateDto['targets']) {
+  constructor(public projectsStore: ProjectsStore, project?: ProjectDto) {
     super();
     makeObservable(this);
 
-    if (this.project && !this.projectState) {
+    if (project) {
+      this.project = project;
+
       this.fetchState();
     }
   }
@@ -42,12 +61,14 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *fetchState() {
-    const res = yield this.projectsStore.service.listState(this.project.id);
+    const res: ProjectStateDto['targets'] = yield this.projectsStore.service.listState(this.project.id);
 
     this.projectTargetsStores = this.mapToStores(res, (val, key) => {
+      const payload = { id: key };
+
       return this.projectTargetsStores[key]
-        ? this.projectTargetsStores[key].update(val)
-        : new ProjectTargetStore(this, val);
+        ? this.projectTargetsStores[key].update(payload)
+        : new ProjectTargetStore(this, payload);
     }, this.projectTargetsStores);
   }
 }

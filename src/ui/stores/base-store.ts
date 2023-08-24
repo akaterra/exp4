@@ -7,26 +7,26 @@ export class BaseStore {
   @observable
   isProcessing: boolean = false;
 
-  mapToStores<T extends BaseStore>(
-    source: Array<any> | Record<string, any>,
-    mapper: (val: any, key: number | string) => T,
-    storesMaybeDisposable?: Array<T> | Record<string, T>,
-    items?: typeof source extends Array<any> ? Array<T> : Record<string, T>,
-  ): typeof source extends Array<any> ? Array<T> : Record<string, T> {
+  mapToStores<T extends BaseStore, U extends any>(
+    source: Array<U> | Record<string, U>,
+    mapper: (val: U, key: typeof source extends Array<U> ? number : string) => T,
+    storesMaybeToDispose?: Array<T> | Record<string, T>,
+    items?: typeof source extends Array<U> ? Array<T> : Record<string, T>,
+  ): typeof source extends Array<U> ? Array<T> : Record<string, T> {
     if (Array.isArray(source)) {
       const result = items as unknown as Array<T> ?? [];
 
       for (let key = 0; key < source.length; key += 1) {
-        const store = mapper(source[key], key as number);
+        const store = mapper(source[key], key as any);
 
         if (store) {
           result.push(store);
         }
       }
 
-      if (storesMaybeDisposable) {
-        for (let i = source.length; i < (storesMaybeDisposable as T[]).length; i += 1) {
-          (storesMaybeDisposable as T[])[i].dispose();
+      if (storesMaybeToDispose) {
+        for (let i = source.length; i < (storesMaybeToDispose as T[]).length; i += 1) {
+          (storesMaybeToDispose as T[])[i].dispose();
         }
       }
 
@@ -38,13 +38,13 @@ export class BaseStore {
         const store = mapper(val, key);
 
         if (store) {
-          result[key] = val;
+          result[key] = store;
         }
       }
 
-      if (storesMaybeDisposable) {
-        for (const key of Object.keys(storesMaybeDisposable as Record<string, T>)) {
-          !result[key] && storesMaybeDisposable[key].dispose();
+      if (storesMaybeToDispose) {
+        for (const key of Object.keys(storesMaybeToDispose as Record<string, T>)) {
+          !result[key] && storesMaybeToDispose[key].dispose();
         }
       }
 
