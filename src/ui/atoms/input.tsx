@@ -11,9 +11,20 @@ export const componentSingleStyle = {
 
 export const Checkbox = ({ children, currentValue = undefined, onChange = undefined, style = undefined }: any) => {
     return <label className='flex flex-start'><input
+        className='checkbox'
         checked={ currentValue }
-        style={ { margin: '4px' } }
+        style={ style }
         type='checkbox'
+        onChange={ onChange ? ((e) => onChange((e.target as HTMLInputElement).checked)) : undefined }
+    />{ children }</label>;
+}
+
+export const Radio = ({ children, currentValue = undefined, onChange = undefined, style = undefined }: any) => {
+    return <label className='flex flex-start'><input
+        className='checkbox'
+        checked={ currentValue }
+        style={ style }
+        type='radio'
         onChange={ onChange ? ((e) => onChange((e.target as HTMLInputElement).checked)) : undefined }
     />{ children }</label>;
 }

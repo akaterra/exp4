@@ -7,22 +7,22 @@ integrations:
   github:
     type: "github"
     config:
-      org: "getpackageltd"
+      org: "akaterra"
   githubDev:
     type: "github"
     config:
-      org: "getpackageltd"
+      org: "akaterra"
       branch: "develop"
   githubStg:
     type: "github"
     config:
-      org: "getpackageltd"
+      org: "akaterra"
       branch: "test-v${version.major}.${version.minor}.${version.patch}"
   githubProduction:
     type: "github"
     config:
-      org: "getpackageltd"
-      branch: "master"
+      org: "akaterra"
+      branch: "main"
 
 storages:
   github:
@@ -49,7 +49,7 @@ versionings:
 
 flows:
   dev:
-    description: ""
+    title: ""
     targets:
       - dev
     actions:
@@ -68,12 +68,12 @@ flows:
         title: "Run tests"
         steps:
           - type: "runAction"
-            description: "Run tests"
+            title: "Run tests"
             config:
               name: "test"
 
   release:
-    description: ""
+    title: ""
     targets:
       - stg
     actions:
@@ -128,7 +128,7 @@ flows:
               - "production"
 
   production:
-    description: ""
+    title: ""
     targets:
       - production
     actions:
@@ -152,12 +152,12 @@ targets:
   dev:
     title: "Development"
     streams:
-      gp-deliveries-service:
+      testa:
         type: "github"
         title: "Deliveries"
         config:
           integration: "githubDev"
-      gp-deliveries-history-service:
+      testb:
         type: "github"
         title: "Deliveries history"
         config:
@@ -167,22 +167,22 @@ targets:
   stg:
     title: "QA"
     streams:
-      gp-deliveries-crud-service:
+      testa:
         type: "github"
         title: "Deliveries CRUD"
         config:
           integration: "githubStg"
-      gp-deliveries-service:
+      testb:
         type: "github"
         title: "Deliveries"
         config:
           integration: "githubStg"
-      gp-deliveries-history-service:
+      testc:
         type: "github"
         title: "Deliveries history"
         config:
           integration: "githubStg"
-      gp-uam-service:
+      testd:
         type: "github"
         title: "UAM"
         config:
@@ -192,7 +192,7 @@ targets:
   stgHotfix:
     title: "QA Hot Fix"
     streams:
-      gp-deliveries-service:
+      testa:
         type: "github"
         title: "Deliveries"
         config:
@@ -202,7 +202,7 @@ targets:
   production:
     title: "Production"
     streams:
-      gp-deliveries-service:
+      testa:
         type: "github"
         title: "Deliveries"
         config:

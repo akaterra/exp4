@@ -8,12 +8,21 @@ export const componentSingleStyle = {
 
 };
 
-export const Button = ({ children, className = null, disabled = false, label = null, x = undefined, onClick = undefined, style = {} }) => {
+export const Button = ({ children, className = null, disabled = false, label = null, x = undefined, onClick = undefined, style = {} }: any) => {
     const Component = <button
         className={ disabled ? `button unbound ${className ?? ''} disabled` : `button unbound ${className ?? ''}` }
         disabled={ disabled }
         style={ style }
-        onClick={ !disabled ? onClick : undefined }
+        onClick={ !disabled
+            ? (e) => {
+                // e.preventDefault();
+
+                if (onClick) {
+                    onClick();
+                }
+            }
+            : undefined
+        }
     >{ children }</button>;
 
     return mayBeLabeledControl(Component, x, label);

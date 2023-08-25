@@ -59,6 +59,18 @@ export class ProjectTargetStore extends BaseStore {
     this.update(projectTargetState);
   }
 
+  selectStream(streamId: string | null) {
+    if (streamId !== null) {
+      this.projectStore.selectedStreamWithState = {
+        stream: this.target?.streams?.[streamId],
+        streamState: this.projectTargetState?.streams?.[streamId],
+        targetStore: this,
+      };
+    } else {
+      this.projectStore.selectedStreamWithState = null;
+    }
+  }
+
   update(state?: Partial<ProjectTargetStateDto>) {
     if (state) {
       this.projectTargetState = { ...this.projectTargetState, ...state };
@@ -73,6 +85,8 @@ export class ProjectStore extends BaseStore {
   project: ProjectDto;
   @observable
   projectTargetsStores: Record<string, ProjectTargetStore> = {};
+  @observable
+  selectedStreamWithState: { stream: ProjectTargetStreamDto, streamState: ProjectTargetStreamStateDto, targetStore: ProjectTargetStore } | null;
 
   constructor(public projectsStore: ProjectsStore, project: ProjectDto) {
     super();

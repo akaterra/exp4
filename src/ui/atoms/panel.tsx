@@ -3,7 +3,7 @@ import { Label } from "./label";
 import { C, getStyleByGrid } from "./grid";
 import { mayBeLabeledControl } from './utils';
 
-export const Panel = ({ children, className = undefined, disabled = undefined, label = null, x = undefined, onClick = undefined, containerStyle = null, style = undefined }) => {
+export const Panel = ({ children, className = undefined, disabled = undefined, label = null, x = undefined, onClick = undefined, containerStyle = null, style = undefined }: any) => {
     const Element = <div 
         className={ disabled ? 'panel primary disabled' : 'panel primary' }
         style={ style }
