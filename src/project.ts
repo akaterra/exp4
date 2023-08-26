@@ -162,7 +162,7 @@ export class Project implements IProject {
             .entries(def.actions ?? {})
             .reduce((acc, [ actKey, actDef ]) => {
               acc[actKey] = {
-                id: actDef.id,
+                id: actDef.id ?? actKey,
                 type: actDef.type,
                 ref: { flowId: key, projectId: this.name },
                 title: actDef.title,

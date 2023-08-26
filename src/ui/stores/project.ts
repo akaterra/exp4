@@ -59,16 +59,13 @@ export class ProjectTargetStore extends BaseStore {
     this.update(projectTargetState);
   }
 
+  selectAction(streamId: string | null, actionId: string | null) {
+    this.selectStream(null);
+    this.projectStore.selectTargetStreamAction(this.target?.id, streamId, actionId);
+  }
+
   selectStream(streamId: string | null) {
-    if (streamId !== null) {
-      this.projectStore.selectedStreamWithState = {
-        stream: this.target?.streams?.[streamId],
-        streamState: this.projectTargetState?.streams?.[streamId],
-        targetStore: this,
-      };
-    } else {
-      this.projectStore.selectedStreamWithState = null;
-    }
+    this.projectStore.selectTargetStream(this.target?.id, streamId);
   }
 
   update(state?: Partial<ProjectTargetStateDto>) {
@@ -86,6 +83,8 @@ export class ProjectStore extends BaseStore {
   @observable
   projectTargetsStores: Record<string, ProjectTargetStore> = {};
   @observable
+  selectedAction: { stream: ProjectTargetStreamDto | null, action: ProjectFlowActionDto, targetStore: ProjectTargetStore } | null;
+  @observable
   selectedStreamWithState: { stream: ProjectTargetStreamDto, streamState: ProjectTargetStreamStateDto, targetStore: ProjectTargetStore } | null;
 
   constructor(public projectsStore: ProjectsStore, project: ProjectDto) {
@@ -101,6 +100,10 @@ export class ProjectStore extends BaseStore {
     return this.project?.targets?.[targetId];
   }
 
+  getTargetStoreByTargetId(targetId) {
+    return this.projectTargetsStores?.[targetId];
+  }
+
   getTargetStreamByTargetIdAndStreamId(targetId, streamId) {
     return this.project?.targets?.[targetId]?.streams?.[streamId];
   }
@@ -114,5 +117,41 @@ export class ProjectStore extends BaseStore {
         ? this.projectTargetsStores[key].update(val)
         : new ProjectTargetStore(this, val);
     }, this.projectTargetsStores);
+  }
+
+  @flow @processing
+  *applyTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string) {
+    this.selectedAction = null;
+  }
+
+  selectTargetStream(targetId: string | null, streamId: string | null) {
+    if (targetId && streamId) {
+      const target = this.getTargetByTargetId(targetId);
+      const targetStore = this.getTargetStoreByTargetId(targetId);
+
+      this.selectedStreamWithState = {
+        stream: target?.streams?.[streamId],
+        streamState: targetStore?.projectTargetState?.streams[streamId],
+        targetStore,
+      };
+    } else {
+      this.selectedStreamWithState = null;
+    }
+  }
+
+  selectTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string | null) {
+    if (targetId && actionId) {
+      const target = this.getTargetByTargetId(targetId);
+      const targetStore = this.getTargetStoreByTargetId(targetId);
+
+      this.selectedAction = {
+        stream: streamId ? target?.streams?.[streamId] : null,
+        action: Object.values(this.project?.flows).find((flow) => flow.targets.includes(targetId))?.actions?.[actionId]!,
+        targetStore,
+      };
+      console.log(this.selectedAction);
+    } else {
+      this.selectedAction = null;
+    }
   }
 }

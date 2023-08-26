@@ -10,6 +10,8 @@ import { Checkbox } from '../atoms/input';
 import { Overlay } from '../atoms/overlay';
 import { Button } from '../atoms/button';
 import { Panel } from '../atoms/panel';
+import { DetailsPanel } from '../atoms/details-panel';
+import { Modal } from '../atoms/modal';
 
 const style = {
     projectTarget: {
@@ -17,54 +19,79 @@ const style = {
     },
 };
 
-export const ProjectTargetStream = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
+export const ProjectTargetStreamActionModal = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
+    const selectedAction = projectTarget?.projectStore?.selectedAction;
+
+    return <Modal
+        title={
+            <React.Fragment>
+                { selectedAction?.action?.title }
+                &nbsp;
+                <span className='font-sml sup'>{ selectedAction?.action?.description }</span>
+            </React.Fragment>
+        }
+        onClose={ () => projectTarget?.selectAction(null, null) }
+    >
+            <div>
+                <Button.Failure>A</Button.Failure>
+                <Button>B</Button>
+            </div>
+    </Modal>
+});
+
+export const ProjectTargetStreamModal = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
     const selectedStreamWithState = projectTarget?.projectStore?.selectedStreamWithState;
     const lastChange = selectedStreamWithState?.streamState?.history?.change?.[0];
 
-    return <div className='flex h-100'>
-        <div className='c14 c10-m- clear'></div>
-        <div className='c-4 c-8-m- clear back-light h-100 shadow shadow-low'>
-            <div className='paragraph paragraph-lrg'>
-                <div className='panel unbound transparent clear'>
-                    <div className='c18 children-gap'>
-                        <div>
-                            <div className='flex flex-hor'>
-                                <SubTitle>
-                                    { selectedStreamWithState?.stream?.title ?? selectedStreamWithState?.stream?.id }
-                                    &nbsp;
-                                    <span className='font-sml sup'>{ selectedStreamWithState?.streamState?.version }</span>
-                                </SubTitle>
-                                <Button className='button-sml default transparent w-auto' x={ null } onClick={ () => projectTarget?.selectStream(null) }>✖</Button>
-                            </div>
-                            <Label>{ selectedStreamWithState?.stream?.description ?? 'No description' }</Label>
-                        </div>
-                        <a className='link' href={ selectedStreamWithState?.streamState?.link } target='__blank'>{ selectedStreamWithState?.streamState?.type }</a>
-                        <div>Target: { projectTarget?.target?.title ?? projectTarget?.target?.id }</div>
-                        {
-                            selectedStreamWithState?.streamState?.history?.action?.length
-                                ? <div>
-                                    <SubSubTitle>Last action</SubSubTitle>
-                                </div>
-                                : null
-                        }
-                        {
-                            selectedStreamWithState?.streamState?.history?.change?.length
-                                ? <React.Fragment>
-                                    <div>
-                                        <SubSubTitle>Last change</SubSubTitle>
-                                        <Label>{ lastChange?.description ?? 'No description' }</Label>
-                                    </div>
-                                    <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
-                                    <div>Author: <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'Unknown' }</a></div>
-                                    { lastChange?.time && <div>{ lastChange?.time }</div> }
-                                </React.Fragment>
-                                : null
-                        }
-                    </div>
+    return <DetailsPanel
+        title={
+            <React.Fragment>
+                { selectedStreamWithState?.stream?.title ?? selectedStreamWithState?.stream?.id }
+                &nbsp;
+                <span className='font-sml sup'>{ selectedStreamWithState?.streamState?.version }</span>
+            </React.Fragment>
+        }
+        titleContent={
+            <Label>{ selectedStreamWithState?.stream?.description ?? 'No description' }</Label>
+        }
+        onClose={ () => projectTarget?.selectStream(null) }
+    >
+        <a className='link' href={ selectedStreamWithState?.streamState?.link } target='__blank'>{ selectedStreamWithState?.streamState?.type }</a>
+        <div>Target: { projectTarget?.target?.title ?? projectTarget?.target?.id }</div>
+        {
+            selectedStreamWithState?.streamState?.history?.action?.length
+                ? <div>
+                    <SubSubTitle>Last action</SubSubTitle>
                 </div>
-            </div>
+                : null
+        }
+        {
+            selectedStreamWithState?.streamState?.history?.change?.length
+                ? <React.Fragment>
+                    <div>
+                        <SubSubTitle>Last change</SubSubTitle>
+                        <Label>{ lastChange?.description ?? 'No description' }</Label>
+                    </div>
+                    <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+                    <div>Author: <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'Unknown' }</a></div>
+                    { lastChange?.time && <div>{ lastChange?.time }</div> }
+                </React.Fragment>
+                : null
+        }
+        <div>
+            {
+                projectTarget?.actions.map((action, i) => {
+                    return <div key={ i }>
+                        <Button
+                            className='button-sml success auto'
+                            x={ null }
+                            onClick={ () => projectTarget.selectAction(selectedStreamWithState?.stream?.id!, action.id) }
+                        >{ action.title ?? action.id }</Button>
+                    </div>;
+                })
+            }
         </div>
-    </div>;
+    </DetailsPanel>;
 });
 
 export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
@@ -83,8 +110,8 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
         </div>
         <div>
             {
-                projectTarget.actions.map((action) => {
-                    return <div>
+                projectTarget.actions.map((action, i) => {
+                    return <div key={ i }>
                         <button className='button button-sml success auto'>{ action.title ?? action.id }</button>
                     </div>;
                 })
@@ -92,8 +119,8 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
         </div>
         <div>
             {
-                projectTarget.streamsWithStates.map(({ stream, streamState }) => {
-                    return <div>
+                projectTarget.streamsWithStates.map(({ stream, streamState }, i) => {
+                    return <div key={ i }>
                         <Checkbox>
                             <div>
                                 <div>
@@ -118,10 +145,13 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
 
     return <div>
         {
+            project.selectedAction
+                ? <ProjectTargetStreamActionModal projectTarget={ project.selectedAction.targetStore } />
+                : null
+        }
+        {
             project.selectedStreamWithState
-                ? <Overlay isShown={ true }>
-                    <ProjectTargetStream projectTarget={ project.selectedStreamWithState.targetStore } />
-                </Overlay>
+                ? <ProjectTargetStreamModal projectTarget={ project.selectedStreamWithState.targetStore } />
                 : null
         }
         <SubTitle>{ project.project?.title ?? project.project?.id }</SubTitle>
