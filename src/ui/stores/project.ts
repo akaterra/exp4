@@ -4,6 +4,8 @@ import { ProjectStateDto, ProjectTargetStateDto, ProjectTargetStreamStateDto } f
 import { ProjectsService } from '../services/projects.service';
 import { ProjectsStore } from './projects';
 import { BaseStore, processing } from './base-store';
+import { modalStore } from '../blocks/modal';
+import { ProjectTargetStreamActionModalContent, ProjectTargetStreamActionModalTitle } from '../blocks/project';
 
 export class ProjectTargetStore extends BaseStore {
   @observable projectTargetState: ProjectTargetStateDto;
@@ -59,8 +61,12 @@ export class ProjectTargetStore extends BaseStore {
     this.update(projectTargetState);
   }
 
+  @flow
+  *applyAction(streamId: string | null, actionId: string | null) {
+    yield this.projectStore.applyTargetStreamAction(this.target?.id, streamId, actionId);
+  }
+
   selectAction(streamId: string | null, actionId: string | null) {
-    this.selectStream(null);
     this.projectStore.selectTargetStreamAction(this.target?.id, streamId, actionId);
   }
 
@@ -120,8 +126,40 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string) {
-    this.selectedAction = null;
+  *applyTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string | null) {
+    const selectedStreamIds = streamId
+      ? [ streamId ]
+      : Object.values(this.getTargetByTargetId(targetId).streams).map((stream) => stream.id);
+    const selectedStreamWithState = this.selectedStreamWithState;
+    const projectFlow = Object
+      .values(this.project?.flows)
+      .find((flow) => flow.targets.includes(targetId));
+    this.selectedStreamWithState = null;
+
+    const action = yield modalStore.show({
+      content: ProjectTargetStreamActionModalContent,
+      props: {
+        projectTarget: this.getTargetByTargetId(targetId),
+        projectTargetActions: projectFlow?.actions?.[actionId],
+        projectTargetStreams: Object
+          .values(this.getTargetByTargetId(targetId).streams)
+          .filter((stream) => selectedStreamIds.includes(stream.id)),
+      },
+      title: ProjectTargetStreamActionModalTitle,
+    });
+
+    switch (action) {
+      case 'cancel':
+        this.selectedStreamWithState = selectedStreamWithState;
+
+        break;
+      case 'ok':
+        yield this.projectsStore.service.runAction(this.project.id, projectFlow?.id, actionId);
+
+        break;
+    }
+
+    modalStore.hide();
   }
 
   selectTargetStream(targetId: string | null, streamId: string | null) {
@@ -149,7 +187,6 @@ export class ProjectStore extends BaseStore {
         action: Object.values(this.project?.flows).find((flow) => flow.targets.includes(targetId))?.actions?.[actionId]!,
         targetStore,
       };
-      console.log(this.selectedAction);
     } else {
       this.selectedAction = null;
     }

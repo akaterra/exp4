@@ -7,21 +7,21 @@ integrations:
   github:
     type: "github"
     config:
-      org: "akaterra"
+      org: "akaterra-org"
   githubDev:
     type: "github"
     config:
-      org: "akaterra"
+      org: "akaterra-org"
       branch: "develop"
   githubStg:
     type: "github"
     config:
-      org: "akaterra"
+      org: "akaterra-org"
       branch: "test-v${version.major}.${version.minor}.${version.patch}"
   githubProduction:
     type: "github"
     config:
-      org: "akaterra"
+      org: "akaterra-org"
       branch: "main"
 
 storages:

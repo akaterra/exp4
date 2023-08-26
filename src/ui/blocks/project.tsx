@@ -12,6 +12,7 @@ import { Button } from '../atoms/button';
 import { Panel } from '../atoms/panel';
 import { DetailsPanel } from '../atoms/details-panel';
 import { Modal } from '../atoms/modal';
+import { ProjectFlowActionDto, ProjectTargetDto, ProjectTargetStreamDto } from '../stores/dto/project';
 
 const style = {
     projectTarget: {
@@ -19,25 +20,37 @@ const style = {
     },
 };
 
-export const ProjectTargetStreamActionModal = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
-    const selectedAction = projectTarget?.projectStore?.selectedAction;
+export const ProjectTargetStreamActionModalTitle = ({
+    projectTarget,
+    projectTargetActions,
+    projectTargetStreams,
+}: {
+    projectTarget?: ProjectTargetDto;
+    projectTargetActions?: ProjectFlowActionDto;
+    projectTargetStreams?: ProjectTargetStreamDto[];
+}) => {
+    return <React.Fragment>
+        { projectTargetActions?.title }
+        &nbsp;
+        <span className='font-sml sup'>{ projectTargetActions?.description }</span>
+    </React.Fragment>;
+};
 
-    return <Modal
-        title={
-            <React.Fragment>
-                { selectedAction?.action?.title }
-                &nbsp;
-                <span className='font-sml sup'>{ selectedAction?.action?.description }</span>
-            </React.Fragment>
-        }
-        onClose={ () => projectTarget?.selectAction(null, null) }
-    >
-            <div>
-                <Button.Failure>A</Button.Failure>
-                <Button>B</Button>
-            </div>
-    </Modal>
-});
+export const ProjectTargetStreamActionModalContent = ({
+    projectTarget,
+    projectTargetActions,
+    projectTargetStreams,
+}: {
+    projectTarget?: ProjectTargetDto;
+    projectTargetActions?: ProjectFlowActionDto;
+    projectTargetStreams?: ProjectTargetStreamDto[];
+}) => {
+    return <div className='row'>
+        <div className='c18'>
+            Are you sure to run action for <span className='bold'>{ projectTargetStreams?.map((stream) => stream.title ?? stream.id).join(', ') }</span> targeted to <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
+        </div>
+    </div>;
+};
 
 export const ProjectTargetStreamModal = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
     const selectedStreamWithState = projectTarget?.projectStore?.selectedStreamWithState;
@@ -57,7 +70,7 @@ export const ProjectTargetStreamModal = observer(({ projectTarget }: { projectTa
         onClose={ () => projectTarget?.selectStream(null) }
     >
         <a className='link' href={ selectedStreamWithState?.streamState?.link } target='__blank'>{ selectedStreamWithState?.streamState?.type }</a>
-        <div>Target: { projectTarget?.target?.title ?? projectTarget?.target?.id }</div>
+        <div>Targeted to: { projectTarget?.target?.title ?? projectTarget?.target?.id }</div>
         {
             selectedStreamWithState?.streamState?.history?.action?.length
                 ? <div>
@@ -85,7 +98,7 @@ export const ProjectTargetStreamModal = observer(({ projectTarget }: { projectTa
                         <Button
                             className='button-sml success auto'
                             x={ null }
-                            onClick={ () => projectTarget.selectAction(selectedStreamWithState?.stream?.id!, action.id) }
+                            onClick={ () => projectTarget.applyAction(selectedStreamWithState?.stream?.id!, action.id) }
                         >{ action.title ?? action.id }</Button>
                     </div>;
                 })
@@ -112,7 +125,7 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
             {
                 projectTarget.actions.map((action, i) => {
                     return <div key={ i }>
-                        <button className='button button-sml success auto'>{ action.title ?? action.id }</button>
+                        <Button className='button-sml success auto' x={ null } onClick={ () => projectTarget.applyAction(null, action.id) }>{ action.title ?? action.id }</Button>
                     </div>;
                 })
             }
@@ -144,11 +157,11 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
     }
 
     return <div>
-        {
+        {/* {
             project.selectedAction
                 ? <ProjectTargetStreamActionModal projectTarget={ project.selectedAction.targetStore } />
                 : null
-        }
+        } */}
         {
             project.selectedStreamWithState
                 ? <ProjectTargetStreamModal projectTarget={ project.selectedStreamWithState.targetStore } />

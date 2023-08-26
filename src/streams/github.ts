@@ -105,7 +105,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     )) {
       await targetIntegration.gitCreateReference(
         targetBranchName,
-        source.history.change[0].id,
+        source.history.change[0]?.id,
         targetStream.id,
       );
     }
