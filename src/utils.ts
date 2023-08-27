@@ -1,6 +1,33 @@
 import Container from 'typedi';
 import * as _ from 'lodash';
 
+export class PromiseContainer {
+  private promises: Promise<any>[] = [];
+
+  constructor(private max: number = 3) {
+
+  }
+
+  async push(promise: Promise<any> | Function, ...args: any[]) {
+    if (typeof promise === 'function') {
+      promise = promise(...args);
+    }
+
+    this.promises.push(promise as Promise<any>);
+
+    if (this.promises.length >= this.max) {
+      const promises = this.promises;
+      this.promises = [];
+
+      await Promise.all(promises);
+    }
+  }
+
+  async wait() {
+    await Promise.all(this.promises);
+  }
+}
+
 export function Autowired(name?: any | (() => any)) {
   return function(target: Object, propertyName: string){
     if (typeof name === 'function') {

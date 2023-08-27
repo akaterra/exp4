@@ -29,9 +29,12 @@ export interface IProjectFlowActionStep<C extends (Record<string, unknown> | str
 
   ref?: { flowId: string; projectId: string; };
 
-  config?: C;
   title?: string;
   description?: string;
+
+  isDirty?: boolean;
+
+  config?: C;
   targets?: string[];
 }
 
@@ -43,6 +46,9 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
 
   title?: string;
   description?: string;
+
+  isDirty?: boolean;
+
   steps?: IProjectFlowActionStep<C>[];
   targets?: string[];
 }
@@ -57,6 +63,9 @@ export interface IProjectFlow<C extends (Record<string, unknown> | string) = str
 
   title?: string;
   description?: string;
+
+  isDirty?: boolean;
+
   actions: Record<string, IProjectFlowAction<C>>;
   targets: string[];
 }
@@ -69,9 +78,12 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
 
   ref?: { projectId: string; targetId: string; };
 
-  config?: C;
   title?: string;
   description?: string;
+
+  isDirty?: boolean;
+
+  config?: C;
   targets?: string[];
 }
 
@@ -85,6 +97,9 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 
   title?: string;
   description?: string;
+
+  isDirty?: boolean;
+
   streams: Record<string, IProjectTargetStream<C>>;
   versioning?: string;
 }
@@ -251,7 +266,7 @@ export class Project implements IProject {
   getTargetVersioning(targetId: string, unsafe?: boolean): string {
     const versioning = this.getTargetByTargetId(targetId).versioning;
 
-    if (!versioning) {
+    if (versioning === undefined) {
       if (unsafe) {
         return null;
       }

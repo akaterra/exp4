@@ -77,7 +77,7 @@ export function loadFromFile(pathOrName: string): Project {
     if (config.versionings) {
       const versioningsService = config.env.versionings;
 
-      for (const [ defId, defConfig ] of Object.entries(config.versionings)) {
+      for (const [ defId, defConfig ] of Object.entries(config.versionings).concat([ [ null, { type: null } ] ])) {
         versioningsService.add(versioningsService.getInstance(defConfig.type, defConfig.config), defId);
       }
     }

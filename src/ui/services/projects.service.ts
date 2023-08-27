@@ -15,7 +15,12 @@ export class ProjectsService {
     return this.rest.get(`projects/${projectId}/streams`, filter);
   }
 
-  runAction(projectId: ProjectDto['id'], flowId: ProjectFlowDto['id'], actionId: ProjectFlowActionDto['id']) {
-    return this.rest.post(`projects/${projectId}/flow/${flowId}/action/${actionId}/run`);
+  runAction(
+    projectId: ProjectDto['id'],
+    flowId: ProjectFlowDto['id'],
+    actionId: ProjectFlowActionDto['id'],
+    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+  ) {
+    return this.rest.post(`projects/${projectId}/flow/${flowId}/action/${actionId}/run`, targetsStreams);
   }
 }

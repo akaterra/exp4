@@ -74,12 +74,12 @@ export class GithubStreamService extends EntityService implements IStreamService
           id: branch.commit.sha,
           type: 'github:commit',
   
-          author: { name: branch.commit.committer?.name ?? null, link: branch.commit.committer?.html_url ?? null },
+          author: { name: branch.commit.commit.committer?.name ?? null, link: branch.commit.commit.committer?.html_url ?? null },
           description: branch.commit.commit.message,
-          link: branch.commit.commit.url,
+          link: branch.commit.html_url,
           metadata: {},
           status: null,
-          time: null,
+          time: branch.commit.commit.committer?.date ?? null,
         } ] : [],
       },
       link: branch ? branch._links.html : null,
@@ -99,7 +99,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     const targetIntegration = this.projectsService.get(targetStream.ref.projectId).getIntegraionByTargetStream<GithubIntegrationService>(targetStream);
     const targetBranchName = await this.getBranch(targetStream);
 
-    if (!await sourceIntegration.gitGetBranch(
+    if (!await targetIntegration.gitGetBranch(
       targetBranchName,
       targetStream.id,
     )) {

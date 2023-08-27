@@ -24,7 +24,7 @@ export const Modal = ({
     <div className="modal-content f10">
       <div className="panel unbound shadow shadow-high paragraph">
         <div className='row'>
-          <div className='c18 children-gap'>
+          <div className='c18 children-gap-full'>
             <div>
               <div className='flex flex-hor'>
                 <SubTitle>{ title }</SubTitle>

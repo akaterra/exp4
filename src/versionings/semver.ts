@@ -44,7 +44,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   async override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string> {
-    const sourceVersion = await this.getCurrent(source);
+    const sourceVersion = await this.projectsService.get(source.ref.projectId).getVersioningByTarget(source).getCurrent(source) ?? '0.1.0';
 
     await this.getStorage(target).varSet(
       target,
@@ -61,7 +61,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     if (version) {
       version = semver.inc(version, 'patch');
     } else {
-      version = '0.0.1';
+      version = '0.1.0';
     }
 
     await this.getStorage(target).varSet(

@@ -24,6 +24,7 @@ import { GithubIntegrationService } from './integrations/github';
 import { VersionOverrideActionService } from './actions/version-override';
 import { RunActionActionService } from './actions/run-action';
 import { SemverVersioningService } from './versionings/semver';
+import { StubVersioningService } from './versionings/stub';
 
 (async () => {
   const integrations = Container.get(IntegrationsService);
@@ -41,6 +42,7 @@ import { SemverVersioningService } from './versionings/semver';
   streams.addFactory(GithubStreamService);
   const versionings = Container.get(VersioningsService);
   versionings.addFactory(SemverVersioningService);
+  versionings.addFactory(StubVersioningService);
   const projects = Container.get(ProjectsService);
 
   const p = loadFromFile('test');
@@ -64,6 +66,7 @@ import { SemverVersioningService } from './versionings/semver';
 
   const app = express();
   app.use(cors());
+  app.use(express.json());
 
   function error(err, req, res, next) {
     console.error(err, err.stack);

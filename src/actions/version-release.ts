@@ -20,6 +20,8 @@ export class VersionReleaseActionService extends EntityService implements IActio
       const target = project.getTargetByTargetId(tId);
 
       await project.getVersioningByTarget(target).release(target);
+
+      target.isDirty = true;
     }
   }
 }

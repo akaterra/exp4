@@ -5,7 +5,7 @@ import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { IStream } from './stream';
 import { ITarget } from './target';
-import { iter } from './utils';
+import { PromiseContainer, iter } from './utils';
 import { ActionsService } from './actions.service';
 import { EntitiesService } from './entities.service';
 
@@ -24,12 +24,17 @@ export class ProjectsService extends EntitiesService<Project> {
     return this.entities;
   }
 
-  async flowActionRun(projectId: string, flowId: string, actionId: string | string[]) {
+  async flowActionRun(
+    projectId: string,
+    flowId: string,
+    actionId: string | string[],
+    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+  ) {
     const flow = this.get(projectId).getFlow(flowId);
 
     for (const [ , aId ] of iter(actionId)) {
       for (const action of flow.actions[aId].steps) {
-        await this.actionsService.get(action.type).run(action);
+        await this.actionsService.get(action.type).run(action, targetsStreams);
       }
     }
 
@@ -37,7 +42,7 @@ export class ProjectsService extends EntitiesService<Project> {
   }
 
   async getState(projectId: string, targetId?: string | string[]) {
-    const state: {
+    const dirtyState: {
       id: IProjectDef['id'];
       targets: Record<string, {
         id: IProjectTargetDef['id'];
@@ -49,17 +54,42 @@ export class ProjectsService extends EntitiesService<Project> {
       targets: {},
     };
     const project = this.get(projectId);
+    const promiseContainer = new PromiseContainer(1);
+
+    for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
+      const target = project.getTargetByTargetId(tId);
+
+      await promiseContainer.push(async () => {
+        dirtyState.targets[tId] = {
+          id: tId,
+          streams: {},
+          version: await this.versioningsService.getByTarget(target).getCurrent(target),
+        };
+
+        for (const [ sId, stream ] of Object.entries(target.streams)) {
+          await promiseContainer.push(async () => {
+            dirtyState.targets[tId].streams[sId] = await this.streamGetState(stream);
+          });
+        }
+      });
+    }
+
+    await promiseContainer.wait();
+
+    const state: typeof dirtyState = {
+      id: projectId,
+      targets: {},
+    };
 
     for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
       const target = project.getTargetByTargetId(tId);
       state.targets[tId] = {
-        id: tId,
+        ...dirtyState.targets[tId],
         streams: {},
-        version: await this.versioningsService.getByTarget(target).getCurrent(target),
       };
 
       for (const [ sId, stream ] of Object.entries(target.streams)) {
-        state.targets[tId].streams[sId] = await this.streamGetState(stream);
+        state.targets[tId].streams[sId] = dirtyState.targets[tId].streams[sId];
       }
     }
 

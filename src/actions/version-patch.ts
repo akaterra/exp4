@@ -20,6 +20,8 @@ export class VersionPatchActionService extends EntityService implements IActionS
       const target = project.getTargetByTargetId(tId);
 
       await project.getVersioningByTarget(target).patch(target);
+
+      target.isDirty = true;
     }
   }
 }
