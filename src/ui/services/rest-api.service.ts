@@ -31,10 +31,22 @@ export class PublicRestApiService {
               method,
               body: JSON.stringify(data),
               headers,
-          }).then((res) => res.json());
+          }).then((res) => {
+            if (res.status >= 200 && res.status <= 299) {
+                return res.json();
+            }
+
+            return res.json().then((res) => Promise.reject(res));
+          });
       }
 
-      return fetch(`${this.domain}/${this.rootPath}${path}`, { method, headers }).then((res) => res.json());
+      return fetch(`${this.domain}/${this.rootPath}${path}`, { method, headers }).then((res) => {
+        if (res.status >= 200 && res.status <= 299) {
+            return res.json();
+        }
+
+        return res.json().then((res) => Promise.reject(res));
+      });
   }
 
   protected doRequestHeaders() {

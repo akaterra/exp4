@@ -1,4 +1,5 @@
 import { makeObservable, observable, computed, action, flow } from 'mobx';
+import { alertsStore } from '../blocks/alerts';
 
 export class BaseStore {
   @observable
@@ -56,42 +57,4 @@ export class BaseStore {
   update(state?) {
     return this;
   }
-}
-
-export function processing(target, prop, descriptor) {
-  const fn = descriptor.value;
-
-  function next(g) {
-    while (true) {
-      const v = g.next();
-      
-      if (v.done) {
-        break;
-      }
-    }
-  }
-
-  descriptor.value = async function *(...args) {
-    this.isProcessing = true;
-
-    try {
-      const g = fn.call(this, ...args);
-      let val;
-
-      while (true) {
-        const next = g.next(await val);
-        val = next.value;
-
-        yield val;
-
-        if (next.done) {
-          break;
-        }
-      }
-    } finally {
-      this.isProcessing = false;
-    }
-  }
-
-  return descriptor;
 }

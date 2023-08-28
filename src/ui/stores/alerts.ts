@@ -6,7 +6,10 @@ export class AlertsStore extends BaseStore {
   @observable alerts: {
     messageComponent: React.Component | React.FunctionComponent | string;
     timestamp: number;
-  }[] = [];
+  }[] = [{
+    messageComponent: 'test',
+    timestamp: Date.now(),
+  }];
 
   private cleanAlertsTimer: NodeJS.Timeout;
 
@@ -17,7 +20,7 @@ export class AlertsStore extends BaseStore {
     this.cleanAlertsTimer = setInterval(() => {
       const now = Date.now();
 
-      this.alerts = this.alerts.filter((alert) => alert.timestamp - now >= 5000);
+      this.alerts = this.alerts.filter((alert) => now - alert.timestamp < 15000);
     }, 500);
   }
 

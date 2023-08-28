@@ -2,11 +2,12 @@ import { makeObservable, observable, computed, action, flow, reaction } from 'mo
 import { ProjectDto, ProjectFlowDto, ProjectFlowActionDto, ProjectTargetStreamDto } from "./dto/project";
 import { ProjectStateDto, ProjectTargetStateDto, ProjectTargetStreamStateDto } from './dto/project-state';
 import { ProjectsStore } from './projects';
-import { BaseStore, processing } from './base-store';
+import { BaseStore } from './base-store';
 import { modalStore } from '../blocks/modal';
 import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
+import { processing } from './utils';
 
 export class ProjectTargetStore extends BaseStore {
   @observable projectTargetState: ProjectTargetStateDto;

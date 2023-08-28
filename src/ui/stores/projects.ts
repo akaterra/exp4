@@ -2,8 +2,9 @@ import { makeObservable, observable, computed, action, flow } from 'mobx';
 import { RestApiService } from '../services/rest-api.service';
 import { ProjectDto } from './dto/project';
 import { ProjectsService } from '../services/projects.service';
-import { BaseStore, processing } from './base-store';
+import { BaseStore } from './base-store';
 import { ProjectStore } from './project';
+import { processing } from './utils';
 
 export class ProjectsStore extends BaseStore {
   readonly service = new ProjectsService();
