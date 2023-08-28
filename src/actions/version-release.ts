@@ -19,7 +19,7 @@ export class VersionReleaseActionService extends EntityService implements IActio
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
       const target = project.getTargetByTargetId(tId);
 
-      await project.getVersioningByTarget(target).release(target);
+      await project.getEnvVersioningByTarget(target).release(target);
 
       target.isDirty = true;
     }

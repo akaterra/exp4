@@ -87,8 +87,8 @@ flows:
             title: "Create release branch"
             targets:
               - "dev"
-      releaseToProduction:
-        title: "Merge to production"
+      finishRelease:
+        title: "Finish release"
         steps:
           - type: "moveTo"
             title: ""
@@ -98,6 +98,14 @@ flows:
             title: ""
             targets:
               - "stg:production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg:production"
+          - type: "detach"
+            title: ""
+            targets:
+              - "stg"
       mergeToDev:
         title: "Merge to develop"
         steps:
@@ -112,6 +120,13 @@ flows:
             title: ""
             targets:
               - "dev"
+      exclude:
+        title: "Exclude"
+        steps:
+          - type: "detach"
+            title: ""
+            targets:
+              - "stg"
       test:
         title: "Run tests"
         steps:
@@ -136,12 +151,16 @@ flows:
             title: ""
             targets:
               - "stgHotfix"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stgHotfix"
           - type: "moveFrom"
             title: ""
             targets:
               - "production"
-      mergeToProduction:
-        title: "Merge to production"
+      finishHotfix:
+        title: "Finish hotfix"
         steps:
           - type: "moveTo"
             title: ""
@@ -151,6 +170,21 @@ flows:
             title: ""
             targets:
               - "production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "production"
+          - type: "detach"
+            title: ""
+            targets:
+              - "stgHotfix"
+      mergeToQa:
+        title: "Merge to QA"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "stg"
       mergeFromProduction:
         title: "Merge latest production"
         steps:
@@ -158,6 +192,24 @@ flows:
             title: ""
             targets:
               - "production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stgHotfix"
+      exclude:
+        title: "Exclude"
+        steps:
+          - type: "detach"
+            title: ""
+            targets:
+              - "stgHotfix"
+      test:
+        title: "Run tests"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
 
   production:
     title: ""
@@ -168,10 +220,6 @@ flows:
         title: "Merge to develop"
         steps:
           - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
-          - type: "version:override"
             title: ""
             targets:
               - "dev"

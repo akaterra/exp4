@@ -28,6 +28,18 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
+  async branchDelete(branch?, repo?, org?) {
+    const res = (await this.client.git.deleteRef({
+      owner: this.org(org), repo: this.repo(repo), ref: `heads/${this.branch(branch)}`,
+    }).catch((err) => {
+      if (err?.status === 404) {
+        return { data: undefined };
+      }
+
+      return Promise.reject(err);
+    })).data;
+  }
+
   async orgVarCreate(key: string, val: any, org?) {
     const res = (await this.client.rest.actions.createOrgVariable({
       org: this.org(org),

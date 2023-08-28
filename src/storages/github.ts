@@ -1,7 +1,7 @@
 import { Inject, Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { Cache } from '../cache';
-import { IProjectTargetDef } from '../project';
+import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
@@ -50,9 +50,43 @@ export class GithubStorageService extends EntityService implements IStorageServi
     this.cache.set(intKey, val, 60);
   }
 
+  async varGetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
+    const intKey = GithubStorageService.getKeyStream(key, stream.id);
+
+    if (this.cache.has(intKey)) {
+      return this.cache.get(intKey);
+    }
+
+    const val = await this.integration.orgVarGet(intKey);
+
+    if (val !== undefined) {
+      this.cache.set(intKey, val, 60);
+    }
+
+    return val !== undefined ? val : def;
+  }
+
+  async varSetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
+    const intKey = GithubStorageService.getKeyStream(key, stream.id);
+
+    if (await this.varGetStream(stream, key) === null) {
+      await this.integration.orgVarCreate(intKey, val);
+    } else {
+      await this.integration.orgVarUpdate(intKey, val);
+    }
+
+    this.cache.set(intKey, val, 60);
+  }
+
   private static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
     return `rc__${key}`;
+  }
+
+  private static getKeyStream(key: string | string[], streamId: string): string {
+    key = Array.isArray(key) ? key.join('__') : key;
+
+    return `rc__${key}__${streamId.toLowerCase().replace(/-/g, '_')}`;
   }
 }

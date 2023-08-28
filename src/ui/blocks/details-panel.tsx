@@ -1,11 +1,11 @@
 import * as React from 'react-dom';
 import { observer } from "mobx-react-lite";
 import { ModalStore } from "../stores/modal";
-import { Modal as ModalAtom } from "../atoms/modal";
+import { DetailsPanel as DetailsPanelAtom } from "../atoms/details-panel";
 
-export const modalStore = new ModalStore();
+export const detailsPanelStore = new ModalStore();
 
-export const Modal = observer(({ store }: { store?: ModalStore }) => {
+export const DetailsPanel = observer(({ store }: { store?: ModalStore }) => {
   if (!store?.initialOpts) {
     return null;
   }
@@ -17,17 +17,17 @@ export const Modal = observer(({ store }: { store?: ModalStore }) => {
     ? (props?) => <span>{ store?.initialOpts?.content as string }</span>
     : store?.initialOpts?.content;
 
-  return <ModalAtom
-    buttons={ store?.initialOpts?.buttons }
-    title={ TitleComponent && <TitleComponent { ...store.initialOpts?.props } store={ store } /> }
-    onSelect={ store?.initialOpts?.onSelect }
+  return <DetailsPanelAtom
+    // buttons={ modalStore?.initialOpts?.buttons }
+    title={ TitleComponent && <TitleComponent { ...store.initialOpts?.props } /> }
+    onClose={ store?.initialOpts?.onClose }
   >
     {
-      ContentComponent && <ContentComponent { ...store.initialOpts?.props } store={ store } />
+      ContentComponent && <ContentComponent { ...store.initialOpts?.props } />
     }
-  </ModalAtom>;
+  </DetailsPanelAtom>;
 });
 
-export const GlobalModal = observer(() => {
-  return <Modal store={ modalStore } />;
+export const GlobalDetailsPanel = observer(() => {
+  return <DetailsPanel store={ detailsPanelStore } />;
 });

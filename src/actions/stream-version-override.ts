@@ -5,11 +5,11 @@ import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 
 @Service()
-export class VersionOverrideActionService extends EntityService implements IActionService {
+export class StreamVersionOverrideActionService extends EntityService implements IActionService {
   @Inject() protected projectsService: ProjectsService;
 
   get type() {
-    return 'version:override';
+    return 'streamVersion:override';
   }
 
   async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
@@ -29,8 +29,20 @@ export class VersionOverrideActionService extends EntityService implements IActi
 
         const source = project.getTargetByTargetId(sIdOfSource);
         const target = project.getTargetByTargetId(tIdOfTarget);
+        const streamIds = targetsStreams?.[tIdOfTarget] === true
+          ? Object.keys(target.streams)
+          : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
-        await project.getEnvVersioningByTarget(target).override(source, target);
+        for (const streamId of streamIds) {
+          const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
+
+          await project.getEnvVersioningByTarget(target).overrideStream(
+            source,
+            targetStream,
+          );
+
+          targetStream.isDirty = true;
+        }
 
         source.isDirty = true;
         target.isDirty = true;

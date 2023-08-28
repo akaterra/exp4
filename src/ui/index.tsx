@@ -10,10 +10,12 @@ import { Row } from './atoms/row';
 import { Project } from './blocks/project';
 import { observer } from 'mobx-react-lite';
 import { GlobalModal, Modal, modalStore } from './blocks/modal';
+import { GlobalDetailsPanel } from './blocks/details-panel';
 
 export const App = observer(() => {
   return <Row.M>
-    <Modal modalStore={ modalStore } />
+    <GlobalDetailsPanel />
+    <GlobalModal />
     <div className='c-3 -s-'>
         <div className='paragraph paragraph-lrg'>
           <Navigation projects={ projectsStore } />

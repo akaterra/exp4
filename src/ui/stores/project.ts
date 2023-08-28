@@ -4,7 +4,9 @@ import { ProjectStateDto, ProjectTargetStateDto, ProjectTargetStreamStateDto } f
 import { ProjectsStore } from './projects';
 import { BaseStore, processing } from './base-store';
 import { modalStore } from '../blocks/modal';
-import { ProjectTargetStreamActionModalContent, ProjectTargetStreamActionModalTitle } from '../blocks/project';
+import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
+import { detailsPanelStore } from '../blocks/details-panel';
+import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
 
 export class ProjectTargetStore extends BaseStore {
   @observable projectTargetState: ProjectTargetStateDto;
@@ -62,16 +64,25 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @flow
-  *applyAction(streamId: string | string[] | null, actionId: string | null) {
-    if (!streamId) {
-      streamId = Object.keys(this.selectedProjectTargetStreamIds);
+  *applyTargetStreamDetails(streamId: string | null) {
+    yield this.projectStore.applyTargetStreamDetails(this.target?.id, streamId);
+  }
 
-      if (!streamId.length) {
-        streamId = Object.keys(this.target.streams);
+  @flow
+  *applyRunAction(streamId: string | null, actionId: string | null) {
+    let selectedStreamIds: string[];
+
+    if (!streamId) {
+      selectedStreamIds = Object.keys(this.selectedProjectTargetStreamIds);
+
+      if (!selectedStreamIds.length) {
+        selectedStreamIds = Object.keys(this.target.streams);
       }
+    } else {
+      selectedStreamIds = [ streamId ];
     }
 
-    yield this.projectStore.applyTargetStreamAction(this.target?.id, streamId, actionId);
+    yield this.projectStore.applyRunAction(this.target?.id, selectedStreamIds, actionId);
   }
 
   @flow
@@ -143,18 +154,34 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyTargetStreamAction(targetId: string | null, streamId: string | string[] | null, actionId: string | null) {
+  *applyTargetStreamDetails(targetId: string | null, streamId: string | null) {
+    modalStore.hide();
+
+    this.selectTargetStream(targetId, streamId);
+
+    const action = yield detailsPanelStore.show({
+      content: ProjectTargetStreamDetailsModalContent,
+      props: {
+        projectTarget: this.getTargetStoreByTargetId(targetId),
+      },
+      title: ProjectTargetStreamDetailsModalTitle,
+      withClose: true,
+    });
+  }
+
+  @flow @processing
+  *applyRunAction(targetId: string | null, streamId: string | string[] | null, actionId: string | null) {
+    detailsPanelStore.hide();
+
     const selectedStreamIds = streamId
       ? Array.isArray(streamId) ? streamId : [ streamId ]
       : Object.values(this.getTargetByTargetId(targetId).streams).map((stream) => stream.id);
-    const selectedStreamWithState = this.selectedStreamWithState;
     const projectFlow = Object
       .values(this.project?.flows)
       .find((flow) => flow.targets.includes(targetId));
-    this.selectedStreamWithState = null;
 
     const action = yield modalStore.show({
-      content: ProjectTargetStreamActionModalContent,
+      content: ProjectRunActionModalContent,
       props: {
         projectTarget: this.getTargetByTargetId(targetId),
         projectTargetActions: projectFlow?.actions?.[actionId],
@@ -162,13 +189,12 @@ export class ProjectStore extends BaseStore {
           .values(this.getTargetByTargetId(targetId).streams)
           .filter((stream) => selectedStreamIds.includes(stream.id)),
       },
-      title: ProjectTargetStreamActionModalTitle,
+      title: ProjectRunActionModalTitle,
+      withClose: true,
     });
 
     switch (action) {
       case 'cancel':
-        this.selectedStreamWithState = selectedStreamWithState;
-
         break;
       case 'ok':
         yield this.projectsStore.service.runAction(
@@ -183,8 +209,6 @@ export class ProjectStore extends BaseStore {
 
         break;
     }
-
-    modalStore.hide();
   }
 
   selectTargetStream(targetId: string | null, streamId: string | null) {

@@ -8,6 +8,10 @@ import { EntityService } from '../entities.service';
 export class MoveFromActionService extends EntityService implements IActionService {
   @Inject() protected projectsService: ProjectsService;
 
+  get description() {
+    return 'Moves selected streams between targets';
+  }
+
   get type() {
     return 'moveFrom';
   }
@@ -31,7 +35,7 @@ export class MoveFromActionService extends EntityService implements IActionServi
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
-            await project.getStreamByTargetStream(sourceStream)
+            await project.getEnvStreamByTargetStream(sourceStream)
               .streamMove(targetStream, sourceStream);
           }
 

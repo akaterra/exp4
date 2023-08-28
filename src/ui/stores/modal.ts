@@ -1,5 +1,7 @@
 import * as React from 'react-dom';
-import { makeObservable, observable } from 'mobx';
+import { computed, makeObservable, observable } from 'mobx';
+
+export const CLOSE = Symbol('close');
 
 export class ModalStore {
   @observable initialOpts: {
@@ -11,10 +13,17 @@ export class ModalStore {
     }[];
     content?: React.Component | React.FunctionComponent | string | undefined;
     props?: Record<string, any>;
+    onClose?: () => void | undefined;
     onSelect?: ((action?: string) => void) | undefined;
     title: React.Component | React.FunctionComponent | string;
+    withClose?: boolean;
   } | undefined;
   @observable selectedAction: string | undefined;
+
+  @computed
+  get isShow(): boolean {
+    return !!this.initialOpts;
+  }
 
   private opts: ModalStore['initialOpts'];
   private onSelectPromiseResolve: ((action?: string) => void) | undefined;
@@ -23,36 +32,54 @@ export class ModalStore {
     makeObservable(this);
   }
 
+  close() {
+    this.select(CLOSE);
+  }
+
   hide() {
     this.select(undefined);
   }
 
-  select(action?: string) {
+  select(action?: typeof CLOSE | string) {
     this.initialOpts = undefined;
-    this.selectedAction = action;
+    const isCloseAction = action === CLOSE;
+    this.selectedAction = isCloseAction ? null : action;
 
     if (this.onSelectPromiseResolve) {
-      this.onSelectPromiseResolve(action);
+      this.onSelectPromiseResolve(this.selectedAction);
+    }
+
+    if (isCloseAction) {
+      if (this.opts.onClose) {
+        this.opts.onClose();
+      }
+
+      return;
     }
 
     if (action && this?.opts?.buttons) {
-      const button = this.opts.buttons.find((button) => button.action === action);
+      const button = this.opts.buttons.find((button) => button.action === this.selectedAction);
 
       if (button?.onSelect) {
-        button.onSelect(action);
+        button.onSelect(this.selectedAction);
 
         return;
       }
     }
 
     if (this.opts?.onSelect) {
-      this.opts.onSelect(action);
+      this.opts.onSelect(this.selectedAction);
     }
   }
 
   show(opts: ModalStore['initialOpts']) {
     this.opts = opts;
-    this.initialOpts = { ...opts, onSelect: this.select.bind(this) };
+    this.initialOpts = {
+      ...opts,
+      props: { ...opts?.props, storage: this },
+      onClose: opts?.onClose || opts.withClose ? this.close.bind(this) : null,
+      onSelect: this.select.bind(this),
+    };
 
     if (this.initialOpts?.buttons) {
       this.initialOpts.buttons = this.initialOpts.buttons.map((button) => ({ ...button, onSelect: this.select.bind(this) }));

@@ -28,7 +28,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     if (entity) {
       const versioning = this.projectsService.get(stream.ref.projectId).getTargetVersioning(stream.ref.targetId);
 
-      entity.version = await this.versioningsService.get(versioning).getCurrent(
+      entity.version = entity.version ?? await this.versioningsService.get(versioning).getCurrent(
         this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId),
       );
     }

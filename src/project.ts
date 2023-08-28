@@ -147,6 +147,10 @@ export class Project implements IProject {
   targets: Record<string, IProjectTargetDef> = {};
   versionings: Record<string, Record<string, unknown>>;
 
+  get description() {
+    return '';
+  }
+
   get type() {
     return this.name;
   }
@@ -239,7 +243,7 @@ export class Project implements IProject {
         return null;
       }
 
-      throw `Project target "${id}" not found`;
+      throw new Error(`Project target "${id}" not found`);
     }
 
     return target;
@@ -257,7 +261,7 @@ export class Project implements IProject {
         return null;
       }
 
-      throw `Project stream "${streamId}" not found`;
+      throw new Error(`Project stream "${streamId}" not found`);
     }
 
     return stream;
@@ -271,7 +275,7 @@ export class Project implements IProject {
         return null;
       }
 
-      throw `Project target "${targetId}" versioning not found`;
+      throw new Error(`Project target "${targetId}" versioning not found`);
     }
 
     return versioning;
@@ -279,31 +283,35 @@ export class Project implements IProject {
 
   // helpers
 
-  getActionByFlowActionStep(actionStep: IProjectFlowActionStep) {
+  getEnvActionByFlowActionStep(actionStep: IProjectFlowActionStep) {
     return this.env.actions.get(actionStep.type);
   }
 
-  getIntegraionByTargetIdAndStreamId(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']) {
-    return this.getIntegraionByTargetStream(this.getTargetStreamByTargetIdAndStreamId(targetId, streamId));
+  getEnvIntegraionByTargetIdAndStreamId(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']) {
+    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetIdAndStreamId(targetId, streamId));
   }
 
-  getIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef) {
+  getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef) {
     return this.env.integrations.get<T>(stream.config?.integration as string);
   }
 
-  getStorageByStorageId(storageId: IProjectTargetDef['id']) {
+  getEnvStorageByStorageId(storageId: IProjectTargetDef['id']) {
     return this.env.storages.get(storageId);
   }
 
-  getStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef) {
+  getEnvStreamByTargetIdAndStreamId<T extends IStreamService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']) {
+    return this.env.streams.get(this.targets[targetId]?.streams[streamId]?.type);
+  }
+
+  getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef) {
     return this.env.streams.get(stream.type);
   }
 
-  getVersioningByTargetId(targetId: IProjectTargetDef['id']) {
-    return this.getVersioningByTarget(this.getTargetByTargetId(targetId));
+  getEnvVersioningByTargetId(targetId: IProjectTargetDef['id']) {
+    return this.getEnvVersioningByTarget(this.getTargetByTargetId(targetId));
   }
 
-  getVersioningByTarget(target: IProjectTargetDef) {
+  getEnvVersioningByTarget(target: IProjectTargetDef) {
     return this.env.versionings.get(target.versioning);
   }
 

@@ -1,7 +1,7 @@
 import { Inject, Service } from 'typedi';
 import semver from 'semver';
 import { IVersioningService } from './versioning.service';
-import { IProjectTargetDef } from '../project';
+import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IStorageService } from '../storages/storage.service';
 import { Autowired, resolvePlaceholders } from '../utils';
@@ -28,6 +28,26 @@ export class StubVersioningService extends EntityService implements IVersioningS
   }
 
   async release(target: IProjectTargetDef): Promise<string> {
+    return null;
+  }
+
+  async getCurrentStream(target: IProjectTargetStreamDef): Promise<string> {
+    return null;
+  }
+
+  async formatStream(stream: IProjectTargetStreamDef, entity) {
+    return entity;
+  }
+
+  async overrideStream(source: IProjectTargetDef, target: IProjectTargetStreamDef): Promise<string> {
+    return null;
+  }
+
+  async patchStream(target: IProjectTargetStreamDef): Promise<string> {
+    return null;
+  }
+
+  async releaseStream(target: IProjectTargetStreamDef): Promise<string> {
     return null;
   }
 

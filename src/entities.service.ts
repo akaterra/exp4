@@ -1,9 +1,14 @@
 export interface IService {
+  readonly description: string;
   readonly type: string;
 }
 
 export class EntityService {
   static readonly type: string = 'unknown';
+
+  get description() {
+    return '';
+  }
 
   get type() {
     return (this.constructor as any).type;
@@ -45,7 +50,7 @@ export class EntitiesServiceWithFactory<T extends EntityService = EntityService>
 
   getInstance(type: string, ...args): T {
     if (!this.factories[type]) {
-      throw `${this.domain} "${type}" is not registered`;
+      throw new Error(`${this.domain} "${type}" is not registered`);
     }
 
     return new this.factories[type](...args);

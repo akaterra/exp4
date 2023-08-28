@@ -6,6 +6,8 @@ import { IService } from '../entities.service';
 export interface IStreamService extends IService {
   actionRun(id: string);
 
+  streamDetach(stream: IProjectTargetStreamDef): Promise<IStream>;
+
   streamGetState(stream: IProjectTargetStreamDef): Promise<IStream>;
 
   streamGetBuildState(stream: IProjectTargetStreamDef): Promise<IStream>;

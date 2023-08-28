@@ -21,8 +21,8 @@ export const Modal = ({
   onSelect = undefined,
 }: any) => {
   return <div className="modal">
-    <div className="modal-content f10">
-      <div className="panel unbound shadow shadow-high paragraph">
+    <div className="modal-content f10 back-light shadow shadow-high span default">
+      <div className="paragraph">
         <div className='row'>
           <div className='c18 children-gap-full'>
             <div>

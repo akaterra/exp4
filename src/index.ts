@@ -25,17 +25,21 @@ import { VersionOverrideActionService } from './actions/version-override';
 import { RunActionActionService } from './actions/run-action';
 import { SemverVersioningService } from './versionings/semver';
 import { StubVersioningService } from './versionings/stub';
+import { StreamVersionOverrideActionService } from './actions/stream-version-override';
+import { DetachActionService } from './actions/detach';
 
 (async () => {
   const integrations = Container.get(IntegrationsService);
   integrations.addFactory(GithubIntegrationService);
   const actions = Container.get(ActionsService);
+  actions.add(Container.get(DetachActionService));
   actions.add(Container.get(MoveFromActionService));
   actions.add(Container.get(MoveToActionService));
   actions.add(Container.get(VersionOverrideActionService));
   actions.add(Container.get(VersionPatchActionService));
   actions.add(Container.get(VersionReleaseActionService));
   actions.add(Container.get(RunActionActionService));
+  actions.add(Container.get(StreamVersionOverrideActionService));
   const storages = Container.get(StoragesService);
   storages.addFactory(GithubStorageService);
   const streams = Container.get(StreamsService);
