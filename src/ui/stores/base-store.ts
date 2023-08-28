@@ -2,9 +2,6 @@ import { makeObservable, observable, computed, action, flow } from 'mobx';
 
 export class BaseStore {
   @observable
-  alerts: Array<{ ts: number, content: string }> = [];
-
-  @observable
   isProcessing: boolean = false;
 
   mapToStores<T extends BaseStore, U extends any>(
@@ -54,10 +51,6 @@ export class BaseStore {
 
   dispose() {
 
-  }
-
-  pushAlert(content) {
-    this.alerts.push({ ts: Date.now(), content });
   }
 
   update(state?) {

@@ -34,6 +34,7 @@ export class StreamVersionOverrideActionService extends EntityService implements
           : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
         for (const streamId of streamIds) {
+          const sourceStream = project.getTargetStreamByTargetIdAndStreamId(sIdOfSource, streamId);
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
 
           await project.getEnvVersioningByTarget(target).overrideStream(
@@ -41,6 +42,7 @@ export class StreamVersionOverrideActionService extends EntityService implements
             targetStream,
           );
 
+          sourceStream.isDirty = true;
           targetStream.isDirty = true;
         }
 

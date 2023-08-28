@@ -27,12 +27,14 @@ export class DetachActionService extends EntityService implements IActionService
           : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
         for (const streamId of streamIds) {
+          const sourceStream = project.getTargetStreamByTargetIdAndStreamId(sIdOfSource, streamId);
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
 
           await project.getEnvStreamByTargetStream(targetStream).streamDetach(
             targetStream,
           );
 
+          sourceStream.isDirty = true;
           targetStream.isDirty = true;
         }
 

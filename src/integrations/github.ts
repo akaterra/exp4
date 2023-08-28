@@ -32,7 +32,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     const res = (await this.client.git.deleteRef({
       owner: this.org(org), repo: this.repo(repo), ref: `heads/${this.branch(branch)}`,
     }).catch((err) => {
-      if (err?.status === 404) {
+      if (err?.status === 404 || err?.status === 422) {
         return { data: undefined };
       }
 
