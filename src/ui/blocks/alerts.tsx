@@ -2,6 +2,7 @@ import * as React from 'react-dom';
 import { observer } from "mobx-react-lite";
 import { AlertsStore } from '../stores/alerts';
 import { Loader } from '../atoms/loader';
+import { Button } from '../atoms/button';
 
 const style: React.CSSProperties = {
   position: 'fixed',
@@ -18,9 +19,14 @@ export const Alerts = observer(({ store }: { store: AlertsStore }) => {
     <div className='row clear'>
       <div className='paragraph paragraph-lrg' style={ { alignItems: 'end' } }>
         {
-          store.alerts.map((alert) => {
-            return <div className='f-4 f-8-m- f14-s-'>
-              <div className='alert failure unbound shadow shadow-sml'>{ alert.messageComponent }</div>
+          store.alerts.map((alert, i) => {
+            return <div className='f-4 f-8-m- f14-s-' key={ i }>
+              <div className='alert failure unbound shadow shadow-sml flex flex-hor flex-middle'>
+                <div className='row'>
+                  <div className='ccc'>{ alert.message }</div>
+                  <Button className='button-sml failure transparent w-auto' x='ccc' onClick={ () => store.close(alert) }>✖</Button>
+                </div>
+              </div>
             </div>;
           })
         }
