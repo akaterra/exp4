@@ -73,6 +73,12 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data;
   }
 
+  async orgMembersList(org?) {
+    return (await this.client.orgs.listMembers({
+      org: this.org(org), per_page: 100,
+    })).data;
+  }
+
   async gitCreateReference(refName, sha, repo?, org?) {
     return (await this.client.git.createRef({
       owner: this.org(org), repo: this.repo(repo), ref: `refs/heads/${refName}`, sha,
@@ -112,6 +118,12 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   async gitMerge(base, head, commitMessage?, repo?, org?) {
     return (await this.client.repos.merge({
       owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), commit_message: commitMessage,
+    })).data;
+  }
+
+  async userGet(username) {
+    return (await this.client.users.getByUsername({
+      username,
     })).data;
   }
 

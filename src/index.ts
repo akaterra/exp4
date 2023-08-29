@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import 'universal-dotenv/register';
 import cors from 'cors';
-import { loadFromFile } from './project-loader';
+import { loadProjectFromFile } from './project-loader';
 import { GithubStreamService, IGithubTargetStream } from './streams/github';
 import Container from 'typedi';
 import { IStorageService } from './storages/storage.service';
@@ -27,6 +27,10 @@ import { SemverVersioningService } from './versionings/semver';
 import { StubVersioningService } from './versionings/stub';
 import { StreamVersionOverrideActionService } from './actions/stream-version-override';
 import { DetachActionService } from './actions/detach';
+import { loadGlobalConfigFromFile } from './global-config-loader';
+import { AuthStrategiesService } from './auth-strategies.service';
+import { GithubAuthStrategyService } from './auth/github';
+import { err } from './utils';
 
 (async () => {
   const integrations = Container.get(IntegrationsService);
@@ -48,8 +52,12 @@ import { DetachActionService } from './actions/detach';
   versionings.addFactory(SemverVersioningService);
   versionings.addFactory(StubVersioningService);
   const projects = Container.get(ProjectsService);
+  const authStrategies = Container.get(AuthStrategiesService);
+  authStrategies.addFactory(GithubAuthStrategyService);
 
-  const p = loadFromFile('test');
+  const c = loadGlobalConfigFromFile('global');
+  const p = loadProjectFromFile('test');
+
   // console.log({p});
   projects.add(p);
 
@@ -75,26 +83,15 @@ import { DetachActionService } from './actions/detach';
   function error(err, req, res, next) {
     console.error(err, err.stack);
 
-    res.status(500);
+    if (!res.statusCode || res.statusCode < 300) {
+      res.status(500);
+    }
+
     res.send(JSON.stringify(err?.message ?? err));
   }
-
-  function err(fn) {
-    return function (req, res, next) {
-      try {
-        const result = fn(req, res, next);
-
-        if (result instanceof Promise) {
-          result.catch((err) => {
-            next(err);
-          });
-        }
-      } catch (err) {
-        next(err);
-      }
-    };
-  }
  
+  await authStrategies.configureServer(app);
+
   app.get(
     '/projects', err(projectList),
   );

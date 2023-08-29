@@ -15,7 +15,7 @@ const EXTENSIONS = {
   yml: 'yaml',
 };
 
-export function loadFromFile(pathOrName: string): Project {
+export function loadProjectFromFile(pathOrName: string): Project {
   let config: IProjectInput & { env?: Project['env'] };
 
   if (Object.keys(EXTENSIONS).some((ext) => pathOrName.slice(-ext.length - 1) === `.${ext}`)) {
@@ -34,8 +34,8 @@ export function loadFromFile(pathOrName: string): Project {
     }
 
     if (config && typeof config === 'object') {
-      if (!config.name) {
-        config.name = pathOrName.slice(pathOrName.lastIndexOf('/') + 1, pathOrName.lastIndexOf('.'));
+      if (!config.id) {
+        config.id = pathOrName.slice(pathOrName.lastIndexOf('/') + 1, pathOrName.lastIndexOf('.'));
       }
     }
   } else {
@@ -43,12 +43,16 @@ export function loadFromFile(pathOrName: string): Project {
       const filename = `${process.cwd()}/projects/${pathOrName}.${ext}`;
 
       if (fs.existsSync(filename)) {
-        return loadFromFile(filename);
+        return loadProjectFromFile(filename);
       }
     }
   }
 
   if (config) {
+    if (config.type !== 'project') {
+      throw new Error('Invalid project definition');
+    }
+
     config.env = {
       actions: Container.get(ActionsService),
       integrations: Container.get(IntegrationsService),

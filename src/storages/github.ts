@@ -6,6 +6,7 @@ import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
+import { User } from '../user';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {
@@ -20,6 +21,26 @@ export class GithubStorageService extends EntityService implements IStorageServi
 
   constructor(protected config?: { integration?: string }) {
     super();
+  }
+
+  async userGet(id: string, type: string): Promise<User> {
+    const member = (await this.integration.orgMembersList()).find((member) => String(member.id) === id);
+
+    if (member) {
+      const user = await this.integration.userGet(member.login);
+
+      return {
+        id,
+        type: this.type,
+
+        email: null,
+        name: user.name,
+        phoneNumber: null,
+        status: null,
+      };
+    }
+
+    return null;
   }
 
   async varGet<D extends any = any>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {

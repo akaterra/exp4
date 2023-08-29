@@ -1,0 +1,24 @@
+type: "global"
+
+auth:
+  github:
+    type: "github"
+    config:
+      credentials:
+        clientId: null
+        clientSecret: null
+        callbackUrl: null
+      integration: "github"
+      storage: "github"
+
+integrations:
+  github:
+    type: "github"
+    config:
+      org: "getpackageltd"
+
+storages:
+  github:
+    type: "github"
+    config:
+      integration: "github"

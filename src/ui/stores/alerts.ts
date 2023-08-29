@@ -6,10 +6,7 @@ export class AlertsStore extends BaseStore {
   @observable alerts: {
     messageComponent: React.Component | React.FunctionComponent | string;
     timestamp: number;
-  }[] = [{
-    messageComponent: 'test',
-    timestamp: Date.now(),
-  }];
+  }[] = [];
 
   private cleanAlertsTimer: NodeJS.Timeout;
 

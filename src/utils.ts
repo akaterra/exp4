@@ -1,5 +1,6 @@
 import Container from 'typedi';
 import * as _ from 'lodash';
+import fetch from 'node-fetch-native';
 
 export class PromiseContainer {
   private promises: Promise<any>[] = [];
@@ -50,6 +51,36 @@ export function *iter(iterable): Generator<any> {
   } else {
     yield [ 0, iterable ];
   }
+}
+
+export function err(fn) {
+  return function (req, res, next) {
+    try {
+      const result = fn(req, res, next);
+
+      if (result instanceof Promise) {
+        result.catch((err) => {
+          next(err);
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
+export async function requestJson(url, data?, method?, authorization?) {
+  const response = await fetch(url, {
+    method: method ?? 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': authorization ? `Bearer ${authorization}` : undefined,
+      'Content-Type': 'application/json',
+    },
+    body: data ? JSON.stringify(data) : undefined,
+  });
+
+  return response.json();
 }
 
 export function resolvePlaceholders(template, params) {

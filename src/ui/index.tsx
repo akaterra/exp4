@@ -12,21 +12,42 @@ import { observer } from 'mobx-react-lite';
 import { GlobalModal, Modal, modalStore } from './blocks/modal';
 import { GlobalDetailsPanel } from './blocks/details-panel';
 import { GlobalAlerts } from './blocks/alerts';
+import { RootStore, rootStore } from './stores/root';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 
-export const App = observer(() => {
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <div>Test</div>,
+  },
+]);
+
+export const App = observer(({ root }: { root: RootStore }) => {
   return <Row.M>
     <GlobalAlerts />
     <GlobalDetailsPanel />
     <GlobalModal />
+    <RouterProvider router={ router } />
     <div className='c-3 -s-'>
-        <div className='paragraph paragraph-lrg'>
-          <Navigation projects={ projectsStore } />
-        </div>
+      {
+        root.isAuthorized
+          ? <div className='paragraph paragraph-lrg'>
+            <Navigation projects={ projectsStore } root={ root } />
+          </div>
+          : null
+      }
     </div>
     <div className='c15 -s-'>
-      <div className='paragraph paragraph-lrg'>
-          <Project project={ projectsStore.selectedProjectStore } />
-      </div>
+      {
+        root.isAuthorized
+          ? <div className='paragraph paragraph-lrg'>
+              <Project project={ projectsStore.selectedProjectStore } />
+          </div>
+          : null
+      }
     </div>
     {/* <div className='c15 -s-'>
         <Router>
@@ -45,7 +66,7 @@ const projectsStore = new ProjectsStore();
 (async () => {
   const root = ReactDOM.createRoot(document.getElementById('container'));
   
-  root.render(<App />);
+  root.render(<App root={ rootStore } />);
 
   // await projectsStore.fetch();
 })();

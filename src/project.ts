@@ -107,7 +107,11 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 export type IProjectTargetDef = IProjectTarget<Record<string, unknown>>;
 
 export interface IProject {
-  name: string;
+  id: string;
+  type: string;
+
+  title: string;
+  descriptopn: string;
 
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow<Record<string, unknown>>>;
@@ -118,7 +122,11 @@ export interface IProject {
 }
 
 export interface IProjectInput {
-  name: string;
+  id: string;
+  type: string;
+
+  title: string;
+  descriptopn: string;
 
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow>;
@@ -129,7 +137,10 @@ export interface IProjectInput {
 }
 
 export class Project implements IProject {
-  name: string = 'unknown';
+  id: string = 'unknown';
+
+  title: string;
+  descriptopn: string;
 
   env: {
     actions: ActionsService;
@@ -152,12 +163,12 @@ export class Project implements IProject {
   }
 
   get type() {
-    return this.name;
+    return this.id;
   }
 
   constructor(config: Partial<IProjectInput & { env?: Project['env'] }>) {
-    if (config.name) {
-      this.name = config.name;
+    if (config.id) {
+      this.id = config.id;
     }
 
     if (config.definitions) {
@@ -173,7 +184,7 @@ export class Project implements IProject {
         this.flows[key] = {
           id: key,
           type: 'flow',
-          ref: { projectId: this.name },
+          ref: { projectId: this.id },
           title: def.title,
           description: def.description,
           targets: def.targets ?? [],
@@ -183,13 +194,13 @@ export class Project implements IProject {
               acc[actKey] = {
                 id: actDef.id ?? actKey,
                 type: actDef.type,
-                ref: { flowId: key, projectId: this.name },
+                ref: { flowId: key, projectId: this.id },
                 title: actDef.title,
                 description: actDef.description,
                 steps: actDef.steps.map((step) => ({
                   id: step.id ?? actKey,
                   type: step.type,
-                  ref: { flowId: key, projectId: this.name },
+                  ref: { flowId: key, projectId: this.id },
                   config: this.getDefinition(step.config),
                   description: step.description,
                   targets: step.targets ?? actDef.targets ?? [],
@@ -207,7 +218,7 @@ export class Project implements IProject {
         this.targets[key] = {
           id: key,
           type: 'target',
-          ref: { projectId: this.name },
+          ref: { projectId: this.id },
           title: def.title,
           description: def.description,
           versioning: def.versioning,
@@ -217,7 +228,7 @@ export class Project implements IProject {
               acc[actKey] = {
                 id: actDef.id ?? actKey,
                 type: actDef.type,
-                ref: { projectId: this.name, targetId: key },
+                ref: { projectId: this.id, targetId: key },
                 config: this.getDefinition(actDef.config),
                 title: actDef.title,
                 description: actDef.description,
@@ -317,7 +328,7 @@ export class Project implements IProject {
 
   toJSON() {
     return {
-      id: this.name,
+      id: this.id,
 
       definitions: this.definitions,
       flows: this.flows,
