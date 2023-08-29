@@ -51,11 +51,21 @@ export class RootStore {
   }
 
   @flow @processing
+  *logout() {
+    localStorage.removeItem('accessToken');
+
+    this.accessToken = null;
+    this.isAuthorized = false;
+
+    yield this.authenticate();
+  }
+
+  @flow @processing
   *fetchAuthMethodActions(id: IAuthStrategyMethod['id']): IAuthStrategyMethod['actions'] {
     const authMethod = this.authMethods[id];
 
     if (authMethod) {
-      authMethod.actions = yield this.usersService.listAuthMethodActions(id);
+      this.authMethods[id] = { ...authMethod, ...yield this.usersService.listAuthMethodActions(id) };
 
       return authMethod.actions;
     }

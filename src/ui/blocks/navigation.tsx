@@ -3,13 +3,14 @@ import { SubTitle, Title } from '../atoms/title';
 import { Link } from '../atoms/link';
 import { ProjectsStore } from '../stores/projects';
 import { observer } from 'mobx-react-lite';
-import { RootStore } from '../stores/root';
+import { RootStore, rootStore } from '../stores/root';
 
 export const Navigation = observer(({ projects, root }: { projects: ProjectsStore, root: RootStore }) => {
+    console.log(root.authMethods);
     if (!root.isAuthorized) {
         return <div className='block no-scroll children-gap'>
             <div>
-                <SubTitle><Link activeClassName="link active" href={ root.authMethods.github.actions.redirect } className='link'>
+                <SubTitle><Link activeClassName="link active" href={ root.authMethods?.github?.actions?.redirect } className='link'>
                     Login
                 </Link></SubTitle>
             </div>
@@ -26,6 +27,11 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
                     </Link></SubTitle>
                 })
             }
+        </div>
+        <div>
+            <SubTitle><Link activeClassName="link failure" className='link failure' onClick={ () => rootStore.logout() }>
+                Logout
+            </Link></SubTitle>
         </div>
     </div>;
 });

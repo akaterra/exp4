@@ -3,7 +3,11 @@ import { Fragment } from 'react';
 import { C } from "./grid";
 import { Label } from "./label";
 
-export function mayBeLabeledControl(Element, x, label?) {
+export function maybeClassName(base, extended) {
+    return extended ? `${base} ${extended}` : base;
+}
+
+export function maybeLabeledControl(Element, x, label?) {
     if (!label) {
         if (x !== null) {
             return <C x={ x }>{ Element }</C>;

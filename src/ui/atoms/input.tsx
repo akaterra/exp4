@@ -1,6 +1,6 @@
 import React from 'react';
 import './input.css';
-import { mayBeLabeledControl } from './utils';
+import { maybeLabeledControl } from './utils';
 
 export const componentStyle = {
 
@@ -43,5 +43,5 @@ export const Input = ({ currentValue = undefined, disabled = undefined, label = 
         onChange={ !disabled && onChange ? ((e) => onChange((e.target as HTMLInputElement).value)) : undefined }
     />;
 
-    return mayBeLabeledControl(Component, x, label);
+    return maybeLabeledControl(Component, x, label);
 }

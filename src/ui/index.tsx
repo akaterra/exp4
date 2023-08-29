@@ -33,13 +33,9 @@ export const App = observer(({ root }: { root: RootStore }) => {
     <GlobalModal />
     <RouterProvider router={ router } />
     <div className='c-3 -s-'>
-      {
-        root.isAuthorized
-          ? <div className='paragraph paragraph-lrg'>
-            <Navigation projects={ projectsStore } root={ root } />
-          </div>
-          : null
-      }
+      <div className='paragraph paragraph-lrg'>
+        <Navigation projects={ projectsStore } root={ root } />
+      </div>
     </div>
     <div className='c15 -s-'>
       {

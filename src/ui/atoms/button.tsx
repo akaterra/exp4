@@ -1,5 +1,5 @@
 import React from 'react';
-import { mayBeLabeledControl, stylize } from './utils';
+import { maybeLabeledControl, stylize } from './utils';
 
 export const componentStyle = {
 
@@ -26,7 +26,7 @@ export const Button = ({ children, className = null, disabled = false, key = und
         }
     >{ children }</button>;
 
-    return mayBeLabeledControl(Component, x, label);
+    return maybeLabeledControl(Component, x, label);
 }
 
 Button.Failure = stylize(Button, { className: 'failure' });

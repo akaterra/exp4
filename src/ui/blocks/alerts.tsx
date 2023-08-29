@@ -1,6 +1,7 @@
 import * as React from 'react-dom';
 import { observer } from "mobx-react-lite";
 import { AlertsStore } from '../stores/alerts';
+import { Loader } from '../atoms/loader';
 
 const style: React.CSSProperties = {
   position: 'fixed',
@@ -13,6 +14,7 @@ export const alertsStore = new AlertsStore();
 
 export const Alerts = observer(({ store }: { store: AlertsStore }) => {
   return <div style={ style }>
+    <Loader isShown={ store.isLoaderShownIteration } />
     <div className='row clear'>
       <div className='paragraph paragraph-lrg' style={ { alignItems: 'end' } }>
         {

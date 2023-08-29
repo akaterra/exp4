@@ -1,5 +1,5 @@
 import React from 'react';
-import { mayBeLabeledControl } from './utils';
+import { maybeLabeledControl } from './utils';
 
 export const componentStyle = {
 
@@ -14,5 +14,5 @@ export const Content = ({ children, label = null, x = undefined, style = {} }) =
         style={ style }
     >{ children }</div>;
 
-    return mayBeLabeledControl(control, x, label);
+    return maybeLabeledControl(control, x, label);
 }

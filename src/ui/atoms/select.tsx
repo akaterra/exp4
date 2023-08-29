@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label } from "./label";
 import { C, getStyleByGrid } from "./grid";
-import { mayBeLabeledControl } from './utils';
+import { maybeLabeledControl } from './utils';
 
 export const Select = ({ currentValue = null, decoration = null, disabled = false, items, label = null, onChange = null, containerClassName=null, containerStyle = null, style = null, x = 2 }: { items: string[] | Record<string, any> } & any) => {
     const control = Array.isArray(items)
@@ -24,5 +24,5 @@ export const Select = ({ currentValue = null, decoration = null, disabled = fals
             }
         >{ Object.entries<string>(items ?? {}).map(([optionVal, optionTitle]) => <option selected={ optionVal === currentValue } value={ optionVal }>{ optionTitle }</option>) }</select>;
 
-    return mayBeLabeledControl(control, x, label);
+    return maybeLabeledControl(control, x, label);
 }

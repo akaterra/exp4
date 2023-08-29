@@ -1,6 +1,6 @@
 import React from 'react';
 import './input.css';
-import { mayBeLabeledControl } from './utils';
+import { maybeLabeledControl } from './utils';
 
 export const Textarea = ({ children, label = undefined, onChange = undefined, placeholder='', rows = 5, x = undefined, style = undefined }: any) => {
     const control = <textarea
@@ -11,5 +11,5 @@ export const Textarea = ({ children, label = undefined, onChange = undefined, pl
         onChange={ onChange && ((e) => onChange((e.target as HTMLTextAreaElement).value)) }
     >{ children }</textarea>;
 
-    return mayBeLabeledControl(control, x, label);
+    return maybeLabeledControl(control, x, label);
 }

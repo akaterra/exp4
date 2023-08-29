@@ -1,8 +1,5 @@
 type: "project"
 
-id: "test"
-description: ""
-
 definitions:
   none: null
 
@@ -10,31 +7,21 @@ integrations:
   github:
     type: "github"
     config:
-      org: "getpackageltd"
+      org: "akaterra-org"
   githubDev:
     type: "github"
     config:
-      org: "getpackageltd"
+      org: "akaterra-org"
       branch: "develop"
   githubStg:
     type: "github"
     config:
-      org: "getpackageltd"
+      org: "akaterra-org"
       branch: "test-v${version.major}.${version.minor}.${version.patch}"
-  githubHotfix:
+  githubProduction:
     type: "github"
     config:
-      org: "getpackageltd"
-      branch: "hotfix-v${version.major}.${version.minor}.${version.patch}"
-  githubMaster:
-    type: "github"
-    config:
-      org: "getpackageltd"
-      branch: "master"
-  githubMain:
-    type: "github"
-    config:
-      org: "getpackageltd"
+      org: "akaterra-org"
       branch: "main"
 
 storages:
@@ -66,6 +53,17 @@ flows:
     targets:
       - dev
     actions:
+      release:
+        title: "Create release"
+        steps:
+          - type: "version:release"
+            title: "Increase minor version"
+            targets:
+              - "stg"
+          - type: "moveTo"
+            title: "Create release branch"
+            targets:
+              - "stg"
       test:
         title: "Run tests"
         steps:
@@ -80,18 +78,7 @@ flows:
       - stg
     actions:
       release:
-        title: "Create release"
-        steps:
-          - type: "version:release"
-            title: "Increase minor version"
-            targets:
-              - "stg"
-          - type: "moveFrom"
-            title: "Create release branch"
-            targets:
-              - "dev"
-      finishRelease:
-        title: "Finish release"
+        title: "Release to production"
         steps:
           - type: "moveTo"
             title: ""
@@ -100,36 +87,21 @@ flows:
           - type: "version:override"
             title: ""
             targets:
-              - "stg:production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg:production"
-          - type: "detach"
-            title: ""
-            targets:
-              - "stg"
+              - "production"
       mergeToDev:
-        title: "Merge to develop"
+        title: "Release to develop"
         steps:
           - type: "moveTo"
             title: ""
             targets:
               - "dev"
       mergeFromDev:
-        title: "Merge latest develop"
+        title: "Fetch latest develop"
         steps:
           - type: "moveFrom"
             title: ""
             targets:
               - "dev"
-      exclude:
-        title: "Exclude"
-        steps:
-          - type: "detach"
-            title: ""
-            targets:
-              - "stg"
       test:
         title: "Run tests"
         steps:
@@ -143,27 +115,8 @@ flows:
     targets:
       - stgHotfix
     actions:
-      hotfix:
-        title: "Create hotfix"
-        steps:
-          - type: "version:override"
-            title: ""
-            targets:
-              - "production:stgHotfix"
-          - type: "version:patch"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-      finishHotfix:
-        title: "Finish hotfix"
+      release:
+        title: "Release to production"
         steps:
           - type: "moveTo"
             title: ""
@@ -173,95 +126,63 @@ flows:
             title: ""
             targets:
               - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "production"
-          - type: "detach"
-            title: ""
-            targets:
-              - "stgHotfix"
-      mergeToQa:
-        title: "Merge to QA"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "stg"
-      mergeFromProduction:
-        title: "Merge latest production"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stgHotfix"
-      exclude:
-        title: "Exclude"
-        steps:
-          - type: "detach"
-            title: ""
-            targets:
-              - "stgHotfix"
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
 
   production:
     title: ""
     targets:
       - production
     actions:
-      mergeToDevelop:
-        title: "Merge to develop"
+      hotfix:
+        title: "Create hotfix"
         steps:
+          - type: "version:override"
+            title: ""
+            targets:
+              - "stgHotfix"
+          - type: "version:patch"
+            title: ""
+            targets:
+              - "stgHotfix"
           - type: "moveTo"
             title: ""
             targets:
-              - "dev"
+              - "stgHotfix"
 
 targets:
   dev:
     title: "Development"
     streams:
-      gp-deliveries-service:
+      testa:
         type: "github"
         title: "Deliveries"
         config:
           integration: "githubDev"
-      gp-deliveries-history-service:
+      testb:
         type: "github"
         title: "Deliveries history"
         config:
           integration: "githubDev"
-    versioning: null
+    versioning: "release"
 
   stg:
     title: "QA"
     streams:
-      gp-deliveries-crud-service:
+      testa:
         type: "github"
         title: "Deliveries CRUD"
         config:
           integration: "githubStg"
-      gp-deliveries-service:
+      testb:
         type: "github"
         title: "Deliveries"
         config:
           integration: "githubStg"
-      gp-deliveries-history-service:
+      testc:
         type: "github"
         title: "Deliveries history"
         config:
           integration: "githubStg"
-      gp-uam-service:
+      testd:
         type: "github"
         title: "UAM"
         config:
@@ -269,31 +190,21 @@ targets:
     versioning: "release"
 
   stgHotfix:
-    title: "QA Hotfix"
+    title: "QA Hot Fix"
     streams:
-      gp-analytics-service:
-        type: "github"
-        title: "Analytics"
-        config:
-          integration: "githubHotfix"
-      gp-deliveries-service:
+      testa:
         type: "github"
         title: "Deliveries"
         config:
-          integration: "githubHotfix"
+          integration: "github"
     versioning: "hotfix"
 
   production:
     title: "Production"
     streams:
-      gp-analytics-service:
-        type: "github"
-        title: "Analytics"
-        config:
-          integration: "githubMain"
-      gp-deliveries-service:
+      testa:
         type: "github"
         title: "Deliveries"
         config:
-          integration: "githubMaster"
+          integration: "githubProduction"
     versioning: "current"

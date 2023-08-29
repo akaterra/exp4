@@ -1,3 +1,5 @@
+import { processingRequest } from "../stores/utils";
+
 export class PublicRestApiService {
   constructor(
     private domain = 'http://127.0.0.1:7000',
@@ -21,6 +23,7 @@ export class PublicRestApiService {
       return this.doRequest(path, 'put', data);
   }
 
+  @processingRequest
   protected doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, any>) {
       const headers = this.doRequestHeaders();
 

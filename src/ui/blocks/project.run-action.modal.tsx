@@ -14,9 +14,9 @@ export const ProjectRunActionModalTitle = ({
   projectTargetStreams?: ProjectTargetStreamDto[];
 }) => {
   return <React.Fragment>
-    {projectTargetActions?.title}
+    { projectTargetActions?.title }
     &nbsp;
-    <span className='font-sml sup'>{projectTargetActions?.description}</span>
+    <span className='font-sml sup'>{ projectTargetActions?.description }</span>
   </React.Fragment>;
 };
 
@@ -33,13 +33,13 @@ export const ProjectRunActionModalContent = ({
 }) => {
   return <div className='row'>
     <div className='c18'>
-      Are you sure to run action for
+      Are you sure to run action <span className='bold'>"{ projectTargetActions?.title }"</span> for
       <ul>
         {
           projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
         }
       </ul>
-      on <span className='bold'>{projectTarget?.title ?? projectTarget?.id}</span>?
+      on <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
     </div>
   </div>;
 };

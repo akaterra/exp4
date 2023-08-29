@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label } from "./label";
 import { C, getStyleByGrid } from "./grid";
-import { mayBeLabeledControl } from './utils';
+import { maybeLabeledControl } from './utils';
 
 export const Panel = ({ children, className = undefined, disabled = undefined, label = null, x = undefined, onClick = undefined, containerStyle = null, style = undefined }: any) => {
     const Element = <div 
@@ -10,5 +10,5 @@ export const Panel = ({ children, className = undefined, disabled = undefined, l
         onClick={ !disabled ? onClick : undefined }
     >{ children }</div>;
 
-    return mayBeLabeledControl(Element, label);
+    return maybeLabeledControl(Element, label);
 }

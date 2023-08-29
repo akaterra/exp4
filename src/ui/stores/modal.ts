@@ -76,8 +76,8 @@ export class ModalStore {
     this.opts = opts;
     this.initialOpts = {
       ...opts,
-      props: { ...opts?.props, storage: this },
-      onClose: opts?.onClose || opts.withClose ? this.close.bind(this) : null,
+      props: { ...opts.props, storage: this },
+      onClose: opts.onClose || opts.withClose ? this.close.bind(this) : null,
       onSelect: this.select.bind(this),
     };
 
