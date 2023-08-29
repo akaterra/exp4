@@ -1,6 +1,6 @@
-import { ProjectDto, ProjectTargetDto, ProjectTargetStreamDto } from './project';
+import { IProject, IProjectTarget, ProjectTargetStreamDto } from './project';
 
-export interface ProjectTargetStreamStateDto {
+export interface IProjectTargetStreamState {
   id: ProjectTargetStreamDto['id'];
   type: ProjectTargetStreamDto['id'];
 
@@ -35,13 +35,13 @@ export interface ProjectTargetStreamStateDto {
   version: string;
 }
 
-export type ProjectTargetStateDto = {
-  id: ProjectTargetDto['id'];
-  streams: Record<string, ProjectTargetStreamStateDto>;
+export type IProjectTargetState = {
+  id: IProjectTarget['id'];
+  streams: Record<string, IProjectTargetStreamState>;
   version: string;
 };
 
-export type ProjectStateDto = {
-  id: ProjectDto['id'];
-  targets: Record<string, ProjectTargetStateDto>;
+export type IProjectState = {
+  id: IProject['id'];
+  targets: Record<string, IProjectTargetState>;
 };

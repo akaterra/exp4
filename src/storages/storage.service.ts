@@ -1,9 +1,9 @@
 import { IService } from '../entities.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { User } from '../user';
+import { IUser } from '../user';
 
 export interface IStorageService extends IService {
-  userGet(id: string, type: string): Promise<User>;
+  userGet(id: string, type: string): Promise<IUser>;
 
   varGet<D extends any = any>(target: IProjectTargetDef, key: string | string[], def: D): Promise<D>;
 

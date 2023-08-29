@@ -1,9 +1,8 @@
 import express from 'express';
 import { IService } from '../entities.service';
-import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { User } from '../user';
+import { IUser } from '../user';
 
-export interface IAuthStrategyRequestActionsDto {
+export interface IAuthStrategyMethod {
   id?: string;
   type: string;
 
@@ -14,9 +13,9 @@ export interface IAuthStrategyRequestActionsDto {
 }
 
 export interface IAuthStrategyService extends IService {
-  authorize(data: Record<string, any>): Promise<User>;
+  authorize(data: Record<string, any>): Promise<IUser>;
 
-  request(): Promise<IAuthStrategyRequestActionsDto>;
+  request(): Promise<IAuthStrategyMethod>;
 
   configureServer(app: express.Application): Promise<void>;
 }

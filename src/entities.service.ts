@@ -1,10 +1,13 @@
 export interface IService {
+  id: string;
   readonly description: string;
   readonly type: string;
 }
 
 export class EntityService {
   static readonly type: string = 'unknown';
+
+  id: string;
 
   get description() {
     return '';
@@ -34,6 +37,10 @@ export class EntitiesService<T extends EntityService = EntityService> {
 
   add(entity: T, id?: string) {
     this.entities[id ?? entity.type] = entity;
+
+    if (id) {
+      entity.id = id;
+    }
 
     return this;
   }

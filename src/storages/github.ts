@@ -6,7 +6,7 @@ import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
-import { User } from '../user';
+import { IUser } from '../user';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {
@@ -23,7 +23,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     super();
   }
 
-  async userGet(id: string, type: string): Promise<User> {
+  async userGet(id: string, type: string): Promise<IUser> {
     const member = (await this.integration.orgMembersList()).find((member) => String(member.id) === id);
 
     if (member) {

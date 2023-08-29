@@ -1,6 +1,6 @@
 import express from 'express';
 import { Service } from 'typedi';
-import { IAuthStrategyRequestActionsDto, IAuthStrategyService } from './auth/auth-strategy.service';
+import { IAuthStrategyMethod, IAuthStrategyService } from './auth/auth-strategy.service';
 import { EntitiesServiceWithFactory } from './entities.service';
 import * as _ from 'lodash';
 
@@ -16,7 +16,7 @@ export class AuthStrategiesService extends EntitiesServiceWithFactory<IAuthStrat
     }
   }
 
-  list(): Record<string, Pick<IAuthStrategyRequestActionsDto, 'id' | 'type' | 'title' | 'description'>> {
+  list(): Record<string, Pick<IAuthStrategyMethod, 'id' | 'type' | 'title' | 'description'>> {
     return _.mapValues(this.entities, (entity) => ({
       id: entity.id,
       type: entity.type,

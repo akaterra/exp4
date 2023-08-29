@@ -11,7 +11,7 @@ import { ProjectsService } from './projects.service';
 import { StreamsService } from './streams.service';
 import { StoragesService } from './storages.service';
 import express from 'express';
-import { projectStreamList } from './api/project-stream/list';
+import { projectStreamList } from './api/project-state/list';
 import { projectList } from './api/project/list';
 import { ActionsService } from './actions.service';
 import { VersionReleaseActionService } from './actions/version-release';
@@ -31,6 +31,7 @@ import { loadGlobalConfigFromFile } from './global-config-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
 import { err } from './utils';
+import { authMethodList } from './api/auth/list-methods';
 
 (async () => {
   const integrations = Container.get(IntegrationsService);
@@ -92,6 +93,9 @@ import { err } from './utils';
  
   await authStrategies.configureServer(app);
 
+  app.get(
+    '/auth/methods', err(authMethodList),
+  );
   app.get(
     '/projects', err(projectList),
   );

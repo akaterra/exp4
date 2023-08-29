@@ -1,6 +1,6 @@
 import { makeObservable, observable, computed, action, flow } from 'mobx';
 import { RestApiService } from '../services/rest-api.service';
-import { ProjectDto } from './dto/project';
+import { IProject } from './dto/project';
 import { ProjectsService } from '../services/projects.service';
 import { BaseStore } from './base-store';
 import { ProjectStore } from './project';
@@ -10,7 +10,7 @@ export class ProjectsStore extends BaseStore {
   readonly service = new ProjectsService();
 
   @observable
-  projects: Record<string, ProjectDto> = {};
+  projects: Record<string, IProject> = {};
   @observable
   projectsStores: Record<string, ProjectStore> = {};
   @observable
@@ -43,7 +43,7 @@ export class ProjectsStore extends BaseStore {
 
   @flow @processing
   *fetch() {
-    const res: Record<string, ProjectDto> = yield this.service.list();
+    const res: Record<string, IProject> = yield this.service.list();
 
     this.projects = res;
     this.projectsStores = this.mapToStores(res, (val, key) => {

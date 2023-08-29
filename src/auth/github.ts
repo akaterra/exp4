@@ -4,8 +4,8 @@ import { EntityService } from '../entities.service';
 import { Autowired, err, requestJson } from '../utils';
 import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
-import { IAuthStrategyRequestActionsDto, IAuthStrategyService } from './auth-strategy.service';
-import { User } from '../user';
+import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
+import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
 import fetch from 'node-fetch-native';
 import { prepareAuthData } from '../auth.service';
@@ -55,12 +55,13 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
     }
   }
 
-  async authorize(data: Record<string, any>): Promise<User> {
+  async authorize(data: Record<string, any>): Promise<IUser> {
     return null;
   }
 
-  async request(): Promise<IAuthStrategyRequestActionsDto> {
+  async request(): Promise<IAuthStrategyMethod> {
     return {
+      id: this.id,
       type: this.type,
       actions: {
         redirect: `https://github.com/login/oauth/authorize?client_id=${this.config?.credentials?.clientId}&client_secret=${this.config?.credentials?.clientSecret}&redirect_uri=${encodeURIComponent(this.config?.credentials?.callbackUrl)}`,
@@ -70,16 +71,18 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
 
   async configureServer(app: express.Application, path?: string): Promise<void> {
     if (!path) {
-      path = `/auth/${this.type}`;
+      path = `/auth/methods/${this.id ?? this.type}`;
+    } else {
+      path = `/auth/methods${path}`;
     }
 
-    app.get(path, async (req, res) => {
-      res.redirect((await this.request()).actions.redirect);
-    });
-
-    app.get(path + '/actions', err(async (req, res) => {
+    app.get(path, err(async (req, res) => {
       res.json(await this.request());
     }));
+
+    app.get(path + '/redirect', async (req, res) => {
+      res.redirect((await this.request()).actions.redirect);
+    });
 
     app.get(path + '/callback', err(async (req, res) => {
       const githubAuth = await requestJson(

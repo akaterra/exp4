@@ -1,6 +1,6 @@
 import { makeObservable, observable, computed, action, flow, reaction } from 'mobx';
-import { ProjectDto, ProjectFlowDto, ProjectFlowActionDto, ProjectTargetStreamDto } from "./dto/project";
-import { ProjectStateDto, ProjectTargetStateDto, ProjectTargetStreamStateDto } from './dto/project-state';
+import { IProject, IProjectFlow, IProjectFlowAction, ProjectTargetStreamDto } from "./dto/project";
+import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
 import { BaseStore } from './base-store';
 import { modalStore } from '../blocks/modal';
@@ -10,13 +10,13 @@ import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModal
 import { processing } from './utils';
 
 export class ProjectTargetStore extends BaseStore {
-  @observable projectTargetState: ProjectTargetStateDto;
+  @observable projectTargetState: IProjectTargetState;
   @observable selectedProjectTargetStreamIds: Record<string, boolean> = {};
 
   @computed
-  get actions(): ProjectFlowActionDto[] {
+  get actions(): IProjectFlowAction[] {
     if (this.projectStore.project?.flows) {
-      const flows: ProjectFlowActionDto[] = [];
+      const flows: IProjectFlowAction[] = [];
 
       for (const flow of Object.values(this.projectStore.project?.flows)) {
         if (flow.targets.includes(this.projectTargetState.id)) {
@@ -31,9 +31,9 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @computed
-  get streamsWithStates(): { stream: ProjectTargetStreamDto, streamState: ProjectTargetStreamStateDto, isSelected: boolean }[] {
+  get streamsWithStates(): { stream: ProjectTargetStreamDto, streamState: IProjectTargetStreamState, isSelected: boolean }[] {
     if (this.target) {
-      const streamsWithStates: { stream: ProjectTargetStreamDto, streamState: ProjectTargetStreamStateDto, isSelected: boolean }[] = [];
+      const streamsWithStates: { stream: ProjectTargetStreamDto, streamState: IProjectTargetStreamState, isSelected: boolean }[] = [];
 
       for (const stream of Object.values(this.target.streams)) {
         streamsWithStates.push({
@@ -57,7 +57,7 @@ export class ProjectTargetStore extends BaseStore {
     return this.projectStore.projectTargetsStores?.[this.projectTargetState.id];
   }
 
-  constructor(public projectStore: ProjectStore, projectTargetState: ProjectTargetStateDto) {
+  constructor(public projectStore: ProjectStore, projectTargetState: IProjectTargetState) {
     super();
     makeObservable(this);
 
@@ -103,7 +103,7 @@ export class ProjectTargetStore extends BaseStore {
     this.projectStore.selectTargetStream(this.target?.id, streamId);
   }
 
-  update(state?: Partial<ProjectTargetStateDto>) {
+  update(state?: Partial<IProjectTargetState>) {
     if (state) {
       this.projectTargetState = { ...this.projectTargetState, ...state };
     }
@@ -114,15 +114,15 @@ export class ProjectTargetStore extends BaseStore {
 
 export class ProjectStore extends BaseStore {
   @observable
-  project: ProjectDto;
+  project: IProject;
   @observable
   projectTargetsStores: Record<string, ProjectTargetStore> = {};
   @observable
-  selectedAction: { stream: ProjectTargetStreamDto | null, action: ProjectFlowActionDto, targetStore: ProjectTargetStore } | null;
+  selectedAction: { stream: ProjectTargetStreamDto | null, action: IProjectFlowAction, targetStore: ProjectTargetStore } | null;
   @observable
-  selectedStreamWithState: { stream: ProjectTargetStreamDto, streamState: ProjectTargetStreamStateDto, targetStore: ProjectTargetStore } | null;
+  selectedStreamWithState: { stream: ProjectTargetStreamDto, streamState: IProjectTargetStreamState, targetStore: ProjectTargetStore } | null;
 
-  constructor(public projectsStore: ProjectsStore, project: ProjectDto) {
+  constructor(public projectsStore: ProjectsStore, project: IProject) {
     super();
     makeObservable(this);
 
@@ -145,7 +145,7 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *fetchState() {
-    const res: ProjectStateDto = yield this.projectsStore.service.listState(this.project.id);
+    const res: IProjectState = yield this.projectsStore.service.listState(this.project.id);
 
     this.projectTargetsStores = this.mapToStores(res.targets, (val, key) => {
       return this.projectTargetsStores[key]

@@ -17,7 +17,9 @@ export class AlertsStore extends BaseStore {
     this.cleanAlertsTimer = setInterval(() => {
       const now = Date.now();
 
-      this.alerts = this.alerts.filter((alert) => now - alert.timestamp < 15000);
+      this.alerts = this.alerts.length
+        ? this.alerts.filter((alert) => now - alert.timestamp < 15000)
+        : this.alerts;
     }, 500);
   }
 

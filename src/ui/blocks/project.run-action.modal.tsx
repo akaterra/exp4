@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ProjectFlowActionDto, ProjectTargetDto, ProjectTargetStreamDto } from '../stores/dto/project';
+import { IProjectFlowAction, IProjectTarget, ProjectTargetStreamDto } from '../stores/dto/project';
 import { ModalStore } from '../stores/modal';
 
 export const ProjectRunActionModalTitle = ({
@@ -9,8 +9,8 @@ export const ProjectRunActionModalTitle = ({
   projectTargetStreams,
 }: {
   store: ModalStore;
-  projectTarget?: ProjectTargetDto;
-  projectTargetActions?: ProjectFlowActionDto;
+  projectTarget?: IProjectTarget;
+  projectTargetActions?: IProjectFlowAction;
   projectTargetStreams?: ProjectTargetStreamDto[];
 }) => {
   return <React.Fragment>
@@ -27,8 +27,8 @@ export const ProjectRunActionModalContent = ({
   projectTargetStreams,
 }: {
   store: ModalStore;
-  projectTarget?: ProjectTargetDto;
-  projectTargetActions?: ProjectFlowActionDto;
+  projectTarget?: IProjectTarget;
+  projectTargetActions?: IProjectFlowAction;
   projectTargetStreams?: ProjectTargetStreamDto[];
 }) => {
   return <div className='row'>

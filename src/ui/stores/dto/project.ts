@@ -1,4 +1,4 @@
-export interface ProjectFlowActionStepDto {
+export interface IProjectFlowActionStep {
   id: string;
   type: string;
 
@@ -9,7 +9,7 @@ export interface ProjectFlowActionStepDto {
   targets: string[];
 }
 
-export interface ProjectFlowActionDto {
+export interface IProjectFlowAction {
   id: string;
   type: string;
 
@@ -17,16 +17,16 @@ export interface ProjectFlowActionDto {
   
   title: string;
   description: string;
-  steps: ProjectFlowActionStepDto[];
+  steps: IProjectFlowActionStep[];
 }
 
-export interface ProjectFlowDto {
+export interface IProjectFlow {
   id: string;
   type: string;
 
   title: string;
   desription: string;
-  actions: Record<string, ProjectFlowActionDto>;
+  actions: Record<string, IProjectFlowAction>;
   targets: string[];
 }
 
@@ -41,7 +41,7 @@ export interface ProjectTargetStreamDto {
   targets: string[];
 }
 
-export interface ProjectTargetDto {
+export interface IProjectTarget {
   id: string;
   type: string;
 
@@ -53,12 +53,12 @@ export interface ProjectTargetDto {
   versioning: string;
 }
 
-export interface ProjectDto {
+export interface IProject {
   id: string;
   type: string;
 
   title: string;
   description: string;
-  flows: Record<string, ProjectFlowDto>;
-  targets: Record<string, ProjectTargetDto>;
+  flows: Record<string, IProjectFlow>;
+  targets: Record<string, IProjectTarget>;
 }
