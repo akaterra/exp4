@@ -128,7 +128,7 @@ export class ProjectStore extends BaseStore {
 
     this.project = project;
 
-    this.fetchState();
+    // this.fetchState();
   }
 
   getTargetByTargetId(targetId) {

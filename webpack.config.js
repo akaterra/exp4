@@ -43,12 +43,12 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
-                { from: path.resolve(__dirname, 'src/ui/public/assets'), to: 'assets' }
-            ]
+                { from: path.resolve(__dirname, 'src/ui/public/assets'), to: 'assets' },
+            ],
         }),
         new HtmlWebPackPlugin({
             template: './src/ui/public/index.html',
-            filename: './src/ui/index.html'
+            filename: 'index.html',
         }),
     ],
     resolve: {
@@ -66,7 +66,7 @@ module.exports = {
             '/api': {
                 target: 'http://127.0.0.1:5002',
                 logLevel: 'debug'
-            }
-        }
+            },
+        },
     },
 }

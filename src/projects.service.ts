@@ -8,6 +8,7 @@ import { ITarget } from './target';
 import { PromiseContainer, iter } from './utils';
 import { ActionsService } from './actions.service';
 import { EntitiesService } from './entities.service';
+import { Cache } from './cache';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
@@ -15,6 +16,8 @@ export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => StreamsService) protected streamsService: StreamsService;
   @Inject(() => TargetsService) protected targetsService: TargetsService;
   @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
+
+  private statesCache = new Cache<any>();
 
   get domain() {
     return 'Project';
@@ -41,7 +44,38 @@ export class ProjectsService extends EntitiesService<Project> {
     return true;
   }
 
-  async getState(projectId: string, targetId?: string | string[]) {
+  async getState(projectId: string, targetId?: string | string[], withRefresh?: boolean) {
+    const project = this.get(projectId);
+
+    if (!withRefresh) {
+      let potentialTargets = [];
+
+      for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
+        const target = project.getTargetByTargetId(tId);
+
+        if (target.isDirty || Object.values(target.streams).some((stream) => stream.isDirty)) {
+          potentialTargets.push(tId);
+        }
+      }
+
+      if (!potentialTargets.length) {
+        let loop = 120;
+
+        while (loop) {
+          if (this.statesCache.has(projectId)) {
+            return this.statesCache.get(projectId);
+          }
+  
+          loop -= 1;
+  
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      } else {
+        targetId = potentialTargets;
+      }
+    }
+
+    const oldState = this.statesCache.get(projectId);
     const dirtyState: {
       id: IProjectDef['id'];
       targets: Record<string, {
@@ -50,10 +84,10 @@ export class ProjectsService extends EntitiesService<Project> {
         version: string;
       }>;
     } = {
+      ...oldState,
       id: projectId,
-      targets: {},
+      targets: { ...oldState?.targets },
     };
-    const project = this.get(projectId);
     const promiseContainer = new PromiseContainer(1);
 
     for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
@@ -93,7 +127,17 @@ export class ProjectsService extends EntitiesService<Project> {
       }
     }
 
+    this.statesCache.set(projectId, state, 120, true);
+
     return state;
+  }
+
+  async runStatesRefresh() {
+    for (const projectId of Object.keys(this.entities)) {
+      await this.getState(projectId, null, true);
+    }
+
+    setTimeout(() => this.runStatesRefresh(), 60000);
   }
 
   streamGetState(stream: IProjectTargetStreamDef): Promise<IStream>;

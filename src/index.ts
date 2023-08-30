@@ -111,6 +111,8 @@ import { authMethodList } from './api/auth/list-methods';
   app.listen(7000, () => {
 
   });
+
+  projects.runStatesRefresh();
 })().catch((err) => {
   console.error({
     err,

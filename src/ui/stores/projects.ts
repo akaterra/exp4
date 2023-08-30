@@ -26,7 +26,7 @@ export class ProjectsStore extends BaseStore {
     return Object.values(this.projects);
   }
 
-  constructor(selectedProjectId: string = 'test') {
+  constructor(selectedProjectId?: string) {
     super();
     makeObservable(this);
 
@@ -54,6 +54,15 @@ export class ProjectsStore extends BaseStore {
         : new ProjectStore(this, payload);
     }, this.projectsStores);
 
-    console.log(this)
+    if (this.selectedProjectId) {
+      yield this.selectProject(this.selectedProjectId);
+    }
+  }
+
+  @flow @processing
+  *selectProject(id: IProject['id']) {
+    this.selectedProjectId = id;
+    
+    yield this.selectedProjectStore?.fetchState();
   }
 }

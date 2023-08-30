@@ -15,55 +15,62 @@ import { GlobalAlerts } from './blocks/alerts';
 import { RootStore, rootStore } from './stores/root';
 import {
   createBrowserRouter,
+  Outlet,
+  Router,
   RouterProvider,
 } from "react-router-dom";
+import { IProject } from './stores/dto/project';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <div>Test</div>,
-    errorElement: <div />,
-  },
-]);
+const projectsStore = new ProjectsStore();
 
-export const App = observer(({ root }: { root: RootStore }) => {
+export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
+  return <Project project={ projects.selectedProjectStore } />;
+});
+
+export const Layout = observer(({ root }: { root: RootStore }) => {
   return <Row.M>
     <GlobalAlerts />
     <GlobalDetailsPanel />
     <GlobalModal />
-    <RouterProvider router={ router } />
     <div className='c-3 -s-'>
       <div className='paragraph paragraph-lrg'>
         <Navigation projects={ projectsStore } root={ root } />
       </div>
     </div>
     <div className='c15 -s-'>
-      {
-        root.isAuthorized
-          ? <div className='paragraph paragraph-lrg'>
-              <Project project={ projectsStore.selectedProjectStore } />
-          </div>
-          : null
-      }
+      <div className='paragraph paragraph-lrg'>
+        <Outlet />
+      </div>
     </div>
-    {/* <div className='c15 -s-'>
-        <Router>
-            <FeedsApp default path="/feeds/:selectedFeedId?" />
-            <ProjectsApp path="/projects/:selectedProjectId?" />
-            <SubscriptionsApp path="/subscriptions/:selectedProjectUserStateId?" />
-            <UsersApp path="/users/:selectedUserId?" />
-            <div path="/error">Error!</div>
-        </Router>
-    </div> */}
   </Row.M>;
 });
 
-const projectsStore = new ProjectsStore();
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout root={ rootStore } />,
+    // errorElement: <div />,
+    children: [ {
+      path: '/projects/:id',
+      element: <RouteProject projects={ projectsStore } />,
+      // errorElement: <div />,
+      loader: async ({ request, params }) => {
+        projectsStore.selectProject(params.id as IProject['id']);
+
+        return null;
+      },
+    } ]
+  },
+], {
+  basename: '',
+});
+
+export const App = () => {
+  return <RouterProvider router={ router } />;
+}
 
 (async () => {
   const root = ReactDOM.createRoot(document.getElementById('container'));
   
-  root.render(<App root={ rootStore } />);
-
-  // await projectsStore.fetch();
+  root.render(<App />);
 })();

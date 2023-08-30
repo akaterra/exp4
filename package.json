@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/ts-node/dist/bin.js src/index.ts\"",
-    "dev:fe": "webpack-dev-server"
+    "dev:fe": "webpack serve"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
