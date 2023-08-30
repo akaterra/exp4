@@ -46,19 +46,20 @@ export class ProjectsService extends EntitiesService<Project> {
 
   async getState(projectId: string, targetId?: string | string[], withRefresh?: boolean) {
     const project = this.get(projectId);
+    const initialTargetId = targetId;
 
     if (!withRefresh) {
-      let potentialTargets = [];
+      let replaceDirtyTargetIds = [];
 
       for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
         const target = project.getTargetByTargetId(tId);
 
         if (target.isDirty || Object.values(target.streams).some((stream) => stream.isDirty)) {
-          potentialTargets.push(tId);
+          replaceDirtyTargetIds.push(tId);
         }
       }
 
-      if (!potentialTargets.length) {
+      if (!replaceDirtyTargetIds.length) {
         let loop = 120;
 
         while (loop) {
@@ -71,7 +72,7 @@ export class ProjectsService extends EntitiesService<Project> {
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
       } else {
-        targetId = potentialTargets;
+        targetId = replaceDirtyTargetIds;
       }
     }
 
@@ -115,7 +116,7 @@ export class ProjectsService extends EntitiesService<Project> {
       targets: {},
     };
 
-    for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
+    for (const [ ,tId ] of iter(initialTargetId ?? Object.keys(project.targets))) {
       const target = project.getTargetByTargetId(tId);
       state.targets[tId] = {
         ...dirtyState.targets[tId],
