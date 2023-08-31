@@ -100,13 +100,25 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   async gitGetWorkflowRuns(branch?, repo?, org?) {
     return (await this.client.actions.listWorkflowRunsForRepo({
       owner: this.org(org), repo: this.repo(repo), branch: this.branch(branch), per_page: 1,
+    }).catch((err) => {
+      if (err?.status === 404) {
+        return { data: undefined };
+      }
+
+      return Promise.reject(err);
     })).data?.workflow_runs;
   }
 
   async gitGetWorkflowJobs(runId, repo?, org?) {
     return (await this.client.actions.listJobsForWorkflowRun({
-      owner: this.org(org), repo: this.repo(repo), run_id: runId,
-    })).data;
+      owner: this.org(org), repo: this.repo(repo), run_id: runId, filter: 'latest',
+    }).catch((err) => {
+      if (err?.status === 404) {
+        return { data: undefined };
+      }
+
+      return Promise.reject(err);
+    })).data?.jobs;
   }
 
   async gitGetWorkflowJob(jobId, repo?, org?) {
@@ -118,6 +130,12 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   async gitMerge(base, head, commitMessage?, repo?, org?) {
     return (await this.client.repos.merge({
       owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), commit_message: commitMessage,
+    }).catch((err) => {
+      if (err?.status === 404) {
+        return { data: undefined };
+      }
+
+      return Promise.reject(err);
     })).data;
   }
 

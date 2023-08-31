@@ -1,6 +1,6 @@
 import { Inject, Service } from 'typedi';
 import { IStorageService } from './storage.service';
-import { Cache } from '../cache';
+import { AwaitedCache } from '../cache';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
@@ -13,7 +13,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   static readonly type: string = 'github';
 
   @Autowired() protected integrationsService: IntegrationsService;
-  protected cache = new Cache();
+  protected cache = new AwaitedCache();
 
   private get integration() {
     return this.integrationsService.get(this.config?.integration ?? 'default', this.type) as GithubIntegrationService;

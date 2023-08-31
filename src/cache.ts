@@ -1,9 +1,15 @@
-export class Cache<T = any> {
-  protected cache = new Map<string, [ number, T ]>();
+export class AwaitedCache<T = any> {
+  protected cache = new Map<string, [ number, number, T | Promise<T> ]>(); // expire, version, val
 
-  get(key: string, def?: T) {
+  del(key: string) {
+    this.cache.delete(key);
+
+    return this;
+  }
+
+  get(key: string, def?: T): T | Promise<T> {
     if (this.cache.has(key)) {
-      const [ expire, val ] = this.cache.get(key);
+      const [ expire, , val ] = this.cache.get(key);
 
       return expire
         ? expire >= Date.now() ? val : def
@@ -25,17 +31,45 @@ export class Cache<T = any> {
     return false;
   }
 
-  set(key: string, val: T, ttlSec?: number, updTtl?: boolean) {
+  set(key: string, val: T | Promise<T>, ttlSec?: number, updTtl?: boolean) {
     let expire;
+    let version;
+    let set = true;
 
     if (!updTtl) {
       if (this.has(key)) {
-        [ expire, ] = this.cache.get(key);
+        [ expire, version, ] = this.cache.get(key);
       }
     }
 
-    this.cache.set(key, [ expire ?? (ttlSec ? Date.now() + ttlSec * 1000 : null), val ]);
+    version = !version ? 1 : version + 1;
 
-    return this;
+    if (val instanceof Promise) {
+      if (this.cache.has(key)) {
+        set = false;
+      }
+
+      val.then((res) => {
+        if ((this.cache.get(key)?.[1] ?? 1) <= version) {
+          this.set(key, res, ttlSec, updTtl);
+        }
+
+        return res;
+      }).catch((err) => {
+        this.del(key);
+
+        return Promise.reject(err);
+      });
+    }
+
+    if (set) {
+      this.cache.set(key, [
+        expire ?? (ttlSec ? Date.now() + ttlSec * 1000 : null),
+        version,
+        val,
+      ]);
+    }
+
+    return val;
   }
 }

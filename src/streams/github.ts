@@ -6,10 +6,15 @@ import { Service } from 'typedi';
 import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
-import { VersioningsService } from '../versionings.service';
 import { ProjectsService } from '../projects.service';
+import { Status } from '../enums/status';
+
+const JOB_CONSLUSION_TO_STATUS_MAP = {
+  failure: Status.FAILED,
+  skipped: Status.COMPLETED,
+  success: Status.COMPLETED,
+}
 
 export type IGithubTargetStream = IProjectTargetStream<{
   integration?: string;
@@ -55,9 +60,9 @@ export class GithubStreamService extends EntityService implements IStreamService
     const workflowRuns = branch
       ? await integration.gitGetWorkflowRuns(stream.config.branch, stream.id)
       : [];
-    // const workflowRunsJobs = workflowRuns?.[0]
-    //   ? await integration.getWorkflowJobs(stream.config.org, stream.id, workflowRuns[0].id)
-    //   : [];
+    const workflowRunsJobs = workflowRuns?.[0]
+      ? await integration.gitGetWorkflowJobs(workflowRuns[0].id, stream.id, stream.config.org)
+      : [];
 
     const metadata = {
       org: stream.config?.org ?? integration.config?.org,
@@ -72,17 +77,37 @@ export class GithubStreamService extends EntityService implements IStreamService
       targetId: stream.ref.targetId,
 
       history: {
-        action: workflowRuns ? workflowRuns.map((w) => ({
-          id: String(w.id),
-          type: 'github:workflow',
-  
-          author: { name: w.actor?.name ?? null, link: w.actor?.html_url ?? null },
-          description: w.name,
-          link: w.html_url ?? null,
-          metadata: {},
-          status: w.status ?? null,
-          time: null,
-        })) : [],
+        action: workflowRuns ? workflowRuns.map((w) => {
+          const isJobSucceeded = workflowRunsJobs[0]
+            ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
+            : true;
+
+          return {
+            id: String(w.id),
+            type: 'github:workflow',
+    
+            author: { name: w.actor?.name ?? null, link: w.actor?.html_url ?? null },
+            description: w.name,
+            link: w.html_url ?? null,
+            metadata: {},
+            steps: workflowRunsJobs?.[0]
+              ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
+                acc[jobStep.number] = {
+                  id: String(jobStep.number),
+                  type: 'github:workflow:job',
+
+                  description: jobStep.name,
+                  link: workflowRunsJobs[0].html_url,
+                  status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
+                };
+
+                return acc;
+              }, {})
+              : null,
+            status: isJobSucceeded ? (w.status ?? null) : Status.FAILED,
+            time: null,
+          };
+        }) : [],
         change: branch ? [ {
           id: branch.commit.sha,
           type: 'github:commit',
@@ -92,6 +117,7 @@ export class GithubStreamService extends EntityService implements IStreamService
           link: branch.commit.html_url,
           metadata: {},
           status: null,
+          steps: null,
           time: branch.commit.commit.committer?.date ?? null,
         } ] : [],
       },

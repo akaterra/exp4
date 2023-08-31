@@ -30,12 +30,24 @@ export class PromiseContainer {
 }
 
 export function Autowired(name?: any | (() => any)) {
-  return function(target: Object, propertyName: string){
-    if (typeof name === 'function') {
-      name = name();
-    }
+  return function(target: Object, propertyName: string) {
+    Reflect.defineProperty(
+      target,
+      propertyName,
+      {
+        get: function() {
+          if (typeof name === 'function') {
+            name = name();
+          }
+      
+          const ref = Container.get(name ?? Reflect.getMetadata('design:type', target, propertyName));
 
-    target[propertyName] = Container.get(name ?? Reflect.getMetadata('design:type', target, propertyName));
+          Reflect.defineProperty(this, propertyName, { value: ref });
+
+          return ref;
+        }
+      }
+    )
   }
 }
 

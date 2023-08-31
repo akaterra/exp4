@@ -5,6 +5,7 @@ import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
+import {Status} from '../enums/status';
 
 export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
     if (!projectTarget?.target?.id) {
@@ -32,7 +33,9 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
         <div>
             {
                 projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
+                    const lastAction = streamState?.history?.action?.[0];
                     const lastChange = streamState?.history?.change?.[0];
+                    const isFailed = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED;
 
                     return <div key={ i } className={ lastChange ? '' : 'opacity-med' }>
                         <Checkbox
@@ -47,7 +50,11 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
                                 </div>
                             </div>
                         </Checkbox>
-                        <Button className='button-sml default auto' x={ null } onClick={ () => projectTarget.applyTargetStreamDetails(stream.id) }>Info</Button>
+                        <Button
+                            className={ isFailed ? 'button-sml failure auto' : 'button-sml default auto' }
+                            x={ null }
+                            onClick={ () => projectTarget.applyTargetStreamDetails(stream.id) }
+                        >Info</Button>
                     </div>;
                 })
             }

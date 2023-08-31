@@ -1,4 +1,14 @@
+import { Status } from '../../enums/status';
 import { IProject, IProjectTarget, ProjectTargetStreamDto } from './project';
+
+export interface IStreamHistoryStep {
+  id: string;
+  type: string;
+
+  description: string;
+  link: string;
+  status: Status;
+}
 
 export interface IProjectTargetStreamState {
   id: ProjectTargetStreamDto['id'];
@@ -15,7 +25,8 @@ export interface IProjectTargetStreamState {
       description: string;
       link: string;
       metadata: Record<string, unknown>;
-      status: string;
+      steps: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
+      status: Status;
       time: string;
     }[];
     change: {
@@ -26,7 +37,8 @@ export interface IProjectTargetStreamState {
       description: string;
       link: string;
       metadata: Record<string, unknown>;
-      status: string;
+      steps: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
+      status: Status;
       time: string;
     }[];
   };

@@ -172,8 +172,6 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *applyRunAction(targetId: string | null, streamId: string | string[] | null, actionId: string | null) {
-    detailsPanelStore.hide();
-
     const selectedStreamIds = streamId
       ? Array.isArray(streamId) ? streamId : [ streamId ]
       : Object.values(this.getTargetByTargetId(targetId).streams).map((stream) => stream.id);

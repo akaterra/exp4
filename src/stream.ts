@@ -1,4 +1,14 @@
+import {Status} from './enums/status';
 import { IProjectTargetStream } from './project';
+
+export interface IStreamHistoryStep {
+  id: string;
+  type: string;
+
+  description: string;
+  link: string;
+  status: Status;
+}
 
 export interface IStream<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
@@ -22,7 +32,8 @@ export interface IStream<
       description?: string;
       link?: string;
       metadata?: HistoryActionMetadata;
-      status?: string;
+      steps?: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
+      status?: Status;
       time?: Date;
     }[];
     change?: {
@@ -33,7 +44,8 @@ export interface IStream<
       description?: string;
       link?: string;
       metadata?: HistoryChangeMetadata;
-      status?: string;
+      steps?: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
+      status?: Status;
       time?: Date;
     }[];
   };

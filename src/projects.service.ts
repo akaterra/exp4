@@ -5,10 +5,11 @@ import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { IStream } from './stream';
 import { ITarget } from './target';
-import { PromiseContainer, iter } from './utils';
+import { PromiseContainer, iter as iterArr } from './utils';
 import { ActionsService } from './actions.service';
 import { EntitiesService } from './entities.service';
-import { Cache } from './cache';
+import { AwaitedCache } from './cache';
+import {ProjectState} from './project-state';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
@@ -17,7 +18,7 @@ export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => TargetsService) protected targetsService: TargetsService;
   @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
 
-  private statesCache = new Cache<any>();
+  private statesCache = new AwaitedCache<ProjectState>();
 
   get domain() {
     return 'Project';
@@ -35,7 +36,7 @@ export class ProjectsService extends EntitiesService<Project> {
   ) {
     const flow = this.get(projectId).getFlow(flowId);
 
-    for (const [ , aId ] of iter(actionId)) {
+    for (const [ , aId ] of iterArr(actionId)) {
       for (const action of flow.actions[aId].steps) {
         await this.actionsService.get(action.type).run(action, targetsStreams);
       }
@@ -44,98 +45,66 @@ export class ProjectsService extends EntitiesService<Project> {
     return true;
   }
 
-  async getState(projectId: string, targetId?: string | string[], withRefresh?: boolean) {
+  async getState(projectId: string, targetId?: string | string[], withRefresh?: boolean): Promise<ProjectState> {
     const project = this.get(projectId);
-    const initialTargetId = targetId;
+    const projectState = await this.statesCache.get(projectId) ?? new ProjectState(projectId);
 
     if (!withRefresh) {
-      let replaceDirtyTargetIds = [];
-
-      for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
-        const target = project.getTargetByTargetId(tId);
-
-        if (target.isDirty || Object.values(target.streams).some((stream) => stream.isDirty)) {
-          replaceDirtyTargetIds.push(tId);
-        }
-      }
+      const replaceDirtyTargetIds = projectState.getDirtyTargetIds();
 
       if (!replaceDirtyTargetIds.length) {
-        let loop = 120;
-
-        while (loop) {
-          if (this.statesCache.has(projectId)) {
-            return this.statesCache.get(projectId);
-          }
-  
-          loop -= 1;
-  
-          await new Promise((resolve) => setTimeout(resolve, 500));
+        if (this.statesCache.has(projectId)) {
+          return this.statesCache.get(projectId);
         }
       } else {
         targetId = replaceDirtyTargetIds;
       }
     }
 
-    const oldState = this.statesCache.get(projectId);
-    const dirtyState: {
-      id: IProjectDef['id'];
-      targets: Record<string, {
-        id: IProjectTargetDef['id'];
-        streams: Record<string, IStream>;
-        version: string;
-      }>;
-    } = {
-      ...oldState,
-      id: projectId,
-      targets: { ...oldState?.targets },
-    };
-    const promiseContainer = new PromiseContainer(1);
+    return this.statesCache.set(projectId, (async () => {
+      const promiseContainer = new PromiseContainer(1);
+  
+      for (const [ ,tId ] of iterArr(targetId ?? Object.keys(project.targets))) {
+        const target = project.getTargetByTargetId(tId);
+  
+        await promiseContainer.push(async () => {
+          projectState.setTarget(tId, {
+            version: await this.versioningsService.getByTarget(target).getCurrent(target),
+          })
+  
+          const replaceDirtyStreamIds = projectState.getDirtyTargetStreamIds(tId);
 
-    for (const [ ,tId ] of iter(targetId ?? Object.keys(project.targets))) {
-      const target = project.getTargetByTargetId(tId);
+          for (const stream of Object.values(target.streams)) {
+            if (
+              !withRefresh &&
+              (
+                !replaceDirtyStreamIds.length ||
+                !replaceDirtyStreamIds.includes(stream.id)
+              )
+            ) {
+              continue;
+            }
 
-      await promiseContainer.push(async () => {
-        dirtyState.targets[tId] = {
-          id: tId,
-          streams: {},
-          version: await this.versioningsService.getByTarget(target).getCurrent(target),
-        };
-
-        for (const [ sId, stream ] of Object.entries(target.streams)) {
-          await promiseContainer.push(async () => {
-            dirtyState.targets[tId].streams[sId] = await this.streamGetState(stream);
-          });
-        }
-      });
-    }
-
-    await promiseContainer.wait();
-
-    const state: typeof dirtyState = {
-      id: projectId,
-      targets: {},
-    };
-
-    for (const [ ,tId ] of iter(initialTargetId ?? Object.keys(project.targets))) {
-      const target = project.getTargetByTargetId(tId);
-      state.targets[tId] = {
-        ...dirtyState.targets[tId],
-        streams: {},
-      };
-
-      for (const [ sId, stream ] of Object.entries(target.streams)) {
-        state.targets[tId].streams[sId] = dirtyState.targets[tId].streams[sId];
+            await promiseContainer.push(async () => {
+              projectState.setTargetStream(tId, await this.streamGetState(stream));
+            });
+          }
+        });
       }
-    }
-
-    this.statesCache.set(projectId, state, 120, true);
-
-    return state;
+  
+      await promiseContainer.wait();
+  
+      return projectState;
+    })(), 120, true);
   }
 
   async runStatesRefresh() {
-    for (const projectId of Object.keys(this.entities)) {
-      await this.getState(projectId, null, true);
+    try {
+      for (const projectId of Object.keys(this.entities)) {
+        await this.getState(projectId, null, true);
+      }
+    } catch (err) {
+      
     }
 
     setTimeout(() => this.runStatesRefresh(), 60000);

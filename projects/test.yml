@@ -241,6 +241,11 @@ targets:
         title: "Deliveries history"
         config:
           integration: "githubDev"
+      gp-routes-calc-dev:
+        type: "github"
+        title: "Routes calc"
+        config:
+          integration: "githubDev"
     versioning: null
 
   stg:
