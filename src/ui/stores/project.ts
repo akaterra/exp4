@@ -127,8 +127,6 @@ export class ProjectStore extends BaseStore {
     makeObservable(this);
 
     this.project = project;
-
-    // this.fetchState();
   }
 
   getTargetByTargetId(targetId) {

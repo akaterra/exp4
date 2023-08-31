@@ -23,6 +23,23 @@ export interface IProjectVersioning {
   storage?: string;
 }
 
+export interface IProjectFlowActionParam {
+  type: string;
+
+  title?: string;
+  description?: string;
+
+  constraints?: {
+    enum?: any[];
+    min?: number;
+    minLength?: number;
+    max?: number;
+    maxLength?: number;
+    optional?: boolean;
+  };
+  initialValue: any;
+}
+
 export interface IProjectFlowActionStep<C extends (Record<string, unknown> | string) = string, T extends string = string> {
   id?: string;
   type: T;
@@ -35,6 +52,7 @@ export interface IProjectFlowActionStep<C extends (Record<string, unknown> | str
   isDirty?: boolean;
 
   config?: C;
+  params?: Record<string, IProjectFlowActionParam>;
   targets?: string[];
 }
 
@@ -50,6 +68,7 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
   isDirty?: boolean;
 
   steps?: IProjectFlowActionStep<C>[];
+  params?: Record<string, IProjectFlowActionParam>;
   targets?: string[];
 }
 
@@ -84,6 +103,7 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
   isDirty?: boolean;
 
   config?: C;
+  tags?: string[];
   targets?: string[];
 }
 
@@ -101,6 +121,7 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
   isDirty?: boolean;
 
   streams: Record<string, IProjectTargetStream<C>>;
+  tags?: string[];
   versioning?: string;
 }
 
@@ -197,12 +218,14 @@ export class Project implements IProject {
                 ref: { flowId: key, projectId: this.id },
                 title: actDef.title,
                 description: actDef.description,
+                params: actDef.params,
                 steps: actDef.steps.map((step) => ({
                   id: step.id ?? actKey,
                   type: step.type,
                   ref: { flowId: key, projectId: this.id },
                   config: this.getDefinition(step.config),
                   description: step.description,
+                  params: actDef.params,
                   targets: step.targets ?? actDef.targets ?? [],
                 })),
               };
@@ -232,6 +255,7 @@ export class Project implements IProject {
                 config: this.getDefinition(actDef.config),
                 title: actDef.title,
                 description: actDef.description,
+                tags: actDef.tags ?? [],
                 targets: actDef.targets ?? [],
               };
 

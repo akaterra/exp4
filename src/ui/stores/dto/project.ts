@@ -9,6 +9,23 @@ export interface IProjectFlowActionStep {
   targets: string[];
 }
 
+export interface IProjectFlowActionParam {
+  type: string;
+
+  title?: string;
+  description?: string;
+
+  constraints?: {
+    enum?: any[];
+    min?: number;
+    minLength?: number;
+    max?: number;
+    maxLength?: number;
+    optional?: boolean;
+  };
+  initialValue: any;
+}
+
 export interface IProjectFlowAction {
   id: string;
   type: string;
@@ -17,7 +34,9 @@ export interface IProjectFlowAction {
   
   title: string;
   description: string;
+
   steps: IProjectFlowActionStep[];
+  params?: Record<string, IProjectFlowActionParam>;
 }
 
 export interface IProjectFlow {
@@ -26,6 +45,7 @@ export interface IProjectFlow {
 
   title: string;
   desription: string;
+
   actions: Record<string, IProjectFlowAction>;
   targets: string[];
 }
@@ -38,6 +58,8 @@ export interface ProjectTargetStreamDto {
 
   title: string;
   description: string;
+
+  tags: string[];
   targets: string[];
 }
 
@@ -49,6 +71,7 @@ export interface IProjectTarget {
 
   title: string;
   description: string;
+
   streams: Record<string, ProjectTargetStreamDto>;
   versioning: string;
 }

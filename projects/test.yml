@@ -90,6 +90,13 @@ flows:
             title: "Create release branch"
             targets:
               - "dev"
+        params:
+          name:
+            title: "Release name"
+            type: "string"
+            constraints:
+              minLength: 1
+              maxLength: 20
       finishRelease:
         title: "Finish release"
         steps:

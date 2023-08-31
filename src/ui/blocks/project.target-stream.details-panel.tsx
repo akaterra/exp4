@@ -7,6 +7,7 @@ import { Button } from '../atoms/button';
 import { ModalStore } from '../stores/modal';
 import {Status} from '../enums/status';
 import {InfoCollapse} from '../atoms/info-collapse';
+import {StatusLine, TitledLine} from '../atoms/status-line';
 
 export const ProjectTargetStreamDetailsModalTitle = observer(({
   store,
@@ -47,18 +48,11 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     <div>
       {
         lastChange
-          ? <span>On <span className='bold'>{ projectTarget?.target?.title ?? projectTarget?.target?.id }</span></span>
-          : <span className='span warning'>Not on <span className='bold'>{ projectTarget?.target?.title ?? projectTarget?.target?.id }</span></span>
+          ? <span>In <span className='bold'>{ projectTarget?.target?.title ?? projectTarget?.target?.id }</span></span>
+          : <span className='span warning'>Not in <span className='bold'>{ projectTarget?.target?.title ?? projectTarget?.target?.id }</span></span>
       }
     </div>
-    <div>
-      Status:
-      {
-        isFailed
-          ? <span className='span failure bold'> Failed</span>
-          : <span className='span success bold'> Success</span>
-      }
-    </div>
+    <StatusLine isFailed={ isFailed } />
     {
       selectedStreamWithState?.streamState?.history?.action?.length
         ? <React.Fragment>
@@ -66,6 +60,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
               <SubSubTitle>Last action</SubSubTitle>
               <Label>{ lastAction?.description ?? 'No description' }</Label>
             </div>
+            <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
             {
               lastAction?.steps
                 ? <InfoCollapse isFailed={ isFailed } showTitle='Steps info'>
@@ -84,9 +79,12 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                   </InfoCollapse>
                 : null
             }
-            <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
-            <div>Author: <a className='link' href={ lastAction?.author?.link }>{ lastAction?.author?.name ?? 'Unknown' }</a></div>
-            { lastAction?.time ? <div>At: { new Date(lastAction?.time).toLocaleString() }</div> : null }
+            <TitledLine title='Author:'>
+              <a className='link' href={ lastAction?.author?.link }>{ lastAction?.author?.name ?? 'Unknown' }</a>
+            </TitledLine>
+            <TitledLine title='At:' isShown={ !!lastAction?.time }>
+              { lastAction?.time ? new Date(lastAction?.time).toLocaleString() : null }
+            </TitledLine>
           </React.Fragment>
         : null
     }
@@ -98,8 +96,12 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
               <Label>{ lastChange?.description ?? 'No description' }</Label>
             </div>
             <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
-            <div>Author: <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'Unknown' }</a></div>
-            { lastChange?.time ? <div>At: { new Date(lastChange?.time).toLocaleString() }</div> : null }
+            <TitledLine title='Author:'>
+              <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'Unknown' }</a>
+            </TitledLine>
+            <TitledLine title='At:' isShown={ !!lastChange?.time }>
+              { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
+            </TitledLine>
           </React.Fragment>
         : null
     }
