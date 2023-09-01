@@ -91,12 +91,13 @@ flows:
             targets:
               - "dev"
         params:
-          name:
+          releaseName:
             title: "Release name"
             type: "string"
             constraints:
               minLength: 1
               maxLength: 20
+              optional: true
       finishRelease:
         title: "Finish release"
         steps:

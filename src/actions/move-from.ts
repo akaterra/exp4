@@ -37,10 +37,10 @@ export class MoveFromActionService extends EntityService implements IActionServi
           if (sourceStream && targetStream) {
             await project.getEnvStreamByTargetStream(sourceStream)
               .streamMove(targetStream, sourceStream);
-          }
 
-          sourceStream.isDirty = true;
-          targetStream.isDirty = true;
+            sourceStream.isDirty = true;
+            targetStream.isDirty = true;
+          }
         }
       }
     }

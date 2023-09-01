@@ -13,13 +13,17 @@ export class VersionPatchActionService extends EntityService implements IActionS
     return 'version:patch';
   }
 
-  async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
+  async run(
+    action: IProjectFlowActionDef,
+    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    params?: Record<string, any>,
+  ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
 
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
       const target = project.getTargetByTargetId(tId);
 
-      await project.getEnvVersioningByTarget(target).patch(target);
+      await project.getEnvVersioningByTarget(target).patch(target, params);
 
       target.isDirty = true;
     }

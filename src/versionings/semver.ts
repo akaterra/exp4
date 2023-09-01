@@ -55,13 +55,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return sourceVersion;
   }
 
-  async patch(target: IProjectTargetDef): Promise<string> {
+  async patch(target: IProjectTargetDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrent(target);
 
     if (version) {
       version = semver.inc(version, 'patch');
     } else {
       version = '0.1.0';
+    }
+
+    if (params?.releaseName) {
+      version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
     await this.getStorage(target).varSet(
@@ -73,13 +77,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
-  async release(target: IProjectTargetDef): Promise<string> {
+  async release(target: IProjectTargetDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrent(target);
 
     if (version) {
       version = semver.inc(version, 'minor');
     } else {
       version = '0.1.0';
+    }
+
+    if (params?.releaseName) {
+      version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
     await this.getStorage(target).varSet(
@@ -124,13 +132,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return sourceVersion;
   }
 
-  async patchStream(stream: IProjectTargetStreamDef): Promise<string> {
+  async patchStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrentStream(stream);
 
     if (version) {
       version = semver.inc(version, 'patch');
     } else {
       version = '0.1.0';
+    }
+
+    if (params?.releaseName) {
+      version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
     await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId)).varSetStream(
@@ -142,13 +154,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
-  async releaseStream(stream: IProjectTargetStreamDef): Promise<string> {
+  async releaseStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrentStream(stream);
 
     if (version) {
       version = semver.inc(version, 'minor');
     } else {
       version = '0.1.0';
+    }
+
+    if (params?.releaseName) {
+      version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
     await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId)).varSetStream(

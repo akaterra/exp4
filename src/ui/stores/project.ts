@@ -129,11 +129,11 @@ export class ProjectFlowActionParamsStore extends BaseStore {
   @observable
   projectFlowAction: IProjectFlowAction;
   @observable
-  projectFlowActionParams: Record<string, any> = {};
-  @observable
   isValid: boolean = true;
   @observable
   paramsErrors: Record<string, string | null> = {};
+  @observable
+  paramsValues: Record<string, any> = {};
 
   constructor(public projectsStore: ProjectsStore, projectFlowAction: IProjectFlowAction) {
     super();
@@ -143,13 +143,13 @@ export class ProjectFlowActionParamsStore extends BaseStore {
 
     if (projectFlowAction.params) {
       for (const [ key, val ] of Object.entries(projectFlowAction.params)) {
-        this.projectFlowActionParams[key] = val.initialValue ?? null;
+        this.paramsValues[key] = val.initialValue;
       }
     }
   }
 
   setValue(key, val) {
-    this.projectFlowActionParams[key] = val;
+    this.paramsValues[key] = val;
   }
 
   validate() {
@@ -157,11 +157,19 @@ export class ProjectFlowActionParamsStore extends BaseStore {
     let isValid = true;
 
     if (params) {
-      for (const [ key, val ] of Object.entries(this.projectFlowActionParams)) {
+      for (const [ key, val ] of Object.entries(this.paramsValues)) {
         const constraints = params[key].constraints;
 
         if (constraints) {
           const errors: string[] = [];
+
+          if (typeof constraints.optional === 'boolean' && !constraints.optional && (val === '' || val === undefined)) {
+            errors.push('Required');
+          }
+
+          if (constraints.optional && (val === '' || val === undefined)) {
+            continue;
+          }
 
           if (Array.isArray(constraints.enum) && !constraints.enum.includes(val)) {
             errors.push(`Only ${constraints.enum.map((e) => `"${e}"`).join(', ')} values allowed`);
@@ -181,10 +189,6 @@ export class ProjectFlowActionParamsStore extends BaseStore {
 
           if (typeof constraints.minLength === 'number' && (val?.length ?? 0) < constraints.minLength) {
             errors.push(`Min ${constraints.minLength} symbols required`);
-          }
-
-          if (typeof constraints.optional === 'boolean' && !constraints.optional && (val === '' || val === undefined)) {
-            errors.push('Required');
           }
 
           if (errors.length) {
@@ -303,7 +307,8 @@ export class ProjectStore extends BaseStore {
           actionId,
           {
             [ targetId ]: selectedStreamIds as [ string, ...string[] ],
-          }
+          },
+          projectFlowActionParamsStore.paramsValues,
         );
         yield this.fetchState();
 

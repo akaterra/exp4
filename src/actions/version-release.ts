@@ -13,13 +13,17 @@ export class VersionReleaseActionService extends EntityService implements IActio
     return 'version:release';
   }
 
-  async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
+  async run(
+    action: IProjectFlowActionDef,
+    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    params?: Record<string, any>,
+  ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
 
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
       const target = project.getTargetByTargetId(tId);
 
-      await project.getEnvVersioningByTarget(target).release(target);
+      await project.getEnvVersioningByTarget(target).release(target, params);
 
       target.isDirty = true;
     }

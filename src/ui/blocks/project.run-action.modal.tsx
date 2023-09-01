@@ -3,6 +3,7 @@ import { IProjectFlowAction, IProjectTarget, IProjectTargetStream } from '../sto
 import { ModalStore } from '../stores/modal';
 import {Input, RadioGroup} from '../atoms/input';
 import {ProjectFlowActionParamsStore} from '../stores/project';
+import {Select} from '../atoms/select';
 
 export const ProjectRunActionModalTitle = ({
   store,
@@ -37,30 +38,39 @@ export const ProjectRunActionModalContent = ({
   projectTarget?: IProjectTarget;
   projectTargetStreams?: IProjectTargetStream[];
 }) => {
-  let ParamsComponents: React.ReactElement[] | null = null;
+  let ParamsElements: React.ReactElement[] | null = null;
 
   if (projectFlowActionParamsStore?.projectFlowAction?.params) {
-    ParamsComponents = [];
+    ParamsElements = [];
 
     for (const [ key, param ] of Object.entries(projectFlowActionParamsStore?.projectFlowAction?.params)) {
       switch (param.type) {
         case 'enum':
-          if (param.constraints?.enum) {
-            for (const enumValue of param.constraints.enum) {
-              ParamsComponents.push(<div><RadioGroup x={ null } name={ key } onBlur={ () => projectFlowActionParamsStore.validate() }>{ enumValue }</RadioGroup></div>);
-            }
-          }
+          ParamsElements.push(<div key={ key }>
+            <Select
+              items={ param.constraints?.enum ?? [] } currentValue={ projectFlowActionParamsStore.paramsValues[key] ?? '' }
+              error={ projectFlowActionParamsStore.paramsErrors[key] }
+              key={ key }
+              label={ param.title ?? key }
+              x={ null }
+              onBlur={ (val) => {
+                projectFlowActionParamsStore.setValue(key, val);
+                projectFlowActionParamsStore.validate();
+              } }
+              onChange={ _ => _ }
+            />
+          </div>);
 
           break;
 
         case 'string':
-          ParamsComponents.push(<div key={ key }>
+          ParamsElements.push(<div key={ key }>
             <Input
-              currentValue={ projectFlowActionParamsStore.projectFlowActionParams[key] ?? '' }
+              currentValue={ projectFlowActionParamsStore.paramsValues[key] ?? '' }
               error={ projectFlowActionParamsStore.paramsErrors[key] }
               key={ key }
               label={ param.title ?? key }
-              x={ null}
+              x={ null }
               onBlur={ (val) => {
                 projectFlowActionParamsStore.setValue(key, val);
                 projectFlowActionParamsStore.validate();
@@ -86,7 +96,7 @@ export const ProjectRunActionModalContent = ({
         on <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
       </div>
       {
-        ParamsComponents
+        ParamsElements
       }
     </div>
   </div>;

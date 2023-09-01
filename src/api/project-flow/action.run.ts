@@ -9,6 +9,7 @@ export async function projectFlowActionRun(req, res) {
     req.params.projectId,
     req.params.flowId,
     req.params.actionId?.split(','),
-    req.body,
+    req.body?.targetsStreams,
+    req.body?.params,
   ));
 }

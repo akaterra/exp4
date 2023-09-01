@@ -33,12 +33,13 @@ export class ProjectsService extends EntitiesService<Project> {
     flowId: string,
     actionId: string | string[],
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    params?: Record<string, any>,
   ) {
     const flow = this.get(projectId).getFlow(flowId);
 
     for (const [ , aId ] of iterArr(actionId)) {
       for (const action of flow.actions[aId].steps) {
-        await this.actionsService.get(action.type).run(action, targetsStreams);
+        await this.actionsService.get(action.type).run(action, targetsStreams, params);
       }
     }
 

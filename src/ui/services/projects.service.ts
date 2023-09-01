@@ -20,7 +20,11 @@ export class ProjectsService {
     flowId: IProjectFlow['id'],
     actionId: IProjectFlowAction['id'],
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    params?: Record<string, any>,
   ) {
-    return this.rest.post(`projects/${projectId}/flow/${flowId}/action/${actionId}/run`, targetsStreams);
+    return this.rest.post(`projects/${projectId}/flow/${flowId}/action/${actionId}/run`, {
+      targetsStreams,
+      params,
+    });
   }
 }
