@@ -1,55 +1,74 @@
 import * as React from 'react';
-import { IProjectFlowAction, IProjectTarget, ProjectTargetStreamDto } from '../stores/dto/project';
+import { IProjectFlowAction, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
 import { ModalStore } from '../stores/modal';
-import {Input, Radio} from '../atoms/input';
+import {Input, RadioGroup} from '../atoms/input';
+import {ProjectFlowActionParamsStore} from '../stores/project';
 
 export const ProjectRunActionModalTitle = ({
   store,
+  projectFlowAction,
+  projectFlowActionParamsStore,
   projectTarget,
-  projectTargetActions,
   projectTargetStreams,
 }: {
   store: ModalStore;
+  projectFlowAction?: IProjectFlowAction;
+  projectFlowActionParamsStore?: ProjectFlowActionParamsStore;
   projectTarget?: IProjectTarget;
-  projectTargetActions?: IProjectFlowAction;
-  projectTargetStreams?: ProjectTargetStreamDto[];
+  projectTargetStreams?: IProjectTargetStream[];
 }) => {
   return <React.Fragment>
-    { projectTargetActions?.title }
+    { projectFlowAction?.title }
     &nbsp;
-    <span className='font-sml sup'>{ projectTargetActions?.description }</span>
+    <span className='font-sml sup'>{ projectFlowAction?.description }</span>
   </React.Fragment>;
 };
 
 export const ProjectRunActionModalContent = ({
   store,
+  projectFlowAction,
+  projectFlowActionParamsStore,
   projectTarget,
-  projectTargetActions,
   projectTargetStreams,
 }: {
   store: ModalStore;
+  projectFlowAction?: IProjectFlowAction;
+  projectFlowActionParamsStore?: ProjectFlowActionParamsStore;
   projectTarget?: IProjectTarget;
-  projectTargetActions?: IProjectFlowAction;
-  projectTargetStreams?: ProjectTargetStreamDto[];
+  projectTargetStreams?: IProjectTargetStream[];
 }) => {
   let ParamsComponents: React.ReactElement[] | null = null;
 
-  if (projectTargetActions?.params) {
+  if (projectFlowActionParamsStore?.projectFlowAction?.params) {
     ParamsComponents = [];
 
-    for (const [ key, param ] of Object.entries(projectTargetActions.params)) {
+    for (const [ key, param ] of Object.entries(projectFlowActionParamsStore?.projectFlowAction?.params)) {
       switch (param.type) {
         case 'enum':
           if (param.constraints?.enum) {
             for (const enumValue of param.constraints.enum) {
-              ParamsComponents.push(<div><Radio x={ null } name={ key }>{ enumValue }</Radio></div>);
+              ParamsComponents.push(<div><RadioGroup x={ null } name={ key } onBlur={ () => projectFlowActionParamsStore.validate() }>{ enumValue }</RadioGroup></div>);
             }
           }
 
           break;
 
         case 'string':
-          ParamsComponents.push(<div><Input label={ param.title ?? key } x={ null} /></div>);
+          ParamsComponents.push(<div key={ key }>
+            <Input
+              currentValue={ projectFlowActionParamsStore.projectFlowActionParams[key] ?? '' }
+              error={ projectFlowActionParamsStore.paramsErrors[key] }
+              key={ key }
+              label={ param.title ?? key }
+              x={ null}
+              onBlur={ (val) => {
+                projectFlowActionParamsStore.setValue(key, val);
+                projectFlowActionParamsStore.validate();
+              } }
+              onChange={ _ => _ }
+            />
+          </div>);
+
           break;
       }
     }
@@ -58,7 +77,7 @@ export const ProjectRunActionModalContent = ({
   return <div className='row'>
     <div className='c18 children-gap'>
       <div>
-        Are you sure to run action <span className='bold'>"{ projectTargetActions?.title }"</span> for
+        Are you sure to run action <span className='bold'>"{ projectFlowAction?.title }"</span> for
         <ul>
           {
             projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)

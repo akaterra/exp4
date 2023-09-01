@@ -1,5 +1,5 @@
 import { makeObservable, observable, computed, action, flow, reaction } from 'mobx';
-import { IProject, IProjectFlow, IProjectFlowAction, ProjectTargetStreamDto } from "./dto/project";
+import { IProject, IProjectFlow, IProjectFlowAction, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
 import { BaseStore } from './base-store';
@@ -8,10 +8,13 @@ import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blo
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
 import { processing } from './utils';
+import {error} from 'console';
 
 export class ProjectTargetStore extends BaseStore {
-  @observable projectTargetState: IProjectTargetState;
-  @observable selectedProjectTargetStreamIds: Record<string, boolean> = {};
+  @observable
+  projectTargetState: IProjectTargetState;
+  @observable
+  selectedProjectTargetStreamIds: Record<string, boolean> = {};
 
   @computed
   get actions(): IProjectFlowAction[] {
@@ -31,13 +34,23 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @computed
-  get streamsWithStates(): { stream: ProjectTargetStreamDto, streamState: IProjectTargetStreamState, isSelected: boolean }[] {
+  get streamsWithStates(): {
+    stream: IProjectTargetStream,
+    streamState: IProjectTargetStreamState,
+    isSelected: boolean,
+  }[] {
     if (this.target) {
-      const streamsWithStates: { stream: ProjectTargetStreamDto, streamState: IProjectTargetStreamState, isSelected: boolean }[] = [];
+      const streamsWithStates: {
+        stream: IProjectTargetStream,
+        streamState: IProjectTargetStreamState,
+        isSelected: boolean,
+      }[] = [];
 
       for (const stream of Object.values(this.target.streams)) {
         streamsWithStates.push({
-          stream, streamState: this.projectTargetState?.streams?.[stream.id], isSelected: !!this.selectedProjectTargetStreamIds[stream.id],
+          stream,
+          streamState: this.projectTargetState?.streams?.[stream.id],
+          isSelected: !!this.selectedProjectTargetStreamIds[stream.id],
         });
       }
 
@@ -95,9 +108,9 @@ export class ProjectTargetStore extends BaseStore {
     }
   }
 
-  selectAction(streamId: string | null, actionId: string | null) {
-    this.projectStore.selectTargetStreamAction(this.target?.id, streamId, actionId);
-  }
+  // selectAction(streamId: string | null, actionId: string | null) {
+  //   this.projectStore.selectTargetStreamAction(this.target?.id, streamId, actionId);
+  // }
 
   selectStreamInfo(streamId: string | null) {
     this.projectStore.selectTargetStream(this.target?.id, streamId);
@@ -112,15 +125,102 @@ export class ProjectTargetStore extends BaseStore {
   }
 }
 
+export class ProjectFlowActionParamsStore extends BaseStore {
+  @observable
+  projectFlowAction: IProjectFlowAction;
+  @observable
+  projectFlowActionParams: Record<string, any> = {};
+  @observable
+  isValid: boolean = true;
+  @observable
+  paramsErrors: Record<string, string | null> = {};
+
+  constructor(public projectsStore: ProjectsStore, projectFlowAction: IProjectFlowAction) {
+    super();
+    makeObservable(this);
+
+    this.projectFlowAction = projectFlowAction;
+
+    if (projectFlowAction.params) {
+      for (const [ key, val ] of Object.entries(projectFlowAction.params)) {
+        this.projectFlowActionParams[key] = val.initialValue ?? null;
+      }
+    }
+  }
+
+  setValue(key, val) {
+    this.projectFlowActionParams[key] = val;
+  }
+
+  validate() {
+    const params = this.projectFlowAction.params;
+    let isValid = true;
+
+    if (params) {
+      for (const [ key, val ] of Object.entries(this.projectFlowActionParams)) {
+        const constraints = params[key].constraints;
+
+        if (constraints) {
+          const errors: string[] = [];
+
+          if (Array.isArray(constraints.enum) && !constraints.enum.includes(val)) {
+            errors.push(`Only ${constraints.enum.map((e) => `"${e}"`).join(', ')} values allowed`);
+          }
+
+          if (typeof constraints.max === 'number' && parseInt(val) > constraints.max) {
+            errors.push(`${constraints.max} is a max value`);
+          }
+
+          if (typeof constraints.maxLength === 'number' && (val?.length ?? 0) > constraints.maxLength) {
+            errors.push(`Max ${constraints.maxLength} symbols are allowed`);
+          }
+
+          if (typeof constraints.min === 'number' && parseInt(val) < constraints.min) {
+            errors.push(`${constraints.min} is a min value`);
+          }
+
+          if (typeof constraints.minLength === 'number' && (val?.length ?? 0) < constraints.minLength) {
+            errors.push(`Min ${constraints.minLength} symbols required`);
+          }
+
+          if (typeof constraints.optional === 'boolean' && !constraints.optional && (val === '' || val === undefined)) {
+            errors.push('Required');
+          }
+
+          if (errors.length) {
+            this.paramsErrors[key] = errors.join(', ');
+          } else {
+            if (this.paramsErrors[key]) {
+              this.paramsErrors[key] = null;
+            }
+          }
+
+          if (errors.length) {
+            isValid = false;
+          }
+        }
+      }
+
+      if (this.isValid !== isValid) {
+        this.isValid = isValid;
+
+        modalStore.updateButtonState('ok', { disabled: !isValid });
+      }
+    }
+
+    return isValid;
+  }
+}
+
 export class ProjectStore extends BaseStore {
   @observable
   project: IProject;
   @observable
   projectTargetsStores: Record<string, ProjectTargetStore> = {};
   @observable
-  selectedAction: { stream: ProjectTargetStreamDto | null, action: IProjectFlowAction, targetStore: ProjectTargetStore } | null;
+  selectedAction: { stream: IProjectTargetStream | null, action: IProjectFlowAction, targetStore: ProjectTargetStore } | null;
   @observable
-  selectedStreamWithState: { stream: ProjectTargetStreamDto, streamState: IProjectTargetStreamState, targetStore: ProjectTargetStore } | null;
+  selectedStreamWithState: { stream: IProjectTargetStream, streamState: IProjectTargetStreamState, targetStore: ProjectTargetStore } | null;
 
   constructor(public projectsStore: ProjectsStore, project: IProject) {
     super();
@@ -177,15 +277,18 @@ export class ProjectStore extends BaseStore {
       .values(this.project?.flows)
       .find((flow) => flow.targets.includes(targetId));
 
+    const projectFlowActionParamsStore = new ProjectFlowActionParamsStore(this.projectsStore, projectFlow?.actions?.[actionId]);
     const action = yield modalStore.show({
       content: ProjectRunActionModalContent,
       props: {
+        projectFlowAction: projectFlow?.actions?.[actionId],
+        projectFlowActionParamsStore,
         projectTarget: this.getTargetByTargetId(targetId),
-        projectTargetActions: projectFlow?.actions?.[actionId],
         projectTargetStreams: Object
           .values(this.getTargetByTargetId(targetId).streams)
           .filter((stream) => selectedStreamIds.includes(stream.id)),
       },
+      onBeforeSelect: (action) => action === 'ok' ? projectFlowActionParamsStore.validate() : true,
       title: ProjectRunActionModalTitle,
       withClose: true,
     });
@@ -223,18 +326,18 @@ export class ProjectStore extends BaseStore {
     }
   }
 
-  selectTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string | null) {
-    if (targetId && actionId) {
-      const target = this.getTargetByTargetId(targetId);
-      const targetStore = this.getTargetStoreByTargetId(targetId);
+  // selectTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string | null) {
+  //   if (targetId && actionId) {
+  //     const target = this.getTargetByTargetId(targetId);
+  //     const targetStore = this.getTargetStoreByTargetId(targetId);
 
-      this.selectedAction = {
-        stream: streamId ? target?.streams?.[streamId] : null,
-        action: Object.values(this.project?.flows).find((flow) => flow.targets.includes(targetId))?.actions?.[actionId]!,
-        targetStore,
-      };
-    } else {
-      this.selectedAction = null;
-    }
-  }
+  //     this.selectedAction = {
+  //       stream: streamId ? target?.streams?.[streamId] : null,
+  //       action: Object.values(this.project?.flows).find((flow) => flow.targets.includes(targetId))?.actions?.[actionId]!,
+  //       targetStore,
+  //     };
+  //   } else {
+  //     this.selectedAction = null;
+  //   }
+  // }
 }

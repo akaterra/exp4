@@ -50,7 +50,7 @@ export interface IProjectFlow {
   targets: string[];
 }
 
-export interface ProjectTargetStreamDto {
+export interface IProjectTargetStream {
   id: string;
   type: string;
 
@@ -72,7 +72,7 @@ export interface IProjectTarget {
   title: string;
   description: string;
 
-  streams: Record<string, ProjectTargetStreamDto>;
+  streams: Record<string, IProjectTargetStream>;
   versioning: string;
 }
 

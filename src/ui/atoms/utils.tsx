@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Fragment } from 'react';
 import { C } from "./grid";
 import { Label } from "./label";
@@ -7,7 +7,14 @@ export function maybeClassName(base, extended) {
     return extended ? `${base} ${extended}` : base;
 }
 
-export function maybeLabeledControl(Element, x, label?) {
+export function maybeLabeledControl(Element, x, label?, error?) {
+    if (error) {
+        Element = <React.Fragment>
+            { Element }
+            <div className='label failure flex flex-right'>{ error }</div>
+        </React.Fragment>
+    }
+
     if (!label) {
         if (x !== null) {
             return <C x={ x }>{ Element }</C>;

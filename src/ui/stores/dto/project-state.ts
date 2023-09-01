@@ -1,5 +1,5 @@
 import { Status } from '../../enums/status';
-import { IProject, IProjectTarget, ProjectTargetStreamDto } from './project';
+import { IProject, IProjectTarget, IProjectTargetStream } from './project';
 
 export interface IStreamHistoryStep {
   id: string;
@@ -11,10 +11,10 @@ export interface IStreamHistoryStep {
 }
 
 export interface IProjectTargetStreamState {
-  id: ProjectTargetStreamDto['id'];
-  type: ProjectTargetStreamDto['id'];
+  id: IProjectTargetStream['id'];
+  type: IProjectTargetStream['id'];
 
-  ref: ProjectTargetStreamDto['ref'];
+  ref: IProjectTargetStream['ref'];
 
   history: {
     action: {

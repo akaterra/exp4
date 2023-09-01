@@ -29,22 +29,22 @@ export class PromiseContainer {
   }
 }
 
-export function Autowired(name?: any | (() => any)) {
+export function Autowired(ref?: any | (() => any)) {
   return function(target: Object, propertyName: string) {
     Reflect.defineProperty(
       target,
       propertyName,
       {
         get: function() {
-          if (typeof name === 'function') {
-            name = name();
+          if (typeof ref === 'function') {
+            ref = ref();
           }
       
-          const ref = Container.get(name ?? Reflect.getMetadata('design:type', target, propertyName));
+          const instance = Container.get(ref ?? Reflect.getMetadata('design:type', target, propertyName));
 
-          Reflect.defineProperty(this, propertyName, { value: ref });
+          Reflect.defineProperty(this, propertyName, { value: instance });
 
-          return ref;
+          return instance;
         }
       }
     )

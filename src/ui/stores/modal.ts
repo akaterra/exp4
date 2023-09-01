@@ -4,28 +4,33 @@ import { computed, makeObservable, observable } from 'mobx';
 export const CLOSE = Symbol('close');
 
 export class ModalStore {
-  @observable initialOpts: {
-    buttons?: {
-      action: string;
-      onSelect?: (action?: string) => void;
-      title: string;
-      type: 'active' | null;
-    }[];
-    content?: React.Component | React.FunctionComponent | string | undefined;
-    props?: Record<string, any>;
-    onClose?: () => void | undefined;
-    onSelect?: ((action?: string) => void) | undefined;
-    title: React.Component | React.FunctionComponent | string;
-    withClose?: boolean;
-  } | undefined;
-  @observable selectedAction: string | undefined;
+  @observable
+  optsState?: ModalStore['opts'];
+  @observable
+  selectedAction?: string;
 
   @computed
   get isShow(): boolean {
-    return !!this.initialOpts;
+    return !!this.optsState;
   }
 
-  private opts: ModalStore['initialOpts'];
+  private opts: {
+    buttons?: Record<string, {
+      action?: string;
+      disabled?: boolean;
+      onBeforeSelect?: ((action?: string) => boolean);
+      onSelect?: (action?: string) => void;
+      title: string;
+      type?: 'active' | null;
+    }>;
+    content?: React.Component | React.FunctionComponent | string;
+    props?: Record<string, any>;
+    onBeforeSelect?: ((action?: string) => boolean);
+    onClose?: () => void;
+    onSelect?: ((action?: string) => void);
+    title: React.Component | React.FunctionComponent | string;
+    withClose?: boolean;
+  };
   private onSelectPromiseResolve: ((action?: string) => void) | undefined;
 
   constructor() {
@@ -41,9 +46,25 @@ export class ModalStore {
   }
 
   select(action?: typeof CLOSE | string) {
-    this.initialOpts = undefined;
     const isCloseAction = action === CLOSE;
-    this.selectedAction = isCloseAction ? null : action;
+    this.selectedAction = isCloseAction ? undefined : action;
+    const button = action && this?.opts?.buttons && this.selectedAction
+      ? Object.values(this.opts.buttons).find((button) => button.action === this.selectedAction)
+      : null;
+
+    if (this.opts?.onBeforeSelect && !this.opts?.onBeforeSelect(this.selectedAction)) {
+      return;
+    }
+
+    if (button) {
+      if (button.onBeforeSelect) {
+        if (!button.onBeforeSelect(this.selectedAction)) {
+          return;
+        }
+      }
+    }
+
+    this.optsState = undefined;
 
     if (this.onSelectPromiseResolve) {
       this.onSelectPromiseResolve(this.selectedAction);
@@ -57,10 +78,8 @@ export class ModalStore {
       return;
     }
 
-    if (action && this?.opts?.buttons) {
-      const button = this.opts.buttons.find((button) => button.action === this.selectedAction);
-
-      if (button?.onSelect) {
+    if (button) {
+      if (button.onSelect) {
         button.onSelect(this.selectedAction);
 
         return;
@@ -72,21 +91,41 @@ export class ModalStore {
     }
   }
 
-  show(opts: ModalStore['initialOpts']) {
+  show(opts: ModalStore['opts']) {
+    if (!opts.buttons) {
+      opts.buttons = {
+        cancel: { action: 'cancel', title: 'Cancel' },
+        ok: { action: 'ok', title: 'OK', type: 'active' },
+      };
+    }
+
     this.opts = opts;
-    this.initialOpts = {
+    this.optsState = {
       ...opts,
       props: { ...opts.props, storage: this },
       onClose: opts.onClose || opts.withClose ? this.close.bind(this) : null,
       onSelect: this.select.bind(this),
     };
 
-    if (this.initialOpts?.buttons) {
-      this.initialOpts.buttons = this.initialOpts.buttons.map((button) => ({ ...button, onSelect: this.select.bind(this) }));
+    if (this.optsState?.buttons) {
+      this.optsState.buttons = Object
+        .entries(this.optsState.buttons)
+        .reduce((acc, [ key, button ]) => {
+          acc[key] = { ...button, onSelect: this.select.bind(this) };
+
+          return acc;
+        }, {});
     }
 
     return new Promise<string | undefined>((resolve) => {
       this.onSelectPromiseResolve = resolve;
     });
+  }
+
+  updateButtonState(id, opts: { disabled?: boolean }) {
+    if (this.optsState?.buttons?.[id]) {
+      this.optsState.buttons[id] = { ...this.optsState.buttons[id], ...opts };
+      this.optsState = { ...this.optsState };
+    }
   }
 }

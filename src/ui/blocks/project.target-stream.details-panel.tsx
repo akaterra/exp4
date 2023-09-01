@@ -80,7 +80,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                 : null
             }
             <TitledLine title='Author:'>
-              <a className='link' href={ lastAction?.author?.link }>{ lastAction?.author?.name ?? 'Unknown' }</a>
+              <a className='link' href={ lastAction?.author?.link }>{ lastAction?.author?.name ?? 'unknown' }</a>
             </TitledLine>
             <TitledLine title='At:' isShown={ !!lastAction?.time }>
               { lastAction?.time ? new Date(lastAction?.time).toLocaleString() : null }
@@ -97,7 +97,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             </div>
             <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
             <TitledLine title='Author:'>
-              <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'Unknown' }</a>
+              <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'unknown' }</a>
             </TitledLine>
             <TitledLine title='At:' isShown={ !!lastChange?.time }>
               { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
