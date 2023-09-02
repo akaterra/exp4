@@ -22,9 +22,9 @@ export const Alerts = observer(({ store }: { store: AlertsStore }) => {
           store.alerts.map((alert, i) => {
             return <div className='f-4 f-8-m- f14-s-' key={ i }>
               <div className='alert failure unbound shadow shadow-sml flex flex-hor flex-middle'>
-                <div className='row'>
+                <div className='row flex-hor flex-start'>
                   <div className='ccc'>{ alert.message }</div>
-                  <Button className='button-sml failure transparent w-auto' x='ccc' onClick={ () => store.close(alert) }>✖</Button>
+                  <Button className='button-sml failure no-margin' x='ccc w-auto' onClick={ () => store.close(alert) }>✖</Button>
                 </div>
               </div>
             </div>;

@@ -10,7 +10,7 @@ export class RootStore {
   @observable
   authMethods: Record<string, IAuthStrategyMethod> = {};
   @observable
-  isAuthorized: boolean = false;
+  isAuthorized: boolean | null = null;
   @observable
   user: IUser | null = null;
 

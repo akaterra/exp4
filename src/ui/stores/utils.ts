@@ -43,7 +43,7 @@ export function processingRequest(target, prop, descriptor) {
     try {
       return await fn.call(this, ...args);
     } catch (e) {
-      alertsStore.push(e?.message ?? e);
+      // alertsStore.push(e?.message ?? e);
 
       throw e;
     } finally {
@@ -57,29 +57,3 @@ export function processingRequest(target, prop, descriptor) {
     }
   }
 }
-
-// export function flowToPromise(generator) {
-//   return new Promise((resolve, reject) => {
-//     try {
-//       const generatorState = fn.call(this, ...args);
-//       let val;
-
-//       while (true) {
-//         const next = generatorState.next(await val);
-//         val = next.value;
-
-//         yield val;
-
-//         if (next.done) {
-//           break;
-//         }
-//       }
-//     } catch (e) {
-//       alertsStore.push(e?.message ?? e);
-
-//       throw e;
-//     } finally {
-//       this.isProcessing = false;
-//     }
-//   });
-// }

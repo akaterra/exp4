@@ -6,7 +6,7 @@ export const DetailsPanel = ({ children, title = undefined, titleContent = undef
   return <div className='modal'>
     <div className='flex h-max'>
       <div className='c12 c-8-m- c-4-s- clear'></div>
-      <div className='c-6 c10-m- c14-s- back-light max-height shadow shadow-high span default left-padded right-padded triple'>
+      <div className='c-6 c10-m- c14-s- back-light max-height shadow shadow-high span default pad-hor triple'>
         <div className='paragraph paragraph-lrg'>
           <div className='row'>
             <div className='c18'>

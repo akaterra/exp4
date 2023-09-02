@@ -39,7 +39,11 @@ export const Layout = observer(({ root }: { root: RootStore }) => {
     </div>
     <div className='c15 -s-'>
       <div className='paragraph paragraph-lrg'>
-        <Outlet />
+        {
+          root.isAuthorized
+            ? <Outlet />
+            : null
+        }
       </div>
     </div>
   </Row.M>;

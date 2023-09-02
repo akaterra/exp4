@@ -8,41 +8,50 @@ import { ModalStore } from '../stores/modal';
 import {Status} from '../enums/status';
 import {InfoCollapse} from '../atoms/info-collapse';
 import {StatusLine, TitledLine} from '../atoms/status-line';
+import { IProjectTargetStreamState } from '../stores/dto/project-state';
+import { IProjectTargetStream } from '../stores/dto/project';
 
 export const ProjectTargetStreamDetailsModalTitle = observer(({
   store,
   projectTarget,
+  projectTargetStream,
+  projectTargetStreamState,
 }: {
   store: ModalStore;
   projectTarget?: ProjectTargetStore;
+  projectTargetStream?: IProjectTargetStream;
+  projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
-  const selectedStreamWithState = projectTarget?.projectStore?.selectedStreamWithState;
-  const lastAction = selectedStreamWithState?.streamState?.history?.action?.[0];
-  const lastChange = selectedStreamWithState?.streamState?.history?.change?.[0];
+  const lastAction = projectTargetStreamState?.history?.action?.[0];
+  const lastChange = projectTargetStreamState?.history?.change?.[0];
 
   return <React.Fragment>
-    { selectedStreamWithState?.stream?.title ?? selectedStreamWithState?.stream?.id }
+    { projectTargetStream?.title ?? projectTargetStream?.id }
     &nbsp;
-    <span className='font-sml sup'>{ selectedStreamWithState?.streamState?.version }</span>
+    <span className='font-sml sup'>{ projectTargetStreamState?.version }</span>
   </React.Fragment>
 });
 
 export const ProjectTargetStreamDetailsModalContent = observer(({
   store,
   projectTarget,
+  projectTargetStream,
+  projectTargetStreamState,
 }: {
   store: ModalStore;
   projectTarget?: ProjectTargetStore;
+  projectTargetStream?: IProjectTargetStream;
+  projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
-  const selectedStreamWithState = projectTarget?.projectStore?.selectedStreamWithState;
-  const lastAction = selectedStreamWithState?.streamState?.history?.action?.[0];
-  const lastChange = selectedStreamWithState?.streamState?.history?.change?.[0];
+  const lastAction = projectTargetStreamState?.history?.action?.[0];
+  const lastChange = projectTargetStreamState?.history?.change?.[0];
+
   const isFailed = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED;
 
   return <React.Fragment>
     {
-      selectedStreamWithState?.streamState?.link
-        ? <a className='link' href={ selectedStreamWithState?.streamState?.link } target='__blank'>{ selectedStreamWithState?.streamState?.type }</a>
+      projectTargetStreamState?.link
+        ? <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a>
         : null
     }
     <div>
@@ -54,7 +63,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     </div>
     <StatusLine isFailed={ isFailed } />
     {
-      selectedStreamWithState?.streamState?.history?.action?.length
+      lastAction
         ? <React.Fragment>
             <div>
               <SubSubTitle>Last action</SubSubTitle>
@@ -89,7 +98,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
         : null
     }
     {
-      selectedStreamWithState?.streamState?.history?.change?.length
+      lastChange
         ? <React.Fragment>
             <div>
               <SubSubTitle>Last change</SubSubTitle>
@@ -112,7 +121,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <Button
               className='button-sml success auto'
               x={ null }
-              onClick={ () => projectTarget.applyRunAction(selectedStreamWithState?.stream?.id!, action.id) }
+              onClick={ () => projectTarget.applyRunAction(projectTargetStreamState?.id!, action.id) }
             >{ action.title ?? action.id }</Button>
           </div>;
         })

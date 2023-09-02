@@ -6,7 +6,12 @@ import { observer } from 'mobx-react-lite';
 import { RootStore, rootStore } from '../stores/root';
 
 export const Navigation = observer(({ projects, root }: { projects: ProjectsStore, root: RootStore }) => {
-    if (!root.isAuthorized) {
+    // bootstrap, app loading
+    if (root.isAuthorized === null) {
+        return null;
+    }
+
+    if (root.isAuthorized === false) {
         return <div className='block no-scroll children-gap'>
             <div>
                 <SubTitle><Link activeClassName="link active" href={ root.authMethods?.github?.actions?.redirect } className='link'>

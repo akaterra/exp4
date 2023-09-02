@@ -8,7 +8,6 @@ import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blo
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
 import { processing } from './utils';
-import {error} from 'console';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -106,14 +105,6 @@ export class ProjectTargetStore extends BaseStore {
     } else {
       this.selectedProjectTargetStreamIds[streamId] = true;
     }
-  }
-
-  // selectAction(streamId: string | null, actionId: string | null) {
-  //   this.projectStore.selectTargetStreamAction(this.target?.id, streamId, actionId);
-  // }
-
-  selectStreamInfo(streamId: string | null) {
-    this.projectStore.selectTargetStream(this.target?.id, streamId);
   }
 
   update(state?: Partial<IProjectTargetState>) {
@@ -257,15 +248,15 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyTargetStreamDetails(targetId: string | null, streamId: string | null) {
-    modalStore.hide();
-
-    this.selectTargetStream(targetId, streamId);
-
+  *applyTargetStreamDetails(targetId: string, streamId: string) {
+    const target = this.getTargetByTargetId(targetId);
+    const targetStore = this.getTargetStoreByTargetId(targetId);
     const action = yield detailsPanelStore.show({
       content: ProjectTargetStreamDetailsModalContent,
       props: {
         projectTarget: this.getTargetStoreByTargetId(targetId),
+        projectTargetStream: target?.streams?.[streamId],
+        projectTargetStreamState: targetStore?.projectTargetState?.streams[streamId],
       },
       title: ProjectTargetStreamDetailsModalTitle,
       withClose: true,
@@ -273,7 +264,7 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyRunAction(targetId: string | null, streamId: string | string[] | null, actionId: string | null) {
+  *applyRunAction(targetId: string, streamId: string | string[] | null, actionId: string) {
     const selectedStreamIds = streamId
       ? Array.isArray(streamId) ? streamId : [ streamId ]
       : Object.values(this.getTargetByTargetId(targetId).streams).map((stream) => stream.id);
@@ -315,34 +306,4 @@ export class ProjectStore extends BaseStore {
         break;
     }
   }
-
-  selectTargetStream(targetId: string | null, streamId: string | null) {
-    if (targetId && streamId) {
-      const target = this.getTargetByTargetId(targetId);
-      const targetStore = this.getTargetStoreByTargetId(targetId);
-
-      this.selectedStreamWithState = {
-        stream: target?.streams?.[streamId],
-        streamState: targetStore?.projectTargetState?.streams[streamId],
-        targetStore,
-      };
-    } else {
-      this.selectedStreamWithState = null;
-    }
-  }
-
-  // selectTargetStreamAction(targetId: string | null, streamId: string | null, actionId: string | null) {
-  //   if (targetId && actionId) {
-  //     const target = this.getTargetByTargetId(targetId);
-  //     const targetStore = this.getTargetStoreByTargetId(targetId);
-
-  //     this.selectedAction = {
-  //       stream: streamId ? target?.streams?.[streamId] : null,
-  //       action: Object.values(this.project?.flows).find((flow) => flow.targets.includes(targetId))?.actions?.[actionId]!,
-  //       targetStore,
-  //     };
-  //   } else {
-  //     this.selectedAction = null;
-  //   }
-  // }
 }

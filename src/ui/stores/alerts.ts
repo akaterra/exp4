@@ -19,7 +19,7 @@ export class AlertsStore extends BaseStore {
       const now = Date.now();
 
       this.alerts = this.alerts.length
-        ? this.alerts.filter((alert) => now - alert.timestamp < 150000)
+        ? this.alerts.filter((alert) => now - alert.timestamp < 30000)
         : this.alerts;
     }, 500);
   }
