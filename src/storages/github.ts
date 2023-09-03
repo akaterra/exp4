@@ -158,12 +158,12 @@ export class GithubStorageService extends EntityService implements IStorageServi
   private static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `rc__${key}`;
+    return `rc__${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
   private static getKeyStream(key: string | string[], streamId: string): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `rc__${key}__${streamId.toLowerCase().replace(/-/g, '_')}`;
+    return `rc__${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');
   }
 }

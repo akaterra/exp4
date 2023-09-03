@@ -14,16 +14,20 @@ const EXTENSIONS = {
   yml: 'yaml',
 };
 
-export function loadProjectsFromDirectory(path: string, notThrow?: boolean): Project[] {
+export function loadProjectsFromDirectory(path: string, ids?: string[]): Project[] {
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
 
-  return definitions.map((definition) => createProjectFromDefinition(definition, true)).filter((project) => !!project);
+  return definitions
+    .filter((project) => !!project && (!ids?.length || ids.includes(project.id)))
+    .map((definition) => createProjectFromDefinition(definition, true));
 }
 
-export function loadProjectFromFile(pathOrName: string, notThrow?: boolean): Project {
+export function loadProjectFromFile(pathOrName: string): Project {
   const definition: IProjectInput & { env?: Project['env'] } = loadDefinitionFromFile(pathOrName);
 
-  return definition ? createProjectFromDefinition(definition) : null;
+  return definition
+    ? createProjectFromDefinition(definition)
+    : null;
 }
 
 export function createProjectFromDefinition(definition: IProjectInput & { env?: Project['env'] }, notThrow?: boolean): Project {

@@ -1,0 +1,201 @@
+type: "project"
+
+definitions:
+  none: null
+
+integrations:
+  github:
+    type: "github"
+    config:
+      org: "akaterra-org"
+      repository: "testa"
+      useRepositoryAsOrg: true
+  githubDev:
+    type: "github"
+    config:
+      org: "akaterra-org"
+      branch: "develop"
+  githubStg:
+    type: "github"
+    config:
+      org: "akaterra-org"
+      branch: "test-v${version.major}.${version.minor}.${version.patch}"
+  githubProduction:
+    type: "github"
+    config:
+      org: "akaterra-org"
+      branch: "main"
+
+storages:
+  github:
+    type: "github"
+    config:
+      integration: "github"
+
+versionings:
+  release: &versioningRelease
+    type: "semver"
+    config:
+      namespace: "release"
+      storage: "github"
+  hotfix: &versioningHotfix
+    type: "semver"
+    config:
+      namespace: "hotfix"
+      storage: "github"
+  current: &versioningCurrent
+    type: "semver"
+    config:
+      namespace: "current"
+      storage: "github"
+
+flows:
+  dev:
+    title: ""
+    targets:
+      - dev
+    actions:
+      test:
+        title: "Run tests"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
+
+  release:
+    title: ""
+    targets:
+      - stg
+    actions:
+      release:
+        title: "Create release"
+        steps:
+          - type: "version:release"
+            title: "Increase minor version"
+            targets:
+              - "stg"
+          - type: "moveFrom"
+            title: "Create release branch"
+            targets:
+              - "dev"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg"
+      mergeToDev:
+        title: "Release to develop"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "dev"
+      mergeFromDev:
+        title: "Fetch latest develop"
+        steps:
+          - type: "moveFrom"
+            title: ""
+            targets:
+              - "dev"
+      test:
+        title: "Run tests"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
+
+  hotfix:
+    title: ""
+    targets:
+      - stgHotfix
+    actions:
+      release:
+        title: "Release to production"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "production"
+          - type: "version:override"
+            title: ""
+            targets:
+              - "production"
+
+  production:
+    title: ""
+    targets:
+      - production
+    actions:
+      hotfix:
+        title: "Merge to development"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "dev"
+          - type: "version:override"
+            title: ""
+            targets:
+              - "dev"
+
+targets:
+  dev:
+    title: "Development"
+    streams:
+      testa:
+        type: "github"
+        title: "Deliveries"
+        config:
+          integration: "githubDev"
+      testb:
+        type: "github"
+        title: "Deliveries history"
+        config:
+          integration: "githubDev"
+    versioning: "release"
+
+  stg:
+    title: "QA"
+    streams:
+      testc:
+        type: "github"
+        title: "Deliveries CRUD"
+        config:
+          integration: "githubStg"
+      testa:
+        type: "github"
+        title: "Deliveries"
+        config:
+          integration: "githubStg"
+      testb:
+        type: "github"
+        title: "Deliveries history"
+        config:
+          integration: "githubStg"
+      testd:
+        type: "github"
+        title: "UAM"
+        config:
+          integration: "githubStg"
+    versioning: "release"
+
+  stgHotfix:
+    title: "QA Hot Fix"
+    streams:
+      testa:
+        type: "github"
+        title: "Deliveries"
+        config:
+          integration: "github"
+    versioning: "hotfix"
+
+  production:
+    title: "Production"
+    streams:
+      testa:
+        type: "github"
+        title: "Deliveries"
+        config:
+          integration: "githubProduction"
+    versioning: "current"

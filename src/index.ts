@@ -65,8 +65,8 @@ function auth(req, res, next) {
   authStrategies.addFactory(GithubAuthStrategyService);
 
   const c = loadGlobalConfigFromFile('global');
-  const p = loadProjectsFromDirectory('./projects');
-console.log(p);
+  const p = loadProjectsFromDirectory('./projects', (process.env.PROJECT_IDS ?? '').split(','));
+
   p.forEach((p) => projects.add(p));
 
   // console.log({p});
