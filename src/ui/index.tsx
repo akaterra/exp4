@@ -1,7 +1,5 @@
-/** @jsxImportSource theme-ui */
-
 import * as ReactDOM from 'react-dom/client';
-import React from 'react';
+import * as React from 'react';
 import './mini.min.css';
 import 'normalize.css';
 import { Navigation } from './blocks/navigation';
@@ -22,66 +20,62 @@ import {
 import { IProject } from './stores/dto/project';
 import { StatisticsStore } from './stores/statistics';
 import { Statistics } from './blocks/statistics';
-import {RestApiService} from './services/rest-api.service';
-
-const projectsStore = new ProjectsStore();
-const statisticsStore = new StatisticsStore();
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
   return <Project project={ projects.selectedProjectStore } />;
 });
 
-export const Layout = observer(({ root }: { root: RootStore }) => {
-  return <Row.M>
-    <GlobalAlerts />
-    <GlobalDetailsPanel />
-    <GlobalModal />
+export const Layout = observer(({ rootStore }: { rootStore: RootStore }) => {
+  return <React.Fragment>
     <div className='c-3 -s-'>
       <div className='paragraph paragraph-lrg'>
-        <Navigation projects={ projectsStore } root={ root } />
+        <Navigation projects={ rootStore.projectsStore } root={ rootStore } />
       </div>
     </div>
     <div className='c15 -s-'>
       <div className='paragraph paragraph-lrg'>
         {
-          root.isAuthorized
+          rootStore.isAuthorized
             ? <Outlet />
             : null
         }
       </div>
     </div>
-  </Row.M>;
+  </React.Fragment>;
 });
 
 let router;
 
 export const App = () => {
-  return <RouterProvider router={ router } />;
+  return <Row.M>
+    <GlobalAlerts />
+    <GlobalDetailsPanel />
+    <GlobalModal />
+    <RouterProvider router={ router } />
+  </Row.M>;
 }
 
 (async () => {
-  await rootStore.authenticate();
-
   router = createBrowserRouter([
     {
       path: '/',
-      element: <Layout root={ rootStore } />,
-      // errorElement: <div />,
+      element: <Layout rootStore={ rootStore } />,
+      errorElement: <div />,
       children: [ {
         path: '/projects/:id',
-        element: <RouteProject projects={ projectsStore } />,
-        // errorElement: <div />,
+        element: <RouteProject projects={ rootStore.projectsStore } />,
         loader: async ({ request, params }) => {
-          await projectsStore.fetchProject(params.id as IProject['id']);
+          await rootStore.isReady;
+          await rootStore.projectsStore.fetchProject(params.id as IProject['id']);
   
           return null;
         },
       }, {
         path: '/statistics',
-        element: <Statistics statisticsStore={ statisticsStore } />,
-        // errorElement: <div />,
+        element: <Statistics statisticsStore={ rootStore.statisticsStore } />,
         loader: async ({ request, params }) => {
-          await statisticsStore.fetch();
+          await rootStore.isReady;
+          await rootStore.statisticsStore.fetch();
   
           return null;
         },
@@ -95,7 +89,5 @@ export const App = () => {
   
   root.render(<App />);
 
-  if (rootStore.isAuthorized) {
-    await projectsStore.fetch();
-  }
+  rootStore.start();
 })();

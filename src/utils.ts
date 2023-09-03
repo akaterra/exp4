@@ -1,6 +1,14 @@
 import Container from 'typedi';
 import * as _ from 'lodash';
 import fetch from 'node-fetch-native';
+import YAML from 'yaml'
+import fs from 'fs';
+
+const EXTENSIONS = {
+  json: 'json',
+  yaml: 'yaml',
+  yml: 'yaml',
+};
 
 export class PromiseContainer {
   private promises: Promise<any>[] = [];
@@ -27,6 +35,48 @@ export class PromiseContainer {
   async wait() {
     await Promise.all(this.promises);
   }
+}
+
+export function loadDefinitionsFromDirectory(path: string): any[] {
+  const files = fs.readdirSync(path, { withFileTypes: true });
+
+  return files.filter((file) => !file.isDirectory()).map((file) => loadDefinitionFromFile(`${path}/${file.name}`));
+}
+
+export function loadDefinitionFromFile(pathOrName: string): any {
+  let definition;
+
+  if (Object.keys(EXTENSIONS).some((ext) => pathOrName.slice(-ext.length - 1) === `.${ext}`)) {
+    const fileContent = fs.readFileSync(pathOrName, 'utf8');
+
+    switch (pathOrName.slice(pathOrName.lastIndexOf('.') + 1)) {
+      case 'json':
+        definition = JSON.parse(fileContent);
+        break;
+      case 'yaml':
+        definition = YAML.parse(fileContent);
+        break;
+      case 'yml':
+        definition = YAML.parse(fileContent);
+        break;  
+    }
+
+    if (definition && typeof definition === 'object') {
+      if (!definition.id) {
+        definition.id = pathOrName.slice(pathOrName.lastIndexOf('/') + 1, pathOrName.lastIndexOf('.'));
+      }
+    }
+  } else {
+    for (const ext of Object.keys(EXTENSIONS)) {
+      const filename = `${process.cwd()}/projects/${pathOrName}.${ext}`;
+
+      if (fs.existsSync(filename)) {
+        return loadDefinitionFromFile(filename);
+      }
+    }
+  }
+
+  return definition;
 }
 
 export function Autowired(ref?: any | (() => any)) {

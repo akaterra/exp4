@@ -4,8 +4,14 @@ import { UsersService } from '../services/users.service';
 import { IAuthStrategyMethod } from './dto/auth';
 import { processing } from './utils';
 import { RestApiService } from '../services/rest-api.service';
+import {ProjectsStore} from './projects';
+import {StatisticsStore} from './statistics';
 
 export class RootStore {
+  private isReadyResolve: Function;
+
+  readonly projectsStore = new ProjectsStore();
+  readonly statisticsStore = new StatisticsStore();
   readonly usersService = new UsersService();
 
   @observable
@@ -16,9 +22,14 @@ export class RootStore {
   user: IUser | null = null;
 
   accessToken: string | null = null;
+  isReady: Promise<void>;
 
   constructor() {
     makeObservable(this);
+
+    this.isReady = new Promise((resolve) => {
+      this.isReadyResolve = resolve;
+    });
   }
 
   @flow @processing
@@ -50,16 +61,6 @@ export class RootStore {
   }
 
   @flow @processing
-  *logout() {
-    localStorage.removeItem('accessToken');
-
-    this.accessToken = null;
-    this.isAuthorized = false;
-
-    yield this.authenticate();
-  }
-
-  @flow @processing
   *fetchAuthMethodActions(id: IAuthStrategyMethod['id']): IAuthStrategyMethod['actions'] {
     const authMethod = this.authMethods[id];
 
@@ -70,6 +71,27 @@ export class RootStore {
     }
 
     return null;
+  }
+
+  @flow @processing
+  *logout() {
+    localStorage.removeItem('accessToken');
+
+    this.accessToken = null;
+    this.isAuthorized = false;
+
+    yield this.authenticate();
+  }
+
+  @flow @processing
+  *start() {
+    yield this.authenticate();
+
+    if (this.isAuthorized) {
+      yield this.projectsStore.fetch();
+    }
+
+    this.isReadyResolve();
   }
 }
 

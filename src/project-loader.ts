@@ -1,6 +1,4 @@
 import { IProjectInput, Project } from './project';
-import YAML from 'yaml'
-import fs from 'fs';
 import Container from 'typedi';
 import { IntegrationsService } from './integrations.service';
 import { StoragesService } from './storages.service';
@@ -8,6 +6,7 @@ import { StreamsService } from './streams.service';
 import { ActionsService } from './actions.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
+import { loadDefinitionFromFile, loadDefinitionsFromDirectory } from './utils';
 
 const EXTENSIONS = {
   json: 'json',
@@ -15,111 +14,93 @@ const EXTENSIONS = {
   yml: 'yaml',
 };
 
-export function loadProjectFromFile(pathOrName: string): Project {
-  let config: IProjectInput & { env?: Project['env'] };
+export function loadProjectsFromDirectory(path: string, notThrow?: boolean): Project[] {
+  const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
 
-  if (Object.keys(EXTENSIONS).some((ext) => pathOrName.slice(-ext.length - 1) === `.${ext}`)) {
-    const fileContent = fs.readFileSync(pathOrName, 'utf8');
+  return definitions.map((definition) => createProjectFromDefinition(definition, true)).filter((project) => !!project);
+}
 
-    switch (pathOrName.slice(pathOrName.lastIndexOf('.') + 1)) {
-      case 'json':
-        config = JSON.parse(fileContent);
-        break;
-      case 'yaml':
-        config = YAML.parse(fileContent);
-        break;
-      case 'yml':
-        config = YAML.parse(fileContent);
-        break;  
+export function loadProjectFromFile(pathOrName: string, notThrow?: boolean): Project {
+  const definition: IProjectInput & { env?: Project['env'] } = loadDefinitionFromFile(pathOrName);
+
+  return definition ? createProjectFromDefinition(definition) : null;
+}
+
+export function createProjectFromDefinition(definition: IProjectInput & { env?: Project['env'] }, notThrow?: boolean): Project {
+  if (definition.type !== 'project') {
+    if (notThrow) {
+      return null;
     }
 
-    if (config && typeof config === 'object') {
-      if (!config.id) {
-        config.id = pathOrName.slice(pathOrName.lastIndexOf('/') + 1, pathOrName.lastIndexOf('.'));
-      }
-    }
-  } else {
-    for (const ext of Object.keys(EXTENSIONS)) {
-      const filename = `${process.cwd()}/projects/${pathOrName}.${ext}`;
+    throw new Error('Invalid project definition');
+  }
 
-      if (fs.existsSync(filename)) {
-        return loadProjectFromFile(filename);
+  definition.env = {
+    actions: Container.get(ActionsService),
+    integrations: Container.get(IntegrationsService),
+    storages: Container.get(StoragesService),
+    streams: Container.get(StreamsService),
+    targets: Container.get(TargetsService),
+    versionings: Container.get(VersioningsService),
+  }
+
+  if (definition.integrations) {
+    const integrationsService = definition.env.integrations;
+
+    for (const [ defId, defConfig ] of Object.entries(definition.integrations)) {
+      integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
+    }
+  }
+
+  if (definition.storages) {
+    const storagesService = definition.env.storages;
+
+    for (const [ defId, defConfig ] of Object.entries(definition.storages)) {
+      storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
+    }
+  }
+
+  if (definition.versionings) {
+    const versioningsService = definition.env.versionings;
+
+    for (const [ defId, defConfig ] of Object.entries(definition.versionings).concat([ [ null, { type: null } ] ])) {
+      versioningsService.add(versioningsService.getInstance(defConfig.type, defConfig.config), defId);
+    }
+  }
+
+  if (definition.flows) {
+    const actionsService = definition.env.actions;
+
+    for (const [ ,flow ] of Object.entries(definition.flows)) {
+      for ( const [ defId, defConfig ] of Object.entries(flow.actions)) {
+        defConfig.steps.forEach((c) => actionsService.get(c.type));
       }
     }
   }
 
-  if (config) {
-    if (config.type !== 'project') {
-      throw new Error('Invalid project definition');
-    }
+  if (definition.targets) {
+    const streamsService = Container.get(StreamsService);
 
-    config.env = {
-      actions: Container.get(ActionsService),
-      integrations: Container.get(IntegrationsService),
-      storages: Container.get(StoragesService),
-      streams: Container.get(StreamsService),
-      targets: Container.get(TargetsService),
-      versionings: Container.get(VersioningsService),
-    }
+    for (const [ ,target ] of Object.entries(definition.targets)) {
+      for (const [ defId, defConfig ] of Object.entries(target.streams)) {
+        const use = defConfig.use ? definition.targets[defConfig.use]?.streams?.[defId] : null;
 
-    if (config.integrations) {
-      const integrationsService = config.env.integrations;
-
-      for (const [ defId, defConfig ] of Object.entries(config.integrations)) {
-        integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
-      }
-    }
-
-    if (config.storages) {
-      const storagesService = config.env.storages;
-
-      for (const [ defId, defConfig ] of Object.entries(config.storages)) {
-        storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
-      }
-    }
-
-    if (config.versionings) {
-      const versioningsService = config.env.versionings;
-
-      for (const [ defId, defConfig ] of Object.entries(config.versionings).concat([ [ null, { type: null } ] ])) {
-        versioningsService.add(versioningsService.getInstance(defConfig.type, defConfig.config), defId);
-      }
-    }
-
-    if (config.flows) {
-      const actionsService = config.env.actions;
-
-      for (const [ ,flow ] of Object.entries(config.flows)) {
-        for ( const [ defId, defConfig ] of Object.entries(flow.actions)) {
-          defConfig.steps.forEach((c) => actionsService.get(c.type));
-        }
-      }
-    }
-
-    if (config.targets) {
-      const streamsService = Container.get(StreamsService);
-
-      for (const [ ,target ] of Object.entries(config.targets)) {
-        for (const [ defId, defConfig ] of Object.entries(target.streams)) {
-          const use = defConfig.use ? config.targets[defConfig.use]?.streams?.[defId] : null;
-
-          if (use) {
-            for (const [ key, val ] of Object.entries(use)) {
-              if (defConfig[key] === undefined) {
-                defConfig[key] = val;
-              }
+        if (use) {
+          for (const [ key, val ] of Object.entries(use)) {
+            if (defConfig[key] === undefined) {
+              defConfig[key] = val;
             }
-
-            delete defConfig.use;
           }
 
-          streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
+          delete defConfig.use;
         }
 
-        config.env.versionings.get(target.versioning);
+        streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
       }
-    }
 
-    return new Project(config);
+      definition.env.versionings.get(target.versioning);
+    }
   }
+
+  return new Project(definition);
 }

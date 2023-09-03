@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import 'universal-dotenv/register';
 import cors from 'cors';
-import { loadProjectFromFile } from './project-loader';
+import { loadProjectFromFile, loadProjectsFromDirectory } from './project-loader';
 import { GithubStreamService, IGithubTargetStream } from './streams/github';
 import Container from 'typedi';
 import { IStorageService } from './storages/storage.service';
@@ -30,7 +30,7 @@ import { DetachActionService } from './actions/detach';
 import { loadGlobalConfigFromFile } from './global-config-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
-import { err } from './utils';
+import { err, loadDefinitionsFromDirectory } from './utils';
 import { authMethodList } from './api/auth/list-methods';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
@@ -65,10 +65,12 @@ function auth(req, res, next) {
   authStrategies.addFactory(GithubAuthStrategyService);
 
   const c = loadGlobalConfigFromFile('global');
-  const p = loadProjectFromFile('getpackage');
+  const p = loadProjectsFromDirectory('./projects');
+console.log(p);
+  p.forEach((p) => projects.add(p));
 
   // console.log({p});
-  projects.add(p);
+  // projects.add(p);
 
   const ss = Container.get(StreamsService);
   ss.addFactory(GithubStreamService);

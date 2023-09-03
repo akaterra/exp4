@@ -1,10 +1,13 @@
 import { alertsStore } from '../blocks/alerts';
 
+let isProcessingCount = 0;
+
 export function processing(target, prop, descriptor) {
   const fn = descriptor.value;
 
   descriptor.value = async function *(...args) {
     this.isProcessing = true;
+    isProcessingCount += 1;
 
     try {
       const generatorState = fn.call(this, ...args);
@@ -21,11 +24,14 @@ export function processing(target, prop, descriptor) {
         }
       }
     } catch (e) {
-      alertsStore.push(e?.message ?? e);
+      if (isProcessingCount <= 1) {
+        alertsStore.push(e?.message ?? e);
+      }
 
       throw e;
     } finally {
       this.isProcessing = false;
+      isProcessingCount -= 1;
     }
   }
 

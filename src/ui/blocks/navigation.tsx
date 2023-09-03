@@ -26,14 +26,16 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
             <SubTitle><NavLink activeClassName="link active" href='/statistics' className='link'>
                 Statistics
             </NavLink></SubTitle>
-            <Title>Projects</Title>
-            {
-                projects.projectsList.map((e, i) => {
-                    return <SubTitle key={ i }><NavLink activeClassName="link active" href={ `/projects/${e.id}` } className='link'>
-                        { e.id }
-                    </NavLink></SubTitle>
-                })
-            }
+            <SubTitle>Projects</SubTitle>
+            <div className='list'>
+                {
+                    projects.projectsList.map((e, i) => {
+                        return <div className='list-item bold' key={ i }><NavLink activeClassName="link active" href={ `/projects/${e.id}` } className='link'>
+                            { e.id }
+                        </NavLink></div>
+                    })
+                }
+            </div>
         </div>
         <div>
             <SubTitle><Link activeClassName="link failure" className='link failure' onClick={ () => rootStore.logout() }>
