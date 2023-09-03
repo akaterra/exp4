@@ -33,8 +33,6 @@ export class ProjectsStore extends BaseStore {
     if (selectedProjectId) {
       this.selectedProjectId = selectedProjectId;
     }
-
-    this.fetch();
   }
 
   getById(id) {
@@ -55,12 +53,12 @@ export class ProjectsStore extends BaseStore {
     }, this.projectsStores);
 
     if (this.selectedProjectId) {
-      yield this.selectProject(this.selectedProjectId);
+      yield this.fetchProject(this.selectedProjectId);
     }
   }
 
   @flow @processing
-  *selectProject(id: IProject['id']) {
+  *fetchProject(id: IProject['id']) {
     this.selectedProjectId = id;
     
     yield this.selectedProjectStore?.fetchState();

@@ -3,6 +3,7 @@ import { IUser } from './dto/user';
 import { UsersService } from '../services/users.service';
 import { IAuthStrategyMethod } from './dto/auth';
 import { processing } from './utils';
+import { RestApiService } from '../services/rest-api.service';
 
 export class RootStore {
   readonly usersService = new UsersService();
@@ -18,14 +19,12 @@ export class RootStore {
 
   constructor() {
     makeObservable(this);
-
-    this.authenticate();
   }
 
   @flow @processing
   *authenticate() {
     this.authMethods = yield this.usersService.listAuthMethods();
-    this.accessToken = localStorage.getItem('accessToken');
+    this.accessToken = RestApiService.accessToken = localStorage.getItem('accessToken');
 
     if (this.accessToken) {
       this.isAuthorized = true;
@@ -41,7 +40,7 @@ export class RootStore {
         if (accessToken) {
           localStorage.setItem('accessToken', accessToken);
 
-          this.accessToken = accessToken;
+          this.accessToken = RestApiService.accessToken = accessToken;
           this.isAuthorized = true;
         }
       } else {

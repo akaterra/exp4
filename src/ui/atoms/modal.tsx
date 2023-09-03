@@ -21,32 +21,33 @@ export const Modal = ({
   },
   children,
   title = undefined,
-  titleContent = undefined,
   onClose = undefined,
   onSelect = undefined,
 }: {
   buttons?: Record<string, { action?: string; disabled?: Boolean; onSelect?: (action?) => void, title?: string, type?: string }>;
   children,
   title: React.ReactElement | string;
-  titleContent?: React.ReactElement | string;
   onClose?: () => void,
   onSelect?: (action?: string) => void,
 }) => {
   return <div className="modal">
-    <div className="modal-content f10 back-light shadow shadow-high span default pad-hor triple">
+    <div className="modal-content f10 f14-s- back-light shadow shadow-high span default pad-hor triple">
       <div className="paragraph">
         <div className='row'>
           <div className='c18 children-gap-full'>
             <div>
               <div className='flex flex-hor'>
-                <SubTitle>{ title }</SubTitle>
+                {
+                  typeof title === 'string'
+                    ? <SubTitle>{ title }</SubTitle>
+                    : title
+                }
                 {
                   onClose
                     ? <Button className='button-sml default transparent w-auto' x={null} onClick={ onClose }>✖</Button>
                     : null
                 }
               </div>
-              { titleContent }
             </div>
             { children }
             <div className='row flex-right'>

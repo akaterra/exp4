@@ -30,17 +30,19 @@ export class PromiseContainer {
 }
 
 export function Autowired(ref?: any | (() => any)) {
+  let refSymbol;
+
   return function(target: Object, propertyName: string) {
     Reflect.defineProperty(
       target,
       propertyName,
       {
         get: function() {
-          if (typeof ref === 'function') {
-            ref = ref();
+          if (!refSymbol) {
+            refSymbol = typeof ref === 'function' ? ref() : ref;
           }
       
-          const instance = Container.get(ref ?? Reflect.getMetadata('design:type', target, propertyName));
+          const instance = Container.get(refSymbol ?? Reflect.getMetadata('design:type', target, propertyName));
 
           Reflect.defineProperty(this, propertyName, { value: instance });
 

@@ -20,8 +20,12 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { IProject } from './stores/dto/project';
+import { StatisticsStore } from './stores/statistics';
+import { Statistics } from './blocks/statistics';
+import {RestApiService} from './services/rest-api.service';
 
 const projectsStore = new ProjectsStore();
+const statisticsStore = new StatisticsStore();
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
   return <Project project={ projects.selectedProjectStore } />;
@@ -49,32 +53,49 @@ export const Layout = observer(({ root }: { root: RootStore }) => {
   </Row.M>;
 });
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Layout root={ rootStore } />,
-    // errorElement: <div />,
-    children: [ {
-      path: '/projects/:id',
-      element: <RouteProject projects={ projectsStore } />,
-      // errorElement: <div />,
-      loader: async ({ request, params }) => {
-        projectsStore.selectProject(params.id as IProject['id']);
-
-        return null;
-      },
-    } ]
-  },
-], {
-  basename: '',
-});
+let router;
 
 export const App = () => {
   return <RouterProvider router={ router } />;
 }
 
 (async () => {
+  await rootStore.authenticate();
+
+  router = createBrowserRouter([
+    {
+      path: '/',
+      element: <Layout root={ rootStore } />,
+      // errorElement: <div />,
+      children: [ {
+        path: '/projects/:id',
+        element: <RouteProject projects={ projectsStore } />,
+        // errorElement: <div />,
+        loader: async ({ request, params }) => {
+          await projectsStore.fetchProject(params.id as IProject['id']);
+  
+          return null;
+        },
+      }, {
+        path: '/statistics',
+        element: <Statistics statisticsStore={ statisticsStore } />,
+        // errorElement: <div />,
+        loader: async ({ request, params }) => {
+          await statisticsStore.fetch();
+  
+          return null;
+        },
+      } ]
+    },
+  ], {
+    basename: '',
+  });
+
   const root = ReactDOM.createRoot(document.getElementById('container'));
   
   root.render(<App />);
+
+  if (rootStore.isAuthorized) {
+    await projectsStore.fetch();
+  }
 })();

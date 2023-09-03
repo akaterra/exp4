@@ -4,7 +4,11 @@ import { IUser } from './user';
 const jwtSecret = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 
 export function authorize(accessToken: string): IUser {
-  return jwt.verigy(accessToken, jwtSecret);
+  try {
+    return jwt.verify(accessToken, jwtSecret);
+  } catch (err) {
+    throw new Error('Unauthorized');
+  }
 }
 
 export function prepareAuthData(user: IUser) {

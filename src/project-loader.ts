@@ -100,7 +100,19 @@ export function loadProjectFromFile(pathOrName: string): Project {
       const streamsService = Container.get(StreamsService);
 
       for (const [ ,target ] of Object.entries(config.targets)) {
-        for ( const [ defId, defConfig ] of Object.entries(target.streams)) {
+        for (const [ defId, defConfig ] of Object.entries(target.streams)) {
+          const use = defConfig.use ? config.targets[defConfig.use]?.streams?.[defId] : null;
+
+          if (use) {
+            for (const [ key, val ] of Object.entries(use)) {
+              if (defConfig[key] === undefined) {
+                defConfig[key] = val;
+              }
+            }
+
+            delete defConfig.use;
+          }
+
           streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
         }
 

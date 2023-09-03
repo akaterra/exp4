@@ -32,6 +32,14 @@ import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
 import { err } from './utils';
 import { authMethodList } from './api/auth/list-methods';
+import { statisticsList } from './api/statistics/list';
+import { authorize } from './auth.service';
+
+function auth(req, res, next) {
+  req.user = authorize(req.headers.authorization);
+
+  next();
+}
 
 (async () => {
   const integrations = Container.get(IntegrationsService);
@@ -57,7 +65,7 @@ import { authMethodList } from './api/auth/list-methods';
   authStrategies.addFactory(GithubAuthStrategyService);
 
   const c = loadGlobalConfigFromFile('global');
-  const p = loadProjectFromFile('test');
+  const p = loadProjectFromFile('getpackage');
 
   // console.log({p});
   projects.add(p);
@@ -97,13 +105,16 @@ import { authMethodList } from './api/auth/list-methods';
     '/auth/methods', err(authMethodList),
   );
   app.get(
-    '/projects', err(projectList),
+    '/projects', err(auth), err(projectList),
   );
   app.get(
-    '/projects/:projectId/streams', err(projectStreamList),
+    '/projects/:projectId/streams', err(auth), err(projectStreamList),
   );
   app.post(
-    '/projects/:projectId/flow/:flowId/action/:actionId/run', err(projectFlowActionRun),
+    '/projects/:projectId/flow/:flowId/action/:actionId/run', err(auth), err(projectFlowActionRun),
+  );
+  app.get(
+    '/statistics', err(auth), err(statisticsList),
   );
 
   app.use(error);
@@ -112,7 +123,7 @@ import { authMethodList } from './api/auth/list-methods';
 
   });
 
-  projects.runStatesRefresh();
+  projects.runStatesResync();
 })().catch((err) => {
   console.error({
     err,

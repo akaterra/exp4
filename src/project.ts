@@ -6,6 +6,10 @@ import { StreamsService } from './streams.service';
 import { IStreamService } from './streams/stream.service';
 import { TargetsService } from './targets.service';
 import { VersioningsService } from './versionings.service';
+import * as _ from 'lodash';
+import Ajv from 'ajv';
+
+const ajv = new Ajv();
 
 export interface IProjectDef {
   id?: string;
@@ -38,6 +42,7 @@ export interface IProjectFlowActionParam {
     optional?: boolean;
   };
   initialValue: any;
+  validationSchema?: Record<string, any>;
 }
 
 export interface IProjectFlowActionStep<C extends (Record<string, unknown> | string) = string, T extends string = string> {
@@ -153,7 +158,7 @@ export interface IProjectInput {
   flows: Record<string, IProjectFlow>;
   integrations?: Record<string, IProjectDef>;
   storages?: Record<string, IProjectDef>;
-  targets: Record<string, IProjectTarget>;
+  targets: Record<string, IProjectTarget & { streams: Record<string, IProjectTargetStream & { use?: string }> }>;
   versionings: Record<string, IProjectDef>;
 }
 
@@ -225,7 +230,13 @@ export class Project implements IProject {
                   ref: { flowId: key, projectId: this.id },
                   config: this.getDefinition(step.config),
                   description: step.description,
-                  params: actDef.params,
+                  params: actDef.params
+                    ? _.mapValues(actDef.params, (param) => {
+                      param.validationSchema = this.getFlowActionParamValidationScheme(param);
+
+                      return param;
+                    })
+                    : null,
                   targets: step.targets ?? actDef.targets ?? [],
                 })),
               };
@@ -363,9 +374,81 @@ export class Project implements IProject {
     };
   }
 
+  validateParams(flowId: IProjectFlowDef['id'], actionId: IProjectFlowActionDef['id'], params: Record<string, any>) {
+    const action = this.getFlow(flowId)?.actions?.[actionId];
+
+    if (action?.params) {
+      const schema: Record<string, any> = {
+        type: 'object',
+        properties: {},
+        required: [],
+      };
+
+      for (const [ key, param ] of Object.entries(action.params)) {
+        if (param.validationSchema) {
+          schema.properties[key] = param.validationSchema;
+        }
+
+        if (!param.constraints?.optional) {
+          schema.required.push(key);
+        }
+      }
+
+      const validate = ajv.compile(schema);
+      const isValid = validate(params);
+
+      if (!isValid) {
+        throw new Error(`"${validate.errors[0].instancePath.slice(1)}" ${validate.errors[0].message}`);
+      }
+    }
+  }
+
   private getDefinition(mixed: string | Record<string, unknown>): Record<string, unknown> {
     return typeof mixed === 'string'
       ? this.definitions[mixed] ?? {}
       : mixed ?? {};
+  }
+
+  private getFlowActionParamValidationScheme(action: IProjectFlowActionParam) {
+    if (!action) {
+      return;
+    }
+
+    let def: Record<string, any> = {};
+
+    switch (action.type) {
+      case 'number':
+        def.type = 'number';
+
+        if (typeof action.constraints?.min === 'number') {
+          def.minimum = action.constraints?.min;
+        }
+
+        if (typeof action.constraints?.max === 'number') {
+          def.maximum = action.constraints?.max;
+        }
+
+        break;
+      case 'string':
+        def.type = 'string';
+
+        if (typeof action.constraints?.minLength === 'number') {
+          def.minLength = action.constraints?.minLength;
+        }
+
+        if (typeof action.constraints?.maxLength === 'number') {
+          def.maxLength = action.constraints?.maxLength;
+        }
+
+        break;
+    }
+
+    if (def.type && action.constraints?.enum) {
+      def.enum = Array.isArray(action.constraints?.enum)
+        ? action.constraints?.enum
+        : [ action.constraints?.enum ];
+    }
+
+    return Object.keys(def).length ? def : null;
   }
 }

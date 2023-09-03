@@ -59,13 +59,13 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = await this.getCurrent(target);
 
     if (version) {
-      version = semver.inc(version, 'patch');
+      if (params?.releaseName) {
+        version = semver.inc(version, 'prepatch', params?.releaseName, false);
+      } else { 
+        version = semver.inc(version, 'patch');
+      }
     } else {
       version = '0.1.0';
-    }
-
-    if (params?.releaseName) {
-      version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
     await this.getStorage(target).varSet(
@@ -81,13 +81,13 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = await this.getCurrent(target);
 
     if (version) {
-      version = semver.inc(version, 'minor');
+      if (params?.releaseName) {
+        version = semver.inc(version, 'preminor', params?.releaseName, false);
+      } else {  
+        version = semver.inc(version, 'minor');
+      }
     } else {
       version = '0.1.0';
-    }
-
-    if (params?.releaseName) {
-      version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
     await this.getStorage(target).varSet(

@@ -25,11 +25,13 @@ export const ProjectTargetStreamDetailsModalTitle = observer(({
   const lastAction = projectTargetStreamState?.history?.action?.[0];
   const lastChange = projectTargetStreamState?.history?.change?.[0];
 
-  return <React.Fragment>
-    { projectTargetStream?.title ?? projectTargetStream?.id }
-    &nbsp;
-    <span className='font-sml sup'>{ projectTargetStreamState?.version }</span>
-  </React.Fragment>
+  return <div>
+    <Title>
+      { projectTargetStream?.title ?? projectTargetStream?.id }
+      &nbsp;
+      <span className='font-sml sup'>{ projectTargetStreamState?.version }</span>
+    </Title>
+  </div>
 });
 
 export const ProjectTargetStreamDetailsModalContent = observer(({
@@ -72,7 +74,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
             {
               lastAction?.steps
-                ? <InfoCollapse isFailed={ isFailed } showTitle='Steps info'>
+                ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
                     <ul className='font-sml'>
                       {
                         Object.values(lastAction?.steps).map((step) => <li>
@@ -89,7 +91,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                 : null
             }
             <TitledLine title='Author:'>
-              <a className='link' href={ lastAction?.author?.link }>{ lastAction?.author?.name ?? 'unknown' }</a>
+              <a className='link' href={ lastAction?.author?.link } target='__blank'>{ lastAction?.author?.name ?? 'unknown' }</a>
             </TitledLine>
             <TitledLine title='At:' isShown={ !!lastAction?.time }>
               { lastAction?.time ? new Date(lastAction?.time).toLocaleString() : null }
@@ -106,7 +108,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             </div>
             <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
             <TitledLine title='Author:'>
-              <a className='link' href={ lastChange?.author?.link }>{ lastChange?.author?.name ?? 'unknown' }</a>
+              <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
             </TitledLine>
             <TitledLine title='At:' isShown={ !!lastChange?.time }>
               { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }

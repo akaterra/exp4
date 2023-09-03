@@ -1,0 +1,653 @@
+type: "project"
+
+id: "GetPackage"
+description: ""
+
+definitions:
+  none: null
+
+integrations:
+  github:
+    type: "github"
+    config:
+      org: "getpackageltd"
+  githubDev:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "develop"
+  githubStg:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "test-v${version.major}.${version.minor}.${version.patch}"
+  githubHotfix:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "hotfix-v${version.major}.${version.minor}.${version.patch}"
+  githubMaster:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "master"
+  githubMain:
+    type: "github"
+    config:
+      org: "getpackageltd"
+      branch: "main"
+
+storages:
+  github:
+    type: "github"
+    config:
+      integration: "github"
+
+versionings:
+  release: &versioningRelease
+    type: "semver"
+    config:
+      namespace: "release"
+      storage: "github"
+  hotfix: &versioningHotfix
+    type: "semver"
+    config:
+      namespace: "hotfix"
+      storage: "github"
+  current: &versioningCurrent
+    type: "semver"
+    config:
+      namespace: "current"
+      storage: "github"
+
+flows:
+  dev:
+    title: ""
+    targets:
+      - dev
+    actions:
+      test:
+        title: "Run tests"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
+
+  release:
+    title: ""
+    targets:
+      - stg
+    actions:
+      release:
+        title: "Create release"
+        steps:
+          - type: "version:release"
+            title: "Increase minor version"
+            targets:
+              - "stg"
+          - type: "moveFrom"
+            title: "Create release branch"
+            targets:
+              - "dev"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg"
+        params:
+          releaseName:
+            title: "Release name"
+            type: "string"
+            constraints:
+              minLength: 1
+              maxLength: 20
+              optional: true
+      finishRelease:
+        title: "Finish release"
+        description: "Move release to production and close release"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "production"
+          - type: "version:override"
+            title: ""
+            targets:
+              - "stg:production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg:production"
+          - type: "detach"
+            title: ""
+            targets:
+              - "stg"
+      mergeToDev:
+        title: "Merge to develop"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "dev"
+      mergeFromDev:
+        title: "Merge latest develop"
+        steps:
+          - type: "moveFrom"
+            title: ""
+            targets:
+              - "dev"
+      exclude:
+        title: "Exclude"
+        steps:
+          - type: "detach"
+            title: ""
+            targets:
+              - "stg"
+      test:
+        title: "Run tests"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
+
+  hotfix:
+    title: ""
+    targets:
+      - stgHotfix
+    actions:
+      hotfix:
+        title: "Create hotfix"
+        steps:
+          - type: "version:override"
+            title: ""
+            targets:
+              - "production:stgHotfix"
+          - type: "version:patch"
+            title: ""
+            targets:
+              - "stgHotfix"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stgHotfix"
+          - type: "moveFrom"
+            title: ""
+            targets:
+              - "production"
+      finishHotfix:
+        title: "Finish hotfix"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "production"
+          - type: "version:override"
+            title: ""
+            targets:
+              - "production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "production"
+          - type: "detach"
+            title: ""
+            targets:
+              - "stgHotfix"
+      mergeToQa:
+        title: "Merge to QA"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "stg"
+      mergeFromProduction:
+        title: "Merge latest production"
+        steps:
+          - type: "moveFrom"
+            title: ""
+            targets:
+              - "production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stgHotfix"
+      exclude:
+        title: "Exclude"
+        steps:
+          - type: "detach"
+            title: ""
+            targets:
+              - "stgHotfix"
+      test:
+        title: "Run tests"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
+
+  production:
+    title: ""
+    targets:
+      - production
+    actions:
+      mergeToDevelop:
+        title: "Merge to develop"
+        steps:
+          - type: "moveTo"
+            title: ""
+            targets:
+              - "dev"
+
+targets:
+  dev:
+    title: "Development"
+    streams:
+      gp-account-info-processor:
+        type: "github"
+        title: "AIP"
+        config:
+          integration: "githubDev"
+      gp-alerts-service:
+        type: "github"
+        title: "Alerts"
+        config:
+          integration: "githubDev"
+      gp-analytics-service:
+        type: "github"
+        title: "Analytics"
+        config:
+          integration: "githubDev"
+      gp-charge-service:
+        type: "github"
+        title: "Charge"
+        config:
+          integration: "githubDev"
+      gp-deliveries-crud-service:
+        type: "github"
+        title: "Deliveries CRUD"
+        config:
+          integration: "githubDev"
+      gp-deliveries-service:
+        type: "github"
+        title: "Deliveries"
+        config:
+          integration: "githubDev"
+      gp-deliveries-history-service:
+        type: "github"
+        title: "Deliveries history"
+        config:
+          integration: "githubDev"
+      gp-events-service:
+        type: "github"
+        title: "Events"
+        config:
+          integration: "githubDev"
+      gp-frontend-client:
+        type: "github"
+        title: "FE Operator"
+        config:
+          integration: "githubDev"
+      gp-fe-sender:
+        type: "github"
+        title: "FE Sender"
+        config:
+          integration: "githubDev"
+      gp-fe-tracker:
+        type: "github"
+        title: "FE Tracker"
+        config:
+          integration: "githubDev"
+      gp-finance-service:
+        type: "github"
+        title: "Finance"
+        config:
+          integration: "githubDev"
+      gp-finance-calc:
+        type: "github"
+        title: "Finance calc"
+        config:
+          integration: "githubDev"
+      gp-graphql-gateway:
+        type: "github"
+        title: "API Gateway"
+        config:
+          integration: "githubDev"
+      gp-links-service:
+        type: "github"
+        title: "Links"
+        config:
+          integration: "githubDev"
+      gp-locations-service:
+        type: "github"
+        title: "Locations"
+        config:
+          integration: "githubDev"
+      gp-notifications-service:
+        type: "github"
+        title: "Notifications"
+        config:
+          integration: "githubDev"
+      gp-offers-service:
+        type: "github"
+        title: "Offers"
+        config:
+          integration: "githubDev"
+      gp-postil-service:
+        type: "github"
+        title: "Post IL"
+        config:
+          integration: "githubDev"
+      gp-processing-service:
+        type: "github"
+        title: "Processing"
+        config:
+          integration: "githubDev"
+      gp-routes-calc-dev:
+        type: "github"
+        title: "Routes calc"
+        config:
+          integration: "githubDev"
+      gp-uam-service:
+        type: "github"
+        title: "UAM"
+        config:
+          integration: "githubDev"
+      gp-webhooks-service:
+        type: "github"
+        title: "Webhooks"
+        config:
+          integration: "githubDev"
+    versioning: null
+
+  stg:
+    title: "QA"
+    streams:
+      gp-account-info-processor:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-alerts-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-analytics-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-charge-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-deliveries-crud-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-deliveries-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-deliveries-history-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-events-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-frontend-client:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-fe-sender:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-fe-tracker:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-finance-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-finance-calc:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-graphql-gateway:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-links-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-locations-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-notifications-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-offers-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-postil-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-processing-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-routes-calc-dev:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-uam-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+      gp-webhooks-service:
+        use: "dev"
+        config:
+          integration: "githubStg"
+    versioning: "release"
+
+  stgHotfix:
+    title: "QA Hotfix"
+    streams:
+      gp-account-info-processor:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-alerts-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-analytics-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-charge-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-deliveries-crud-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-deliveries-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-deliveries-history-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-events-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-frontend-client:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-fe-sender:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-fe-tracker:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-finance-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-finance-calc:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-graphql-gateway:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-links-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-locations-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-notifications-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-offers-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-postil-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-processing-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-routes-calc-dev:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-uam-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+      gp-webhooks-service:
+        use: "dev"
+        config:
+          integration: "githubHotfix"
+    versioning: "hotfix"
+
+  production:
+    title: "Production"
+    streams:
+      gp-account-info-processor:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-alerts-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-analytics-service:
+        use: "dev"
+        config:
+          integration: "githubMain"
+      gp-charge-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-deliveries-crud-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-deliveries-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-deliveries-history-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-events-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-frontend-client:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-fe-sender:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-fe-tracker:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-finance-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-finance-calc:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-graphql-gateway:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-links-service:
+        use: "dev"
+        config:
+          integration: "githubMain"
+      gp-locations-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-notifications-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-offers-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-postil-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-processing-service:
+        use: "dev"
+        config:
+          integration: "githubMain"
+      gp-routes-calc-dev:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-uam-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+      gp-webhooks-service:
+        use: "dev"
+        config:
+          integration: "githubMaster"
+    versioning: "current"

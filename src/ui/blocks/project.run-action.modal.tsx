@@ -4,6 +4,8 @@ import { ModalStore } from '../stores/modal';
 import {Input, RadioGroup} from '../atoms/input';
 import {ProjectFlowActionParamsStore} from '../stores/project';
 import {Select} from '../atoms/select';
+import {Label} from '../atoms/label';
+import {Title} from '../atoms/title';
 
 export const ProjectRunActionModalTitle = ({
   store,
@@ -18,11 +20,14 @@ export const ProjectRunActionModalTitle = ({
   projectTarget?: IProjectTarget;
   projectTargetStreams?: IProjectTargetStream[];
 }) => {
-  return <React.Fragment>
-    { projectFlowAction?.title }
-    &nbsp;
-    <span className='font-sml sup'>{ projectFlowAction?.description }</span>
-  </React.Fragment>;
+  return <div>
+    <Title>{ projectFlowAction?.title }</Title>
+    {
+      projectFlowAction?.description
+        ? <Label>{ projectFlowAction?.description }</Label>
+        : null
+    }
+  </div>;
 };
 
 export const ProjectRunActionModalContent = ({

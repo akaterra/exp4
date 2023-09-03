@@ -140,7 +140,11 @@ export class ProjectFlowActionParamsStore extends BaseStore {
   }
 
   setValue(key, val) {
-    this.paramsValues[key] = val;
+    if (val !== '') {
+      this.paramsValues[key] = val;
+    } else {
+      this.paramsValues[key] = undefined;
+    }
   }
 
   validate() {
@@ -159,6 +163,8 @@ export class ProjectFlowActionParamsStore extends BaseStore {
           }
 
           if (constraints.optional && (val === '' || val === undefined)) {
+            this.paramsErrors[key] = null;
+
             continue;
           }
 

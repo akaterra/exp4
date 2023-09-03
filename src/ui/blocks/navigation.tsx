@@ -23,6 +23,9 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
 
     return <div className='block no-scroll children-gap'>
         <div>
+            <SubTitle><NavLink activeClassName="link active" href='/statistics' className='link'>
+                Statistics
+            </NavLink></SubTitle>
             <Title>Projects</Title>
             {
                 projects.projectsList.map((e, i) => {

@@ -10,10 +10,12 @@ import { ActionsService } from './actions.service';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
 import {ProjectState} from './project-state';
+import {StatisticsService} from './statistics.service';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => ActionsService) protected actionsService: ActionsService;
+  @Inject(() => StatisticsService) protected statisticsService: StatisticsService;
   @Inject(() => StreamsService) protected streamsService: StreamsService;
   @Inject(() => TargetsService) protected targetsService: TargetsService;
   @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
@@ -35,11 +37,24 @@ export class ProjectsService extends EntitiesService<Project> {
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
     params?: Record<string, any>,
   ) {
-    const flow = this.get(projectId).getFlow(flowId);
+    const project = this.get(projectId);
+    const flow = project.getFlow(flowId);
 
     for (const [ , aId ] of iterArr(actionId)) {
+      project.validateParams(flowId, aId, params);
+
       for (const action of flow.actions[aId].steps) {
-        await this.actionsService.get(action.type).run(action, targetsStreams, params);
+        try {
+          await this.actionsService.get(action.type).run(action, targetsStreams, params);
+        } catch (err) {
+          this.statisticsService.add(`projects.${projectId}.errors`, {
+            message: err?.message ?? err ?? null,
+            time: new Date(),
+            type: 'projectFlowAction:run',
+          });
+
+          throw err;
+        }
       }
     }
 
@@ -96,19 +111,29 @@ export class ProjectsService extends EntitiesService<Project> {
       await promiseContainer.wait();
   
       return projectState;
-    })(), 120, true);
+    })(), 300, true);
   }
 
-  async runStatesRefresh() {
-    try {
-      for (const projectId of Object.keys(this.entities)) {
+  async runStatesResync() {
+    for (const projectId of Object.keys(this.entities)) {
+      try {
         await this.getState(projectId, null, true);
+
+        this.statisticsService.inc(`projects.${projectId}.statesResyncCount`);
+        this.statisticsService.set(`projects.${projectId}.statesResyncAt`, new Date());
+      } catch (err) {
+        this.statisticsService.add(`projects.${projectId}.errors`, {
+          message: err?.message ?? err ?? null,
+          time: new Date(),
+          type: 'projectState:resync',
+        });
       }
-    } catch (err) {
-      
     }
 
-    setTimeout(() => this.runStatesRefresh(), 60000);
+    this.statisticsService.inc('general.statesResyncCount');
+    this.statisticsService.set('general.statesResyncAt', new Date());
+
+    setTimeout(() => this.runStatesResync(), 120000);
   }
 
   streamGetState(stream: IProjectTargetStreamDef): Promise<IStream>;

@@ -12,7 +12,11 @@ export const DetailsPanel = ({ children, title = undefined, titleContent = undef
             <div className='c18'>
               <div>
                 <div className='flex flex-hor'>
-                  <SubTitle>{ title }</SubTitle>
+                  {
+                    typeof title === 'string'
+                      ? <SubTitle>{ title }</SubTitle>
+                      : title
+                  }
                   {
                     onClose
                       ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose ? () => onClose(null) : null }>✖</Button>
