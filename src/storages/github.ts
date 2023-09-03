@@ -71,6 +71,34 @@ export class GithubStorageService extends EntityService implements IStorageServi
     this.cache.set(intKey, val, 60);
   }
 
+  async varAdd<D extends any = any>(target: IProjectTargetDef, key: string | string[], val: D): Promise<D> {
+    let intVal;
+    
+    try {
+      intVal = JSON.parse(await this.varGet(target, key, '[]'));
+    } catch (err) {
+
+    }
+
+    if (Array.isArray(intVal)) {
+      intVal.push(val);
+    } else {
+      intVal = [ val ];
+    }
+
+    await this.varSet(target, key, JSON.stringify(intVal));
+
+    return val;
+  }
+
+  async varInc(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
+    const intVal = parseInt(await this.varGet(target, key, '0'));
+
+    await this.varSet(target, key, typeof intVal === 'number' ? intVal + add : add);
+
+    return intVal;
+  }
+
   async varGetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = GithubStorageService.getKeyStream(key, stream.id);
 
@@ -97,6 +125,34 @@ export class GithubStorageService extends EntityService implements IStorageServi
     }
 
     this.cache.set(intKey, val, 60);
+  }
+
+  async varAddStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], val: D): Promise<D> {
+    let intVal;
+    
+    try {
+      intVal = JSON.parse(await this.varGetStream(stream, key, '[]'));
+    } catch (err) {
+
+    }
+
+    if (Array.isArray(intVal)) {
+      intVal.push(val);
+    } else {
+      intVal = [ val ];
+    }
+
+    await this.varSetStream(stream, key, JSON.stringify(intVal));
+
+    return val;
+  }
+
+  async varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number> {
+    const intVal = parseInt(await this.varGetStream(stream, key, '0'));
+
+    await this.varSetStream(stream, key, typeof intVal === 'number' ? intVal + add : add);
+
+    return intVal;
   }
 
   private static getKey(key: string | string[]): string {
