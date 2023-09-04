@@ -25,20 +25,20 @@ export const Statistics = observer(({ statisticsStore }: { statisticsStore?: Sta
     {
       statisticsStore?.statistics.projects
         ? <div>
-            <SubTitle>Projects</SubTitle>
-            {
-              Object.entries(statisticsStore.statistics.projects).map(([ key, val ]) => {
-                return <React.Fragment>
-                  <SubSubTitle className='primary'>{ key }</SubSubTitle>
-                  {
-                    Object.entries(val).map(([ key, val ]) => {
-                      return <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
-                    })
-                  }
-                </React.Fragment>;
-              })
-            }
-          </div>
+          <SubTitle>Projects</SubTitle>
+          {
+            Object.entries(statisticsStore.statistics.projects).map(([ key, val ]) => {
+              return <React.Fragment>
+                <SubSubTitle className='primary'>{ key }</SubSubTitle>
+                {
+                  Object.entries(val).map(([ key, val ]) => {
+                    return <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
+                  })
+                }
+              </React.Fragment>;
+            })
+          }
+        </div>
         : null
     }
   </div>;

@@ -1,5 +1,5 @@
 import * as React from 'react-dom';
-import { computed, makeObservable, observable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 import { BaseStore } from './base-store';
 
 export class AlertsStore extends BaseStore {

@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/ts-node/dist/bin.js src/index.ts\"",
-    "dev:fe": "webpack serve"
+    "dev:fe": "webpack serve",
+    "lint": "eslint ./src/* --ext=.tsx,.ts --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -26,8 +27,11 @@
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",
+    "eslint": "^8.48.0",
+    "eslint-plugin-unused-imports": "^3.0.0",
     "html-loader": "3.1.0",
     "html-webpack-plugin": "5.5.0",
     "install": "^0.13.0",

@@ -1,4 +1,4 @@
-import { IProjectInput, Project } from './project';
+import { Project } from './project';
 import YAML from 'yaml'
 import fs from 'fs';
 import Container from 'typedi';
@@ -20,15 +20,15 @@ export function loadGlobalConfigFromFile(pathOrName: string): Project {
     const fileContent = fs.readFileSync(pathOrName, 'utf8');
 
     switch (pathOrName.slice(pathOrName.lastIndexOf('.') + 1)) {
-      case 'json':
-        config = JSON.parse(fileContent);
-        break;
-      case 'yaml':
-        config = YAML.parse(fileContent);
-        break;
-      case 'yml':
-        config = YAML.parse(fileContent);
-        break;  
+    case 'json':
+      config = JSON.parse(fileContent);
+      break;
+    case 'yaml':
+      config = YAML.parse(fileContent);
+      break;
+    case 'yml':
+      config = YAML.parse(fileContent);
+      break;  
     }
   } else {
     for (const ext of Object.keys(EXTENSIONS)) {
@@ -48,7 +48,7 @@ export function loadGlobalConfigFromFile(pathOrName: string): Project {
     if (config.auth) {
       const authStrategiesService = Container.get(AuthStrategiesService);
 
-      for (const [ defId, defConfig ] of Object.entries(config.auth)) {
+      for (const [ , defConfig ] of Object.entries(config.auth)) {
         authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defConfig.type);
       }
     }

@@ -1,4 +1,4 @@
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
@@ -16,14 +16,17 @@ export class GithubStorageService extends EntityService implements IStorageServi
   protected cache = new AwaitedCache();
 
   private get integration() {
-    return this.integrationsService.get(this.config?.integration ?? 'default', this.type) as GithubIntegrationService;
+    return this.integrationsService.get(
+      this.config?.integration ?? 'default',
+      this.type,
+    ) as GithubIntegrationService;
   }
 
   constructor(protected config?: { integration?: string }) {
     super();
   }
 
-  async userGet(id: string, type: string): Promise<IUser> {
+  async userGet(id: string): Promise<IUser> {
     const member = (await this.integration.orgMembersList()).find((member) => String(member.id) === id);
 
     if (member) {
@@ -43,14 +46,16 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return null;
   }
 
-  async varGet<D extends any = any>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
+  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKey(key);
     
     if (this.cache.has(intKey)) {
       return this.cache.get(intKey);
     }
 
-    const val = await this.integration.orgVarGet(intKey);
+    const val = isComplex
+      ? GithubStorageService.tryParseComplex(await this.integration.orgVarGet(intKey))
+      : await this.integration.orgVarGet(intKey);
 
     if (val !== undefined) {
       this.cache.set(intKey, val, 60);
@@ -59,34 +64,51 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return val !== undefined ? val : def;
   }
 
-  async varSet<D extends any = any>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
+  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
     const intKey = GithubStorageService.getKey(key);
 
     if (await this.varGet(target, key) === null) {
-      await this.integration.orgVarCreate(intKey, val);
+      await this.integration.orgVarCreate(intKey, isComplex
+        ? GithubStorageService.getVarComplex(val)
+        : val,
+      );
     } else {
-      await this.integration.orgVarUpdate(intKey, val);
+      await this.integration.orgVarUpdate(intKey, isComplex
+        ? GithubStorageService.getVarComplex(val)
+        : val,
+      );
     }
 
     this.cache.set(intKey, val, 60);
   }
 
-  async varAdd<D extends any = any>(target: IProjectTargetDef, key: string | string[], val: D): Promise<D> {
-    let intVal;
-    
-    try {
-      intVal = JSON.parse(await this.varGet(target, key, '[]'));
-    } catch (err) {
-
-    }
+  async varAdd<D>(
+    target: IProjectTargetDef,
+    key: string | string[],
+    val: D,
+    uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+  ): Promise<D> {
+    let intVal = await this.varGet(target, key, null, true);
 
     if (Array.isArray(intVal)) {
+      if (uniq) {
+        if (uniq === true) {
+          if (intVal.includes(val)) {
+            return val;
+          }
+        } else {
+          if (intVal.some((valExisting) => uniq(valExisting, val))) {
+            return val;
+          }
+        }
+      }
+
       intVal.push(val);
     } else {
       intVal = [ val ];
     }
 
-    await this.varSet(target, key, JSON.stringify(intVal));
+    await this.varSet(target, key, intVal, true);
 
     return val;
   }
@@ -99,14 +121,16 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return intVal;
   }
 
-  async varGetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
+  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKeyStream(key, stream.id);
 
     if (this.cache.has(intKey)) {
       return this.cache.get(intKey);
     }
 
-    const val = await this.integration.orgVarGet(intKey);
+    const val = isComplex
+      ? GithubStorageService.tryParseComplex(await this.integration.orgVarGet(intKey))
+      : await this.integration.orgVarGet(intKey);
 
     if (val !== undefined) {
       this.cache.set(intKey, val, 60);
@@ -115,34 +139,51 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return val !== undefined ? val : def;
   }
 
-  async varSetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
+  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
     const intKey = GithubStorageService.getKeyStream(key, stream.id);
 
     if (await this.varGetStream(stream, key) === null) {
-      await this.integration.orgVarCreate(intKey, val);
+      await this.integration.orgVarCreate(intKey, isComplex
+        ? GithubStorageService.getVarComplex(val)
+        : val,
+      );
     } else {
-      await this.integration.orgVarUpdate(intKey, val);
+      await this.integration.orgVarUpdate(intKey, isComplex
+        ? GithubStorageService.getVarComplex(val)
+        : val,
+      );
     }
 
     this.cache.set(intKey, val, 60);
   }
 
-  async varAddStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], val: D): Promise<D> {
-    let intVal;
-    
-    try {
-      intVal = JSON.parse(await this.varGetStream(stream, key, '[]'));
-    } catch (err) {
-
-    }
+  async varAddStream<D>(
+    stream: IProjectTargetStreamDef,
+    key: string | string[],
+    val: D,
+    uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+  ): Promise<D> {
+    let intVal = await this.varGetStream(stream, key, null, true);
 
     if (Array.isArray(intVal)) {
+      if (uniq) {
+        if (uniq === true) {
+          if (intVal.includes(val)) {
+            return val;
+          }
+        } else {
+          if (intVal.some((valExisting) => uniq(valExisting, val))) {
+            return val;
+          }
+        }
+      }
+
       intVal.push(val);
     } else {
       intVal = [ val ];
     }
 
-    await this.varSetStream(stream, key, JSON.stringify(intVal));
+    await this.varSetStream(stream, key, intVal, true);
 
     return val;
   }
@@ -165,5 +206,17 @@ export class GithubStorageService extends EntityService implements IStorageServi
     key = Array.isArray(key) ? key.join('__') : key;
 
     return `rc__${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');
+  }
+
+  private static getVarComplex(val) {
+    return JSON.stringify(val);
+  }
+
+  private static tryParseComplex(val) {
+    try {
+      return JSON.parse(val);
+    } catch (err) {
+      return undefined;
+    }
   }
 }

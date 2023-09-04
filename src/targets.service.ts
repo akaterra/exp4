@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectTarget, IProjectTargetDef } from './project';
+import { IProjectTargetDef } from './project';
 import { AwaitedCache } from './cache';
 import { ProjectsService } from './projects.service';
 import { VersioningsService } from './versionings.service';

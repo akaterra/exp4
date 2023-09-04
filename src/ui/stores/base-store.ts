@@ -1,11 +1,10 @@
-import { makeObservable, observable, computed, action, flow } from 'mobx';
-import { alertsStore } from '../blocks/alerts';
+import { observable } from 'mobx';
 
 export class BaseStore {
   @observable
-  isProcessing: boolean = false;
+    isProcessing: boolean = false;
 
-  mapToStores<T extends BaseStore, U extends any>(
+  mapToStores<T extends BaseStore, U>(
     source: Array<U> | Record<string, U>,
     mapper: (val: U, key: typeof source extends Array<U> ? number : string) => T,
     storesMaybeToDispose?: Array<T> | Record<string, T>,
@@ -54,7 +53,7 @@ export class BaseStore {
 
   }
 
-  update(state?) {
+  update(state?) { // eslint-disable-line
     return this;
   }
 }

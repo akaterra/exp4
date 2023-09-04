@@ -18,8 +18,8 @@ export class DetachActionService extends EntityService implements IActionService
       ? Object.keys(targetsStreams)
       : project.getFlow(action.ref.flowId).targets;
 
-    for (let sIdOfSource of sourceTargetIds) {
-      for (let tIdOfTarget of action.targets) {
+    for (const sIdOfSource of sourceTargetIds) {
+      for (const tIdOfTarget of action.targets) {
         const source = project.getTargetByTargetId(sIdOfSource);
         const target = project.getTargetByTargetId(tIdOfTarget);
         const streamIds = targetsStreams?.[tIdOfTarget] === true

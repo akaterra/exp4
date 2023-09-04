@@ -7,7 +7,7 @@ export class StatisticsStore extends BaseStore {
   readonly service = new StatisticsService();
 
   @observable
-  statistics: Record<string, any> = {};
+    statistics: Record<string, any> = {};
 
   constructor() {
     super();

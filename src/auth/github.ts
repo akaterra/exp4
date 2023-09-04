@@ -7,7 +7,6 @@ import { GithubIntegrationService } from '../integrations/github';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
-import fetch from 'node-fetch-native';
 import { prepareAuthData } from '../auth.service';
 
 @Service()
@@ -55,7 +54,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
     }
   }
 
-  async authorize(data: Record<string, any>): Promise<IUser> {
+  async authorize(data: Record<string, any>): Promise<IUser> { // eslint-disable-line
     return null;
   }
 

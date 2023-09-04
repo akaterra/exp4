@@ -4,7 +4,7 @@ import { Button } from './button';
 export const InfoCollapse = ({ children, isFailed, isIdle, showTitle, hideTitle }: any) => {
   const [ isShown, setIsShown ] = React.useState(false);
 
-  return <div>
+  return <div onMouseLeave={ () => setIsShown(false) }>
     <div>
       <Button className={
         isFailed

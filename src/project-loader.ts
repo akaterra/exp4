@@ -8,18 +8,12 @@ import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { loadDefinitionFromFile, loadDefinitionsFromDirectory } from './utils';
 
-const EXTENSIONS = {
-  json: 'json',
-  yaml: 'yaml',
-  yml: 'yaml',
-};
-
 export function loadProjectsFromDirectory(path: string, ids?: string[]): Project[] {
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
 
   return definitions
-    .filter((project) => !!project && (!ids?.length || ids.includes(project.id)))
-    .map((definition) => createProjectFromDefinition(definition, true));
+    .map((definition) => createProjectFromDefinition(definition, true))
+    .filter((project) => !!project && (!ids?.length || ids.includes(project.id)));
 }
 
 export function loadProjectFromFile(pathOrName: string): Project {
@@ -76,7 +70,7 @@ export function createProjectFromDefinition(definition: IProjectInput & { env?: 
     const actionsService = definition.env.actions;
 
     for (const [ ,flow ] of Object.entries(definition.flows)) {
-      for ( const [ defId, defConfig ] of Object.entries(flow.actions)) {
+      for (const [ , defConfig ] of Object.entries(flow.actions)) {
         defConfig.steps.forEach((c) => actionsService.get(c.type));
       }
     }

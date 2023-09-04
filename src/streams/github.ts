@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { IStreamService } from './stream.service';
-import { IProjectTarget, IProjectTargetDef, IProjectTargetStream } from '../project';
+import { IProjectTarget, IProjectTargetStream } from '../project';
 import { IStream } from '../stream';
 import { Service } from 'typedi';
 import { ITarget } from '../target';
@@ -36,7 +36,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     auth: process.env.GITHUB_TOKEN,
   });
 
-  actionRun(id: string) {
+  actionRun(id: string) { // eslint-disable-line
 
   }
 
@@ -127,13 +127,12 @@ export class GithubStreamService extends EntityService implements IStreamService
     };
   }
 
-  streamGetBuildState(stream: IGithubTargetStream): Promise<IStream> {
+  streamGetBuildState(stream: IGithubTargetStream): Promise<IStream> { // eslint-disable-line
     return null;
   }
 
   async streamMove(sourceStream: IGithubTargetStream, targetStream: IGithubTargetStream) {
     const source = await this.streamGetState(sourceStream);
-    const sourceIntegration = this.projectsService.get(sourceStream.ref.projectId).getEnvIntegraionByTargetStream<GithubIntegrationService>(sourceStream);
     const sourceBranchName = await this.getBranch(sourceStream);
     const targetIntegration = this.projectsService.get(targetStream.ref.projectId).getEnvIntegraionByTargetStream<GithubIntegrationService>(targetStream);
     const targetBranchName = await this.getBranch(targetStream);

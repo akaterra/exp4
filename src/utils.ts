@@ -17,7 +17,7 @@ export class PromiseContainer {
 
   }
 
-  async push(promise: Promise<any> | Function, ...args: any[]) {
+  async push(promise: Promise<any> | ((...args: any[]) => Promise<any>), ...args: any[]) {
     if (typeof promise === 'function') {
       promise = promise(...args);
     }
@@ -50,15 +50,15 @@ export function loadDefinitionFromFile(pathOrName: string): any {
     const fileContent = fs.readFileSync(pathOrName, 'utf8');
 
     switch (pathOrName.slice(pathOrName.lastIndexOf('.') + 1)) {
-      case 'json':
-        definition = JSON.parse(fileContent);
-        break;
-      case 'yaml':
-        definition = YAML.parse(fileContent);
-        break;
-      case 'yml':
-        definition = YAML.parse(fileContent);
-        break;  
+    case 'json':
+      definition = JSON.parse(fileContent);
+      break;
+    case 'yaml':
+      definition = YAML.parse(fileContent);
+      break;
+    case 'yml':
+      definition = YAML.parse(fileContent);
+      break;  
     }
 
     if (definition && typeof definition === 'object') {
@@ -82,7 +82,7 @@ export function loadDefinitionFromFile(pathOrName: string): any {
 export function Autowired(ref?: any | (() => any)) {
   let refSymbol;
 
-  return function(target: Object, propertyName: string) {
+  return function(target: Record<string, any>, propertyName: string) {
     Reflect.defineProperty(
       target,
       propertyName,

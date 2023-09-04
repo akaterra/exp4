@@ -1,5 +1,5 @@
-import { makeObservable, observable, computed, action, flow, reaction } from 'mobx';
-import { IProject, IProjectFlow, IProjectFlowAction, IProjectTargetStream } from "./dto/project";
+import { makeObservable, observable, computed, flow } from 'mobx';
+import { IProject, IProjectFlowAction, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
 import { BaseStore } from './base-store';
@@ -11,9 +11,9 @@ import { processing } from './utils';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
-  projectTargetState: IProjectTargetState;
+    projectTargetState: IProjectTargetState;
   @observable
-  selectedProjectTargetStreamIds: Record<string, boolean> = {};
+    selectedProjectTargetStreamIds: Record<string, boolean> = {};
 
   @computed
   get actions(): IProjectFlowAction[] {
@@ -118,13 +118,13 @@ export class ProjectTargetStore extends BaseStore {
 
 export class ProjectFlowActionParamsStore extends BaseStore {
   @observable
-  projectFlowAction: IProjectFlowAction;
+    projectFlowAction: IProjectFlowAction;
   @observable
-  isValid: boolean = true;
+    isValid: boolean = true;
   @observable
-  paramsErrors: Record<string, string | null> = {};
+    paramsErrors: Record<string, string | null> = {};
   @observable
-  paramsValues: Record<string, any> = {};
+    paramsValues: Record<string, any> = {};
 
   constructor(public projectsStore: ProjectsStore, projectFlowAction: IProjectFlowAction) {
     super();
@@ -177,7 +177,7 @@ export class ProjectFlowActionParamsStore extends BaseStore {
           }
 
           if (typeof constraints.maxLength === 'number' && (val?.length ?? 0) > constraints.maxLength) {
-            errors.push(`Max ${constraints.maxLength} symbols are allowed`);
+            errors.push(`Max ${constraints.maxLength} ${constraints.maxLength === 1 ? 'symbol is' : 'symbols are'} allowed`);
           }
 
           if (typeof constraints.min === 'number' && parseInt(val) < constraints.min) {
@@ -185,7 +185,7 @@ export class ProjectFlowActionParamsStore extends BaseStore {
           }
 
           if (typeof constraints.minLength === 'number' && (val?.length ?? 0) < constraints.minLength) {
-            errors.push(`Min ${constraints.minLength} symbols required`);
+            errors.push(`Min ${constraints.minLength} ${constraints.minLength === 1 ? 'symbol' : 'symbols'} required`);
           }
 
           if (errors.length) {
@@ -215,13 +215,15 @@ export class ProjectFlowActionParamsStore extends BaseStore {
 
 export class ProjectStore extends BaseStore {
   @observable
-  project: IProject;
+    project: IProject;
   @observable
-  projectTargetsStores: Record<string, ProjectTargetStore> = {};
+    projectTargetsStores: Record<string, ProjectTargetStore> = {};
   @observable
-  selectedAction: { stream: IProjectTargetStream | null, action: IProjectFlowAction, targetStore: ProjectTargetStore } | null;
+    selectedAction: { stream: IProjectTargetStream | null, action: IProjectFlowAction, targetStore: ProjectTargetStore } | null;
   @observable
-  selectedStreamWithState: { stream: IProjectTargetStream, streamState: IProjectTargetStreamState, targetStore: ProjectTargetStore } | null;
+    selectedStreamWithState: { stream: IProjectTargetStream, streamState: IProjectTargetStreamState, targetStore: ProjectTargetStore } | null;
+  @observable
+    selectedTab: number = 0;
 
   constructor(public projectsStore: ProjectsStore, project: IProject) {
     super();
@@ -257,7 +259,7 @@ export class ProjectStore extends BaseStore {
   *applyTargetStreamDetails(targetId: string, streamId: string) {
     const target = this.getTargetByTargetId(targetId);
     const targetStore = this.getTargetStoreByTargetId(targetId);
-    const action = yield detailsPanelStore.show({
+    yield detailsPanelStore.show({
       content: ProjectTargetStreamDetailsModalContent,
       props: {
         projectTarget: this.getTargetStoreByTargetId(targetId),
@@ -295,21 +297,21 @@ export class ProjectStore extends BaseStore {
     });
 
     switch (action) {
-      case 'cancel':
-        break;
-      case 'ok':
-        yield this.projectsStore.service.runAction(
-          this.project.id,
-          projectFlow?.id,
-          actionId,
-          {
-            [ targetId ]: selectedStreamIds as [ string, ...string[] ],
-          },
-          projectFlowActionParamsStore.paramsValues,
-        );
-        yield this.fetchState();
+    case 'cancel':
+      break;
+    case 'ok':
+      yield this.projectsStore.service.runAction(
+        this.project.id,
+        projectFlow?.id,
+        actionId,
+        {
+          [targetId]: selectedStreamIds as [ string, ...string[] ],
+        },
+        projectFlowActionParamsStore.paramsValues,
+      );
+      yield this.fetchState();
 
-        break;
+      break;
     }
   }
 }

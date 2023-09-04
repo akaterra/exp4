@@ -1,10 +1,9 @@
 import 'reflect-metadata';
 import 'universal-dotenv/register';
 import cors from 'cors';
-import { loadProjectFromFile, loadProjectsFromDirectory } from './project-loader';
-import { GithubStreamService, IGithubTargetStream } from './streams/github';
+import { loadProjectsFromDirectory } from './project-loader';
+import { GithubStreamService } from './streams/github';
 import Container from 'typedi';
-import { IStorageService } from './storages/storage.service';
 import { GithubStorageService } from './storages/github';
 import { VersioningsService } from './versionings.service';
 import { ProjectsService } from './projects.service';
@@ -30,10 +29,11 @@ import { DetachActionService } from './actions/detach';
 import { loadGlobalConfigFromFile } from './global-config-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
-import { err, loadDefinitionsFromDirectory } from './utils';
+import { err } from './utils';
 import { authMethodList } from './api/auth/list-methods';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
+import { StreamHistoryRollbackActionService } from './actions/stream-history-rollback';
 
 function auth(req, res, next) {
   req.user = authorize(req.headers.authorization);
@@ -53,6 +53,7 @@ function auth(req, res, next) {
   actions.add(Container.get(VersionReleaseActionService));
   actions.add(Container.get(RunActionActionService));
   actions.add(Container.get(StreamVersionOverrideActionService));
+  actions.add(Container.get(StreamHistoryRollbackActionService));
   const storages = Container.get(StoragesService);
   storages.addFactory(GithubStorageService);
   const streams = Container.get(StreamsService);
@@ -65,7 +66,7 @@ function auth(req, res, next) {
   authStrategies.addFactory(GithubAuthStrategyService);
 
   const c = loadGlobalConfigFromFile('global');
-  const p = loadProjectsFromDirectory('./projects', (process.env.PROJECT_IDS ?? '').split(','));
+  const p = loadProjectsFromDirectory('./projects', (process.env.PROJECT_IDS || '').split(',').filter((id) => !!id));
 
   p.forEach((p) => projects.add(p));
 
@@ -91,7 +92,7 @@ function auth(req, res, next) {
   app.use(cors());
   app.use(express.json());
 
-  function error(err, req, res, next) {
+  function error(err, req, res) {
     console.error(err, err.stack);
 
     if (!res.statusCode || res.statusCode < 300) {

@@ -143,6 +143,10 @@ flows:
             title: ""
             targets:
               - "stg"
+          - type: "streamHistory:rollback"
+            title: ""
+            targets:
+              - "stg"
       test:
         title: "Run tests"
         steps:
@@ -216,6 +220,10 @@ flows:
         title: "Exclude"
         steps:
           - type: "detach"
+            title: ""
+            targets:
+              - "stgHotfix"
+          - type: "streamHistory:rollback"
             title: ""
             targets:
               - "stgHotfix"

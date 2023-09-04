@@ -12,6 +12,8 @@ export interface IVersioningService extends IService {
 
   release(target: IProjectTargetDef, params?: Record<string, any>): Promise<string>;
 
+  rollback(target: IProjectTargetDef, params?: Record<string, any>): Promise<string>;
+
   getCurrentStream(stream: IProjectTargetStreamDef): Promise<string>;
 
   formatStream(target: IProjectTargetStreamDef, entity: any): Promise<any>;
@@ -21,6 +23,8 @@ export interface IVersioningService extends IService {
   patchStream(target: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string>;
 
   releaseStream(target: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string>;
+
+  rollbackStream(target: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string>;
 
   exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string>;
 }

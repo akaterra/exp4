@@ -5,9 +5,9 @@ export const CLOSE = Symbol('close');
 
 export class ModalStore {
   @observable
-  optsState?: ModalStore['opts'];
+    optsState?: ModalStore['opts'];
   @observable
-  selectedAction?: string;
+    selectedAction?: string;
 
   @computed
   get isShow(): boolean {

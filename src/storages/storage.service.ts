@@ -5,19 +5,29 @@ import { IUser } from '../user';
 export interface IStorageService extends IService {
   userGet(id: string, type: string): Promise<IUser>;
 
-  varGet<D extends any = any>(target: IProjectTargetDef, key: string | string[], def: D): Promise<D>;
+  varGet<D>(target: IProjectTargetDef, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
 
-  varSet<D extends any = any>(target: IProjectTargetDef, key: string | string[], val: D): Promise<void>;
+  varSet<D>(target: IProjectTargetDef, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
 
-  varAdd<D extends any = any>(target: IProjectTargetDef, key: string | string[], val: D): Promise<D>;
+  varAdd<D>(
+    target: IProjectTargetDef,
+    key: string | string[],
+    val: D,
+    uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+  ): Promise<D>;
 
   varInc(target: IProjectTargetDef, key: string | string[], add: number): Promise<number>;
 
-  varGetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], def: D): Promise<D>;
+  varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
 
-  varSetStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], val: D): Promise<void>;
+  varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
 
-  varAddStream<D extends any = any>(stream: IProjectTargetStreamDef, key: string | string[], val: D): Promise<D>;
+  varAddStream<D>(
+    stream: IProjectTargetStreamDef,
+    key: string | string[],
+    val: D,
+    uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+  ): Promise<D>;
 
   varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number>;
 }

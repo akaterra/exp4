@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
+import { IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
 import { StreamsService } from './streams.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
@@ -9,8 +9,8 @@ import { PromiseContainer, iter as iterArr } from './utils';
 import { ActionsService } from './actions.service';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
-import {ProjectState} from './project-state';
-import {StatisticsService} from './statistics.service';
+import { ProjectState } from './project-state';
+import { StatisticsService } from './statistics.service';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {

@@ -4,34 +4,34 @@ import { C } from "./grid";
 import { Label } from "./label";
 
 export function maybeClassName(base, extended) {
-    return extended ? `${base} ${extended}` : base;
+  return extended ? `${base} ${extended}` : base;
 }
 
 export function maybeLabeledControl(Element, x, label?, error?) {
-    if (error) {
-        Element = <React.Fragment>
-            { Element }
-            <div className='label failure flex flex-right'>{ error }</div>
-        </React.Fragment>
+  if (error) {
+    Element = <React.Fragment>
+      { Element }
+      <div className='label failure flex flex-right'>{ error }</div>
+    </React.Fragment>
+  }
+
+  if (!label) {
+    if (x !== null) {
+      return <C x={ x }>{ Element }</C>;
     }
 
-    if (!label) {
-        if (x !== null) {
-            return <C x={ x }>{ Element }</C>;
-        }
+    return Element;
+  }
 
-        return Element;
-    }
-
-    return x !== null
-        ?<C className='children-gap-full' x={ x }>
-            <Label>{ label }</Label>
-            { Element }
-        </C>
-        : <Fragment>
-            <Label>{ label }</Label>
-            { Element }
-        </Fragment>;
+  return x !== null
+    ?<C className='children-gap-full' x={ x }>
+      <Label>{ label }</Label>
+      { Element }
+    </C>
+    : <Fragment>
+      <Label>{ label }</Label>
+      { Element }
+    </Fragment>;
 }
 
 export function stylize(Component, def: {
@@ -42,19 +42,19 @@ export function stylize(Component, def: {
     verPad?: true;
     style?: any;
 } & Record<string, any>) {
-    const s = def.style;
-    let set = false;
+  const s = def.style;
+  let set = false;
 
-    for (const key of Object.keys(def)) {
-        if (def[key] && key !== 'style') {
-            def[key] = key;
-            set = true;
-        } else {
-            delete def[key];
-        }
+  for (const key of Object.keys(def)) {
+    if (def[key] && key !== 'style') {
+      def[key] = key;
+      set = true;
+    } else {
+      delete def[key];
     }
+  }
 
-    const inlineClassName = set ? Object.values({ ...def }).join(' ') : '';
+  const inlineClassName = set ? Object.values({ ...def }).join(' ') : '';
 
-    return (props) => <Component className={ inlineClassName } style={ s } { ...props } />;
+  return (props) => <Component className={ inlineClassName } style={ s } { ...props } />;
 }

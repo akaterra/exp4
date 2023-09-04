@@ -1,4 +1,4 @@
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import semver from 'semver';
 import { IVersioningService } from './versioning.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
@@ -45,18 +45,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
   async override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string> {
     const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source) ?? '0.1.0';
+    const storage = this.getStorage(target);
 
-    await this.getStorage(target).varSet(
-      target,
-      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
-      sourceVersion,
-    );
+    await this.setTargetVersionHistory(target, storage, sourceVersion);
+    await this.setTargetVersion(target, storage, sourceVersion);
 
     return sourceVersion;
   }
 
   async patch(target: IProjectTargetDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrent(target);
+    const storage = this.getStorage(target);
 
     if (version) {
       if (params?.releaseName) {
@@ -68,17 +67,15 @@ export class SemverVersioningService extends EntityService implements IVersionin
       version = '0.1.0';
     }
 
-    await this.getStorage(target).varSet(
-      target,
-      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
-      version,
-    );
+    await this.setTargetVersionHistory(target, storage, version);
+    await this.setTargetVersion(target, storage, version);
 
     return version;
   }
 
   async release(target: IProjectTargetDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrent(target);
+    const storage = this.getStorage(target);
 
     if (version) {
       if (params?.releaseName) {
@@ -90,11 +87,42 @@ export class SemverVersioningService extends EntityService implements IVersionin
       version = '0.1.0';
     }
 
-    await this.getStorage(target).varSet(
+    await this.setTargetVersionHistory(target, storage, version);
+    await this.setTargetVersion(target, storage, version);
+
+    return version;
+  }
+
+  async rollback(target: IProjectTargetDef): Promise<string> {
+    const storage = this.getStorage(target);
+    const targetVersion = await this.getCurrent(target);
+    const versionHistory = await storage.varGet(
       target,
-      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
-      version,
+      [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
+      null,
+      true,
     );
+
+    let version = null;
+
+    if (Array.isArray(versionHistory)) {
+      const index = versionHistory.findIndex((val) => val?.version === targetVersion);
+
+      if (index !== -1) {
+        versionHistory.splice(index, 1);
+      }
+
+      version = versionHistory[index - 1]?.version ?? null;
+
+      await storage.varSet(
+        target,
+        [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
+        versionHistory,
+        true,
+      );
+    }
+
+    await this.setTargetVersion(target, storage, version);
 
     return version;
   }
@@ -122,18 +150,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
   async overrideStream(source: IProjectTargetDef, target: IProjectTargetStreamDef): Promise<string> {
     const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source) ?? '0.1.0';
+    const storage = this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId));
 
-    await this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId)).varSetStream(
-      target,
-      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
-      sourceVersion,
-    );
+    await this.setStreamVersionHistory(target, storage, sourceVersion);
+    await this.setStreamVersion(target, storage, sourceVersion);
 
     return sourceVersion;
   }
 
   async patchStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrentStream(stream);
+    const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
     if (version) {
       version = semver.inc(version, 'patch');
@@ -145,17 +172,15 @@ export class SemverVersioningService extends EntityService implements IVersionin
       version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
-    await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId)).varSetStream(
-      stream,
-      [ 'version', stream.ref.projectId, this.config?.namespace ?? stream.ref.targetId ],
-      version,
-    );
+    await this.setStreamVersionHistory(stream, storage, version);
+    await this.setStreamVersion(stream, storage, version);
 
     return version;
   }
 
   async releaseStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrentStream(stream);
+    const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
     if (version) {
       version = semver.inc(version, 'minor');
@@ -167,25 +192,57 @@ export class SemverVersioningService extends EntityService implements IVersionin
       version = semver.inc(version, 'prerelease', params?.releaseName, false);
     }
 
-    await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId)).varSetStream(
+    await this.setStreamVersionHistory(stream, storage, version);
+    await this.setStreamVersion(stream, storage, version);
+
+    return version;
+  }
+
+  async rollbackStream(stream: IProjectTargetStreamDef): Promise<string> {
+    const target = this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId);
+    const targetVersion = await this.getCurrent(target);
+    const storage = this.getStorage(target);
+    const versionHistory = await storage.varGetStream(
       stream,
-      [ 'version', stream.ref.projectId, this.config?.namespace ?? stream.ref.targetId ],
-      version,
+      [ 'versionHistory', stream.ref.projectId, this.config?.namespace ?? stream.id ],
+      null,
+      true,
     );
+
+    let version = null;
+
+    if (Array.isArray(versionHistory)) {
+      const index = versionHistory.findIndex((val) => val?.version === targetVersion);
+
+      if (index !== -1) {
+        versionHistory.splice(index, 1);
+
+        version = versionHistory[index - 1]?.version ?? null;
+
+        await storage.varSetStream(
+          stream,
+          [ 'versionHistory', stream.ref.projectId, this.config?.namespace ?? stream.id ],
+          versionHistory,
+          true,
+        );
+
+        await this.setStreamVersion(stream, storage, version);
+      }
+    }
 
     return version;
   }
 
   async exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string> {
     switch (action) {
-      case 'current':
-        return this.getCurrent(target);
-      case 'override':
-        return this.override(source, target);
-      case 'patch':
-        return this.patch(target);
-      case 'release':
-        return this.release(target);
+    case 'current':
+      return this.getCurrent(target);
+    case 'override':
+      return this.override(source, target);
+    case 'patch':
+      return this.patch(target);
+    case 'release':
+      return this.release(target);
     }
 
     throw new Error(`Unknown action: ${action}`);
@@ -193,5 +250,39 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
   private getStorage(target: IProjectTargetDef): IStorageService {
     return this.projectsService.get(target.ref.projectId).getEnvStorageByStorageId(this.config?.storage ?? 'default');
+  }
+
+  private async setTargetVersion(target: IProjectTargetDef, storage: IStorageService, version: string) {
+    await storage.varSet(
+      target,
+      [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
+      version,
+    );
+  }
+
+  private async setTargetVersionHistory(target: IProjectTargetDef, storage: IStorageService, version: string) {
+    await storage.varAdd<any>(
+      target,
+      [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
+      { at: new Date(), version },
+      (existingVal, val) => existingVal?.version === val?.version,
+    );
+  }
+
+  private async setStreamVersion(stream: IProjectTargetStreamDef, storage: IStorageService, version: string) {
+    await storage.varSetStream(
+      stream,
+      [ 'version', stream.ref.projectId, this.config?.namespace ?? stream.id ],
+      version,
+    );
+  }
+
+  private async setStreamVersionHistory(stream: IProjectTargetStreamDef, storage: IStorageService, version: string) {
+    await storage.varAddStream<any>(
+      stream,
+      [ 'versionHistory', stream.ref.projectId, this.config?.namespace ?? stream.id ],
+      { at: new Date(), version },
+      (existingVal, val) => existingVal?.version === val?.version,
+    );
   }
 }

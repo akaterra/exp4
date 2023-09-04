@@ -30,7 +30,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   async branchDelete(branch?, repo?, org?) {
-    const res = (await this.client.git.deleteRef({
+    await this.client.git.deleteRef({
       owner: this.org(org), repo: this.repo(repo), ref: `heads/${this.branch(branch)}`,
     }).catch((err) => {
       if (err?.status === 404 || err?.status === 422) {
@@ -38,15 +38,15 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
       }
 
       return Promise.reject(err);
-    })).data;
+    });
   }
 
   async orgVarCreate(key: string, val: any, org?) {
-    const res = this.config?.useRepositoryAsOrg
+    this.config?.useRepositoryAsOrg
       ? await this.repositoryVarCreate(key, val, undefined, org)
-      : (await this.client.rest.actions.createOrgVariable({
+      : await this.client.rest.actions.createOrgVariable({
         org: this.org(org), name: key, value: val, visibility: 'private',
-      })).data;
+      });
   }
 
   async orgVarGet(key: string, org?) {
@@ -66,11 +66,21 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   async orgVarUpdate(key: string, val: any, org?) {
-    const res = this.config?.useRepositoryAsOrg
+    if (val === null) {
+      if (!this.config?.useRepositoryAsOrg) {
+        await this.client.rest.actions.deleteOrgVariable({
+          org: this.org(org), name: key,
+        });
+      }
+
+      return;
+    }
+
+    this.config?.useRepositoryAsOrg
       ? await this.repositoryVarUpdate(key, val, undefined, org)
-      : (await this.client.rest.actions.updateOrgVariable({
+      : await this.client.rest.actions.updateOrgVariable({
         org: this.org(org), name: key, value: val, visibility: 'private',
-      })).data;
+      });
   }
 
   async orgMembersList(org?) {
@@ -80,9 +90,9 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   async repositoryVarCreate(key: string, val: any, repo?, org?) {
-    const res = (await this.client.rest.actions.createRepoVariable({
+    await this.client.rest.actions.createRepoVariable({
       owner: this.org(org), name: key, repo: this.repo(repo), value: val, visibility: 'private',
-    })).data;
+    });
   }
 
   async repositoryVarGet(key: string, repo?, org?) {
@@ -100,9 +110,17 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   async repositoryVarUpdate(key: string, val: any, repo?, org?) {
-    const res = (await this.client.rest.actions.updateRepoVariable({
+    if (val === null) {
+      await this.client.rest.actions.deleteRepoVariable({
+        owner: this.org(org), name: key, repo: this.repo(repo),
+      });
+
+      return;
+    }
+
+    await this.client.rest.actions.updateRepoVariable({
       owner: this.org(org), name: key, repo: this.repo(repo), value: val, visibility: 'private',
-    })).data;
+    });
   }
 
   async gitCreateReference(refName, sha, repo?, org?) {

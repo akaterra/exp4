@@ -12,10 +12,10 @@ export const Modal = observer(({ store }: { store?: ModalStore }) => {
   }
 
   const TitleComponent: React.Component | React.FunctionComponent | undefined = typeof store?.optsState?.title === 'string'
-    ? (props?) => <span>{ store?.optsState?.title as string }</span>
+    ? () => <span>{ store?.optsState?.title as string }</span>
     : store?.optsState?.title;
   const ContentComponent: React.Component | React.FunctionComponent | undefined = typeof store?.optsState?.content === 'string'
-    ? (props?) => <span>{ store?.optsState?.content as string }</span>
+    ? () => <span>{ store?.optsState?.content as string }</span>
     : store?.optsState?.content;
 
   return <ModalAtom

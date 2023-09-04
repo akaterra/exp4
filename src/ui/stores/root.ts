@@ -1,25 +1,25 @@
-import { computed, flow, makeObservable, observable } from 'mobx';
+import { flow, makeObservable, observable } from 'mobx';
 import { IUser } from './dto/user';
 import { UsersService } from '../services/users.service';
 import { IAuthStrategyMethod } from './dto/auth';
 import { processing } from './utils';
 import { RestApiService } from '../services/rest-api.service';
-import {ProjectsStore} from './projects';
-import {StatisticsStore} from './statistics';
+import { ProjectsStore } from './projects';
+import { StatisticsStore } from './statistics';
 
 export class RootStore {
-  private isReadyResolve: Function;
+  private isReadyResolve: () => any;
 
   readonly projectsStore = new ProjectsStore();
   readonly statisticsStore = new StatisticsStore();
   readonly usersService = new UsersService();
 
   @observable
-  authMethods: Record<string, IAuthStrategyMethod> = {};
+    authMethods: Record<string, IAuthStrategyMethod> = {};
   @observable
-  isAuthorized: boolean | null = null;
+    isAuthorized: boolean | null = null;
   @observable
-  user: IUser | null = null;
+    user: IUser | null = null;
 
   accessToken: string | null = null;
   isReady: Promise<void>;

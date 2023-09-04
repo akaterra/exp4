@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SubSubTitle, SubTitle, Title } from '../atoms/title';
+import { SubTitle, Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
@@ -7,8 +7,9 @@ import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
 import { Status } from '../enums/status';
 import { InfoCollapse } from '../atoms/info-collapse';
+import {Tabs} from '../atoms/tabs';
 
-export const ProjectTarget = observer(({projectTarget}: {projectTarget?: ProjectTargetStore}) => {
+export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
   if (!projectTarget?.target?.id) {
     return null;
   }
@@ -35,9 +36,9 @@ export const ProjectTarget = observer(({projectTarget}: {projectTarget?: Project
     </div>
     <div>
       {
-        projectTarget.streamsWithStates.map(({stream, streamState, isSelected}, i) => {
-          const lastAction = streamState?.history?.action?.[ 0 ];
-          const lastChange = streamState?.history?.change?.[ 0 ];
+        projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
+          const lastAction = streamState?.history?.action?.[0];
+          const lastChange = streamState?.history?.change?.[0];
           const isFailed = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED;
 
           return <div key={i} className={lastChange ? '' : 'opacity-med'}>
@@ -65,7 +66,25 @@ export const ProjectTarget = observer(({projectTarget}: {projectTarget?: Project
   </div>;
 });
 
-export const Project = observer(({project}: {project?: ProjectStore}) => {
+export const ProjectTargets = observer(({ project }: { project?: ProjectStore }) => {
+  if (!project?.project?.id) {
+    return null;
+  }
+
+  return <div className='row paragraph'>
+    {
+      Object.values(project.projectTargetsStores).map((projectTargetStore) => {
+        return <div className='ccc -s- w25'>
+          <div className='panel primary shadow shadow-low unbound'>
+            <ProjectTarget projectTarget={projectTargetStore} />
+          </div>
+        </div>;
+      })
+    }
+  </div>;
+});
+
+export const Project = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
     return null;
   }
@@ -73,16 +92,11 @@ export const Project = observer(({project}: {project?: ProjectStore}) => {
   return <div>
     <Title>{project.project?.title ?? project.project?.id}</Title>
     <Label>{project.project?.description ?? 'No description'}</Label>
-    <div className='row paragraph'>
-      {
-        Object.values(project.projectTargetsStores).map((projectTargetStore) => {
-          return <div className='ccc -s- w25'>
-            <div className='panel primary shadow shadow-low unbound'>
-              <ProjectTarget projectTarget={projectTargetStore} />
-            </div>
-          </div>;
-        })
-      }
+    <div className='paragraph'>
+      <Tabs selectedIndex={ project.selectedTab } tabs={ [ 'Targets', 'Statistics' ] } tabsDecoration='default'>
+        <ProjectTargets project={ project } />
+        <div>1</div>
+      </Tabs>
     </div>
   </div>;
 });

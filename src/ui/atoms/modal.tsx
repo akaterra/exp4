@@ -24,7 +24,7 @@ export const Modal = ({
   onClose = undefined,
   onSelect = undefined,
 }: {
-  buttons?: Record<string, { action?: string; disabled?: Boolean; onSelect?: (action?) => void, title?: string, type?: string }>;
+  buttons?: Record<string, { action?: string; disabled?: boolean; onSelect?: (action?) => void, title?: string, type?: string }>;
   children,
   title: React.ReactElement | string;
   onClose?: () => void,

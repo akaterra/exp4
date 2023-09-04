@@ -1,13 +1,13 @@
 import React from 'react';
 
 const componentStyle = {
-    block: {
-        display: 'flex',
-    },
+  block: {
+    display: 'flex',
+  },
 }
 
 export const Block = ({ children, className = '', style = null }) => {
-    return <div className={ className } style={ style ?? componentStyle.block }>{ children }</div>;
+  return <div className={ className } style={ style ?? componentStyle.block }>{ children }</div>;
 };
 
 Block.stylize = (style: {
@@ -18,21 +18,21 @@ Block.stylize = (style: {
     verPad?: true;
     style?: any;
 }) => {
-    const s = style.style;
-    let set = false;
+  const s = style.style;
+  let set = false;
 
-    for (const key of Object.keys(style)) {
-        if (style[key] && key !== 'style') {
-            style[key] = key;
-            set = true;
-        } else {
-            delete style[key];
-        }
+  for (const key of Object.keys(style)) {
+    if (style[key] && key !== 'style') {
+      style[key] = key;
+      set = true;
+    } else {
+      delete style[key];
     }
+  }
 
-    const inlineClassName = set ? Object.values({ padding: 'padding', ...style }).join(' ') : '';
+  const inlineClassName = set ? Object.values({ padding: 'padding', ...style }).join(' ') : '';
 
-    return (props) => <Block className={ inlineClassName } style={ s } { ...props } />;
+  return (props) => <Block className={ inlineClassName } style={ s } { ...props } />;
 }
 
 export type Elem = (props: any) => any;

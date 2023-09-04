@@ -9,10 +9,10 @@ export const componentSingleStyle = {
 };
 
 export const Content = ({ children, label = null, x = undefined, style = {} }) => {
-    const control = <div
-        className='children-gap-full'
-        style={ style }
-    >{ children }</div>;
+  const control = <div
+    className='children-gap-full'
+    style={ style }
+  >{ children }</div>;
 
-    return maybeLabeledControl(control, x, label);
+  return maybeLabeledControl(control, x, label);
 }

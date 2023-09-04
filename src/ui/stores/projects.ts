@@ -1,5 +1,4 @@
-import { makeObservable, observable, computed, action, flow } from 'mobx';
-import { RestApiService } from '../services/rest-api.service';
+import { makeObservable, observable, computed, flow } from 'mobx';
 import { IProject } from './dto/project';
 import { ProjectsService } from '../services/projects.service';
 import { BaseStore } from './base-store';
@@ -10,11 +9,11 @@ export class ProjectsStore extends BaseStore {
   readonly service = new ProjectsService();
 
   @observable
-  projects: Record<string, IProject> = {};
+    projects: Record<string, IProject> = {};
   @observable
-  projectsStores: Record<string, ProjectStore> = {};
+    projectsStores: Record<string, ProjectStore> = {};
   @observable
-  selectedProjectId: string;
+    selectedProjectId: string;
 
   @computed
   get selectedProjectStore() {

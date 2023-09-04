@@ -345,12 +345,12 @@ export class Project implements IProject {
     return this.env.storages.get(storageId);
   }
 
-  getEnvStreamByTargetIdAndStreamId<T extends IStreamService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']) {
-    return this.env.streams.get(this.targets[targetId]?.streams[streamId]?.type);
+  getEnvStreamByTargetIdAndStreamId<T extends IStreamService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']): T {
+    return this.env.streams.get(this.targets[targetId]?.streams[streamId]?.type) as T;
   }
 
-  getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef) {
-    return this.env.streams.get(stream.type);
+  getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef): T {
+    return this.env.streams.get(stream.type) as T;
   }
 
   getEnvVersioningByTargetId(targetId: IProjectTargetDef['id']) {
@@ -414,33 +414,33 @@ export class Project implements IProject {
       return;
     }
 
-    let def: Record<string, any> = {};
+    const def: Record<string, any> = {};
 
     switch (action.type) {
-      case 'number':
-        def.type = 'number';
+    case 'number':
+      def.type = 'number';
 
-        if (typeof action.constraints?.min === 'number') {
-          def.minimum = action.constraints?.min;
-        }
+      if (typeof action.constraints?.min === 'number') {
+        def.minimum = action.constraints?.min;
+      }
 
-        if (typeof action.constraints?.max === 'number') {
-          def.maximum = action.constraints?.max;
-        }
+      if (typeof action.constraints?.max === 'number') {
+        def.maximum = action.constraints?.max;
+      }
 
-        break;
-      case 'string':
-        def.type = 'string';
+      break;
+    case 'string':
+      def.type = 'string';
 
-        if (typeof action.constraints?.minLength === 'number') {
-          def.minLength = action.constraints?.minLength;
-        }
+      if (typeof action.constraints?.minLength === 'number') {
+        def.minLength = action.constraints?.minLength;
+      }
 
-        if (typeof action.constraints?.maxLength === 'number') {
-          def.maxLength = action.constraints?.maxLength;
-        }
+      if (typeof action.constraints?.maxLength === 'number') {
+        def.maxLength = action.constraints?.maxLength;
+      }
 
-        break;
+      break;
     }
 
     if (def.type && action.constraints?.enum) {

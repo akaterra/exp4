@@ -1,4 +1,4 @@
-import {Status} from './enums/status';
+import { Status } from './enums/status';
 import { IProjectTargetStream } from './project';
 
 export interface IStreamHistoryStep {

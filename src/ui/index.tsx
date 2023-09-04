@@ -5,20 +5,18 @@ import 'normalize.css';
 import { Navigation } from './blocks/navigation';
 import { ProjectsStore } from './stores/projects';
 import { Row } from './atoms/row';
-import { Project } from './blocks/project';
+import { Project, ProjectTargets } from './blocks/project';
 import { observer } from 'mobx-react-lite';
-import { GlobalModal, Modal, modalStore } from './blocks/modal';
+import { GlobalModal } from './blocks/modal';
 import { GlobalDetailsPanel } from './blocks/details-panel';
 import { GlobalAlerts } from './blocks/alerts';
 import { RootStore, rootStore } from './stores/root';
 import {
   createBrowserRouter,
   Outlet,
-  Router,
   RouterProvider,
 } from "react-router-dom";
 import { IProject } from './stores/dto/project';
-import { StatisticsStore } from './stores/statistics';
 import { Statistics } from './blocks/statistics';
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
@@ -64,7 +62,7 @@ export const App = () => {
       children: [ {
         path: '/projects/:id',
         element: <RouteProject projects={ rootStore.projectsStore } />,
-        loader: async ({ request, params }) => {
+        loader: async ({ params }) => {
           await rootStore.isReady;
           await rootStore.projectsStore.fetchProject(params.id as IProject['id']);
   
@@ -73,7 +71,7 @@ export const App = () => {
       }, {
         path: '/statistics',
         element: <Statistics statisticsStore={ rootStore.statisticsStore } />,
-        loader: async ({ request, params }) => {
+        loader: async () => {
           await rootStore.isReady;
           await rootStore.statisticsStore.fetch();
   

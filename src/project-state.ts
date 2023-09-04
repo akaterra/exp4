@@ -1,4 +1,4 @@
-import {Service} from 'typedi';
+import { Service } from 'typedi';
 import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { ProjectsService } from './projects.service';
 import { IStream } from './stream';
