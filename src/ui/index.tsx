@@ -60,11 +60,21 @@ export const App = () => {
       element: <Layout rootStore={ rootStore } />,
       errorElement: <div />,
       children: [ {
-        path: '/projects/:id',
+        path: '/projects/:id/:tab?',
         element: <RouteProject projects={ rootStore.projectsStore } />,
         loader: async ({ params }) => {
           await rootStore.isReady;
           await rootStore.projectsStore.fetchProject(params.id as IProject['id']);
+
+          if (rootStore.projectsStore.selectedProjectStore) {
+            switch (params.tab) {
+              case 'statistics':
+                rootStore.projectsStore.selectedProjectStore.selectedTab = 1;
+                break;
+              default:
+                rootStore.projectsStore.selectedProjectStore.selectedTab = 0;
+            }
+          }
   
           return null;
         },
