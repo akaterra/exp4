@@ -8,13 +8,15 @@ import { Button } from '../atoms/button';
 import { Status } from '../enums/status';
 import { InfoCollapse } from '../atoms/info-collapse';
 import {Tabs} from '../atoms/tabs';
+import { TitledLine } from '../atoms/status-line';
+import * as _ from 'lodash';
 
 export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
   if (!projectTarget?.target?.id) {
     return null;
   }
 
-  return <div className='children-gap'>
+  return <div className='children-gap span default'>
     <div>
       <SubTitle>
         {projectTarget.target?.title ?? projectTarget.target?.id}
@@ -66,6 +68,29 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
   </div>;
 });
 
+export const ProjectStatistics = observer(({ project }: { project?: ProjectStore }) => {
+  if (!project?.project?.id) {
+    return null;
+  }
+
+	return <div className='paragraph children-gap'>
+    {
+			Object.entries(project?.projectStatistics).map(([ key, val ]) => {
+				return <div>
+					<TitledLine title={ `${_.startCase(key)}:` }>
+						{
+							Array.isArray(val) ? null : val
+						}
+						{
+							Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
+						}
+					</TitledLine>
+				</div>;
+			})
+    }
+  </div>;    
+});
+
 export const ProjectTargets = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
     return null;
@@ -93,9 +118,16 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
     <Title>{project.project?.title ?? project.project?.id}</Title>
     <Label>{project.project?.description ?? 'No description'}</Label>
     <div className='paragraph'>
-      <Tabs selectedIndex={ project.selectedTab } tabs={ [ 'Targets', 'Statistics' ] } tabsDecoration='default'>
+      <Tabs
+				selectedIndex={ project.selectedTab }
+				tabs={ [
+					{ type: 'link', href: `/projects/${project.project.id}`, title: 'Targets' },
+					{ type: 'link', href: `/projects/${project.project.id}/statistics`, title: 'Statistics' },
+				] }
+				tabsDecoration='default'
+			>
         <ProjectTargets project={ project } />
-        <div>1</div>
+        <ProjectStatistics project={ project } />
       </Tabs>
     </div>
   </div>;

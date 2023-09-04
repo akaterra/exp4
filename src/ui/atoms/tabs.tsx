@@ -1,7 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { C } from "./grid";
 import { Fragment, useEffect, useState } from 'react';
 import { Row } from './row';
+import { NavLink } from './link';
 
 export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false, onlyChild = false, selectedIndex = 0, tabs, tabsDecoration = undefined, onSelect = undefined }: any) => {
   const [ currentSelectedIndex, setCurrentSelectedIndex ] = useState(selectedIndex ?? 0);
@@ -19,13 +20,37 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
             <div className={ `tabs underlined ${decoration ?? ''}` }>
               <div className='tabs-bar'>
                 {
-                  tabs.map((tab, i) => <button className={ i.toString() === String(currentSelectedIndex) ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
-                    setCurrentSelectedIndex(i);
+                  tabs.map((tab, i) => {
+                    if (tab && typeof tab === 'object') {
+                      let Component: any;
+                      let props;
 
-                    if (onSelect) {
-                      onSelect(i);
+                      switch (tab.type) {
+                        case 'link':
+                          Component = NavLink;
+                          props = { href: tab.href };
+                          break;
+                      }
+
+                      if (Component) {
+                        return <Component className={ i.toString() === String(currentSelectedIndex) ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
+                          setCurrentSelectedIndex(i);
+      
+                          if (onSelect) {
+                            onSelect(i);
+                          }
+                        } } { ...props }>{ tab.title }</Component>;
+                      }
                     }
-                  } }>{ tab }</button>)
+
+                    return <button className={ i.toString() === String(currentSelectedIndex) ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
+                      setCurrentSelectedIndex(i);
+  
+                      if (onSelect) {
+                        onSelect(i);
+                      }
+                    } }>{ tab }</button>;
+                  })
                 }
               </div>
               <div className='tabs-content underlined' />

@@ -15,6 +15,10 @@ export class ProjectsService {
     return this.rest.get(`projects/${projectId}/streams`, filter);
   }
 
+  listStatistics(id: IProject['id']): Promise<Record<string, any>> {
+    return this.rest.get('statistics').then((res) => res?.projects?.[id] ?? {});
+  }
+
   runAction(
     projectId: IProject['id'],
     flowId: IProjectFlow['id'],

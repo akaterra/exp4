@@ -8,5 +8,12 @@ export const Link = ({ children, className = undefined, href = undefined, onClic
 }
 
 export const NavLink = ({ children, className = undefined, href = undefined, onClick = undefined, style = undefined }: any) => {
-  return <NavLinkBase to={ href } className={ maybeClassName('link', className) } style={ style } onClick={ onClick }>{ children }</NavLinkBase>;
+	const cn = maybeClassName('link', className);
+
+	return <NavLinkBase
+		to={ href }
+		className={	() => cn }
+		style={ style }
+		onClick={ onClick }
+	>{ children }</NavLinkBase>;
 }

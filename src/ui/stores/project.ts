@@ -118,9 +118,9 @@ export class ProjectTargetStore extends BaseStore {
 
 export class ProjectFlowActionParamsStore extends BaseStore {
   @observable
-    projectFlowAction: IProjectFlowAction;
-  @observable
     isValid: boolean = true;
+  @observable
+    projectFlowAction: IProjectFlowAction;
   @observable
     paramsErrors: Record<string, string | null> = {};
   @observable
@@ -217,6 +217,8 @@ export class ProjectStore extends BaseStore {
   @observable
     project: IProject;
   @observable
+    projectStatistics: Record<string, any> = {};
+  @observable
     projectTargetsStores: Record<string, ProjectTargetStore> = {};
   @observable
     selectedAction: { stream: IProjectTargetStream | null, action: IProjectFlowAction, targetStore: ProjectTargetStore } | null;
@@ -253,6 +255,7 @@ export class ProjectStore extends BaseStore {
         ? this.projectTargetsStores[key].update(val)
         : new ProjectTargetStore(this, val);
     }, this.projectTargetsStores);
+    this.projectStatistics = yield this.projectsStore.service.listStatistics(this.project.id);
   }
 
   @flow @processing
