@@ -7,7 +7,7 @@ import { ActionsService } from './actions.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { loadDefinitionFromFile, loadDefinitionsFromDirectory } from './utils';
-import {ArtifactsService} from './artifacts.service';
+import { ArtifactsService } from './artifacts.service';
 
 export function loadProjectsFromDirectory(path: string, ids?: string[]): Project[] {
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);

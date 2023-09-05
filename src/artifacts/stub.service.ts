@@ -1,8 +1,6 @@
-import { Inject, Service } from 'typedi';
-import { BaseArtifactService, IArtifactService } from './artifact.service';
-import { IProjectArtifact, IProjectDef } from '../project';
-import { IStream } from '../stream';
-import {GithubIntegrationService} from '../integrations/github';
+import { Service } from 'typedi';
+import { BaseArtifactService } from './artifact.service';
+import { IProjectArtifact } from '../project';
 
 @Service()
 export class StubArtifactService extends BaseArtifactService {

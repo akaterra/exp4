@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { IStreamService } from './stream.service';
-import { IProjectArtifact, IProjectTarget, IProjectTargetStream } from '../project';
+import { IProjectTarget, IProjectTargetStream } from '../project';
 import { IStream } from '../stream';
 import Container, { Service } from 'typedi';
 import { ITarget } from '../target';
@@ -9,8 +9,8 @@ import { Autowired } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
 import { ProjectsService } from '../projects.service';
 import { Status } from '../enums/status';
-import {AwaitedCache} from '../cache';
-import {StubArtifactService} from '../artifacts/stub.service';
+import { AwaitedCache } from '../cache';
+import { StubArtifactService } from '../artifacts/stub.service';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,

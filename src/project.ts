@@ -8,7 +8,7 @@ import { TargetsService } from './targets.service';
 import { VersioningsService } from './versionings.service';
 import * as _ from 'lodash';
 import Ajv from 'ajv';
-import {ArtifactsService} from './artifacts.service';
+import { ArtifactsService } from './artifacts.service';
 
 const ajv = new Ajv();
 

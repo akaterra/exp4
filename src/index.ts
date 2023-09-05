@@ -34,8 +34,8 @@ import { authMethodList } from './api/auth/list-methods';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
 import { StreamHistoryRollbackActionService } from './actions/stream-history-rollback';
-import {ArtifactsService} from './artifacts.service';
-import {GithubActionStepLogArtifactService} from './artifacts/github-workflow-job-log';
+import { ArtifactsService } from './artifacts.service';
+import { GithubActionStepLogArtifactService } from './artifacts/github-workflow-job-log';
 
 function auth(req, res, next) {
   req.user = authorize(req.headers.authorization);

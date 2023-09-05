@@ -1,10 +1,8 @@
-import { Inject, Service } from 'typedi';
-import { ProjectsService } from '../projects.service';
-import { EntityService } from '../entities.service';
-import { BaseArtifactService, IArtifactService } from './artifact.service';
+import { Service } from 'typedi';
+import { BaseArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
 import { IStream } from '../stream';
-import {GithubIntegrationService} from '../integrations/github';
+import { GithubIntegrationService } from '../integrations/github';
 
 export type IGithubActionStepLogArtifact = IProjectArtifact<{
   integration: IProjectDef['id'];
@@ -24,7 +22,7 @@ export class GithubActionStepLogArtifactService extends BaseArtifactService {
       entity.ref?.streamId,
     );
 
-    console.log({result});
+    console.log({ result });
   }
 
   private getIntegration(ref: IGithubActionStepLogArtifact['ref']): GithubIntegrationService {
