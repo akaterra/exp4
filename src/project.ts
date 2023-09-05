@@ -8,6 +8,7 @@ import { TargetsService } from './targets.service';
 import { VersioningsService } from './versionings.service';
 import * as _ from 'lodash';
 import Ajv from 'ajv';
+import {ArtifactsService} from './artifacts.service';
 
 const ajv = new Ajv();
 
@@ -21,7 +22,22 @@ export interface IProjectDef<C extends Record<string, any> = Record<string, any>
   config?: C;
 }
 
+export interface IProjectRef {
+  actionId?: IProjectFlowAction['id'],
+  projectId?: IProject['id'],
+  flowId?: IProjectFlow['id'],
+  streamId?: IProjectTargetStream['id'],
+  targetId?: IProjectTarget['id'],
+}
+
+export interface IProjectArtifact<C extends Record<string, any> = Record<string, any>> extends IProjectDef<C> {
+  as?: string;
+  dependants?: IProjectArtifact['id'][];
+  ref?: IProjectRef;
+}
+
 export interface IProjectVersioning {
+  id?: string;
   type: string;
 
   namespace?: string;
@@ -50,7 +66,7 @@ export interface IProjectFlowActionStep<C extends (Record<string, unknown> | str
   id?: string;
   type: T;
 
-  ref?: { flowId: string; projectId: string; };
+  ref?: IProjectRef;
 
   title?: string;
   description?: string;
@@ -66,17 +82,17 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
   id?: string;
   type: T;
 
-  ref?: { flowId: string; projectId: string; };
+  ref?: IProjectRef;
 
   title?: string;
   description?: string;
 
   isDirty?: boolean;
 
-  artifacts?: IProjectDef[];
+  artifacts?: IProjectArtifact['id'][];
   steps?: IProjectFlowActionStep<C>[];
   params?: Record<string, IProjectFlowActionParam>;
-  targets?: string[];
+  targets?: IProjectTarget['id'][];
 }
 
 export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
@@ -85,7 +101,7 @@ export interface IProjectFlow<C extends (Record<string, unknown> | string) = str
   id: string;
   type: string;
 
-  ref?: { projectId: string; };
+  ref?: IProjectRef;
 
   title?: string;
   description?: string;
@@ -93,7 +109,7 @@ export interface IProjectFlow<C extends (Record<string, unknown> | string) = str
   isDirty?: boolean;
 
   actions: Record<string, IProjectFlowAction<C>>;
-  targets: string[];
+  targets: IProjectTarget['id'][];
 }
 
 export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
@@ -102,17 +118,17 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
   id?: string;
   type: T;
 
-  ref?: { projectId: string; targetId: string; };
+  ref?: IProjectRef;
 
   title?: string;
   description?: string;
 
   isDirty?: boolean;
 
-  artifacts?: IProjectDef[];
+  artifacts?: IProjectArtifact['id'][];
   config?: C;
   tags?: string[];
-  targets?: string[];
+  targets?: IProjectTarget['id'][];
 }
 
 export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknown>>;
@@ -121,17 +137,17 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
   id: string;
   type: string;
 
-  ref?: { projectId: string; };
+  ref?: IProjectRef;
 
   title?: string;
   description?: string;
 
   isDirty?: boolean;
 
-  artifacts?: IProjectDef[];
+  artifacts?: IProjectArtifact['id'][];
   streams: Record<string, IProjectTargetStream<C>>;
   tags?: string[];
-  versioning?: string;
+  versioning?: IProjectVersioning['id'];
 }
 
 export type IProjectTargetDef = IProjectTarget<Record<string, unknown>>;
@@ -143,6 +159,7 @@ export interface IProject {
   title: string;
   descriptopn: string;
 
+  artifacts: Record<string, IProjectArtifact<Record<string, unknown>>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow<Record<string, unknown>>>;
   integrations?: Record<string, IProjectDef>;
@@ -158,6 +175,7 @@ export interface IProjectInput {
   title: string;
   descriptopn: string;
 
+  artifacts: Record<string, IProjectDef & Pick<IProjectArtifact, 'as' | 'dependants'>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow>;
   integrations?: Record<string, IProjectDef>;
@@ -173,6 +191,7 @@ export class Project implements IProject {
   descriptopn: string;
 
   env: {
+    artifacts: ArtifactsService;
     actions: ActionsService;
     integrations: IntegrationsService;
     storages: StoragesService;
@@ -181,6 +200,7 @@ export class Project implements IProject {
     versionings: VersioningsService;
   };
 
+  artifacts: Record<string, IProjectArtifact<Record<string, unknown>>> = {};
   definitions: Record<string, Record<string, unknown>> = {};
   flows: Record<string, IProjectFlowDef> = {};
   integrations?: Record<string, IProjectDef>;
@@ -199,6 +219,10 @@ export class Project implements IProject {
   constructor(config: Partial<IProjectInput & { env?: Project['env'] }>) {
     if (config.id) {
       this.id = config.id;
+    }
+
+    if (config.artifacts) {
+      this.artifacts = config.artifacts;
     }
 
     if (config.definitions) {
@@ -224,14 +248,15 @@ export class Project implements IProject {
               acc[actKey] = {
                 id: actDef.id ?? actKey,
                 type: actDef.type,
-                ref: { flowId: key, projectId: this.id },
+                ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id },
                 title: actDef.title,
                 description: actDef.description,
+                artifacts: actDef.artifacts,
                 params: actDef.params,
                 steps: actDef.steps.map((step) => ({
                   id: step.id ?? actKey,
                   type: step.type,
-                  ref: { flowId: key, projectId: this.id },
+                  ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id },
                   config: this.getDefinition(step.config),
                   description: step.description,
                   params: actDef.params
@@ -259,30 +284,36 @@ export class Project implements IProject {
           ref: { projectId: this.id },
           title: def.title,
           description: def.description,
-          versioning: def.versioning,
+          artifacts: def.artifacts,
           streams: Object
             .entries(def.streams ?? {})
             .reduce((acc, [ actKey, actDef ]) => {
               acc[actKey] = {
                 id: actDef.id ?? actKey,
                 type: actDef.type,
-                ref: { projectId: this.id, targetId: key },
+                ref: { projectId: this.id, streamId: actDef.id ?? actKey, targetId: key },
                 config: this.getDefinition(actDef.config),
                 title: actDef.title,
                 description: actDef.description,
+                artifacts: actDef.artifacts,
                 tags: actDef.tags ?? [],
                 targets: actDef.targets ?? [],
               };
 
               return acc;
             }, {}),
+          versioning: def.versioning,
         };
       }
     }
   }
 
-  getFlow(id: string): IProjectFlowDef {
-    return this.flows[id];
+  getArtifactByArtifactId(artifactId: IProjectArtifact['id']): IProjectArtifact {
+    return this.artifacts[artifactId];
+  }
+
+  getFlowByFlowId(flowId: IProjectFlow['id']): IProjectFlowDef {
+    return this.flows[flowId];
   }
 
   getTargetByTargetId<S extends IProjectTargetDef = IProjectTargetDef>(id: string, unsafe?: boolean): S {
@@ -333,16 +364,20 @@ export class Project implements IProject {
 
   // helpers
 
+  getEnvArtifactByArtifactId(artifactId: IProjectArtifact['id'], assertType?: IProjectArtifact['type']) {
+    return this.env.artifacts.get(artifactId, assertType, true);
+  }
+
   getEnvActionByFlowActionStep(actionStep: IProjectFlowActionStep) {
     return this.env.actions.get(actionStep.type);
   }
 
-  getEnvIntegraionByTargetIdAndStreamId(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']) {
-    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetIdAndStreamId(targetId, streamId));
+  getEnvIntegraionByTargetIdAndStreamId<T extends IIntegrationService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id'], assertType?: IProjectTargetStreamDef['type']) {
+    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetIdAndStreamId<T>(targetId, streamId), assertType) as T;
   }
 
-  getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef) {
-    return this.env.integrations.get<T>(stream.config?.integration as string);
+  getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']) {
+    return this.env.integrations.get(stream.config?.integration as string, assertType) as T;
   }
 
   getEnvStorageByStorageId(storageId: IProjectTargetDef['id']) {
@@ -379,7 +414,7 @@ export class Project implements IProject {
   }
 
   validateParams(flowId: IProjectFlowDef['id'], actionId: IProjectFlowActionDef['id'], params: Record<string, any>) {
-    const action = this.getFlow(flowId)?.actions?.[actionId];
+    const action = this.getFlowByFlowId(flowId)?.actions?.[actionId];
 
     if (action?.params) {
       const schema: Record<string, any> = {

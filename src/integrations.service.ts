@@ -7,14 +7,4 @@ export class IntegrationsService extends EntitiesServiceWithFactory<IIntegration
   get domain() {
     return 'Integration';
   }
-
-  get<T extends IIntegrationService>(id: string, assertType?: string): T {
-    const entity = super.get(id);
-
-    if (assertType && entity.type !== assertType) {
-      throw new Error(`${this.domain} requested entity "${id}" (${assertType}) with incompatible type (${entity.type})`);
-    }
-
-    return entity as T;
-  }
 }

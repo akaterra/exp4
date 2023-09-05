@@ -25,11 +25,20 @@ export class EntitiesService<T extends EntityService = EntityService> {
     return 'Unknown';
   }
 
-  get(id: string): T {
+  get(id: string, assertType?: T['type'], assertTypeNonStrict?: boolean): T {
     const entity = this.entities[id];
 
     if (!entity) {
       throw new Error(`${this.domain} "${id ?? '?'}" not found`);
+    }
+
+    if (assertType && entity.type !== assertType && entity.type !== '*') {
+      if (
+        (assertTypeNonStrict && entity.type.slice(0, assertType.length) !== assertType) ||
+        (entity.type !== assertType)
+      ) {
+        throw new Error(`${this.domain} requested entity "${id}" (${assertType}) with incompatible type (${entity.type})`);
+      }
     }
 
     return entity;

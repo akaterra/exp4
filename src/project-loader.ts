@@ -7,6 +7,7 @@ import { ActionsService } from './actions.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { loadDefinitionFromFile, loadDefinitionsFromDirectory } from './utils';
+import {ArtifactsService} from './artifacts.service';
 
 export function loadProjectsFromDirectory(path: string, ids?: string[]): Project[] {
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
@@ -34,12 +35,21 @@ export function createProjectFromDefinition(definition: IProjectInput & { env?: 
   }
 
   definition.env = {
+    artifacts: Container.get(ArtifactsService),
     actions: Container.get(ActionsService),
     integrations: Container.get(IntegrationsService),
     storages: Container.get(StoragesService),
     streams: Container.get(StreamsService),
     targets: Container.get(TargetsService),
     versionings: Container.get(VersioningsService),
+  }
+
+  if (definition.artifacts) {
+    const artifactsService = definition.env.artifacts;
+
+    for (const [ defId, defConfig ] of Object.entries(definition.artifacts)) {
+      artifactsService.add(artifactsService.getInstance(defConfig.type, defConfig.config), defId);
+    }
   }
 
   if (definition.integrations) {
@@ -67,17 +77,20 @@ export function createProjectFromDefinition(definition: IProjectInput & { env?: 
   }
 
   if (definition.flows) {
+    const artifactsService = definition.env.artifacts;
     const actionsService = definition.env.actions;
 
     for (const [ ,flow ] of Object.entries(definition.flows)) {
       for (const [ , defConfig ] of Object.entries(flow.actions)) {
-        defConfig.steps.forEach((c) => actionsService.get(c.type));
+        defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
+        defConfig.steps?.forEach((actionType) => actionsService.get(actionType.type));
       }
     }
   }
 
   if (definition.targets) {
-    const streamsService = Container.get(StreamsService);
+    const artifactsService = definition.env.artifacts;
+    const streamsService = definition.env.streams;
 
     for (const [ ,target ] of Object.entries(definition.targets)) {
       for (const [ defId, defConfig ] of Object.entries(target.streams)) {
@@ -93,9 +106,11 @@ export function createProjectFromDefinition(definition: IProjectInput & { env?: 
           delete defConfig.use;
         }
 
+        defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
         streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
       }
 
+      target.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
       definition.env.versionings.get(target.versioning);
     }
   }

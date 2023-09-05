@@ -171,6 +171,12 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data;
   }
 
+  async gitGetWorkflowJobLog(jobId, repo?, org?) {
+    return (await this.client.actions.downloadJobLogsForWorkflowRun({
+      owner: this.org(org), repo: this.repo(repo), job_id: jobId,
+    })).data;
+  }
+
   async gitMerge(base, head, commitMessage?, repo?, org?) {
     return (await this.client.repos.merge({
       owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), commit_message: commitMessage,

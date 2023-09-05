@@ -20,7 +20,7 @@ export class MoveFromActionService extends EntityService implements IActionServi
     const project = this.projectsService.get(action.ref.projectId);
     const sourceTargetIds = targetsStreams
       ? Object.keys(targetsStreams)
-      : project.getFlow(action.ref.flowId).targets;
+      : project.getFlowByFlowId(action.ref.flowId).targets;
 
     for (const tIdOfSource of sourceTargetIds) {
       const streamIds = targetsStreams

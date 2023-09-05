@@ -3,6 +3,12 @@ type: "project"
 id: "test"
 description: ""
 
+artifacts:
+  githubActionLog:
+    type: "github:workflowJob:log"
+    config:
+      integration: "github"
+
 definitions:
   none: null
 
@@ -265,6 +271,8 @@ targets:
         title: "Deliveries history"
         config:
           integration: "githubDev"
+        artifacts:
+          - "githubActionLog"
       gp-routes-calc-dev:
         type: "github"
         title: "Routes calc"

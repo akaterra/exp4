@@ -1,14 +1,16 @@
 import { Octokit } from '@octokit/rest';
 import { IStreamService } from './stream.service';
-import { IProjectTarget, IProjectTargetStream } from '../project';
+import { IProjectArtifact, IProjectTarget, IProjectTargetStream } from '../project';
 import { IStream } from '../stream';
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
 import { ProjectsService } from '../projects.service';
 import { Status } from '../enums/status';
+import {AwaitedCache} from '../cache';
+import {StubArtifactService} from '../artifacts/stub.service';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
@@ -31,6 +33,7 @@ export type IGithubStream = IStream<{
 export class GithubStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'github';
 
+  protected cache = new AwaitedCache<IStream>();
   @Autowired() protected projectsService: ProjectsService;
   protected client = new Octokit({
     auth: process.env.GITHUB_TOKEN,
@@ -52,7 +55,11 @@ export class GithubStreamService extends EntityService implements IStreamService
     return null;
   }
 
-  async streamGetState(stream: IGithubTargetStream): Promise<IStream> {
+  async streamGetState(stream: IGithubTargetStream, old?: IStream): Promise<IStream> {
+    if (!old) {
+      old = await this.cache.get(stream.id);
+    }
+
     const integration = this.getIntegration(stream);
     const branchName = await this.getBranch(stream);
     const branch = await integration.gitGetBranch(branchName, stream.id);
@@ -69,7 +76,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       branch: branchName,
     };
 
-    return {
+    const state = {
       id: stream.id,
       type: this.type,
 
@@ -125,10 +132,20 @@ export class GithubStreamService extends EntityService implements IStreamService
       metadata,
       version: await versioningService.getCurrentStream(stream),
     };
-  }
 
-  streamGetBuildState(stream: IGithubTargetStream): Promise<IStream> { // eslint-disable-line
-    return null;
+    if (state.history.action?.[0]?.id !== old?.history.action?.[0]?.id) {
+      if (stream.artifacts?.length && workflowRunsJobs?.length) {
+        await this.getArtifact().run(
+          { artifacts: stream.artifacts, ref: stream.ref },
+          [],
+          { job_id: workflowRunsJobs?.[0]?.id },
+        );
+      }
+    }
+
+    this.cache.set(stream.id, state);
+
+    return state;
   }
 
   async streamMove(sourceStream: IGithubTargetStream, targetStream: IGithubTargetStream) {
@@ -161,6 +178,10 @@ export class GithubStreamService extends EntityService implements IStreamService
       id: config.id,
       type: null,
     };
+  }
+
+  private getArtifact() {
+    return Container.get(StubArtifactService);
   }
 
   private getIntegration(stream: IGithubTargetStream) {

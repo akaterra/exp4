@@ -16,7 +16,7 @@ export class VersionOverrideActionService extends EntityService implements IActi
     const project = this.projectsService.get(action.ref.projectId);
     const sourceTargetIds = targetsStreams
       ? Object.keys(targetsStreams)
-      : project.getFlow(action.ref.flowId).targets;
+      : project.getFlowByFlowId(action.ref.flowId).targets;
 
     for (let sIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of action.targets) {

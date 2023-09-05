@@ -38,7 +38,7 @@ export class ProjectsService extends EntitiesService<Project> {
     params?: Record<string, any>,
   ) {
     const project = this.get(projectId);
-    const flow = project.getFlow(flowId);
+    const flow = project.getFlowByFlowId(flowId);
 
     for (const [ , aId ] of iterArr(actionId)) {
       project.validateParams(flowId, aId, params);
