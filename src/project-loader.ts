@@ -12,8 +12,8 @@ export function loadProjectsFromDirectory(path: string, ids?: string[]): Project
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
 
   return definitions
-    .filter((project) => !!project && (!ids?.length || ids.includes(project.id)))
-    .map((definition) => createProjectFromDefinition(definition, true));
+    .map((definition) => createProjectFromDefinition(definition, true))
+    .filter((project) => !!project && (!ids?.length || ids.includes(project.id)));
 }
 
 export function loadProjectFromFile(pathOrName: string): Project {
@@ -25,7 +25,7 @@ export function loadProjectFromFile(pathOrName: string): Project {
 }
 
 export function createProjectFromDefinition(definition: IProjectInput & { env?: Project['env'] }, notThrow?: boolean): Project {
-  if (definition.type !== 'project') {
+  if (definition?.type !== 'project') {
     if (notThrow) {
       return null;
     }

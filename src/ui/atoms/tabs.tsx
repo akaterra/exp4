@@ -26,10 +26,10 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
                       let props;
 
                       switch (tab.type) {
-                        case 'link':
-                          Component = NavLink;
-                          props = { href: tab.href };
-                          break;
+                      case 'link':
+                        Component = NavLink;
+                        props = { href: tab.href };
+                        break;
                       }
 
                       if (Component) {

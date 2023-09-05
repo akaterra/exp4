@@ -36,6 +36,18 @@ export interface IStream<
       status?: Status;
       time?: Date;
     }[];
+    artifact?: {
+      id: string;
+      type: string;
+  
+      author?: { name?: string; link?: string };
+      description?: string;
+      link?: string;
+      metadata?: Record<string, any>;
+      steps?: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
+      status?: Status;
+      time?: Date;
+    }[];
     change?: {
       id: string;
       type: string;

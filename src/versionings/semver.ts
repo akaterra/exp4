@@ -8,8 +8,15 @@ import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 
 export interface ISemverConfig {
+  format?: string;
   namespace: string;
   storage: string;
+}
+
+export interface ISemverHistoryItem {
+  id: string;
+  at: Date;
+  version: string;
 }
 
 @Service()
@@ -22,25 +29,22 @@ export class SemverVersioningService extends EntityService implements IVersionin
     super();
   }
 
-  async getCurrent(target: IProjectTargetDef): Promise<string> {
-    return this.getStorage(target).varGet(
+  async getCurrent(target: IProjectTargetDef, format?: string): Promise<string> {
+    const version = await this.getStorage(target).varGet(
       target,
       [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       null,
     );
-  }
 
-  async format(target: IProjectTargetDef, entity) {
-    if (typeof entity !== 'string') {
-      return entity;
+    if (format ?? this.config?.format) {
+      return this.format(version, format);
     }
 
-    const version = semver.parse(await this.getCurrent(target));
-    entity = version
-      ? resolvePlaceholders(entity, { version })
-      : entity;
+    return version;
+  }
 
-    return entity;
+  async format(version: string, format?: string) {
+    return this.getFormatted(version, format ?? this.config?.format);
   }
 
   async override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string> {
@@ -96,7 +100,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   async rollback(target: IProjectTargetDef): Promise<string> {
     const storage = this.getStorage(target);
     const targetVersion = await this.getCurrent(target);
-    const versionHistory = await storage.varGet(
+    const versionHistory = await storage.varGet<ISemverHistoryItem[]>(
       target,
       [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
       null,
@@ -106,7 +110,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = null;
 
     if (Array.isArray(versionHistory)) {
-      const index = versionHistory.findIndex((val) => val?.version === targetVersion);
+      const index = versionHistory.findIndex((val) => val?.id === targetVersion);
 
       if (index !== -1) {
         versionHistory.splice(index, 1);
@@ -127,25 +131,22 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
-  async getCurrentStream(target: IProjectTargetStreamDef): Promise<string> {
-    return this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId)).varGetStream(
+  async getCurrentStream(target: IProjectTargetStreamDef, format?: string): Promise<string> {
+    const version = await this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId)).varGetStream(
       target,
       [ 'version', target.ref.projectId, this.config?.namespace ?? target.ref.targetId ],
       null,
     );
-  }
 
-  async formatStream(stream: IProjectTargetStreamDef, entity) {
-    if (typeof entity !== 'string') {
-      return entity;
+    if (format || this.config?.format) {
+      return this.formatStream(version, format);
     }
 
-    const version = semver.parse(await this.getCurrentStream(stream));
-    entity = version
-      ? resolvePlaceholders(entity, { version })
-      : entity;
+    return version;
+  }
 
-    return entity;
+  async formatStream(version: string, format?: string) {
+    return this.getFormatted(version, format ?? this.config?.format);
   }
 
   async overrideStream(source: IProjectTargetDef, target: IProjectTargetStreamDef): Promise<string> {
@@ -202,7 +203,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     const target = this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId);
     const targetVersion = await this.getCurrent(target);
     const storage = this.getStorage(target);
-    const versionHistory = await storage.varGetStream(
+    const versionHistory = await storage.varGetStream<ISemverHistoryItem[]>(
       stream,
       [ 'versionHistory', stream.ref.projectId, this.config?.namespace ?? stream.id ],
       null,
@@ -212,7 +213,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = null;
 
     if (Array.isArray(versionHistory)) {
-      const index = versionHistory.findIndex((val) => val?.version === targetVersion);
+      const index = versionHistory.findIndex((val) => val?.id === targetVersion);
 
       if (index !== -1) {
         versionHistory.splice(index, 1);
@@ -248,6 +249,18 @@ export class SemverVersioningService extends EntityService implements IVersionin
     throw new Error(`Unknown action: ${action}`);
   }
 
+  private getFormatted(version: string, format: string): string {
+    if (!version || !format) {
+      return version;
+    }
+
+    const parsedVersion = semver.parse(version);
+
+    return parsedVersion
+      ? resolvePlaceholders(format, { version: parsedVersion })
+      : version;
+  }
+
   private getStorage(target: IProjectTargetDef): IStorageService {
     return this.projectsService.get(target.ref.projectId).getEnvStorageByStorageId(this.config?.storage ?? 'default');
   }
@@ -264,7 +277,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     await storage.varAdd<any>(
       target,
       [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
-      { at: new Date(), version },
+      { id: version, at: new Date(), version },
       (existingVal, val) => existingVal?.version === val?.version,
     );
   }
@@ -281,7 +294,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     await storage.varAddStream<any>(
       stream,
       [ 'versionHistory', stream.ref.projectId, this.config?.namespace ?? stream.id ],
-      { at: new Date(), version },
+      { id: version, at: new Date(), version },
       (existingVal, val) => existingVal?.version === val?.version,
     );
   }

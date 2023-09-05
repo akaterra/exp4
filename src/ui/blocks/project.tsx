@@ -7,7 +7,7 @@ import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
 import { Status } from '../enums/status';
 import { InfoCollapse } from '../atoms/info-collapse';
-import {Tabs} from '../atoms/tabs';
+import { Tabs } from '../atoms/tabs';
 import { TitledLine } from '../atoms/status-line';
 import * as _ from 'lodash';
 
@@ -73,20 +73,20 @@ export const ProjectStatistics = observer(({ project }: { project?: ProjectStore
     return null;
   }
 
-	return <div className='paragraph children-gap'>
+  return <div className='paragraph children-gap'>
     {
-			Object.entries(project?.projectStatistics).map(([ key, val ]) => {
-				return <div>
-					<TitledLine title={ `${_.startCase(key)}:` }>
-						{
-							Array.isArray(val) ? null : val
-						}
-						{
-							Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
-						}
-					</TitledLine>
-				</div>;
-			})
+      Object.entries(project?.projectStatistics).map(([ key, val ]) => {
+        return <div>
+          <TitledLine title={ `${_.startCase(key)}:` }>
+            {
+              Array.isArray(val) ? null : val
+            }
+            {
+              Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
+            }
+          </TitledLine>
+        </div>;
+      })
     }
   </div>;    
 });
@@ -119,13 +119,13 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
     <Label>{project.project?.description ?? 'No description'}</Label>
     <div className='paragraph'>
       <Tabs
-				selectedIndex={ project.selectedTab }
-				tabs={ [
-					{ type: 'link', href: `/projects/${project.project.id}`, title: 'Targets' },
-					{ type: 'link', href: `/projects/${project.project.id}/statistics`, title: 'Statistics' },
-				] }
-				tabsDecoration='default'
-			>
+        selectedIndex={ project.selectedTab }
+        tabs={ [
+          { type: 'link', href: `/projects/${project.project.id}`, title: 'Targets' },
+          { type: 'link', href: `/projects/${project.project.id}/statistics`, title: 'Statistics' },
+        ] }
+        tabsDecoration='default'
+      >
         <ProjectTargets project={ project } />
         <ProjectStatistics project={ project } />
       </Tabs>

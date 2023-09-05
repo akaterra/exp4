@@ -86,7 +86,7 @@ export class GithubStreamService extends EntityService implements IStreamService
             id: String(w.id),
             type: 'github:workflow',
     
-            author: { name: w.actor?.name ?? null, link: w.actor?.html_url ?? null },
+            author: { name: w.actor?.name ?? w.actor?.login ?? null, link: w.actor?.html_url ?? null },
             description: w.name,
             link: w.html_url ?? null,
             metadata: {},
@@ -112,7 +112,7 @@ export class GithubStreamService extends EntityService implements IStreamService
           id: branch.commit.sha,
           type: 'github:commit',
   
-          author: { name: branch.commit.commit.committer?.name ?? null, link: branch.commit.commit.committer?.html_url ?? null },
+          author: { name: branch.commit.commit.author?.name ?? branch.commit.commit.author?.login ?? null, link: branch.commit.commit.author?.html_url ?? null },
           description: branch.commit.commit.message,
           link: branch.commit.html_url,
           metadata: {},
@@ -172,7 +172,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     const integration = project.getEnvIntegraionByTargetStream<GithubIntegrationService>(stream);
     const target = project.getTargetByTargetStream(stream);
     const branch = await project.getEnvVersioningByTarget(target)
-      .format(target, stream.config?.branch ?? integration.config?.branch);
+      .getCurrent(target, stream.config?.branch ?? integration.config?.branch);
 
     return branch;
   }

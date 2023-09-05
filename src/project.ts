@@ -11,13 +11,14 @@ import Ajv from 'ajv';
 
 const ajv = new Ajv();
 
-export interface IProjectDef {
+export interface IProjectDef<C extends Record<string, any> = Record<string, any>> {
   id?: string;
   type: string;
 
-  config?: any;
   title?: string;
   description?: string;
+
+  config?: C;
 }
 
 export interface IProjectVersioning {
@@ -72,6 +73,7 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
 
   isDirty?: boolean;
 
+  artifacts?: IProjectDef[];
   steps?: IProjectFlowActionStep<C>[];
   params?: Record<string, IProjectFlowActionParam>;
   targets?: string[];
@@ -107,6 +109,7 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
 
   isDirty?: boolean;
 
+  artifacts?: IProjectDef[];
   config?: C;
   tags?: string[];
   targets?: string[];
@@ -125,6 +128,7 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 
   isDirty?: boolean;
 
+  artifacts?: IProjectDef[];
   streams: Record<string, IProjectTargetStream<C>>;
   tags?: string[];
   versioning?: string;

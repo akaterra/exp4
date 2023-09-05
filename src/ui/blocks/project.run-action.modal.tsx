@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { IProjectFlowAction, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { ModalStore } from '../stores/modal';
 import { Input } from '../atoms/input';
 import { ProjectFlowActionParamsStore } from '../stores/project';
 import { Select } from '../atoms/select';

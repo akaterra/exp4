@@ -11,8 +11,8 @@ export class StubVersioningService extends EntityService implements IVersioningS
     return null;
   }
 
-  async format(target: IProjectTargetDef, entity) { // eslint-disable-line
-    return entity;
+  async format(version: string, format?: string) { // eslint-disable-line
+    return version;
   }
 
   async override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string> { // eslint-disable-line
@@ -35,8 +35,8 @@ export class StubVersioningService extends EntityService implements IVersioningS
     return null;
   }
 
-  async formatStream(stream: IProjectTargetStreamDef, entity) { // eslint-disable-line
-    return entity;
+  async formatStream(version: string, format?: string) { // eslint-disable-line
+    return version;
   }
 
   async overrideStream(source: IProjectTargetDef, target: IProjectTargetStreamDef): Promise<string> { // eslint-disable-line

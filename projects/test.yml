@@ -20,12 +20,12 @@ integrations:
     type: "github"
     config:
       org: "getpackageltd"
-      branch: "test-v${version.major}.${version.minor}.${version.patch}"
+      branch: "v${version.major}.${version.minor}"
   githubHotfix:
     type: "github"
     config:
       org: "getpackageltd"
-      branch: "hotfix-v${version.major}.${version.minor}.${version.patch}"
+      branch: "v${version.major}.${version.minor}-hotfix"
   githubMaster:
     type: "github"
     config:
@@ -47,16 +47,19 @@ versionings:
   release: &versioningRelease
     type: "semver"
     config:
+      format: "v${version.major}-${version.minor}"
       namespace: "release"
       storage: "github"
   hotfix: &versioningHotfix
     type: "semver"
     config:
+      format: "v${version.major}-${version.minor}-hotfix"
       namespace: "hotfix"
       storage: "github"
   current: &versioningCurrent
     type: "semver"
     config:
+      format: "v${version.major}-${version.minor}"
       namespace: "current"
       storage: "github"
 

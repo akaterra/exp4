@@ -5,7 +5,7 @@ import 'normalize.css';
 import { Navigation } from './blocks/navigation';
 import { ProjectsStore } from './stores/projects';
 import { Row } from './atoms/row';
-import { Project, ProjectTargets } from './blocks/project';
+import { Project } from './blocks/project';
 import { observer } from 'mobx-react-lite';
 import { GlobalModal } from './blocks/modal';
 import { GlobalDetailsPanel } from './blocks/details-panel';
@@ -68,11 +68,11 @@ export const App = () => {
 
           if (rootStore.projectsStore.selectedProjectStore) {
             switch (params.tab) {
-              case 'statistics':
-                rootStore.projectsStore.selectedProjectStore.selectedTab = 1;
-                break;
-              default:
-                rootStore.projectsStore.selectedProjectStore.selectedTab = 0;
+            case 'statistics':
+              rootStore.projectsStore.selectedProjectStore.selectedTab = 1;
+              break;
+            default:
+              rootStore.projectsStore.selectedProjectStore.selectedTab = 0;
             }
           }
   
