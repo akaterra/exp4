@@ -8,6 +8,18 @@ artifacts:
     type: "github:workflowJob:log"
     config:
       integration: "github"
+  githubActionLogImageTag:
+    type: "setBy"
+    dependsOn:
+      - githubActionLog
+    config:
+      source: "gitWorkflowJobLog"
+      target:
+        "Image tag":
+          pattern: "Re\\-tagging\\: [\\w\\-]+:(\\w+\\-\\d+\\-\\d+)"
+          keys:
+            - 1
+          type: "dockerImage"
 
 definitions:
   none: null
@@ -272,7 +284,7 @@ targets:
         config:
           integration: "githubDev"
         artifacts:
-          - "githubActionLog"
+          - "githubActionLogImageTag"
       gp-routes-calc-dev:
         type: "github"
         title: "Routes calc"

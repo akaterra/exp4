@@ -36,6 +36,7 @@ import { authorize } from './auth.service';
 import { StreamHistoryRollbackActionService } from './actions/stream-history-rollback';
 import { ArtifactsService } from './artifacts.service';
 import { GithubActionStepLogArtifactService } from './artifacts/github-workflow-job-log';
+import {SetByArtifactService} from './artifacts/set-by';
 
 function auth(req, res, next) {
   req.user = authorize(req.headers.authorization);
@@ -46,6 +47,7 @@ function auth(req, res, next) {
 (async () => {
   const artifacts = Container.get(ArtifactsService);
   artifacts.addFactory(GithubActionStepLogArtifactService);
+  artifacts.addFactory(SetByArtifactService);
   const integrations = Container.get(IntegrationsService);
   integrations.addFactory(GithubIntegrationService);
   const actions = Container.get(ActionsService);

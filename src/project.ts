@@ -32,7 +32,7 @@ export interface IProjectRef {
 
 export interface IProjectArtifact<C extends Record<string, any> = Record<string, any>> extends IProjectDef<C> {
   as?: string;
-  dependants?: IProjectArtifact['id'][];
+  dependsOn?: IProjectArtifact['id'][];
   ref?: IProjectRef;
 }
 
@@ -175,7 +175,7 @@ export interface IProjectInput {
   title: string;
   descriptopn: string;
 
-  artifacts: Record<string, IProjectDef & Pick<IProjectArtifact, 'as' | 'dependants'>>;
+  artifacts: Record<string, IProjectDef & Pick<IProjectArtifact, 'as' | 'dependsOn'>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow>;
   integrations?: Record<string, IProjectDef>;
@@ -210,6 +210,10 @@ export class Project implements IProject {
 
   get description() {
     return '';
+  }
+
+  get assertType() {
+    return '*';
   }
 
   get type() {
@@ -372,7 +376,11 @@ export class Project implements IProject {
     return this.env.actions.get(actionStep.type);
   }
 
-  getEnvIntegraionByTargetIdAndStreamId<T extends IIntegrationService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id'], assertType?: IProjectTargetStreamDef['type']) {
+  getEnvIntegraionByIntegrationId<T extends IIntegrationService>(integrationId: IProjectDef['id']): T {
+    return this.env.integrations.get(integrationId) as T;
+  }
+
+  getEnvIntegraionByTargetIdAndStreamId<T extends IIntegrationService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id'], assertType?: IProjectTargetStreamDef['type']): T {
     return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetIdAndStreamId<T>(targetId, streamId), assertType) as T;
   }
 

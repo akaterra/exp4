@@ -17,6 +17,9 @@ const JOB_CONSLUSION_TO_STATUS_MAP = {
   skipped: Status.COMPLETED,
   success: Status.COMPLETED,
 }
+const JOB_STATUS_TO_STATUS_MAP = {
+  is_progress: Status.PROCESSING,
+}
 
 export type IGithubTargetStream = IProjectTargetStream<{
   integration?: string;
@@ -44,7 +47,7 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   async streamDetach(stream: IGithubTargetStream): Promise<IStream> {
-    const integration = this.getIntegration(stream);
+    const integration = this.getIntegrationService(stream);
     const branchName = await this.getBranch(stream);
 
     await integration.branchDelete(
@@ -56,11 +59,13 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   async streamGetState(stream: IGithubTargetStream, old?: IStream): Promise<IStream> {
+    const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
+
     if (!old) {
-      old = await this.cache.get(stream.id);
+      old = await this.cache.get(cacheKey);
     }
 
-    const integration = this.getIntegration(stream);
+    const integration = this.getIntegrationService(stream);
     const branchName = await this.getBranch(stream);
     const branch = await integration.gitGetBranch(branchName, stream.id);
     const versioningService = await this.projectsService.get(stream.ref.projectId).getEnvVersioningByTargetId(stream.ref.targetId);
@@ -85,7 +90,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
       history: {
         action: workflowRuns ? workflowRuns.map((w) => {
-          const isJobSucceeded = workflowRunsJobs[0]
+          const isJobStepsNotFailed = workflowRunsJobs[0]
             ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
             : true;
 
@@ -111,10 +116,11 @@ export class GithubStreamService extends EntityService implements IStreamService
                 return acc;
               }, {})
               : null,
-            status: isJobSucceeded ? (w.status ?? null) : Status.FAILED,
+            status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
             time: null,
           };
         }) : [],
+        artifact: [],
         change: branch ? [ {
           id: branch.commit.sha,
           type: 'github:commit',
@@ -134,16 +140,25 @@ export class GithubStreamService extends EntityService implements IStreamService
     };
 
     if (state.history.action?.[0]?.id !== old?.history.action?.[0]?.id) {
-      if (stream.artifacts?.length && workflowRunsJobs?.length) {
-        await this.getArtifact().run(
+      if (
+        stream.artifacts?.length &&
+        workflowRunsJobs?.length &&
+        (
+          !old?.history.action?.[0]?.id ||
+          ![ Status.FAILED, Status.COMPLETED ].includes(state.history.action?.[0]?.status)
+        )
+      ) {
+        await this.getArtifactsService(stream).run(
           { artifacts: stream.artifacts, ref: stream.ref },
-          [],
+          state,
           { job_id: workflowRunsJobs?.[0]?.id },
         );
       }
+    } else if (old) {
+      state.history.artifact = old.history.artifact;
     }
 
-    this.cache.set(stream.id, state);
+    this.cache.set(cacheKey, state);
 
     return state;
   }
@@ -180,11 +195,11 @@ export class GithubStreamService extends EntityService implements IStreamService
     };
   }
 
-  private getArtifact() {
-    return Container.get(StubArtifactService);
+  private getArtifactsService(stream: IGithubTargetStream) {
+    return this.projectsService.get(stream.ref.projectId).env.artifacts;
   }
 
-  private getIntegration(stream: IGithubTargetStream) {
+  private getIntegrationService(stream: IGithubTargetStream) {
     return this.projectsService.get(stream.ref.projectId).getEnvIntegraionByTargetStream<GithubIntegrationService>(stream);
   }
 

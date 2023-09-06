@@ -1,16 +1,22 @@
 export interface IService {
   id: string;
+  readonly assertType: string;
   readonly description: string;
   readonly type: string;
 }
 
 export class EntityService {
+  static readonly assertType: string = null;
   static readonly type: string = 'unknown';
 
   id: string;
 
   get description() {
     return '';
+  }
+
+  get assertType() {
+    return (this.constructor as any).assertType ?? (this.constructor as any).type;
   }
 
   get type() {
@@ -32,10 +38,10 @@ export class EntitiesService<T extends EntityService = EntityService> {
       throw new Error(`${this.domain} "${id ?? '?'}" not found`);
     }
 
-    if (assertType && entity.type !== assertType && entity.type !== '*') {
+    if (assertType && entity.assertType !== assertType && entity.assertType !== '*') {
       if (
-        (assertTypeNonStrict && entity.type.slice(0, assertType.length) !== assertType) ||
-        (entity.type !== assertType)
+        (assertTypeNonStrict && entity.assertType.slice(0, assertType.length) !== assertType) ||
+        (entity.assertType !== assertType)
       ) {
         throw new Error(`${this.domain} requested entity "${id}" (${assertType}) with incompatible type (${entity.type})`);
       }

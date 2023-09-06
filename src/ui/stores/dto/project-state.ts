@@ -29,6 +29,18 @@ export interface IProjectTargetStreamState {
       status: Status;
       time: string;
     }[];
+    artifact: {
+      id: string;
+      type: string;
+
+      author: { name: string; link: string; };
+      description: string;
+      link: string;
+      metadata: Record<string, unknown>;
+      steps: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
+      status: Status;
+      time: string;
+    }[];
     change: {
       id: string;
       type: string;

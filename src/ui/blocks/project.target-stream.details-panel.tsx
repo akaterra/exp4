@@ -98,21 +98,35 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     {
       lastChange
         ? <React.Fragment>
-          <div>
-            <SubSubTitle>Last change</SubSubTitle>
-            <Label>{ lastChange?.description ?? 'No description' }</Label>
-          </div>
-          <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
-          <TitledLine title='Author:'>
-            <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
-          </TitledLine>
-          <TitledLine title='At:' isShown={ !!lastChange?.time }>
-            { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
-          </TitledLine>
-        </React.Fragment>
+            <div>
+              <SubSubTitle>Last change</SubSubTitle>
+              <Label>{ lastChange?.description ?? 'No description' }</Label>
+            </div>
+            <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+            <TitledLine title='Author:'>
+              <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
+            </TitledLine>
+            <TitledLine title='At:' isShown={ !!lastChange?.time }>
+              { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
+            </TitledLine>
+          </React.Fragment>
         : null
     }
-    <div>
+    {
+      projectTargetStreamState?.history?.artifact?.length
+        ? <React.Fragment>
+            <SubSubTitle>Artifacts</SubSubTitle>
+            {
+              projectTargetStreamState?.history?.artifact.map((artifact) => {
+                return <TitledLine title={ `${artifact.id}:` }>
+                  { artifact.description }
+                </TitledLine>
+              })
+            }
+          </React.Fragment>
+        : null
+    }
+    <div className='paragraph'>
       {
         projectTarget?.actions?.map((action, i) => {
           return <div key={ i }>

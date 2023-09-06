@@ -1,13 +1,14 @@
 import { Service } from 'typedi';
-import { BaseArtifactService } from './artifact.service';
+import { IArtifactService } from './artifact.service';
 import { IProjectArtifact } from '../project';
+import {EntityService} from '../entities.service';
 
 @Service()
-export class StubArtifactService extends BaseArtifactService {
+export class StubArtifactService extends EntityService implements IArtifactService {
   static readonly type: string = '*';
 
-  async exec(
-    entity: { artifact: IProjectArtifact, ref: IProjectArtifact['ref'] },
+  async run(
+    entity: { artifact: IProjectArtifact, ref: IProjectArtifact['ref'], scope?: Record<string, any> },
   ): Promise<void> {
 
   }
