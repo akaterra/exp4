@@ -6,6 +6,8 @@ import { GithubIntegrationService } from '../integrations/github';
 import {EntityService} from '../entities.service';
 import {Autowired} from '../utils';
 import {ProjectsService} from '../projects.service';
+import {AwaitedCache} from '../cache';
+import {Status} from '../enums/status';
 
 export type IGithubActionStepLogArtifactConfig = {
   integration: IProjectDef['id'];
@@ -16,6 +18,7 @@ export class GithubActionStepLogArtifactService extends EntityService implements
   static readonly type: string = 'github:workflowJob:log';
 
   @Autowired() protected projectsService: ProjectsService;
+  protected cache = new AwaitedCache();
 
   constructor(public readonly config?: IGithubActionStepLogArtifactConfig) {
     super();
@@ -26,13 +29,23 @@ export class GithubActionStepLogArtifactService extends EntityService implements
     streamState: IStream,
     params?: Record<string, any>,
   ): Promise<void> {
-    const result = await this.getIntegration(entity.ref).gitGetWorkflowJobLog(
-      params?.job_id,
+    if (!params?.githubWorkflowRunJobId) {
+      return;
+    }
+
+    if (![ Status.FAILED, Status.COMPLETED ].includes(params?.githubWorkflowRunJobStatus)) {
+      return;
+    }
+
+    const result = this.cache.get(params.githubWorkflowRunJobId) ?? await this.getIntegration(entity.ref).gitGetWorkflowJobLog(
+      params?.githubWorkflowRunJobId,
       entity.ref?.streamId,
     );
 
+    this.cache.set(params.githubWorkflowRunJobId, result, 3600);
+
     if (entity.scope) {
-      entity.scope.gitWorkflowJobLog = result;
+      entity.scope.githubWorkflowRunJobLog = result;
     }
   }
 
@@ -40,7 +53,7 @@ export class GithubActionStepLogArtifactService extends EntityService implements
     return this.config?.integration
       ? this.projectsService
           .get(ref?.projectId)
-          .getEnvIntegraionByIntegrationId<GithubIntegrationService>(this.config?.integration)
+          .getEnvIntegraionByIntegrationId<GithubIntegrationService>(this.config?.integration, 'github')
       : this.projectsService
           .get(ref?.projectId)
           .getEnvIntegraionByTargetIdAndStreamId<GithubIntegrationService>(

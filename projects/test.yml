@@ -4,27 +4,48 @@ id: "test"
 description: ""
 
 artifacts:
+  argocdApplication:
+    type: "argocd:application"
+    config:
+      integration: "argocdStg"
+  argocdApplicationImageTag:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplication
+    config:
+      "Image tag":
+        source: "argocdApplication.status.summary.images"
+        filter:
+          contain:
+            key: "ref.streamId"
+        pattern: "\\:(\\w+\\-\\d+\\-\\d+-\\w+)$"
+        keys:
+          - 1
+        type: "dockerImage"
   githubActionLog:
     type: "github:workflowJob:log"
     config:
       integration: "github"
   githubActionLogImageTag:
-    type: "setBy"
+    type: "fetchBy"
     dependsOn:
       - githubActionLog
     config:
-      source: "gitWorkflowJobLog"
-      target:
-        "Image tag":
-          pattern: "Re\\-tagging\\: [\\w\\-]+:(\\w+\\-\\d+\\-\\d+)"
-          keys:
-            - 1
-          type: "dockerImage"
+      "Image tag":
+        source: "githubWorkflowRunJobLog"
+        pattern: "Re\\-tagging\\: [\\w\\-]+:(\\w+\\-\\d+\\-\\d+)"
+        keys:
+          - 1
+        type: "dockerImage"
 
 definitions:
   none: null
 
 integrations:
+  argocdStg:
+    type: "argocd"
+    config:
+      applicationName: "stg"
   github:
     type: "github"
     config:
@@ -283,8 +304,8 @@ targets:
         title: "Deliveries history"
         config:
           integration: "githubDev"
-        artifacts:
-          - "githubActionLogImageTag"
+        # artifacts:
+        #   - "githubActionLogImageTag"
       gp-routes-calc-dev:
         type: "github"
         title: "Routes calc"
@@ -310,6 +331,8 @@ targets:
         title: "Deliveries history"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-uam-service:
         type: "github"
         title: "UAM"

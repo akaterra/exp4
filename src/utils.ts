@@ -103,17 +103,21 @@ export function Autowired(ref?: any | (() => any)) {
   }
 }
 
-export function *iter(iterable): Generator<any> {
+export function *iter(iterable, predicate?: (val?: any, ind?: number) => boolean): Generator<any> {
   if (Array.isArray(iterable)) {
     let i = 0;
 
     for (const item of iterable) {
-      yield [ i, item ];
+      if (!predicate || predicate(item, i)) {
+        yield [ i, item ];
 
-      i += 1;
+        i += 1;
+      }
     }
   } else {
-    yield [ 0, iterable ];
+    if (!predicate || predicate(iterable, 0)) {
+      yield [ 0, iterable ];
+    }
   }
 }
 

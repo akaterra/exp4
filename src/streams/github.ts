@@ -139,21 +139,19 @@ export class GithubStreamService extends EntityService implements IStreamService
       version: await versioningService.getCurrentStream(stream),
     };
 
-    if (state.history.action?.[0]?.id !== old?.history.action?.[0]?.id) {
-      if (
-        stream.artifacts?.length &&
-        workflowRunsJobs?.length &&
-        (
-          !old?.history.action?.[0]?.id ||
-          ![ Status.FAILED, Status.COMPLETED ].includes(state.history.action?.[0]?.status)
-        )
-      ) {
-        await this.getArtifactsService(stream).run(
-          { artifacts: stream.artifacts, ref: stream.ref },
-          state,
-          { job_id: workflowRunsJobs?.[0]?.id },
-        );
-      }
+    if (
+      stream.artifacts?.length &&
+      ![ Status.FAILED, Status.COMPLETED ].includes(state.history.action?.[0]?.status)
+    ) {
+      await this.getArtifactsService(stream).run(
+        { artifacts: stream.artifacts, ref: stream.ref },
+        state,
+        {
+          githubWorkflowRunJobId: workflowRunsJobs?.[0]?.id,
+          githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
+          ref: stream.ref,
+        },
+      );
     } else if (old) {
       state.history.artifact = old.history.artifact;
     }

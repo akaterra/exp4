@@ -36,7 +36,9 @@ import { authorize } from './auth.service';
 import { StreamHistoryRollbackActionService } from './actions/stream-history-rollback';
 import { ArtifactsService } from './artifacts.service';
 import { GithubActionStepLogArtifactService } from './artifacts/github-workflow-job-log';
-import {SetByArtifactService} from './artifacts/set-by';
+import {FetchByArtifactService} from './artifacts/fetch-by';
+import {ArgocdIntegrationService} from './integrations/argocd';
+import {ArgocdApplicationArtifactService} from './artifacts/argocd-application';
 
 function auth(req, res, next) {
   req.user = authorize(req.headers.authorization);
@@ -46,9 +48,11 @@ function auth(req, res, next) {
 
 (async () => {
   const artifacts = Container.get(ArtifactsService);
+  artifacts.addFactory(ArgocdApplicationArtifactService);
   artifacts.addFactory(GithubActionStepLogArtifactService);
-  artifacts.addFactory(SetByArtifactService);
+  artifacts.addFactory(FetchByArtifactService);
   const integrations = Container.get(IntegrationsService);
+  integrations.addFactory(ArgocdIntegrationService);
   integrations.addFactory(GithubIntegrationService);
   const actions = Container.get(ActionsService);
   actions.add(Container.get(DetachActionService));

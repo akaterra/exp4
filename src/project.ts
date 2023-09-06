@@ -376,8 +376,8 @@ export class Project implements IProject {
     return this.env.actions.get(actionStep.type);
   }
 
-  getEnvIntegraionByIntegrationId<T extends IIntegrationService>(integrationId: IProjectDef['id']): T {
-    return this.env.integrations.get(integrationId) as T;
+  getEnvIntegraionByIntegrationId<T extends IIntegrationService>(integrationId: IProjectDef['id'], assertType?: IProjectTargetStreamDef['type']): T {
+    return this.env.integrations.get(integrationId, assertType) as T;
   }
 
   getEnvIntegraionByTargetIdAndStreamId<T extends IIntegrationService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id'], assertType?: IProjectTargetStreamDef['type']): T {
