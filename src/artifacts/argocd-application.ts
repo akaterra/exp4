@@ -6,9 +6,11 @@ import {EntityService} from '../entities.service';
 import {Autowired} from '../utils';
 import {ProjectsService} from '../projects.service';
 import {ArgocdIntegrationService} from '../integrations/argocd';
+import {AwaitedCache} from '../cache';
 
 export type IGithubActionStepLogArtifactConfig = {
   integration: IProjectDef['id'];
+  cacheTtlSec?: number;
 };
 
 @Service()
@@ -16,6 +18,7 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
   static readonly type: string = 'argocd:application';
 
   @Autowired() protected projectsService: ProjectsService;
+  protected cache = new AwaitedCache();
 
   constructor(public readonly config?: IGithubActionStepLogArtifactConfig) {
     super();
@@ -26,11 +29,13 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
     streamState: IStream,
     params?: Record<string, any>,
   ): Promise<void> {
-    const result = await this.getIntegration(entity.ref).getApplication();
+    const result = this.cache.get(this.config?.integration) ?? await this.getIntegration(entity.ref).getApplication();
 
     if (entity.scope) {
       entity.scope.argocdApplication = result;
     }
+
+    this.cache.set(this.config?.integration, result, this.config?.cacheTtlSec ?? 60);
   }
 
   private getIntegration(ref: IProjectArtifact['ref']): ArgocdIntegrationService {

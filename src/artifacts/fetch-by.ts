@@ -6,17 +6,29 @@ import {EntityService} from '../entities.service';
 import * as _ from 'lodash';
 import {iter} from '../utils';
 
+export interface FetchByArtifactConfigFilter {
+  complex?: Record<string, FetchByArtifactConfigFilter>;
+  contains?: any;
+  gte?: any;
+  in?: any;
+  lte?: any;
+  notEmpty?: boolean;
+  pattern?: RegExp | string;
+}
+
 export type FetchByArtifactConfig = Record<string, {
-  keys: ({ index: string, title: string, type: string } | number | string)[];
-  filter?: {
-    contain?: any;
-    gte?: any;
-    in?: any;
-    lte?: any;
-    pattern?: RegExp | string;
-  };
-  pattern: RegExp | string;
+  keys: ({
+    title: string;
+    to?: string;
+    type: string;
+    valueMapping?: Record<string, any>;
+    valuePath: string;
+  } | number | string)[];
+  filter?: FetchByArtifactConfigFilter;
+  filterPath?: string;
+  pattern?: RegExp | string;
   source: string;
+  sourcePath?: string;
   type: string;
 }>;
 
@@ -45,11 +57,19 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
 
       for (const [ , source ] of iter(
         _.get(entity.scope, defConfig.source),
-        defConfig.filter ? (val) => FetchByArtifactService.filter(val, defConfig.filter, params) : undefined,
+        defConfig.filter
+          ? (val) => FetchByArtifactService.filter(
+            defConfig.filterPath ? _.get(val, defConfig.filterPath) : val,
+            defConfig.filter,
+            params
+          )
+          : undefined,
       )) {
-        let matches = source;
+        let matches = defConfig.sourcePath
+          ? _.get(source, defConfig.sourcePath)
+          : source;
 
-        if (typeof source === 'string') {
+        if (typeof source === 'string' && defConfig.pattern) {
           if (!(defConfig.pattern instanceof RegExp)) {
             defConfig.pattern = new RegExp(defConfig.pattern);
           }
@@ -57,41 +77,63 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
           matches = (defConfig.pattern as RegExp).exec(source);
         }
 
-        if (matches !== undefined) {
+        if (matches != undefined) {
           for (const key of defConfig.keys) {
+            let artifactId;
+            let artifactKey;
+            let artifactTo;
+            let artifactType;
+            let artifactVal;
+            let artifactValueMapping;
+
             if (typeof key === 'number' || typeof key === 'string') {
-              const match = typeof matches === 'object'
-                ? matches?.[key]
+              artifactId = typeof key !== 'string' ? defId : key;
+              artifactKey = typeof key !== 'string' ? defId : key;
+              artifactTo = 'description';
+              artifactType = defConfig.type ?? defId;
+              artifactVal = typeof matches === 'object'
+                ? _.get(matches, key)
                 : matches;
-
-              if (match !== undefined) {
-                streamState.history.artifact.push({
-                  id: typeof key !== 'string' ? defId : key,
-                  type: defConfig.type ?? defId,
-                  author: null,
-                  description: match,
-                  link: null,
-                  metadata: { [ typeof key !== 'string' ? defId : key ]: match },
-                  steps: null,
-                  time: null,
-                });
-              }
+              artifactValueMapping = null;
             } else {
-              const match = typeof matches === 'object'
-                ? matches?.[key.index]
+              artifactId = key.title ?? defId;
+              artifactKey = key.title ?? defId;
+              artifactTo = key.to ?? 'description';
+              artifactType = key.type ?? defConfig.type ?? defId;
+              artifactVal = typeof matches === 'object'
+                ? _.get(matches, key.valuePath)
                 : matches;
+              artifactValueMapping = key.valueMapping;
+            }
 
-              if (match !== undefined) {
-                streamState.history.artifact.push({
-                  id: key.title,
-                  type: key.type ?? defConfig.type ?? defId,
+            if (artifactVal != null && artifactValueMapping) {
+              artifactVal = artifactValueMapping[artifactVal];
+            }
+
+            if (artifactVal != null) {
+              let artifact = streamState.history.artifact.find(
+                (artifact) => artifact.id === artifactId && artifact.type === artifactType
+              );
+
+              if (!artifact) {
+                artifact = {
+                  id: artifactId,
+                  type: artifactType,
                   author: null,
-                  description: match,
+                  description: artifactVal,
                   link: null,
-                  metadata: { [ key.title ]: match },
+                  metadata: {},
                   steps: null,
                   time: null,
-                });
+                };
+
+                streamState.history.artifact.push(artifact);
+              }
+
+              artifact.metadata[artifactKey] = artifactVal;
+
+              if (artifactTo) {
+                artifact[artifactTo] = artifactVal;
               }
             }
           }
@@ -100,15 +142,31 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
     }
   }
 
-  private static filter(val: any, filter: {
-    contain?: any;
-    gte?: any;
-    in?: any;
-    lte?: any;
-    pattern?: RegExp | string;
-  }, params: Record<string, any>) {
-    if (filter.contain && !val.includes(FetchByArtifactService.getFilterValue(
-      filter.contain,
+  private static filter(
+    val: any,
+    filter: FetchByArtifactConfigFilter,
+    params: Record<string, any>,
+  ) {
+    if (filter.notEmpty && (val == null || val === '')) {
+      return false;
+    }
+
+    if (filter.complex) {
+      for (const [ complexKey, complexFilter ] of Object.entries(filter.complex)) {
+        if (!FetchByArtifactService.filter(
+          _.get(val, complexKey),
+          complexFilter,
+          params,
+        )) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    if (filter.contains && !val.includes(FetchByArtifactService.getFilterValue(
+      filter.contains,
       params,
     ))) {
       return false;

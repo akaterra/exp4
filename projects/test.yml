@@ -15,13 +15,28 @@ artifacts:
     config:
       "Image tag":
         source: "argocdApplication.status.summary.images"
+        sourcePath: null
+        filter:
+          contains:
+            key: "ref.streamId"
+        filterPath: null
+        pattern: "\\:([\\w\\-\\.]+)$"
+        keys:
+          - 1
+        to: null
+        type: "dockerImage"
+      "Deploy status":
+        source: "argocdApplication.status.resources"
+        sourcePath: null
         filter:
           contain:
             key: "ref.streamId"
-        pattern: "\\:(\\w+\\-\\d+\\-\\d+-\\w+)$"
+        filterPath: "name"
+        pattern: null
         keys:
-          - 1
-        type: "dockerImage"
+          - valuePath: "status"
+        to: "link"
+        type: "argocd:syncStatus"
   githubActionLog:
     type: "github:workflowJob:log"
     config:

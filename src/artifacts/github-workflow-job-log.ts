@@ -11,6 +11,7 @@ import {Status} from '../enums/status';
 
 export type IGithubActionStepLogArtifactConfig = {
   integration: IProjectDef['id'];
+  cacheTtlSec?: number;
 };
 
 @Service()
@@ -42,7 +43,7 @@ export class GithubActionStepLogArtifactService extends EntityService implements
       entity.ref?.streamId,
     );
 
-    this.cache.set(params.githubWorkflowRunJobId, result, 3600);
+    this.cache.set(params.githubWorkflowRunJobId, result, this.config?.cacheTtlSec ?? 3600);
 
     if (entity.scope) {
       entity.scope.githubWorkflowRunJobLog = result;

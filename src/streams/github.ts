@@ -139,10 +139,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       version: await versioningService.getCurrentStream(stream),
     };
 
-    if (
-      stream.artifacts?.length &&
-      ![ Status.FAILED, Status.COMPLETED ].includes(state.history.action?.[0]?.status)
-    ) {
+    if (stream.artifacts?.length) {
       await this.getArtifactsService(stream).run(
         { artifacts: stream.artifacts, ref: stream.ref },
         state,

@@ -3,10 +3,47 @@ type: "project"
 id: "getpackage"
 description: ""
 
+artifacts:
+  argocdApplication:
+    type: "argocd:application"
+    config:
+      integration: "argocdStg"
+  argocdApplicationImageTag:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplication
+    config:
+      "ArgoCD, Image tag":
+        source: "argocdApplication.status.summary.images"
+        filter:
+          contains:
+            key: "ref.streamId"
+        filterPath: null
+        pattern: "\\:([\\w\\-\\.]+)$"
+        keys:
+          - 1
+        to: null
+        type: "dockerImage"
+      "ArgoCD, Deploy status":
+        source: "argocdApplication.status.resources"
+        filter:
+          contain:
+            key: "ref.streamId"
+        filterPath: "name"
+        pattern: null
+        keys:
+          - valuePath: "status"
+        to: "link"
+        type: "argocd:syncStatus"
+
 definitions:
   none: null
 
 integrations:
+  argocdStg:
+    type: "argocd"
+    config:
+      applicationName: "stg"
   github:
     type: "github"
     config:
@@ -368,94 +405,140 @@ targets:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-alerts-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-analytics-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-charge-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-deliveries-crud-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-deliveries-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-deliveries-history-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-events-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-frontend-client:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-fe-sender:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-fe-tracker:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-finance-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-finance-calc:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-graphql-gateway:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-links-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-locations-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-notifications-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-offers-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-postil-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-processing-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-routes-calc-dev:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-uam-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-webhooks-service:
         use: "dev"
         config:
           integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
     versioning: "release"
 
   stgHotfix:
