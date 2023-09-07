@@ -69,7 +69,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           </div>
           <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
           {
-            lastAction?.steps
+            lastAction?.steps && Object.keys(lastAction.steps).length
               ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
                 <ul className='font-sml'>
                   {
@@ -103,6 +103,24 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <Label>{ lastChange?.description ?? 'No description' }</Label>
           </div>
           <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+          {
+            lastChange?.steps && Object.keys(lastChange.steps).length
+              ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
+                <ul className='font-sml'>
+                  {
+                    Object.values(lastChange?.steps).map((step) => <li>
+                      <a
+                        className='link'
+                        href={ step.link }
+                        target='__blank'
+                      >
+                        <span className={ step.status === Status.FAILED ? 'span failure bold' : 'span success' }>{ step.description }</span>
+                      </a>
+                    </li>) }
+                </ul>
+              </InfoCollapse>
+              : null
+          }
           <TitledLine title='Author:'>
             <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
           </TitledLine>

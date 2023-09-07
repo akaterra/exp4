@@ -6,7 +6,6 @@ import { Autowired } from './utils';
 
 @Service()
 export class ProjectState {
-  isSyncing: boolean = false;
   updatedAt: Date = null;
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
@@ -67,10 +66,17 @@ export class ProjectState {
       this.setTarget(targetId, {});
     }
 
-    this.targets[targetId].streams[stream.id] = {
-      ...this.targets[targetId].streams[stream.id],
-      ...stream,
-    };
+    const oldStream = this.targets[targetId].streams[stream.id];
+
+    if (oldStream) {
+      for (const key of Object.keys(oldStream)) {
+        if (!stream.hasOwnProperty(key)) {
+          stream[key] = oldStream[key];
+        }
+      }
+    }
+
+    this.targets[targetId].streams[stream.id] = stream as IStream;
 
     return this;
   }
@@ -78,7 +84,6 @@ export class ProjectState {
   toJSON() {
     return {
       id: this.id,
-      isSyncing: this.isSyncing,
       targets: this.targets,
       updatedAt: this.updatedAt,
     };

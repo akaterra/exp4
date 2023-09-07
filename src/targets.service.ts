@@ -29,12 +29,6 @@ export class TargetsService {
     return entity;
   }
 
-  private getVersioning(target: IProjectTargetDef) {
-    return this.projectsService
-      .get(target.ref?.projectId)
-      .getTargetVersioning(target.id);
-  }
-
   private getVersioningsService(target: IProjectTargetDef) {
     return this.projectsService
       .get(target.ref?.projectId)

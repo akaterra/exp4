@@ -9,9 +9,11 @@ import { iter } from '../utils';
 export interface FetchByArtifactConfigFilter {
   complex?: Record<string, FetchByArtifactConfigFilter>;
   contains?: any;
+  eq?: any;
   gte?: any;
   in?: any;
   lte?: any;
+  ne?: any;
   notEmpty?: boolean;
   pattern?: RegExp | string;
 }
@@ -24,8 +26,7 @@ export type FetchByArtifactConfig = Record<string, {
     valueMapping?: Record<string, any>;
     valuePath: string;
   } | number | string)[];
-  filter?: FetchByArtifactConfigFilter;
-  filterPath?: string;
+  filter?: Record<string, FetchByArtifactConfigFilter>;
   pattern?: RegExp | string;
   source: string;
   sourcePath?: string;
@@ -59,7 +60,7 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
         _.get(entity.scope, defConfig.source),
         defConfig.filter
           ? (val) => FetchByArtifactService.filter(
-            defConfig.filterPath ? _.get(val, defConfig.filterPath) : val,
+            val,
             defConfig.filter,
             params
           )
@@ -143,63 +144,77 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
   }
 
   private static filter(
-    val: any,
-    filter: FetchByArtifactConfigFilter,
+    entity: any,
+    filter: Record<string, FetchByArtifactConfigFilter>,
     params: Record<string, any>,
   ) {
-    if (filter.notEmpty && (val == null || val === '')) {
-      return false;
-    }
+    for (const [ key, condition ] of Object.entries(filter)) {
+      const val = key !== '...' ? _.get(entity, key) : entity;
 
-    if (filter.complex) {
-      for (const [ complexKey, complexFilter ] of Object.entries(filter.complex)) {
+      if (condition.notEmpty && (val == null || val === '')) {
+        return false;
+      }
+
+      if (condition.complex) {
         if (!FetchByArtifactService.filter(
-          _.get(val, complexKey),
-          complexFilter,
+          val,
+          condition.complex,
           params,
         )) {
           return false;
         }
       }
 
-      return true;
-    }
-
-    if (filter.contains && !val.includes(FetchByArtifactService.getFilterValue(
-      filter.contains,
-      params,
-    ))) {
-      return false;
-    }
-
-    if (filter.gte !== undefined && val <= FetchByArtifactService.getFilterValue(
-      filter.gte,
-      params,
-    )) {
-      return false;
-    }
-
-    if (filter.in && !FetchByArtifactService.getFilterValue(
-      filter.in,
-      params,
-    )?.includes(val)) {
-      return false;
-    }
-
-    if (filter.lte !== undefined && val >= FetchByArtifactService.getFilterValue(
-      filter.lte,
-      params,
-    )) {
-      return false;
-    }
-
-    if (filter.pattern && typeof val === 'string') {
-      if (!(filter.pattern instanceof RegExp)) {
-        filter.pattern = new RegExp(filter.pattern);
+      if (condition.contains && !val?.includes(FetchByArtifactService.getFilterValue(
+        condition.contains,
+        params,
+      ))) {
+        return false;
       }
 
-      if (!(filter.pattern as RegExp).test(val)) {
+      if (condition.eq !== undefined && val !== FetchByArtifactService.getFilterValue(
+        condition.eq,
+        params,
+      )) {
         return false;
+      }
+
+      if (condition.gte !== undefined && val <= FetchByArtifactService.getFilterValue(
+        condition.gte,
+        params,
+      )) {
+        return false;
+      }
+
+      if (condition.in && !FetchByArtifactService.getFilterValue(
+        condition.in,
+        params,
+      )?.includes(val)) {
+        return false;
+      }
+
+      if (condition.lte !== undefined && val >= FetchByArtifactService.getFilterValue(
+        condition.lte,
+        params,
+      )) {
+        return false;
+      }
+
+      if (condition.ne !== undefined && val === FetchByArtifactService.getFilterValue(
+        condition.ne,
+        params,
+      )) {
+        return false;
+      }
+
+      if (condition.pattern && typeof val === 'string') {
+        if (!(condition.pattern instanceof RegExp)) {
+          condition.pattern = new RegExp(condition.pattern);
+        }
+
+        if (!(condition.pattern as RegExp).test(val)) {
+          return false;
+        }
       }
     }
 

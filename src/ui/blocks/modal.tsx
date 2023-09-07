@@ -6,7 +6,6 @@ import { Modal as ModalAtom } from "../atoms/modal";
 export const modalStore = new ModalStore();
 
 export const Modal = observer(({ store }: { store?: ModalStore }) => {
-  console.log(store?.optsState?.buttons);
   if (!store?.optsState) {
     return null;
   }

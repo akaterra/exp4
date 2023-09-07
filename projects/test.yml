@@ -15,10 +15,10 @@ artifacts:
     config:
       "ArgoCD Image tag":
         source: "argocdApplication.status.summary.images"
-        sourcePath: null
         filter:
-          contains:
-            key: "ref.streamId"
+          "...":
+            contains:
+              key: "ref.streamId"
         filterPath: null
         pattern: "\\:([\\w\\-\\.]+)$"
         keys:
@@ -27,10 +27,12 @@ artifacts:
         type: "dockerImage"
       "ArgoCD Deploy status":
         source: "argocdApplication.status.resources"
-        sourcePath: null
         filter:
-          contain:
-            key: "ref.streamId"
+          name:
+            contain:
+              key: "ref.streamId"
+          kind:
+            eq: "StatefulSet"
         filterPath: "name"
         pattern: null
         keys:

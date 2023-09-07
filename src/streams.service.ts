@@ -35,12 +35,6 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     return entity;
   }
 
-  private getVersioning(stream: IProjectTargetStreamDef) {
-    return this.projectsService
-      .get(stream.ref?.projectId)
-      .getTargetVersioning(stream.ref?.targetId);
-  }
-
   private getVersioningsService(stream: IProjectTargetStreamDef) {
     return this.projectsService
       .get(stream.ref?.projectId)
