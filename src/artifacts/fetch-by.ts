@@ -1,10 +1,10 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
-import { IProjectArtifact, IProjectDef } from '../project';
+import { IProjectArtifact } from '../project';
 import { IStream } from '../stream';
-import {EntityService} from '../entities.service';
+import { EntityService } from '../entities.service';
 import * as _ from 'lodash';
-import {iter} from '../utils';
+import { iter } from '../utils';
 
 export interface FetchByArtifactConfigFilter {
   complex?: Record<string, FetchByArtifactConfigFilter>;

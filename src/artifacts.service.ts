@@ -1,10 +1,10 @@
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from './entities.service';
 import { IArtifactService } from './artifacts/artifact.service';
-import {Autowired} from './utils';
-import {ProjectsService} from './projects.service';
-import {IStream} from './stream';
-import {IProjectArtifact} from './project';
+import { Autowired } from './utils';
+import { ProjectsService } from './projects.service';
+import { IStream } from './stream';
+import { IProjectArtifact } from './project';
 
 @Service()
 export class ArtifactsService extends EntitiesServiceWithFactory<IArtifactService> {

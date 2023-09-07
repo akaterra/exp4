@@ -1,14 +1,13 @@
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import { IProjectTargetDef } from './project';
 import { AwaitedCache } from './cache';
 import { ProjectsService } from './projects.service';
-import { VersioningsService } from './versionings.service';
 import { ITarget } from './target';
+import { Autowired } from './utils';
 
 @Service()
 export class TargetsService {
-  @Inject(() => ProjectsService) protected projectsService: ProjectsService;
-  @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
   protected cache = new AwaitedCache<ITarget>();
 
   get domain() {
@@ -20,9 +19,7 @@ export class TargetsService {
     const entity = await this.cache.get(key) ?? { id: target.id, type: null };
 
     if (entity) {
-      const versioning = this.projectsService.get(target.ref.projectId).getTargetVersioning(target.id);
-
-      entity.version = await this.versioningsService.get(versioning).getCurrent(
+      entity.version = await this.getVersioningsService(target).getCurrent(
         this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.id),
       );
     }
@@ -30,5 +27,17 @@ export class TargetsService {
     this.cache.set(key, entity, 60);
 
     return entity;
+  }
+
+  private getVersioning(target: IProjectTargetDef) {
+    return this.projectsService
+      .get(target.ref?.projectId)
+      .getTargetVersioning(target.id);
+  }
+
+  private getVersioningsService(target: IProjectTargetDef) {
+    return this.projectsService
+      .get(target.ref?.projectId)
+      .getEnvVersioningByVersioningId(target.versioning);
   }
 }

@@ -1,23 +1,22 @@
 import { IProjectInput, Project } from './project';
-import Container from 'typedi';
 import { IntegrationsService } from './integrations.service';
 import { StoragesService } from './storages.service';
 import { StreamsService } from './streams.service';
 import { ActionsService } from './actions.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
-import { loadDefinitionFromFile, loadDefinitionsFromDirectory } from './utils';
+import { loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules } from './utils';
 import { ArtifactsService } from './artifacts.service';
 
-export function loadProjectsFromDirectory(path: string, ids?: string[]): Project[] {
+export function loadProjectsFromDirectory(path: string, ids?: string[]): Promise<Project[]> {
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
 
-  return definitions
+  return Promise.all(definitions.filter((project) => !!project && (!ids?.length || ids.includes(project?.id)))
     .map((definition) => createProjectFromDefinition(definition, true))
-    .filter((project) => !!project && (!ids?.length || ids.includes(project.id)));
+  ).then((projects) => projects.filter((project) => !!project));
 }
 
-export function loadProjectFromFile(pathOrName: string): Project {
+export function loadProjectFromFile(pathOrName: string): Promise<Project> {
   const definition: IProjectInput & { env?: Project['env'] } = loadDefinitionFromFile(pathOrName);
 
   return definition
@@ -25,7 +24,7 @@ export function loadProjectFromFile(pathOrName: string): Project {
     : null;
 }
 
-export function createProjectFromDefinition(definition: IProjectInput & { env?: Project['env'] }, notThrow?: boolean): Project {
+export async function createProjectFromDefinition(definition: IProjectInput & { env?: Project['env'] }, notThrow?: boolean): Promise<Project> {
   if (definition?.type !== 'project') {
     if (notThrow) {
       return null;
@@ -35,13 +34,37 @@ export function createProjectFromDefinition(definition: IProjectInput & { env?: 
   }
 
   definition.env = {
-    artifacts: Container.get(ArtifactsService),
-    actions: Container.get(ActionsService),
-    integrations: Container.get(IntegrationsService),
-    storages: Container.get(StoragesService),
-    streams: Container.get(StreamsService),
-    targets: Container.get(TargetsService),
-    versionings: Container.get(VersioningsService),
+    artifacts: new ArtifactsService(),
+    actions: new ActionsService(),
+    integrations: new IntegrationsService(),
+    storages: new StoragesService(),
+    streams: new StreamsService(),
+    targets: new TargetsService(),
+    versionings: new VersioningsService(),
+  }
+
+  for (const artifact of await loadModules(__dirname + '/artifacts', 'ArtifactService')) {
+    definition.env.artifacts.addFactory(artifact);
+  }
+
+  for (const action of await loadModules(__dirname + '/actions', 'ActionService')) {
+    definition.env.actions.add(new action());
+  }
+
+  for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
+    definition.env.integrations.addFactory(integration);
+  }
+
+  for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
+    definition.env.storages.addFactory(storage);
+  }
+
+  for (const stream of await loadModules(__dirname + '/streams', 'StreamService')) {
+    definition.env.streams.addFactory(stream);
+  }
+
+  for (const versioning of await loadModules(__dirname + '/versionings', 'VersioningService')) {
+    definition.env.versionings.addFactory(versioning);
   }
 
   if (definition.artifacts) {

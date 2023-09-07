@@ -3,11 +3,11 @@ import { IArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
 import { IStream } from '../stream';
 import { GithubIntegrationService } from '../integrations/github';
-import {EntityService} from '../entities.service';
-import {Autowired} from '../utils';
-import {ProjectsService} from '../projects.service';
-import {AwaitedCache} from '../cache';
-import {Status} from '../enums/status';
+import { EntityService } from '../entities.service';
+import { Autowired } from '../utils';
+import { ProjectsService } from '../projects.service';
+import { AwaitedCache } from '../cache';
+import { Status } from '../enums/status';
 
 export type IGithubActionStepLogArtifactConfig = {
   integration: IProjectDef['id'];
@@ -53,14 +53,14 @@ export class GithubActionStepLogArtifactService extends EntityService implements
   private getIntegration(ref: IProjectArtifact['ref']): GithubIntegrationService {
     return this.config?.integration
       ? this.projectsService
-          .get(ref?.projectId)
-          .getEnvIntegraionByIntegrationId<GithubIntegrationService>(this.config?.integration, 'github')
+        .get(ref?.projectId)
+        .getEnvIntegraionByIntegrationId<GithubIntegrationService>(this.config?.integration, 'github')
       : this.projectsService
-          .get(ref?.projectId)
-          .getEnvIntegraionByTargetIdAndStreamId<GithubIntegrationService>(
-            ref?.targetId,
-            ref?.streamId,
-            'github',
-          );
+        .get(ref?.projectId)
+        .getEnvIntegraionByTargetIdAndStreamId<GithubIntegrationService>(
+          ref?.targetId,
+          ref?.streamId,
+          'github',
+        );
   }
 }

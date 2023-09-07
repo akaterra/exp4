@@ -1,31 +1,16 @@
 import 'reflect-metadata';
+import 'source-map-support/register';
 import 'universal-dotenv/register';
 import cors from 'cors';
 import { loadProjectsFromDirectory } from './project-loader';
 import { GithubStreamService } from './streams/github';
 import Container from 'typedi';
-import { GithubStorageService } from './storages/github';
-import { VersioningsService } from './versionings.service';
 import { ProjectsService } from './projects.service';
 import { StreamsService } from './streams.service';
-import { StoragesService } from './storages.service';
 import express from 'express';
 import { projectStreamList } from './api/project-state/list';
 import { projectList } from './api/project/list';
-import { ActionsService } from './actions.service';
-import { VersionReleaseActionService } from './actions/version-release';
 import { projectFlowActionRun } from './api/project-flow/action.run';
-import { VersionPatchActionService } from './actions/version-patch';
-import { MoveToActionService } from './actions/move-to';
-import { MoveFromActionService } from './actions/move-from';
-import { IntegrationsService } from './integrations.service';
-import { GithubIntegrationService } from './integrations/github';
-import { VersionOverrideActionService } from './actions/version-override';
-import { RunActionActionService } from './actions/run-action';
-import { SemverVersioningService } from './versionings/semver';
-import { StubVersioningService } from './versionings/stub';
-import { StreamVersionOverrideActionService } from './actions/stream-version-override';
-import { DetachActionService } from './actions/detach';
 import { loadGlobalConfigFromFile } from './global-config-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
@@ -33,12 +18,6 @@ import { err } from './utils';
 import { authMethodList } from './api/auth/list-methods';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
-import { StreamHistoryRollbackActionService } from './actions/stream-history-rollback';
-import { ArtifactsService } from './artifacts.service';
-import { GithubActionStepLogArtifactService } from './artifacts/github-workflow-job-log';
-import {FetchByArtifactService} from './artifacts/fetch-by';
-import {ArgocdIntegrationService} from './integrations/argocd';
-import {ArgocdApplicationArtifactService} from './artifacts/argocd-application';
 
 function auth(req, res, next) {
   req.user = authorize(req.headers.authorization);
@@ -47,56 +26,17 @@ function auth(req, res, next) {
 }
 
 (async () => {
-  const artifacts = Container.get(ArtifactsService);
-  artifacts.addFactory(ArgocdApplicationArtifactService);
-  artifacts.addFactory(GithubActionStepLogArtifactService);
-  artifacts.addFactory(FetchByArtifactService);
-  const integrations = Container.get(IntegrationsService);
-  integrations.addFactory(ArgocdIntegrationService);
-  integrations.addFactory(GithubIntegrationService);
-  const actions = Container.get(ActionsService);
-  actions.add(Container.get(DetachActionService));
-  actions.add(Container.get(MoveFromActionService));
-  actions.add(Container.get(MoveToActionService));
-  actions.add(Container.get(VersionOverrideActionService));
-  actions.add(Container.get(VersionPatchActionService));
-  actions.add(Container.get(VersionReleaseActionService));
-  actions.add(Container.get(RunActionActionService));
-  actions.add(Container.get(StreamVersionOverrideActionService));
-  actions.add(Container.get(StreamHistoryRollbackActionService));
-  const storages = Container.get(StoragesService);
-  storages.addFactory(GithubStorageService);
-  const streams = Container.get(StreamsService);
-  streams.addFactory(GithubStreamService);
-  const versionings = Container.get(VersioningsService);
-  versionings.addFactory(SemverVersioningService);
-  versionings.addFactory(StubVersioningService);
   const projects = Container.get(ProjectsService);
   const authStrategies = Container.get(AuthStrategiesService);
   authStrategies.addFactory(GithubAuthStrategyService);
 
-  const c = loadGlobalConfigFromFile('global');
-  const p = loadProjectsFromDirectory('./projects', (process.env.PROJECT_IDS || '').split(',').filter((id) => !!id));
+  const c = await loadGlobalConfigFromFile('global');
+  const p = await loadProjectsFromDirectory('./projects', (process.env.PROJECT_IDS || '').split(',').filter((id) => !!id));
 
   p.forEach((p) => projects.add(p));
 
-  // console.log({p});
-  // projects.add(p);
-
   const ss = Container.get(StreamsService);
   ss.addFactory(GithubStreamService);
-
-  // const stream = p.getTargetStream<IGithubTargetStream>('dev', 'gp-deliveries-service');
-
-  // const s = await projects.streamGetState(stream);
-  // console.log(s);
-  // const t = await projects.targetGetState('test', 'dev');
-  // console.log(t);
-  // const s = await projects.streamGetStateAll('test', ['dev','stg','production']);
-  // console.log(s);
-
-
-  // await versioning.patch(stream);
 
   const app = express();
   app.use(cors());

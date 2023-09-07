@@ -12,12 +12,15 @@ import { ArtifactsService } from './artifacts.service';
 
 const ajv = new Ajv();
 
-export interface IProjectDef<C extends Record<string, any> = Record<string, any>> {
+export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
-  type: string;
+  type: T;
 
   title?: string;
   description?: string;
+
+  isSyncing?: boolean;
+  ref?: IProjectRef;
 
   config?: C;
 }
@@ -31,25 +34,16 @@ export interface IProjectRef {
 }
 
 export interface IProjectArtifact<C extends Record<string, any> = Record<string, any>> extends IProjectDef<C> {
-  as?: string;
   dependsOn?: IProjectArtifact['id'][];
   ref?: IProjectRef;
 }
 
-export interface IProjectVersioning {
-  id?: string;
-  type: string;
-
+export interface IProjectVersioning<T extends string = string> extends IProjectDef<unknown, T> {
   namespace?: string;
   storage?: string;
 }
 
-export interface IProjectFlowActionParam {
-  type: string;
-
-  title?: string;
-  description?: string;
-
+export interface IProjectFlowActionParam extends IProjectDef {
   constraints?: {
     enum?: any[];
     min?: number;
@@ -62,31 +56,14 @@ export interface IProjectFlowActionParam {
   validationSchema?: Record<string, any>;
 }
 
-export interface IProjectFlowActionStep<C extends (Record<string, unknown> | string) = string, T extends string = string> {
-  id?: string;
-  type: T;
-
-  ref?: IProjectRef;
-
-  title?: string;
-  description?: string;
-
+export interface IProjectFlowActionStep<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
-  config?: C;
   params?: Record<string, IProjectFlowActionParam>;
-  targets?: string[];
+  targets?: IProjectTarget['id'][];
 }
 
-export interface IProjectFlowAction<C extends (Record<string, unknown> | string) = string, T extends string = string> {
-  id?: string;
-  type: T;
-
-  ref?: IProjectRef;
-
-  title?: string;
-  description?: string;
-
+export interface IProjectFlowAction<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<unknown, T> {
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
@@ -97,15 +74,7 @@ export interface IProjectFlowAction<C extends (Record<string, unknown> | string)
 
 export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
 
-export interface IProjectFlow<C extends (Record<string, unknown> | string) = string> {
-  id: string;
-  type: string;
-
-  ref?: IProjectRef;
-
-  title?: string;
-  description?: string;
-
+export interface IProjectFlow<C extends (Record<string, unknown> | string) = string> extends IProjectDef {
   isDirty?: boolean;
 
   actions: Record<string, IProjectFlowAction<C>>;
@@ -114,15 +83,7 @@ export interface IProjectFlow<C extends (Record<string, unknown> | string) = str
 
 export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
-export interface IProjectTargetStream<C extends (Record<string, unknown> | string) = string, T extends string = string> {
-  id?: string;
-  type: T;
-
-  ref?: IProjectRef;
-
-  title?: string;
-  description?: string;
-
+export interface IProjectTargetStream<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<unknown, T> {
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
@@ -133,15 +94,7 @@ export interface IProjectTargetStream<C extends (Record<string, unknown> | strin
 
 export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknown>>;
 
-export interface IProjectTarget<C extends (Record<string, unknown> | string) = string> {
-  id: string;
-  type: string;
-
-  ref?: IProjectRef;
-
-  title?: string;
-  description?: string;
-
+export interface IProjectTarget<C extends (Record<string, unknown> | string) = string> extends IProjectDef {
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
@@ -152,13 +105,7 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 
 export type IProjectTargetDef = IProjectTarget<Record<string, unknown>>;
 
-export interface IProject {
-  id: string;
-  type: string;
-
-  title: string;
-  descriptopn: string;
-
+export interface IProject extends IProjectDef {
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow<Record<string, unknown>>>;
@@ -168,20 +115,18 @@ export interface IProject {
   versionings: Record<string, Record<string, unknown>>;
 }
 
-export interface IProjectInput {
-  id: string;
-  type: string;
+export type IProjectDefInput = Omit<IProjectDef, 'isSyncing'>;
+export type IProjectTargetInput = Omit<IProjectTarget, 'isSyncing'>;
+export type IProjectTargetStreamInput = Omit<IProjectTargetStream, 'isSyncing'>;
 
-  title: string;
-  descriptopn: string;
-
-  artifacts: Record<string, IProjectDef & Pick<IProjectArtifact, 'as' | 'dependsOn'>>;
+export interface IProjectInput extends IProjectDef {
+  artifacts: Record<string, IProjectDefInput & Pick<IProjectArtifact, 'dependsOn'>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow>;
-  integrations?: Record<string, IProjectDef>;
-  storages?: Record<string, IProjectDef>;
-  targets: Record<string, IProjectTarget & { streams: Record<string, IProjectTargetStream & { use?: string }> }>;
-  versionings: Record<string, IProjectDef>;
+  integrations?: Record<string, IProjectDefInput>;
+  storages?: Record<string, IProjectDefInput>;
+  targets: Record<string, IProjectTargetInput & { streams: Record<string, IProjectTargetStreamInput & { use?: string }> }>;
+  versionings: Record<string, IProjectDefInput>;
 }
 
 export class Project implements IProject {
@@ -265,7 +210,7 @@ export class Project implements IProject {
                   description: step.description,
                   params: actDef.params
                     ? _.mapValues(actDef.params, (param) => {
-                      param.validationSchema = this.getFlowActionParamValidationScheme(param);
+                      param.validationSchema = this.getFlowActionParamValidationSchema(param);
 
                       return param;
                     })
@@ -352,7 +297,7 @@ export class Project implements IProject {
     return stream;
   }
 
-  getTargetVersioning(targetId: string, unsafe?: boolean): string {
+  getTargetVersioning(targetId: string, unsafe?: boolean): IProjectTargetDef['versioning'] {
     const versioning = this.getTargetByTargetId(targetId).versioning;
 
     if (versioning === undefined) {
@@ -396,16 +341,20 @@ export class Project implements IProject {
     return this.env.streams.get(this.targets[targetId]?.streams[streamId]?.type) as T;
   }
 
-  getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef): T {
+  getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
     return this.env.streams.get(stream.type) as T;
   }
 
-  getEnvVersioningByTargetId(targetId: IProjectTargetDef['id']) {
-    return this.getEnvVersioningByTarget(this.getTargetByTargetId(targetId));
+  getEnvVersioningByVersioningId(versiningId: IProjectVersioning['id'], assertType?: IProjectVersioning['type']) {
+    return this.env.versionings.get(versiningId, assertType);
   }
 
-  getEnvVersioningByTarget(target: IProjectTargetDef) {
-    return this.env.versionings.get(target.versioning);
+  getEnvVersioningByTargetId(targetId: IProjectTargetDef['id'], assertType?: IProjectVersioning['type']) {
+    return this.getEnvVersioningByTarget(this.getTargetByTargetId(targetId), assertType);
+  }
+
+  getEnvVersioningByTarget(target: IProjectTargetDef, assertType?: IProjectVersioning['type']) {
+    return this.env.versionings.get(target.versioning, assertType);
   }
 
   toJSON() {
@@ -456,7 +405,7 @@ export class Project implements IProject {
       : mixed ?? {};
   }
 
-  private getFlowActionParamValidationScheme(action: IProjectFlowActionParam) {
+  private getFlowActionParamValidationSchema(action: IProjectFlowActionParam) {
     if (!action) {
       return;
     }

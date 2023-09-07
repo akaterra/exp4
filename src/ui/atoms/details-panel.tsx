@@ -26,7 +26,7 @@ export const DetailsPanel = ({ children, title = undefined, titleContent = undef
                 { titleContent }
               </div>
             </div>
-            <div className='c18 children-gap-full'>
+            <div className='c18 children-gap children-gap-full'>
               { children }
             </div>
           </div>

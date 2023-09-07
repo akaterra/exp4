@@ -1,18 +1,15 @@
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import { IStream } from './stream';
 import { IProjectTargetStreamDef } from './project';
 import { AwaitedCache } from './cache';
 import { ProjectsService } from './projects.service';
 import { IStreamService } from './streams/stream.service';
 import { EntitiesServiceWithFactory } from './entities.service';
-import { VersioningsService } from './versionings.service';
-import { TargetsService } from './targets.service';
+import { Autowired } from './utils';
 
 @Service()
 export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
-  @Inject(() => ProjectsService) protected projectsService: ProjectsService;
-  @Inject(() => TargetsService) protected targetsService: TargetsService;
-  @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
   protected cache = new AwaitedCache<IStream>();
 
   get domain() {
@@ -26,9 +23,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
       : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream);
 
     if (entity) {
-      const versioning = this.projectsService.get(stream.ref.projectId).getTargetVersioning(stream.ref.targetId);
-
-      entity.version = entity.version ?? await this.versioningsService.get(versioning).getCurrent(
+      entity.version = entity.version ?? await this.getVersioningsService(stream).getCurrent(
         this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId),
       );
     }
@@ -38,5 +33,17 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     this.cache.set(key, entity, 60);
 
     return entity;
+  }
+
+  private getVersioning(stream: IProjectTargetStreamDef) {
+    return this.projectsService
+      .get(stream.ref?.projectId)
+      .getTargetVersioning(stream.ref?.targetId);
+  }
+
+  private getVersioningsService(stream: IProjectTargetStreamDef) {
+    return this.projectsService
+      .get(stream.ref?.projectId)
+      .getEnvVersioningByTargetId(stream.ref?.targetId);
   }
 }

@@ -34,7 +34,7 @@ export const Modal = ({
     <div className="modal-content f10 f14-s- back-light shadow shadow-high pad-hor triple">
       <div className="paragraph">
         <div className='row'>
-          <div className='c18 children-gap-full'>
+          <div className='c18 children-gap children-gap-full'>
             <div>
               <div className='flex flex-hor'>
                 {

@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { IStreamService } from './stream.service';
 import { IProjectTarget, IProjectTargetStream } from '../project';
 import { IStream } from '../stream';
-import Container, { Service } from 'typedi';
+import { Service } from 'typedi';
 import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
@@ -10,7 +10,6 @@ import { GithubIntegrationService } from '../integrations/github';
 import { ProjectsService } from '../projects.service';
 import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
-import { StubArtifactService } from '../artifacts/stub.service';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
@@ -65,23 +64,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       old = await this.cache.get(cacheKey);
     }
 
-    const integration = this.getIntegrationService(stream);
-    const branchName = await this.getBranch(stream);
-    const branch = await integration.gitGetBranch(branchName, stream.id);
-    const versioningService = await this.projectsService.get(stream.ref.projectId).getEnvVersioningByTargetId(stream.ref.targetId);
-    const workflowRuns = branch
-      ? await integration.gitGetWorkflowRuns(stream.config.branch, stream.id)
-      : [];
-    const workflowRunsJobs = workflowRuns?.[0]
-      ? await integration.gitGetWorkflowJobs(workflowRuns[0].id, stream.id, stream.config.org)
-      : [];
-
-    const metadata = {
-      org: stream.config?.org ?? integration.config?.org,
-      branch: branchName,
-    };
-
-    const state = {
+    const state: IStream = {
       id: stream.id,
       type: this.type,
 
@@ -89,69 +72,157 @@ export class GithubStreamService extends EntityService implements IStreamService
       targetId: stream.ref.targetId,
 
       history: {
-        action: workflowRuns ? workflowRuns.map((w) => {
-          const isJobStepsNotFailed = workflowRunsJobs[0]
-            ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
-            : true;
-
-          return {
-            id: String(w.id),
-            type: 'github:workflow',
-    
-            author: { name: w.actor?.name ?? w.actor?.login ?? null, link: w.actor?.html_url ?? null },
-            description: w.name,
-            link: w.html_url ?? null,
-            metadata: {},
-            steps: workflowRunsJobs?.[0]
-              ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
-                acc[jobStep.number] = {
-                  id: String(jobStep.number),
-                  type: 'github:workflow:job',
-
-                  description: jobStep.name,
-                  link: workflowRunsJobs[0].html_url,
-                  status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
-                };
-
-                return acc;
-              }, {})
-              : null,
-            status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
-            time: null,
-          };
-        }) : [],
-        artifact: [],
-        change: branch ? [ {
-          id: branch.commit.sha,
-          type: 'github:commit',
-  
-          author: { name: branch.commit.commit.author?.name ?? branch.commit.commit.author?.login ?? null, link: branch.commit.commit.author?.html_url ?? null },
-          description: branch.commit.commit.message,
-          link: branch.commit.html_url,
-          metadata: {},
-          status: null,
-          steps: null,
-          time: branch.commit.commit.committer?.date ?? null,
-        } ] : [],
+        action: [],
+        artifact: old?.history?.artifact ?? [],
+        change: [],
       },
-      link: branch ? branch._links.html : null,
-      metadata,
-      version: await versioningService.getCurrentStream(stream),
+      isSyncing: true,
+      link: null,
+      metadata: {},
+      version: null,
     };
 
-    if (stream.artifacts?.length) {
-      await this.getArtifactsService(stream).run(
-        { artifacts: stream.artifacts, ref: stream.ref },
-        state,
-        {
-          githubWorkflowRunJobId: workflowRunsJobs?.[0]?.id,
-          githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
-          ref: stream.ref,
-        },
-      );
-    } else if (old) {
-      state.history.artifact = old.history.artifact;
-    }
+    (async () => {
+      const integration = this.getIntegrationService(stream);
+      const branchName = await this.getBranch(stream);
+      const branch = await integration.gitGetBranch(branchName, stream.id);
+      const versioningService = await this.projectsService.get(stream.ref.projectId).getEnvVersioningByTargetId(stream.ref.targetId);
+      const workflowRuns = branch
+        ? await integration.gitGetWorkflowRuns(stream.config.branch, stream.id)
+        : [];
+      const workflowRunsJobs = workflowRuns?.[0]
+        ? await integration.gitGetWorkflowJobs(workflowRuns[0].id, stream.id, stream.config.org)
+        : [];
+  
+      const metadata = {
+        org: stream.config?.org ?? integration.config?.org,
+        branch: branchName,
+      };
+
+      state.history.action = workflowRuns ? workflowRuns.map((w) => {
+        const isJobStepsNotFailed = workflowRunsJobs[0]
+          ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
+          : true;
+
+        return {
+          id: String(w.id),
+          type: 'github:workflow',
+  
+          author: { name: w.actor?.name ?? w.actor?.login ?? null, link: w.actor?.html_url ?? null },
+          description: w.name,
+          link: w.html_url ?? null,
+          metadata: {},
+          steps: workflowRunsJobs?.[0]
+            ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
+              acc[jobStep.number] = {
+                id: String(jobStep.number),
+                type: 'github:workflow:job',
+
+                description: jobStep.name,
+                link: workflowRunsJobs[0].html_url,
+                status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
+              };
+
+              return acc;
+            }, {})
+            : null,
+          status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
+          time: w.run_started_at,
+        };
+      }) : [];
+      state.history.change = branch ? [ {
+        id: branch.commit.sha,
+        type: 'github:commit',
+
+        author: { name: branch.commit.commit.author?.name ?? branch.commit.commit.author?.login ?? null, link: branch.commit.commit.author?.html_url ?? null },
+        description: branch.commit.commit.message,
+        link: branch.commit.html_url,
+        metadata: {},
+        status: null,
+        steps: null,
+        time: branch.commit.commit.committer?.date ?? null,
+      } ] : [];
+  
+      // const state1 = {
+      //   id: stream.id,
+      //   type: this.type,
+  
+      //   projectId: stream.ref.projectId,
+      //   targetId: stream.ref.targetId,
+  
+      //   history: {
+      //     action: workflowRuns ? workflowRuns.map((w) => {
+      //       const isJobStepsNotFailed = workflowRunsJobs[0]
+      //         ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
+      //         : true;
+  
+      //       return {
+      //         id: String(w.id),
+      //         type: 'github:workflow',
+      
+      //         author: { name: w.actor?.name ?? w.actor?.login ?? null, link: w.actor?.html_url ?? null },
+      //         description: w.name,
+      //         link: w.html_url ?? null,
+      //         metadata: {},
+      //         steps: workflowRunsJobs?.[0]
+      //           ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
+      //             acc[jobStep.number] = {
+      //               id: String(jobStep.number),
+      //               type: 'github:workflow:job',
+  
+      //               description: jobStep.name,
+      //               link: workflowRunsJobs[0].html_url,
+      //               status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
+      //             };
+  
+      //             return acc;
+      //           }, {})
+      //           : null,
+      //         status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
+      //         time: w.run_started_at,
+      //       };
+      //     }) : [],
+      //     artifact: [],
+      //     change: branch ? [ {
+      //       id: branch.commit.sha,
+      //       type: 'github:commit',
+    
+      //       author: { name: branch.commit.commit.author?.name ?? branch.commit.commit.author?.login ?? null, link: branch.commit.commit.author?.html_url ?? null },
+      //       description: branch.commit.commit.message,
+      //       link: branch.commit.html_url,
+      //       metadata: {},
+      //       status: null,
+      //       steps: null,
+      //       time: branch.commit.commit.committer?.date ?? null,
+      //     } ] : [],
+      //   },
+      //   link: branch ? branch._links.html : null,
+      //   metadata,
+      //   version: await versioningService.getCurrentStream(stream),
+      // };
+
+      state.link = branch ? branch._links.html : null;
+      state.metadata = metadata;
+      state.version = await versioningService.getCurrentStream(stream);
+  
+      if (stream.artifacts?.length) {
+        await this.getArtifactsService(stream).run(
+          { artifacts: stream.artifacts, ref: stream.ref },
+          state,
+          {
+            githubWorkflowRunJobId: workflowRunsJobs?.[0]?.id,
+            githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
+            ref: stream.ref,
+          },
+        );
+      } else if (old) {
+        state.history.artifact = old.history.artifact;
+      }
+    })().catch((err) => {
+      console.error(err);
+    }).finally(() => {
+      state.isSyncing = false;
+    });
 
     this.cache.set(cacheKey, state);
 

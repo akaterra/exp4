@@ -3,9 +3,9 @@ import { IntegrationsService } from './integrations.service';
 import { IGlobalConfig } from './global-config';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { StoragesService } from './storages.service';
-import { loadDefinitionFromFile } from './utils';
+import { loadDefinitionFromFile, loadModules } from './utils';
 
-export function loadGlobalConfigFromFile(pathOrName: string): void {
+export async function loadGlobalConfigFromFile(pathOrName: string): Promise<void> {
   const definition: IGlobalConfig = loadDefinitionFromFile(pathOrName);
 
   return definition
@@ -13,7 +13,7 @@ export function loadGlobalConfigFromFile(pathOrName: string): void {
     : null;
 }
 
-export function createGlobalConfig(definition: IGlobalConfig, notThrow?: boolean): void {
+export async function createGlobalConfig(definition: IGlobalConfig, notThrow?: boolean): Promise<void> {
   if (definition?.type !== 'global') {
     if (notThrow) {
       return null;
@@ -25,6 +25,10 @@ export function createGlobalConfig(definition: IGlobalConfig, notThrow?: boolean
   if (definition.auth) {
     const authStrategiesService = Container.get(AuthStrategiesService);
 
+    for (const auth of await loadModules(__dirname + '/auth', 'AuthStrategyService')) {
+      authStrategiesService.addFactory(auth);
+    }
+
     for (const [ , defConfig ] of Object.entries(definition.auth)) {
       authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defConfig.type);
     }
@@ -33,6 +37,10 @@ export function createGlobalConfig(definition: IGlobalConfig, notThrow?: boolean
   if (definition.integrations) {
     const integrationsService = Container.get(IntegrationsService);
 
+    for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
+      integrationsService.addFactory(integration);
+    }
+
     for (const [ defId, defConfig ] of Object.entries(definition.integrations)) {
       integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
     }
@@ -40,6 +48,10 @@ export function createGlobalConfig(definition: IGlobalConfig, notThrow?: boolean
 
   if (definition.storages) {
     const storagesService = Container.get(StoragesService);
+
+    for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
+      storagesService.addFactory(storage);
+    }
 
     for (const [ defId, defConfig ] of Object.entries(definition.storages)) {
       storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);

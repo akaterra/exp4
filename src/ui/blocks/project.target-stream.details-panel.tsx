@@ -62,9 +62,9 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     <StatusLine isFailed={ isFailed } />
     {
       lastAction
-        ? <React.Fragment>
+        ? <div className='paragraph paragraph-lrg children-gap'>
           <div>
-            <SubSubTitle>Last action</SubSubTitle>
+            <div className='caption smallest clear-padding-top'>Last action</div>
             <Label>{ lastAction?.description ?? 'No description' }</Label>
           </div>
           <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
@@ -92,56 +92,62 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           <TitledLine title='At:' isShown={ !!lastAction?.time }>
             { lastAction?.time ? new Date(lastAction?.time).toLocaleString() : null }
           </TitledLine>
-        </React.Fragment>
+        </div>
         : null
     }
     {
       lastChange
-        ? <React.Fragment>
-            <div>
-              <SubSubTitle>Last change</SubSubTitle>
-              <Label>{ lastChange?.description ?? 'No description' }</Label>
-            </div>
-            <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
-            <TitledLine title='Author:'>
-              <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
-            </TitledLine>
-            <TitledLine title='At:' isShown={ !!lastChange?.time }>
-              { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
-            </TitledLine>
-          </React.Fragment>
+        ? <div className='paragraph paragraph-lrg children-gap'>
+          <div>
+            <div className='caption smallest clear-padding-top'>Last change</div>
+            <Label>{ lastChange?.description ?? 'No description' }</Label>
+          </div>
+          <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+          <TitledLine title='Author:'>
+            <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
+          </TitledLine>
+          <TitledLine title='At:' isShown={ !!lastChange?.time }>
+            { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
+          </TitledLine>
+        </div>
         : null
     }
     {
       projectTargetStreamState?.history?.artifact?.length
-        ? <React.Fragment>
-            <SubSubTitle>Artifacts</SubSubTitle>
-            {
-              projectTargetStreamState?.history?.artifact.map((artifact) => {
-                return <TitledLine title={ `${artifact.id}:` }>
-                  { artifact.description }
-                </TitledLine>
-              })
-            }
-          </React.Fragment>
+        ? <div className='paragraph paragraph-lrg children-gap'>
+          <div className='caption smallest clear-padding-top'>Artifacts</div>
+          {
+            projectTargetStreamState?.history?.artifact.map((artifact) => {
+              return <TitledLine title={ `${artifact.id}:` }>
+                { artifact.description }
+              </TitledLine>
+            })
+          }
+        </div>
         : null
     }
-    <div className='paragraph'>
-      {
-        projectTarget?.actions?.map((action, i) => {
-          return <div key={ i }>
-            <Button
-              className='button-sml success auto'
-              x={ null }
-              onClick={ () => {
-                if (projectTargetStreamState?.id) {
-                  projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
-                }
-              } }
-            >{ action.title ?? action.id }</Button>
-          </div>;
-        })
-      }
-    </div>
+    {
+      projectTarget?.actions?.length
+        ? <div className='paragraph paragraph-lrg children-gap'>
+        <div>
+          {
+            projectTarget?.actions?.map((action, i) => {
+              return <div key={ i }>
+                <Button
+                  className='button-sml success auto'
+                  x={ null }
+                  onClick={ () => {
+                    if (projectTargetStreamState?.id) {
+                      projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
+                    }
+                  } }
+                >{ action.title ?? action.id }</Button>
+              </div>;
+            })
+          }
+        </div>
+        </div>
+        : null
+    }
   </React.Fragment>;
 });

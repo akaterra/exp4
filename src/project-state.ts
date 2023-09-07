@@ -6,6 +6,7 @@ import { Autowired } from './utils';
 
 @Service()
 export class ProjectState {
+  isSyncing: boolean = false;
   updatedAt: Date = null;
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
@@ -77,6 +78,7 @@ export class ProjectState {
   toJSON() {
     return {
       id: this.id,
+      isSyncing: this.isSyncing,
       targets: this.targets,
       updatedAt: this.updatedAt,
     };

@@ -1,12 +1,8 @@
 import { Inject, Service } from 'typedi';
 import { IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
-import { StreamsService } from './streams.service';
-import { VersioningsService } from './versionings.service';
-import { TargetsService } from './targets.service';
 import { IStream } from './stream';
 import { ITarget } from './target';
-import { PromiseContainer, iter as iterArr } from './utils';
-import { ActionsService } from './actions.service';
+import { AwaitableContainer, iter as iterArr } from './utils';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
 import { ProjectState } from './project-state';
@@ -14,11 +10,7 @@ import { StatisticsService } from './statistics.service';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
-  @Inject(() => ActionsService) protected actionsService: ActionsService;
   @Inject(() => StatisticsService) protected statisticsService: StatisticsService;
-  @Inject(() => StreamsService) protected streamsService: StreamsService;
-  @Inject(() => TargetsService) protected targetsService: TargetsService;
-  @Inject(() => VersioningsService) protected versioningsService: VersioningsService;
 
   private statesCache = new AwaitedCache<ProjectState>();
 
@@ -45,7 +37,7 @@ export class ProjectsService extends EntitiesService<Project> {
 
       for (const action of flow.actions[aId].steps) {
         try {
-          await this.actionsService.get(action.type).run(action, targetsStreams, params);
+          await project.env.actions.get(action.type).run(action, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${projectId}.errors`, {
             message: err?.message ?? err ?? null,
@@ -78,17 +70,18 @@ export class ProjectsService extends EntitiesService<Project> {
     }
 
     return this.statesCache.set(projectId, (async () => {
-      const promiseContainer = new PromiseContainer(1);
+      const targetContainer = new AwaitableContainer(1);
   
       for (const [ ,tId ] of iterArr(targetId ?? Object.keys(project.targets))) {
         const target = project.getTargetByTargetId(tId);
   
-        await promiseContainer.push(async () => {
+        await targetContainer.push(async () => {
           projectState.setTarget(tId, {
-            version: await this.versioningsService.getByTarget(target).getCurrent(target),
+            version: await project.env.versionings.getByTarget(target).getCurrent(target),
           })
   
           const replaceDirtyStreamIds = projectState.getDirtyTargetStreamIds(tId);
+          const streamContainer = new AwaitableContainer(1);
 
           for (const stream of Object.values(target.streams)) {
             if (
@@ -101,14 +94,16 @@ export class ProjectsService extends EntitiesService<Project> {
               continue;
             }
 
-            await promiseContainer.push(async () => {
+            await streamContainer.push(async () => {
               projectState.setTargetStream(tId, await this.streamGetState(stream));
             });
           }
+
+          await streamContainer.wait();
         });
       }
   
-      await promiseContainer.wait();
+      await targetContainer.wait();
   
       return projectState;
     })(), 300, true);
@@ -141,11 +136,14 @@ export class ProjectsService extends EntitiesService<Project> {
   streamGetState(projectId: string, targetId: string, streamId: string): Promise<IStream>;
 
   async streamGetState(mixed: string | IProjectTargetStreamDef, targetId?: string, streamId?: string) {
-    const stream = typeof mixed === 'string'
-      ? await this.streamsService.getState(this.get(mixed).getTargetStreamByTargetIdAndStreamId(targetId, streamId))
-      : await this.streamsService.getState(mixed);
+    const project = this.get(typeof mixed === 'string' ? mixed : mixed.ref?.projectId);
+    const streamState = project.env.streams.getState(
+      typeof mixed === 'string'
+        ? project.getTargetStreamByTargetIdAndStreamId(targetId, streamId)
+        : mixed
+    );
 
-    return stream;
+    return streamState;
   }
 
   targetGetState(stream: IProjectTargetDef): Promise<ITarget>;
@@ -153,10 +151,13 @@ export class ProjectsService extends EntitiesService<Project> {
   targetGetState(projectId: string, targetId: string): Promise<ITarget>;
 
   async targetGetState(mixed: string | IProjectTargetDef, targetId?: string) {
-    const target = typeof mixed === 'string'
-      ? this.targetsService.getState(this.get(mixed).getTargetByTargetId(targetId))
-      : this.targetsService.getState(mixed);
+    const project = this.get(typeof mixed === 'string' ? mixed : mixed.ref?.projectId);
+    const targetState = project.env.targets.getState(
+      typeof mixed === 'string'
+        ? project.getTargetByTargetId(targetId)
+        : mixed
+    );
 
-    return target;
+    return targetState;
   }
 }

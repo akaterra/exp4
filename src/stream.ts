@@ -15,8 +15,6 @@ export interface IStream<
   HistoryActionMetadata extends Record<string, unknown> = Metadata,
   HistoryChangeMetadata extends Record<string, unknown> = Metadata,
 > {
-  projectTargetStream?: IProjectTargetStream;
-
   id: string;
   type: string;
 
@@ -61,6 +59,7 @@ export interface IStream<
       time?: Date;
     }[];
   };
+  isSyncing?: boolean;
   link?: string;
   metadata?: Metadata;
   version?: string;

@@ -1,9 +1,7 @@
-import { Octokit } from '@octokit/rest';
 import { IIntegrationService } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
-import fetch from 'node-fetch-native';
-import {ArgocdService} from '../services/argocd.service';
+import { ArgocdService } from '../services/argocd.service';
 
 export interface IArgocdConfig {
   domain?: string;

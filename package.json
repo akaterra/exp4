@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/ts-node/dist/bin.js src/index.ts\"",
+    "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/typescript/bin/tsc && node ./dist/src/index.js\"",
+    "dev:be1": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/ts-node/dist/bin.js src/index.ts\"",
     "dev:fe": "webpack serve",
     "lint": "eslint ./src/* --ext=.tsx,.ts --fix"
   },
@@ -21,6 +22,7 @@
     "react-router-dom": "^6.15.0",
     "reflect-metadata": "^0.1.13",
     "semver": "^7.5.4",
+    "source-map-support": "^0.5.21",
     "typedi": "^0.10.0",
     "universal-dotenv": "^4.1.0",
     "yaml": "^2.3.1"

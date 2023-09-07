@@ -2,11 +2,11 @@ import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
 import { IStream } from '../stream';
-import {EntityService} from '../entities.service';
-import {Autowired} from '../utils';
-import {ProjectsService} from '../projects.service';
-import {ArgocdIntegrationService} from '../integrations/argocd';
-import {AwaitedCache} from '../cache';
+import { EntityService } from '../entities.service';
+import { Autowired } from '../utils';
+import { ProjectsService } from '../projects.service';
+import { ArgocdIntegrationService } from '../integrations/argocd';
+import { AwaitedCache } from '../cache';
 
 export type IGithubActionStepLogArtifactConfig = {
   integration: IProjectDef['id'];
@@ -41,14 +41,14 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
   private getIntegration(ref: IProjectArtifact['ref']): ArgocdIntegrationService {
     return this.config?.integration
       ? this.projectsService
-          .get(ref?.projectId)
-          .getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(this.config?.integration, 'argocd')
+        .get(ref?.projectId)
+        .getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(this.config?.integration, 'argocd')
       : this.projectsService
-          .get(ref?.projectId)
-          .getEnvIntegraionByTargetIdAndStreamId<ArgocdIntegrationService>(
-            ref?.targetId,
-            ref?.streamId,
-            'argocd',
-          );
+        .get(ref?.projectId)
+        .getEnvIntegraionByTargetIdAndStreamId<ArgocdIntegrationService>(
+          ref?.targetId,
+          ref?.streamId,
+          'argocd',
+        );
   }
 }

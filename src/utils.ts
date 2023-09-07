@@ -10,30 +10,123 @@ const EXTENSIONS = {
   yml: 'yaml',
 };
 
-export class PromiseContainer {
-  private promises: Promise<any>[] = [];
+export class AwaitableContainer {
+  private buckets = new Map<string, {
+    awaitables: [
+      Promise<any> | ((...args: any[]) => Promise<any>),
+      any[],
+    ][];
+    awaitablesNextId?: number;
+    executor?: Promise<void>,
+    onResolve?;
+  }>();
+  private id: string = null;
+  private resolve: (...args: any[]) => void = null;
 
-  constructor(private max: number = 3) {
+  constructor(private max: number = 3, private runInBatch: boolean = true) {
 
   }
 
-  async push(promise: Promise<any> | ((...args: any[]) => Promise<any>), ...args: any[]) {
-    if (typeof promise === 'function') {
-      promise = promise(...args);
-    }
+  onResolve(resolve: (...args: any[]) => void) {
+    this.resolve = resolve;
 
-    this.promises.push(promise as Promise<any>);
-
-    if (this.promises.length >= this.max) {
-      const promises = this.promises;
-      this.promises = [];
-
-      await Promise.all(promises);
-    }
+    return this;
   }
 
-  async wait() {
-    await Promise.all(this.promises);
+  onId(id: string) {
+    this.id = id;
+
+    return this;
+  }
+
+  push(awaitable: Promise<any> | ((...args: any[]) => Promise<any>), ...args: any[]) {
+    const id = this.id;
+    this.id = null;
+    const resolve = this.resolve;
+    this.resolve = null;
+    let bucket = this.buckets.get(id);
+
+    if (!bucket) {
+      bucket = { awaitables: [], onResolve: resolve };
+
+      this.buckets.set(id, bucket);
+    }
+
+    bucket.awaitables.push([ awaitable, args ]);
+
+    if (!bucket.executor) {
+      if (this.runInBatch && bucket.awaitables.length < this.max) {
+        return this;
+      }
+
+      bucket.executor = this.exec(id);
+    }
+
+    return this.runInBatch ? bucket.executor : null;
+  }
+
+  async wait(id: string = null) {
+    const bucket = this.buckets.get(id);
+
+    if (!bucket) {
+      return;
+    }
+
+    if (!bucket.executor) {
+      bucket.executor = this.exec(id);
+    }
+
+    return bucket.executor;
+  }
+
+  private async exec(id: string) {
+    const bucket = this.buckets.get(id);
+
+    if (!bucket) {
+      return;
+    }
+
+    while ((bucket.awaitablesNextId ?? 0) < bucket.awaitables.length) {
+      for (let i = bucket.awaitablesNextId ?? 0, l = bucket.awaitables.length; i < l; i += this.max) {
+        let promises = null;
+
+        for (const awaitable of bucket.awaitables.slice(i, i + this.max)) {
+          if (bucket.awaitables[i] === null) {
+            continue;
+          }
+
+          bucket.awaitables[i] = null;
+
+          if (!promises) {
+            promises = [];
+          }
+
+          promises.push(
+            typeof awaitable[0] === 'function'
+              ? awaitable[0](...awaitable[1])
+              : awaitable[0]
+          );
+        }
+
+        if (!promises?.length) {
+          break;
+        }
+
+        await Promise.all(promises).catch((err) => {
+          console.error(err);
+        });
+      }
+
+      bucket.awaitablesNextId = bucket.awaitables.length;
+
+      await new Promise((r) => setTimeout(r, 250));
+    }
+
+    this.buckets.delete(id);
+
+    if (bucket.onResolve) {
+      bucket.onResolve();
+    }
   }
 }
 
@@ -77,6 +170,36 @@ export function loadDefinitionFromFile(pathOrName: string): any {
   }
 
   return definition;
+}
+
+export function loadModules(path, symbolPostfix?) {
+  function findSymbol(module) {
+    if (module.module) {
+      return module.module;
+    }
+
+    if (symbolPostfix) {
+      const symbol = Object.keys(module).find((key) => key.endsWith(symbolPostfix));
+
+      if (symbol) {
+        return module[symbol];
+      }
+    }
+
+    return null;
+  }
+
+  const files = fs.readdirSync(path, { withFileTypes: true });
+
+  return Promise.all(
+    files
+      .filter((file) => !file.isDirectory() && file.name.slice(-3) === '.js')
+      .map((file) => import(`${path}/${file.name}`))
+  ).then((modules) => {
+    return modules
+      .map(findSymbol)
+      .filter((module) => !!module);
+  });
 }
 
 export function Autowired(ref?: any | (() => any)) {

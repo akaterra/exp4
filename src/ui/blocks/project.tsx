@@ -36,7 +36,7 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
         }
       </InfoCollapse>
     </div>
-    <div>
+    <div className='paragraph paragraph-lrg'>
       {
         projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
           const lastAction = streamState?.history?.action?.[0];

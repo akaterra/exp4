@@ -1,4 +1,4 @@
-import {requestJson} from '../utils';
+import { requestJson } from '../utils';
 
 export class ArgocdService {
   private accessToken: string = null;
