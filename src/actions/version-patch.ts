@@ -2,12 +2,12 @@ import { Inject, Service } from 'typedi';
 import { IProjectFlowActionDef } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
-import { iter } from '../utils';
+import { Autowired, iter } from '../utils';
 import { EntityService } from '../entities.service';
 
 @Service()
 export class VersionPatchActionService extends EntityService implements IActionService {
-  @Inject() protected projectsService: ProjectsService;
+  @Autowired() protected projectsService: ProjectsService;
 
   get type() {
     return 'version:patch';

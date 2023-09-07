@@ -16,7 +16,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     return 'Stream';
   }
 
-  async getState(stream: IProjectTargetStreamDef) {
+  async getState(stream: IProjectTargetStreamDef, withRefresh?: boolean) {
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
     const entity = stream.isDirty
       ? await this.get(stream.type).streamGetState(stream)

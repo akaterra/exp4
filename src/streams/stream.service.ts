@@ -8,7 +8,7 @@ export interface IStreamService extends IService {
 
   streamDetach(stream: IProjectTargetStreamDef): Promise<IStream>;
 
-  streamGetState(stream: IProjectTargetStreamDef, old?: IStream): Promise<IStream>;
+  streamGetState(stream: IProjectTargetStreamDef): Promise<IStream>;
 
   streamMove(sourceStream: IProjectTargetStreamDef, targetStream: IProjectTargetStreamDef);
 

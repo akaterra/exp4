@@ -9,6 +9,10 @@ import { VersioningsService } from './versionings.service';
 import * as _ from 'lodash';
 import Ajv from 'ajv';
 import { ArtifactsService } from './artifacts.service';
+import { ProjectsService } from './projects.service';
+import { Autowired } from './utils';
+import { IStream } from './stream';
+import { ProjectState } from './project-state';
 
 const ajv = new Ajv();
 
@@ -130,6 +134,8 @@ export interface IProjectInput extends IProjectDef {
 }
 
 export class Project implements IProject {
+  @Autowired() protected projectsService: ProjectsService;
+
   id: string = 'unknown';
 
   title: string;
@@ -263,6 +269,14 @@ export class Project implements IProject {
 
   getFlowByFlowId(flowId: IProjectFlow['id']): IProjectFlowDef {
     return this.flows[flowId];
+  }
+
+  getStateByTargetId(targetId: IProjectTarget['id']): Promise<ProjectState> {
+    return this.projectsService.getState(this.id, targetId);
+  }
+
+  async getStreamStateByTargetIdAndStreamId(targetId: IProjectTarget['id'], streamId: IProjectTargetStream['id']): Promise<IStream> {
+    return (await this.projectsService.getState(this.id, targetId))?.targets?.[targetId]?.streams?.[streamId];
   }
 
   getTargetByTargetId<S extends IProjectTargetDef = IProjectTargetDef>(id: string, unsafe?: boolean): S {

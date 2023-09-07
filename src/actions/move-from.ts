@@ -3,10 +3,11 @@ import { IProjectFlowActionDef } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
+import { Autowired } from '../utils';
 
 @Service()
 export class MoveFromActionService extends EntityService implements IActionService {
-  @Inject() protected projectsService: ProjectsService;
+  @Autowired() protected projectsService: ProjectsService;
 
   get description() {
     return 'Moves selected streams between targets';

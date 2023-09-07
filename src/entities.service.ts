@@ -1,3 +1,6 @@
+import { ProjectsService } from "./projects.service";
+import { Autowired } from "./utils";
+
 export interface IService {
   id: string;
   readonly assertType: string;
@@ -8,6 +11,8 @@ export interface IService {
 export class EntityService {
   static readonly assertType: string = null;
   static readonly type: string = 'unknown';
+
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   id: string;
 
@@ -24,11 +29,23 @@ export class EntityService {
   }
 }
 
-export class EntitiesService<T extends EntityService = EntityService> {
+export class EntitiesService<T extends IService = IService> {
   protected entities: Record<string, T> = {};
 
   get domain() {
     return 'Unknown';
+  }
+
+  assertTypes(assertTypeA: T['type'], assertTypeB: T['type'], assertTypeNonStrict: boolean = true, id?: T['id']) {
+    if (assertTypeA != null && assertTypeB != null && assertTypeA !== '*' && assertTypeB !== '*') {
+      if (assertTypeB !== assertTypeA) {
+        if (assertTypeNonStrict && assertTypeB.slice(0, assertTypeA.length) === assertTypeA) {
+          return;
+        }
+
+        throw new Error(`${this.domain} requested entity "${id ?? '?'}" (${assertTypeA}) with incompatible type (${assertTypeB})`);
+      }
+    }
   }
 
   get(id: string, assertType: T['type'] = null, assertTypeNonStrict: boolean = true): T {
@@ -39,14 +56,7 @@ export class EntitiesService<T extends EntityService = EntityService> {
     }
 
     if (assertType !== null) {
-      if (assertType && entity.assertType !== assertType && entity.assertType !== '*') {
-        if (
-          (assertTypeNonStrict && entity.assertType.slice(0, assertType.length) !== assertType) ||
-          (entity.assertType !== assertType)
-        ) {
-          throw new Error(`${this.domain} requested entity "${id}" (${assertType}) with incompatible type (${entity.type})`);
-        }
-      }
+      this.assertTypes(assertType, entity.assertType);
     }
 
     return entity;
@@ -63,7 +73,7 @@ export class EntitiesService<T extends EntityService = EntityService> {
   }
 }
 
-export class EntitiesServiceWithFactory<T extends EntityService = EntityService> extends EntitiesService<T> {
+export class EntitiesServiceWithFactory<T extends IService = IService> extends EntitiesService<T> {
   protected factories: Record<string, { new (...args): T, type: string }> = {};
 
   addFactory(cls: { new (...args): T, type: string }) {
