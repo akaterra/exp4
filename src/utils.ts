@@ -133,7 +133,9 @@ export class AwaitableContainer {
 export function loadDefinitionsFromDirectory(path: string): any[] {
   const files = fs.readdirSync(path, { withFileTypes: true });
 
-  return files.filter((file) => !file.isDirectory()).map((file) => loadDefinitionFromFile(`${path}/${file.name}`));
+  return files
+    .filter((file) => !file.isDirectory())
+    .map((file) => loadDefinitionFromFile(`${path}/${file.name}`));
 }
 
 export function loadDefinitionFromFile(pathOrName: string): any {
@@ -226,6 +228,34 @@ export function Autowired(ref?: any | (() => any)) {
   }
 }
 
+export function err(fn) {
+  return function (req, res, next) {
+    try {
+      const result = fn(req, res, next);
+
+      if (result instanceof Promise) {
+        result.catch((err) => {
+          next(err);
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
+export function hasScope(scope: string, scopes?: Record<string, boolean>): boolean {
+  if (!scopes) {
+    return true;
+  }
+
+  if (scopes['*']) {
+    return true;
+  }
+
+  return !!scopes[scope];
+}
+
 export function *iter(iterable, predicate?: (val?: any, ind?: number) => boolean): Generator<any> {
   if (Array.isArray(iterable)) {
     let i = 0;
@@ -242,22 +272,6 @@ export function *iter(iterable, predicate?: (val?: any, ind?: number) => boolean
       yield [ 0, iterable ];
     }
   }
-}
-
-export function err(fn) {
-  return function (req, res, next) {
-    try {
-      const result = fn(req, res, next);
-
-      if (result instanceof Promise) {
-        result.catch((err) => {
-          next(err);
-        });
-      }
-    } catch (err) {
-      next(err);
-    }
-  };
 }
 
 export async function requestJson(url, data?, method?, authorization?) {

@@ -5,7 +5,7 @@ import { IStream } from '../stream';
 import { Service } from 'typedi';
 import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
-import { Autowired } from '../utils';
+import { Autowired, hasScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
 import { ProjectsService } from '../projects.service';
 import { Status } from '../enums/status';
@@ -56,7 +56,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     return null;
   }
 
-  async streamGetState(stream: IGithubTargetStream): Promise<IStream> {
+  async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>): Promise<IStream> {
     const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
     const old = await this.cache.get(cacheKey);
 
@@ -68,9 +68,9 @@ export class GithubStreamService extends EntityService implements IStreamService
       targetId: stream.ref.targetId,
 
       history: {
-        action: [],
+        action: old?.history?.action ?? [],
         artifact: old?.history?.artifact ?? [],
-        change: [],
+        change: old?.history?.change ?? [],
       },
       isSyncing: true,
       link: null,
@@ -81,12 +81,14 @@ export class GithubStreamService extends EntityService implements IStreamService
     const detailsPromise = (async () => {
       const integration = this.getIntegrationService(stream);
       const branchName = await this.getBranch(stream);
-      const branch = await integration.gitGetBranch(branchName, stream.id);
-      const versioningService = await this.projectsService.get(stream.ref.projectId).getEnvVersioningByTargetId(stream.ref.targetId);
-      const workflowRuns = branch
+      const branch = hasScope('change', scopes) ? await integration.gitGetBranch(branchName, stream.id) : null;
+      const versioningService = await this.projectsService
+        .get(stream.ref.projectId)
+        .getEnvVersioningByTargetId(stream.ref.targetId);
+      const workflowRuns = hasScope('action', scopes) && branch
         ? await integration.gitGetWorkflowRuns(stream.config.branch, stream.id)
         : [];
-      const workflowRunsJobs = workflowRuns?.[0]
+      const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0]
         ? await integration.gitGetWorkflowJobs(workflowRuns[0].id, stream.id, stream.config.org)
         : [];
   
@@ -95,55 +97,66 @@ export class GithubStreamService extends EntityService implements IStreamService
         branch: branchName,
       };
 
-      state.history.action = workflowRuns ? workflowRuns.map((w) => {
-        const isJobStepsNotFailed = workflowRunsJobs[0]
-          ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
-          : true;
+      if (hasScope('action', scopes)) {
+        state.history.action = workflowRuns ? workflowRuns.map((w) => {
+          const isJobStepsNotFailed = workflowRunsJobs[0]
+            ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
+            : true;
 
-        return {
-          id: String(w.id),
-          type: 'github:workflow',
-  
-          author: { name: w.actor?.name ?? w.actor?.login ?? null, link: w.actor?.html_url ?? null },
-          description: w.name,
-          link: w.html_url ?? null,
+          return {
+            id: String(w.id),
+            type: 'github:workflow',
+    
+            author: {
+              name: w.actor?.name ?? w.actor?.login ?? null,
+              link: w.actor?.html_url ?? null,
+            },
+            description: w.name,
+            link: w.html_url ?? null,
+            metadata: {},
+            steps: workflowRunsJobs?.[0]
+              ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
+                acc[jobStep.number] = {
+                  id: String(jobStep.number),
+                  type: 'github:workflow:job',
+
+                  description: jobStep.name,
+                  link: workflowRunsJobs[0].html_url,
+                  status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
+                };
+
+                return acc;
+              }, {})
+              : null,
+            status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
+            time: w.run_started_at,
+          };
+        }) : [];
+      }
+
+      if (hasScope('change', scopes)) {
+        state.history.change = branch ? [ {
+          id: branch.commit.sha,
+          type: 'github:commit',
+
+          author: {
+            name: branch.commit.commit.author?.name ?? branch.commit.commit.author?.login ?? null,
+            link: branch.commit.commit.author?.html_url ?? null,
+          },
+          description: branch.commit.commit.message,
+          link: branch.commit.html_url,
           metadata: {},
-          steps: workflowRunsJobs?.[0]
-            ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
-              acc[jobStep.number] = {
-                id: String(jobStep.number),
-                type: 'github:workflow:job',
+          status: null,
+          steps: null,
+          time: branch.commit.commit.committer?.date ?? null,
+        } ] : [];
+      }
 
-                description: jobStep.name,
-                link: workflowRunsJobs[0].html_url,
-                status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
-              };
-
-              return acc;
-            }, {})
-            : null,
-          status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
-          time: w.run_started_at,
-        };
-      }) : [];
-      state.history.change = branch ? [ {
-        id: branch.commit.sha,
-        type: 'github:commit',
-
-        author: { name: branch.commit.commit.author?.name ?? branch.commit.commit.author?.login ?? null, link: branch.commit.commit.author?.html_url ?? null },
-        description: branch.commit.commit.message,
-        link: branch.commit.html_url,
-        metadata: {},
-        status: null,
-        steps: null,
-        time: branch.commit.commit.committer?.date ?? null,
-      } ] : [];
-
-      state.link = branch ? branch._links.html : null;
+      state.link = branch ? branch._links.html : old?.link ?? null;
       state.metadata = metadata;
       state.version = await versioningService.getCurrentStream(stream);
   
-      if (stream.artifacts?.length) {
+      if (hasScope('artifact', scopes) && stream.artifacts?.length) {
         await this.getArtifactsService(stream).run(
           { artifacts: stream.artifacts, ref: stream.ref },
           state,
@@ -178,14 +191,16 @@ export class GithubStreamService extends EntityService implements IStreamService
 
     const source = await this.projectsService
       .get(sourceStream.ref?.projectId)
-      .getStreamStateByTargetIdAndStreamId(sourceStream.ref?.targetId, sourceStream.ref?.streamId);
+      .getStreamStateByTargetIdAndStreamId(sourceStream.ref?.targetId, sourceStream.ref?.streamId, { change: true });
 
     if (!source?.history?.change?.[0]?.id) {
       return;
     }
 
     const sourceBranchName = await this.getBranch(sourceStream);
-    const targetIntegration = this.projectsService.get(targetStream.ref.projectId).getEnvIntegraionByTargetStream<GithubIntegrationService>(targetStream);
+    const targetIntegration = this.projectsService
+      .get(targetStream.ref.projectId)
+      .getEnvIntegraionByTargetStream<GithubIntegrationService>(targetStream);
     const targetBranchName = await this.getBranch(targetStream);
 
     if (!await targetIntegration.gitGetBranch(
@@ -219,7 +234,9 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   private getIntegrationService(stream: IGithubTargetStream) {
-    return this.projectsService.get(stream.ref.projectId).getEnvIntegraionByTargetStream<GithubIntegrationService>(stream);
+    return this.projectsService
+      .get(stream.ref.projectId)
+      .getEnvIntegraionByTargetStream<GithubIntegrationService>(stream);
   }
 
   private async getBranch(stream: IGithubTargetStream) {

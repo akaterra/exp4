@@ -16,11 +16,11 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     return 'Stream';
   }
 
-  async getState(stream: IProjectTargetStreamDef, withRefresh?: boolean) {
+  async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>) {
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
     const entity = stream.isDirty
-      ? await this.get(stream.type).streamGetState(stream)
-      : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream);
+      ? await this.get(stream.type).streamGetState(stream, scopes)
+      : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream, scopes);
 
     if (entity) {
       entity.version = entity.version ?? await this.getVersioningsService(stream).getCurrent(

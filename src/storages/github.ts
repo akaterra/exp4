@@ -87,6 +87,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+    maxLength?: number,
   ): Promise<D> {
     let intVal = await this.varGet(target, key, null, true);
 
@@ -106,6 +107,10 @@ export class GithubStorageService extends EntityService implements IStorageServi
       intVal.push(val);
     } else {
       intVal = [ val ];
+    }
+
+    if (maxLength) {
+      intVal = intVal.slice(-maxLength);
     }
 
     await this.varSet(target, key, intVal, true);
@@ -162,6 +167,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+    maxLength?: number,
   ): Promise<D> {
     let intVal = await this.varGetStream(stream, key, null, true);
 
@@ -181,6 +187,10 @@ export class GithubStorageService extends EntityService implements IStorageServi
       intVal.push(val);
     } else {
       intVal = [ val ];
+    }
+
+    if (maxLength) {
+      intVal = intVal.slice(-maxLength);
     }
 
     await this.varSetStream(stream, key, intVal, true);

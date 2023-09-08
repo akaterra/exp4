@@ -14,6 +14,7 @@ export interface IStorageService extends IService {
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+    maxLength?: number,
   ): Promise<D>;
 
   varInc(target: IProjectTargetDef, key: string | string[], add: number): Promise<number>;
@@ -27,6 +28,7 @@ export interface IStorageService extends IService {
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
+    maxLength?: number,
   ): Promise<D>;
 
   varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number>;

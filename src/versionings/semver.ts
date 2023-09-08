@@ -279,6 +279,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
       [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
       { id: version, at: new Date(), version },
       (existingVal, val) => existingVal?.version === val?.version,
+      20,
     );
   }
 
@@ -296,6 +297,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
       [ 'versionHistory', stream.ref.projectId, this.config?.namespace ?? stream.id ],
       { id: version, at: new Date(), version },
       (existingVal, val) => existingVal?.version === val?.version,
+      20,
     );
   }
 }

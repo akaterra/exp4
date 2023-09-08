@@ -53,11 +53,15 @@ export class ProjectsService extends EntitiesService<Project> {
     return true;
   }
 
-  async getState(projectId: string, targetId?: string | string[], withRefresh?: boolean): Promise<ProjectState> {
+  async getState(
+    projectId: string,
+    targetId?: string | string[],
+    scopes?: Record<string, boolean>,
+  ): Promise<ProjectState> {
     const project = this.get(projectId);
     const projectState = await this.statesCache.get(projectId) ?? new ProjectState(projectId);
 
-    if (!withRefresh) {
+    if (!scopes) {
       const replaceDirtyTargetIds = projectState.getDirtyTargetIds();
 
       if (!replaceDirtyTargetIds.length) {
@@ -85,7 +89,7 @@ export class ProjectsService extends EntitiesService<Project> {
 
           for (const stream of Object.values(target.streams)) {
             if (
-              !withRefresh &&
+              !scopes &&
               (
                 !replaceDirtyStreamIds.length ||
                 !replaceDirtyStreamIds.includes(stream.id)
@@ -95,7 +99,7 @@ export class ProjectsService extends EntitiesService<Project> {
             }
 
             await streamContainer.push(async () => {
-              projectState.setTargetStream(tId, await this.streamGetState(stream));
+              projectState.setTargetStream(tId, await this.streamGetState(stream, scopes));
             });
           }
 
@@ -112,7 +116,7 @@ export class ProjectsService extends EntitiesService<Project> {
   async runStatesResync() {
     for (const projectId of Object.keys(this.entities)) {
       try {
-        await this.getState(projectId, null, true);
+        await this.getState(projectId, null, { '*': true });
 
         this.statisticsService.inc(`projects.${projectId}.statesResyncCount`);
         this.statisticsService.set(`projects.${projectId}.statesResyncAt`, new Date());
@@ -131,16 +135,19 @@ export class ProjectsService extends EntitiesService<Project> {
     setTimeout(() => this.runStatesResync(), 120000);
   }
 
-  streamGetState(stream: IProjectTargetStreamDef): Promise<IStream>;
+  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>): Promise<IStream>;
 
-  streamGetState(projectId: string, targetId: string, streamId: string): Promise<IStream>;
+  streamGetState(projectId: string, targetId: string, streamId: string, scopes?: Record<string, boolean>): Promise<IStream>;
 
-  async streamGetState(mixed: string | IProjectTargetStreamDef, targetId?: string, streamId?: string) {
+  async streamGetState(mixed: string | IProjectTargetStreamDef, targetId?: string | Record<string, boolean>, streamId?: string, scopes?: Record<string, boolean>) {
     const project = this.get(typeof mixed === 'string' ? mixed : mixed.ref?.projectId);
     const streamState = project.env.streams.getState(
       typeof mixed === 'string'
-        ? project.getTargetStreamByTargetIdAndStreamId(targetId, streamId)
-        : mixed
+        ? project.getTargetStreamByTargetIdAndStreamId(targetId as string, streamId)
+        : mixed,
+      typeof mixed === 'string'
+        ? scopes
+        : targetId as Record<string, boolean>,
     );
 
     return streamState;

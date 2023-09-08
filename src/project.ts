@@ -275,8 +275,12 @@ export class Project implements IProject {
     return this.projectsService.getState(this.id, targetId);
   }
 
-  async getStreamStateByTargetIdAndStreamId(targetId: IProjectTarget['id'], streamId: IProjectTargetStream['id']): Promise<IStream> {
-    return (await this.projectsService.getState(this.id, targetId))?.targets?.[targetId]?.streams?.[streamId];
+  async getStreamStateByTargetIdAndStreamId(
+    targetId: IProjectTarget['id'],
+    streamId: IProjectTargetStream['id'],
+    scopes?: Record<string, boolean>,
+  ): Promise<IStream> {
+    return (await this.projectsService.getState(this.id, targetId, scopes))?.targets?.[targetId]?.streams?.[streamId];
   }
 
   getTargetByTargetId<S extends IProjectTargetDef = IProjectTargetDef>(id: string, unsafe?: boolean): S {
@@ -297,7 +301,11 @@ export class Project implements IProject {
     return this.getTargetByTargetId(stream.ref.targetId);
   }
 
-  getTargetStreamByTargetIdAndStreamId<S extends IProjectTargetStream<Record<string, unknown>> = IProjectTargetStream<Record<string, unknown>>>(targetId: string, streamId: string, unsafe?: boolean): S {
+  getTargetStreamByTargetIdAndStreamId<S extends IProjectTargetStreamDef = IProjectTargetStreamDef>(
+    targetId: string,
+    streamId: string,
+    unsafe?: boolean,
+  ): S {
     const stream = this.getTargetByTargetId(targetId).streams[streamId] as S;
 
     if (!stream) {
