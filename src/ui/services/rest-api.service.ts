@@ -23,7 +23,7 @@ export class PublicRestApiService {
     return this.doRequest(path, 'put', data);
   }
 
-	@processingRequest
+  @processingRequest
   protected doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, any>) {
     const headers = this.doRequestHeaders();
 

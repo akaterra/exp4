@@ -8,14 +8,14 @@ const style: React.CSSProperties = {
   position: 'fixed',
   right: 0,
   bottom: 0,
-  zIndex: 2000,
+  zIndex: 50000,
 };
 
 export const alertsStore = new AlertsStore();
 
 export const Alerts = observer(({ store }: { store: AlertsStore }) => {
   return <div style={ style }>
-    <Loader isShown={ store.isLoaderShownIteration } />
+    <Loader isShown={ store.isShown } />
     <div className='row clear'>
       <div className='paragraph paragraph-lrg' style={ { alignItems: 'end' } }>
         {

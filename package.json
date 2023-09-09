@@ -1,7 +1,6 @@
 {
   "scripts": {
     "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/typescript/bin/tsc && node ./dist/src/index.js\"",
-    "dev:be1": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/ts-node/dist/bin.js src/index.ts\"",
     "dev:fe": "webpack serve",
     "lint": "eslint ./src/* --ext=.tsx,.ts --fix"
   },

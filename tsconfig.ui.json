@@ -13,5 +13,11 @@
 		"resolveJsonModule": true,
 		"incremental": true,
 		"jsx": "react-jsx"
-	}
+	},
+    "include": [
+        "./src/ui"
+    ],
+    "exclude": [
+        "./dist",
+    ]
 }

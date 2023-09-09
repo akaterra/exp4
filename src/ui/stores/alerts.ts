@@ -1,5 +1,5 @@
 import * as React from 'react-dom';
-import { makeObservable, observable } from 'mobx';
+import { computed, makeObservable, observable } from 'mobx';
 import { BaseStore } from './base-store';
 
 export class AlertsStore extends BaseStore {
@@ -10,6 +10,11 @@ export class AlertsStore extends BaseStore {
   @observable isLoaderShownIteration: number = 0;
 
   private cleanAlertsTimer: NodeJS.Timeout;
+
+  @computed
+  get isShown() {
+    return this.isLoaderShownIteration > 0;
+  }
 
   constructor() {
     super();

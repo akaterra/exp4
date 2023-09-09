@@ -8,9 +8,10 @@
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 1000;
+    z-index: 9000;
 }
 .loader.ring {
+    background-color: transparent;
     position: relative;
     margin-top: 150px;
     width: 120px;
@@ -28,7 +29,7 @@
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: red transparent transparent transparent;
 }
-.loader.ring div:nth-child(1) {
+/* .loader.ring div:nth-child(1) {
     animation-delay: -0.45s;
 }
 .loader.ring div:nth-child(2) {
@@ -36,7 +37,7 @@
 }
 .loader.ring div:nth-child(3) {
     animation-delay: -0.15s;
-}
+} */
 @keyframes lds-ring {
     0% {
         transform: rotate(0deg);

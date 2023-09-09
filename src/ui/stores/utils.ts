@@ -42,9 +42,13 @@ export function processingRequest(target, prop, descriptor) {
   const fn = descriptor.value;
 
   descriptor.value = async function (...args) {
-    const showLoaderTimeout = setTimeout(() => {
+    const showLoaderTimeout = alertsStore.isLoaderShownIteration === 0 ? setTimeout(() => {
       alertsStore.showLoader();
-    }, 500);
+    }, 500) : null;
+
+    if (alertsStore.isShown) {
+      alertsStore.showLoader();
+    }
 
     try {
       return await fn.call(this, ...args);
@@ -55,7 +59,7 @@ export function processingRequest(target, prop, descriptor) {
     } finally {
       clearTimeout(showLoaderTimeout);
 
-      if (alertsStore.isLoaderShownIteration) {
+      if (alertsStore.isLoaderShownIteration > 0) {
         setTimeout(() => {
           alertsStore.hideLoader();
         }, 500);
