@@ -1,8 +1,5 @@
-import Container from 'typedi';
-import { StatisticsService } from '../../statistics.service';
-
-const statisticsService = Container.get(StatisticsService);
+import { statistics } from '../../statistics.service';
 
 export function statisticsList(req, res) {
-  res.json(statisticsService.state);
+  res.json(statistics.state);
 }

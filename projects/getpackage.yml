@@ -1,7 +1,12 @@
 type: "project"
 
 id: "getpackage"
-description: ""
+
+title: "GetPackage"
+description: "Org"
+
+resync:
+  intervalSeconds: 300
 
 artifacts:
   argocdApplication:
@@ -28,13 +33,20 @@ artifacts:
         source: "argocdApplication.status.resources"
         filter:
           name:
-            contain:
+            in:
               key: "ref.streamId"
           kind:
             eq: "StatefulSet"
         pattern: null
         keys:
-          - valuePath: "status"
+          - valueMapping:
+              OutOfSync:
+                level: warning
+                value: "Out of sync"
+              Synced:
+                level: success
+                value: "Synced"
+            valuePath: "status"
         to: "link"
         type: "argocd:syncStatus"
 
@@ -59,12 +71,12 @@ integrations:
     type: "github"
     config:
       org: "getpackageltd"
-      branch: "v${version.major}.${version.minor}"
+      branch: "v${version.major}.${version.minor}.${version.patch}"
   githubHotfix:
     type: "github"
     config:
       org: "getpackageltd"
-      branch: "v${version.major}.${version.minor}-hotfix"
+      branch: "v${version.major}.${version.minor}.${version.patch}"
   githubMaster:
     type: "github"
     config:
@@ -88,16 +100,19 @@ versionings:
     config:
       namespace: "release"
       storage: "github"
+      format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
   hotfix: &versioningHotfix
     type: "semver"
     config:
       namespace: "hotfix"
       storage: "github"
+      format: "${version.major}.${version.minor}.${version.patch}"
   current: &versioningCurrent
     type: "semver"
     config:
       namespace: "current"
       storage: "github"
+      format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
 
 flows:
   dev:
@@ -175,6 +190,20 @@ flows:
             title: ""
             targets:
               - "dev"
+      mergeFromHotfix:
+        title: "Merge latest hotfix"
+        steps:
+          - type: "moveFrom"
+            title: ""
+            targets:
+              - "hotfix"
+      mergeFromProduction:
+        title: "Merge latest production"
+        steps:
+          - type: "moveFrom"
+            title: ""
+            targets:
+              - "production"
       exclude:
         title: "Exclude"
         steps:

@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { IIntegrationService } from './integration.service';
+import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import fetch from 'node-fetch-native';
@@ -29,6 +29,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
+  @IncStatistics()
   async branchDelete(branch?, repo?, org?) {
     await this.client.git.deleteRef({
       owner: this.org(org), repo: this.repo(repo), ref: `heads/${this.branch(branch)}`,
@@ -41,6 +42,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
+  @IncStatistics()
   async orgVarCreate(key: string, val: any, org?) {
     this.config?.useRepositoryAsOrg
       ? await this.repositoryVarCreate(key, val, undefined, org)
@@ -49,6 +51,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
       });
   }
 
+  @IncStatistics()
   async orgVarGet(key: string, org?) {
     const res = this.config?.useRepositoryAsOrg
       ? await this.repositoryVarGet(key, undefined, org)
@@ -65,6 +68,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     return res ?? null;
   }
 
+  @IncStatistics()
   async orgVarUpdate(key: string, val: any, org?) {
     if (val === null) {
       if (!this.config?.useRepositoryAsOrg) {
@@ -83,18 +87,21 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
       });
   }
 
+  @IncStatistics()
   async orgMembersList(org?) {
     return (await this.client.orgs.listMembers({
       org: this.org(org), per_page: 100,
     })).data;
   }
 
+  @IncStatistics()
   async repositoryVarCreate(key: string, val: any, repo?, org?) {
     await this.client.rest.actions.createRepoVariable({
       owner: this.org(org), name: key, repo: this.repo(repo), value: val, visibility: 'private',
     });
   }
 
+  @IncStatistics()
   async repositoryVarGet(key: string, repo?, org?) {
     const res = (await this.client.rest.actions.getRepoVariable({
       owner: this.org(org), name: key, repo: this.repo(repo),
@@ -109,6 +116,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     return res ? res.value : null;
   }
 
+  @IncStatistics()
   async repositoryVarUpdate(key: string, val: any, repo?, org?) {
     if (val === null) {
       await this.client.rest.actions.deleteRepoVariable({
@@ -123,12 +131,14 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
+  @IncStatistics()
   async gitCreateReference(refName, sha, repo?, org?) {
     return (await this.client.git.createRef({
       owner: this.org(org), repo: this.repo(repo), ref: `refs/heads/${refName}`, sha,
     })).data;
   }
 
+  @IncStatistics()
   async gitGetBranch(branch?, repo?, org?) {
     return (await this.client.rest.repos.getBranch({
       owner: this.org(org), repo: this.repo(repo), branch: this.branch(branch),
@@ -141,6 +151,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data;
   }
 
+  @IncStatistics()
   async gitGetWorkflowRuns(branch?, repo?, org?) {
     return (await this.client.actions.listWorkflowRunsForRepo({
       owner: this.org(org), repo: this.repo(repo), branch: this.branch(branch), per_page: 1,
@@ -153,6 +164,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data?.workflow_runs;
   }
 
+  @IncStatistics()
   async gitGetWorkflowJobs(runId, repo?, org?) {
     return (await this.client.actions.listJobsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), run_id: runId, filter: 'latest',
@@ -165,18 +177,21 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data?.jobs;
   }
 
+  @IncStatistics()
   async gitGetWorkflowJob(jobId, repo?, org?) {
     return (await this.client.actions.getJobForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), job_id: jobId,
     })).data;
   }
 
+  @IncStatistics()
   async gitGetWorkflowJobLog(jobId, repo?, org?) {
     return (await this.client.actions.downloadJobLogsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), job_id: jobId,
     })).data;
   }
 
+  @IncStatistics()
   async gitMerge(base, head, commitMessage?, repo?, org?) {
     return (await this.client.repos.merge({
       owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), commit_message: commitMessage,
@@ -189,6 +204,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data;
   }
 
+  @IncStatistics()
   async userGet(username) {
     return (await this.client.users.getByUsername({
       username,

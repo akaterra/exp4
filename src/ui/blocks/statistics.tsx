@@ -12,33 +12,39 @@ export const Statistics = observer(({ statisticsStore }: { statisticsStore?: Sta
     </div>
     {
       statisticsStore?.statistics.general
-        ? <div>
+        ? <React.Fragment>
           <SubTitle>General</SubTitle>
-          {
-            Object.entries(statisticsStore.statistics.general).map(([ key, val ]) => {
-              return <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
-            })
-          }
-        </div>
+          <div className='list'>
+            {
+              Object.entries(statisticsStore.statistics.general).map(([ key, val ]) => {
+                return <div className='list-item'>
+                  <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
+                </div>;
+              })
+            }
+          </div>
+        </React.Fragment>
         : null
     }
     {
-      statisticsStore?.statistics.projects
-        ? <div>
-          <SubTitle>Projects</SubTitle>
+      statisticsStore?.statistics.integrations
+        ? <React.Fragment>
+          <SubTitle>Integrations</SubTitle>
           {
-            Object.entries(statisticsStore.statistics.projects).map(([ key, val ]) => {
-              return <React.Fragment>
-                <SubSubTitle className='primary'>{ key }</SubSubTitle>
+            Object.entries(statisticsStore.statistics.integrations).map(([ key, val ]) => {
+              return <div className='list'>
+                <div className='list-item bold'>{ key }</div>
                 {
                   Object.entries(val).map(([ key, val ]) => {
-                    return <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
+                    return <div className='list-subitem'>
+                      <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
+                    </div>;
                   })
                 }
-              </React.Fragment>;
+              </div>;
             })
           }
-        </div>
+        </React.Fragment>
         : null
     }
   </div>;

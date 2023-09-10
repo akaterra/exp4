@@ -24,7 +24,7 @@ export class AwaitedCache<T = any> {
       const [ expire, ] = this.cache.get(key);
 
       return expire
-        ? expire >= Date.now()
+        ? expire >= Date.now() - 2000
         : true;
     }
 

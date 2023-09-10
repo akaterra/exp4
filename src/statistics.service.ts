@@ -1,4 +1,4 @@
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import * as _ from 'lodash';
 
 @Service()
@@ -31,3 +31,5 @@ export class StatisticsService {
     _.set(this.state, key, val);
   }
 }
+
+export const statistics = Container.get(StatisticsService);

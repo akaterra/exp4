@@ -8,7 +8,7 @@ export const TitledLine = ({ children, isShown = true, title = undefined }: any)
 
   return <div>
     { title ?? 'Status:' }
-    <span className='bold'> { children }</span>
+    <span className='bold'> { getChildren(children) }</span>
   </div>;
 };
 
@@ -26,3 +26,17 @@ export const StatusLine = ({ isFailed = false, status = undefined, title = undef
     }> { status }</span>
   </div>;
 };
+
+function getChildren(children) {
+  if (Array.isArray(children)) {
+    return children.map(
+      (child) => child && typeof child === 'object' && child.level
+        ? <span className={ `span ${child.level}` }>{ child.value }</span>
+        : child
+    );
+  }
+
+  return children && typeof children === 'object' && children.level
+    ? <span className={ `span ${children.level}` }>{ children.value }</span>
+    : children;
+}

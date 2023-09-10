@@ -207,7 +207,7 @@ export function loadModules(path, symbolPostfix?) {
 export function Autowired(ref?: any | (() => any)) {
   let refSymbol;
 
-  return function(target: Record<string, any>, propertyName: string) {
+  return function (target: Record<string, any>, propertyName: string) {
     Reflect.defineProperty(
       target,
       propertyName,

@@ -1,4 +1,4 @@
-import { IIntegrationService } from './integration.service';
+import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { ArgocdService } from '../services/argocd.service';
@@ -26,6 +26,7 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     );
   }
 
+  @IncStatistics()
   getApplication(name?) {
     return this.client.getApplication(name ?? this.config?.applicationName);
   }

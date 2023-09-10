@@ -7,6 +7,7 @@ import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
 import { ProjectState } from './project-state';
 import { StatisticsService } from './statistics.service';
+import moment from 'moment-timezone';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
@@ -110,18 +111,31 @@ export class ProjectsService extends EntitiesService<Project> {
       await targetContainer.wait();
   
       return projectState;
-    })(), 300, true);
+    })(), 3600, true);
   }
 
   async runStatesResync() {
-    for (const projectId of Object.keys(this.entities)) {
-      try {
-        await this.getState(projectId, null, { '*': true });
+    const now = moment();
+    let resynced;
 
-        this.statisticsService.inc(`projects.${projectId}.statesResyncCount`);
-        this.statisticsService.set(`projects.${projectId}.statesResyncAt`, new Date());
+    for (const project of Object.values(this.entities)) {
+      if (
+        project.resync?.intervalSeconds &&
+        now.diff(project.resync?.at ?? '1970-01-01', 'seconds') < project.resync?.intervalSeconds
+      ) {
+        continue;
+      }
+
+      try {
+        await this.getState(project.id, null, { '*': true });
+
+        project.resync.at = now.toDate();
+        resynced = true;
+
+        this.statisticsService.inc(`projects.${project.id}.statesResyncCount`);
+        this.statisticsService.set(`projects.${project.id}.statesResyncAt`, now.toDate());
       } catch (err) {
-        this.statisticsService.add(`projects.${projectId}.errors`, {
+        this.statisticsService.add(`projects.${project.id}.errors`, {
           message: err?.message ?? err ?? null,
           time: new Date(),
           type: 'projectState:resync',
@@ -129,10 +143,12 @@ export class ProjectsService extends EntitiesService<Project> {
       }
     }
 
-    this.statisticsService.inc('general.statesResyncCount');
-    this.statisticsService.set('general.statesResyncAt', new Date());
+    if (resynced) {
+      this.statisticsService.inc('general.statesResyncCount');
+      this.statisticsService.set('general.statesResyncAt', new Date());
+    }
 
-    setTimeout(() => this.runStatesResync(), 120000);
+    setTimeout(() => this.runStatesResync(), 30000);
   }
 
   streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>): Promise<IStream>;

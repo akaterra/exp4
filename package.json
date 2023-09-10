@@ -14,6 +14,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.21",
+    "moment-timezone": "^0.5.43",
     "normalize.css": "^8.0.1",
     "npx": "^10.2.2",
     "passport": "^0.6.0",

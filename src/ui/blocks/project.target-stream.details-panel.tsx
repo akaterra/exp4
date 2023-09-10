@@ -49,7 +49,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
   return <React.Fragment>
     {
       projectTargetStreamState?.link
-        ? <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a>
+        ? <div><a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a></div>
         : null
     }
     <div>
@@ -67,7 +67,9 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <div className='caption smallest clear-padding-top'>Last action</div>
             <Label>{ lastAction?.description ?? 'No description' }</Label>
           </div>
-          <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
+          <div>
+            <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
+          </div>
           {
             lastAction?.steps && Object.keys(lastAction.steps).length
               ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
@@ -89,7 +91,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           <TitledLine title='Author:'>
             <a className='link' href={ lastAction?.author?.link } target='__blank'>{ lastAction?.author?.name ?? 'unknown' }</a>
           </TitledLine>
-          <TitledLine title='At:' isShown={ !!lastAction?.time }>
+          <TitledLine title='At' isShown={ !!lastAction?.time }>
             { lastAction?.time ? new Date(lastAction?.time).toLocaleString() : null }
           </TitledLine>
         </div>
@@ -102,7 +104,9 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <div className='caption smallest clear-padding-top'>Last change</div>
             <Label>{ lastChange?.description ?? 'No description' }</Label>
           </div>
-          <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+          <div>
+            <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+          </div>
           {
             lastChange?.steps && Object.keys(lastChange.steps).length
               ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
@@ -124,7 +128,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           <TitledLine title='Author:'>
             <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
           </TitledLine>
-          <TitledLine title='At:' isShown={ !!lastChange?.time }>
+          <TitledLine title='At' isShown={ !!lastChange?.time }>
             { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
           </TitledLine>
         </div>

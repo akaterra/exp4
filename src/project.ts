@@ -110,6 +110,10 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 export type IProjectTargetDef = IProjectTarget<Record<string, unknown>>;
 
 export interface IProject extends IProjectDef {
+  resync?: {
+    intervalSeconds?: number;
+  };
+
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow<Record<string, unknown>>>;
@@ -124,6 +128,10 @@ export type IProjectTargetInput = Omit<IProjectTarget, 'isSyncing'>;
 export type IProjectTargetStreamInput = Omit<IProjectTargetStream, 'isSyncing'>;
 
 export interface IProjectInput extends IProjectDef {
+  resync?: {
+    intervalSeconds?: number;
+  };
+
   artifacts: Record<string, IProjectDefInput & Pick<IProjectArtifact, 'dependsOn'>>;
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlow>;
@@ -151,6 +159,11 @@ export class Project implements IProject {
     versionings: VersioningsService;
   };
 
+  resync?: {
+    intervalSeconds?: number;
+    at?: Date;
+  };
+
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>> = {};
   definitions: Record<string, Record<string, unknown>> = {};
   flows: Record<string, IProjectFlowDef> = {};
@@ -175,6 +188,11 @@ export class Project implements IProject {
     if (config.id) {
       this.id = config.id;
     }
+
+    this.resync = {
+      ...config?.resync,
+      at: null,
+    };
 
     if (config.artifacts) {
       this.artifacts = config.artifacts;

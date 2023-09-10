@@ -18,7 +18,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
 
   async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>) {
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
-    const entity = stream.isDirty
+    const entity = stream.isDirty || scopes
       ? await this.get(stream.type).streamGetState(stream, scopes)
       : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream, scopes);
 
@@ -30,7 +30,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
 
     stream.isDirty = false;
 
-    this.cache.set(key, entity, 60);
+    this.cache.set(key, entity);
 
     return entity;
   }

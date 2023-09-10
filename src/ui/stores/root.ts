@@ -30,6 +30,13 @@ export class RootStore {
     this.isReady = new Promise((resolve) => {
       this.isReadyResolve = resolve;
     });
+
+    setInterval(function (this: RootStore) {
+      if (this.isAuthorized) {
+        this.projectsStore.fetch();
+        this.statisticsStore.fetch();
+      }
+    }.bind(this), 30000);
   }
 
   @flow @processing

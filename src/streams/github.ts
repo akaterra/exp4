@@ -58,9 +58,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
   async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>): Promise<IStream> {
     const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
-    const old = await this.cache.get(cacheKey);
-
-    const state: IStream = {
+    const state: IStream = await this.cache.get(cacheKey) ?? {
       id: stream.id,
       type: this.type,
 
@@ -68,9 +66,9 @@ export class GithubStreamService extends EntityService implements IStreamService
       targetId: stream.ref.targetId,
 
       history: {
-        action: old?.history?.action ?? [],
-        artifact: old?.history?.artifact ?? [],
-        change: old?.history?.change ?? [],
+        action: [],
+        artifact: [],
+        change: [],
       },
       isSyncing: true,
       link: null,
@@ -79,6 +77,8 @@ export class GithubStreamService extends EntityService implements IStreamService
     };
 
     const detailsPromise = (async () => {
+      state.isSyncing = true;
+
       const integration = this.getIntegrationService(stream);
       const branchName = await this.getBranch(stream);
       const branch = hasScope('change', scopes) ? await integration.gitGetBranch(branchName, stream.id) : null;
@@ -87,10 +87,10 @@ export class GithubStreamService extends EntityService implements IStreamService
         .getEnvVersioningByTargetId(stream.ref.targetId);
       const workflowRuns = hasScope('action', scopes) && branch
         ? await integration.gitGetWorkflowRuns(stream.config.branch, stream.id)
-        : [];
-      const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0]
+        : null;
+      const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id)
         ? await integration.gitGetWorkflowJobs(workflowRuns[0].id, stream.id, stream.config.org)
-        : [];
+        : null;
   
       const metadata = {
         org: stream.config?.org ?? integration.config?.org,
@@ -98,10 +98,10 @@ export class GithubStreamService extends EntityService implements IStreamService
       };
 
       if (hasScope('action', scopes)) {
-        state.history.action = workflowRuns ? workflowRuns.map((w) => {
-          const isJobStepsNotFailed = workflowRunsJobs[0]
+        state.history.action = workflowRuns?.length ? workflowRuns.map((w) => {
+          const isJobStepsNotFailed = workflowRunsJobs?.[0]
             ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
-            : true;
+            : null;
 
           return {
             id: String(w.id),
@@ -127,8 +127,12 @@ export class GithubStreamService extends EntityService implements IStreamService
 
                 return acc;
               }, {})
-              : null,
-            status: isJobStepsNotFailed ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null) : Status.FAILED,
+              : state.history.action?.[0]?.steps ?? null,
+            status: typeof isJobStepsNotFailed === 'boolean'
+              ? isJobStepsNotFailed
+                ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null)
+                : Status.FAILED
+              : state.history.action?.[0]?.status ?? Status.COMPLETED,
             time: w.run_started_at,
           };
         }) : [];
@@ -152,7 +156,7 @@ export class GithubStreamService extends EntityService implements IStreamService
         } ] : [];
       }
 
-      state.link = branch ? branch._links.html : old?.link ?? null;
+      state.link = branch ? branch._links.html : state?.link ?? null;
       state.metadata = metadata;
       state.version = await versioningService.getCurrentStream(stream);
   
@@ -166,8 +170,6 @@ export class GithubStreamService extends EntityService implements IStreamService
             ref: stream.ref,
           },
         );
-      } else if (old) {
-        state.history.artifact = old.history.artifact;
       }
     })().catch((err) => {
       console.error(err);
@@ -246,6 +248,6 @@ export class GithubStreamService extends EntityService implements IStreamService
     const branch = await project.getEnvVersioningByTarget(target)
       .getCurrent(target, stream.config?.branch ?? integration.config?.branch);
 
-    return branch;
+    return branch ?? integration?.config?.branch;
   }
 }

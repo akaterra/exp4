@@ -74,17 +74,20 @@ export const ProjectStatistics = observer(({ project }: { project?: ProjectStore
   }
 
   return <div className='paragraph children-gap'>
+    <SubTitle>General</SubTitle>
     {
       Object.entries(project?.projectStatistics).map(([ key, val ]) => {
-        return <div>
-          <TitledLine title={ `${_.startCase(key)}:` }>
-            {
-              Array.isArray(val) ? null : val
-            }
-            {
-              Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
-            }
-          </TitledLine>
+        return <div className='list'>
+          <div className='list-item'>
+            <TitledLine title={ `${_.startCase(key)}:` }>
+              {
+                Array.isArray(val) ? null : val
+              }
+              {
+                Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
+              }
+            </TitledLine>
+          </div>
         </div>;
       })
     }
