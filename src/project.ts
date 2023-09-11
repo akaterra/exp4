@@ -293,7 +293,7 @@ export class Project implements IProject {
   }
 
   getStateByTargetId(targetId: IProjectTarget['id']): Promise<ProjectState> {
-    return this.projectsService.getState(this.id, targetId);
+    return this.projectsService.getState(this.id, { [targetId]: true });
   }
 
   async getStreamStateByTargetIdAndStreamId(
@@ -301,7 +301,7 @@ export class Project implements IProject {
     streamId: IProjectTargetStream['id'],
     scopes?: Record<string, boolean>,
   ): Promise<IStream> {
-    return (await this.projectsService.getState(this.id, targetId, scopes))?.targets?.[targetId]?.streams?.[streamId];
+    return (await this.projectsService.getState(this.id, { [targetId]: [ streamId ] }, scopes))?.targets?.[targetId]?.streams?.[streamId];
   }
 
   getTargetByTargetId<S extends IProjectTargetDef = IProjectTargetDef>(id: string, unsafe?: boolean): S {

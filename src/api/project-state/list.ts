@@ -8,5 +8,5 @@ const projectsService = Container.get(ProjectsService);
 export async function projectStreamList(req, res) {
   logger.info({ message: 'projectStreamList', data: req.data });
 
-  res.json(await projectsService.getState(req.params.projectId, req.query.targetId?.split(',')));
+  res.json(await projectsService.getState(req.params.projectId /*, req.query.targetId?.split(',') */));
 }

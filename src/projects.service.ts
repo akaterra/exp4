@@ -34,7 +34,7 @@ export class ProjectsService extends EntitiesService<Project> {
     const project = this.get(projectId);
     const flow = project.getFlowByFlowId(flowId);
 
-    for (const [ , aId ] of iterArr(actionId)) {
+    for (const [ , aId ] of iter(actionId)) {
       project.validateParams(flowId, aId, params);
 
       for (const action of flow.actions[aId].steps) {
@@ -116,8 +116,17 @@ export class ProjectsService extends EntitiesService<Project> {
               continue;
             }
 
-            if (targetId?.[tId] === true || target?.[tId]?.includes(stream.id)) {
-              continue;
+            if (targetId) {
+              if (
+                Array.isArray(targetId?.[tId]) &&
+                !(targetId?.[tId] as IProjectTargetStream['id'][])?.includes(stream.id)
+              ) {
+                continue;
+              }
+
+              if (!targetId[tId]) {
+                continue;
+              }
             }
 
             await streamContainer.push(async () => {
