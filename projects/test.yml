@@ -3,6 +3,9 @@ type: "project"
 id: "test"
 description: ""
 
+resync:
+  intervalSeconds: 300
+
 artifacts:
   argocdApplication:
     type: "argocd:application"
@@ -181,6 +184,10 @@ flows:
             title: ""
             targets:
               - "stg"
+          - type: "bookmark"
+            title: ""
+            targets:
+              - "production"
       mergeToDev:
         title: "Merge to develop"
         steps:
@@ -257,6 +264,10 @@ flows:
             title: ""
             targets:
               - "stgHotfix"
+          - type: "bookmark"
+            title: ""
+            targets:
+              - "production"
       mergeToQa:
         title: "Merge to QA"
         steps:

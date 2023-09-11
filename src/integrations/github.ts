@@ -3,6 +3,7 @@ import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import fetch from 'node-fetch-native';
+import {Log} from '../logger';
 
 export interface IGithubConfig {
   branch?: string;
@@ -29,7 +30,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async branchDelete(branch?, repo?, org?) {
     await this.client.git.deleteRef({
       owner: this.org(org), repo: this.repo(repo), ref: `heads/${this.branch(branch)}`,
@@ -42,7 +43,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async orgVarCreate(key: string, val: any, org?) {
     this.config?.useRepositoryAsOrg
       ? await this.repositoryVarCreate(key, val, undefined, org)
@@ -51,7 +52,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
       });
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async orgVarGet(key: string, org?) {
     const res = this.config?.useRepositoryAsOrg
       ? await this.repositoryVarGet(key, undefined, org)
@@ -68,13 +69,13 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     return res ?? null;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async orgVarUpdate(key: string, val: any, org?) {
     if (val === null) {
       if (!this.config?.useRepositoryAsOrg) {
-        await this.client.rest.actions.deleteOrgVariable({
-          org: this.org(org), name: key,
-        });
+        // await this.client.rest.actions.deleteOrgVariable({
+        //   org: this.org(org), name: key,
+        // });
       }
 
       return;
@@ -87,21 +88,21 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
       });
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async orgMembersList(org?) {
     return (await this.client.orgs.listMembers({
       org: this.org(org), per_page: 100,
     })).data;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async repositoryVarCreate(key: string, val: any, repo?, org?) {
     await this.client.rest.actions.createRepoVariable({
       owner: this.org(org), name: key, repo: this.repo(repo), value: val, visibility: 'private',
     });
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async repositoryVarGet(key: string, repo?, org?) {
     const res = (await this.client.rest.actions.getRepoVariable({
       owner: this.org(org), name: key, repo: this.repo(repo),
@@ -116,12 +117,12 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     return res ? res.value : null;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async repositoryVarUpdate(key: string, val: any, repo?, org?) {
     if (val === null) {
-      await this.client.rest.actions.deleteRepoVariable({
-        owner: this.org(org), name: key, repo: this.repo(repo),
-      });
+      // await this.client.rest.actions.deleteRepoVariable({
+      //   owner: this.org(org), name: key, repo: this.repo(repo),
+      // });
 
       return;
     }
@@ -131,14 +132,20 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     });
   }
 
-  @IncStatistics()
-  async gitCreateReference(refName, sha, repo?, org?) {
+  @IncStatistics() @Log('debug')
+  async gitCreateReference(refName, sha, repo?, org?, refType?) {
     return (await this.client.git.createRef({
-      owner: this.org(org), repo: this.repo(repo), ref: `refs/heads/${refName}`, sha,
+      owner: this.org(org), repo: this.repo(repo), ref: `refs/${ refType ?? 'heads' }/${refName}`, sha,
+    }).catch((err) => {
+      if (err?.status === 422) {
+        return { data: undefined };
+      }
+
+      return Promise.reject(err);
     })).data;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async gitGetBranch(branch?, repo?, org?) {
     return (await this.client.rest.repos.getBranch({
       owner: this.org(org), repo: this.repo(repo), branch: this.branch(branch),
@@ -151,7 +158,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async gitGetWorkflowRuns(branch?, repo?, org?) {
     return (await this.client.actions.listWorkflowRunsForRepo({
       owner: this.org(org), repo: this.repo(repo), branch: this.branch(branch), per_page: 1,
@@ -164,7 +171,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data?.workflow_runs;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async gitGetWorkflowJobs(runId, repo?, org?) {
     return (await this.client.actions.listJobsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), run_id: runId, filter: 'latest',
@@ -177,21 +184,21 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data?.jobs;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async gitGetWorkflowJob(jobId, repo?, org?) {
     return (await this.client.actions.getJobForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), job_id: jobId,
     })).data;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async gitGetWorkflowJobLog(jobId, repo?, org?) {
     return (await this.client.actions.downloadJobLogsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), job_id: jobId,
     })).data;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
   async gitMerge(base, head, commitMessage?, repo?, org?) {
     return (await this.client.repos.merge({
       owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), commit_message: commitMessage,
@@ -204,7 +211,25 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     })).data;
   }
 
-  @IncStatistics()
+  @IncStatistics() @Log('debug')
+  async tagCreate(sha, tag, commitMessage?, repo?, org?, lightweight?: boolean) {
+    if (lightweight) {
+      await this.gitCreateReference(tag, sha, repo, org, 'tags');
+    } else {
+      const tagObj = (await this.client.git.createTag({
+        message: commitMessage ?? tag,
+        object: sha,
+        owner: this.org(org),
+        repo: this.repo(repo),
+        tag,
+        type: 'commit',
+      })).data;
+  
+      await this.gitCreateReference(tag, tagObj.sha, repo, org, 'tags');
+    }
+  }
+
+  @IncStatistics() @Log('debug')
   async userGet(username) {
     return (await this.client.users.getByUsername({
       username,

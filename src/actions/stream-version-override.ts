@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectFlowActionDef } from '../project';
+import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -13,29 +13,32 @@ export class StreamVersionOverrideActionService extends EntityService implements
     return 'streamVersion:override';
   }
 
-  async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
+  async run(
+    action: IProjectFlowActionDef,
+    targetsStreams?: Record<IProjectTarget['id'], [ IProjectTargetStream['id'], ...IProjectTargetStream['id'][] ] | true>,
+  ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
     const sourceTargetIds = targetsStreams
       ? Object.keys(targetsStreams)
       : project.getFlowByFlowId(action.ref.flowId).targets;
 
-    for (let sIdOfSource of sourceTargetIds) {
+    for (let tIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of action.targets) {
         const [ sId, tId ] = tIdOfTarget.split(':');
 
         if (tId) {
-          sIdOfSource = sId;
+          tIdOfSource = sId;
           tIdOfTarget = tId;
         }
 
-        const source = project.getTargetByTargetId(sIdOfSource);
+        const source = project.getTargetByTargetId(tIdOfSource);
         const target = project.getTargetByTargetId(tIdOfTarget);
-        const streamIds = targetsStreams?.[tIdOfTarget] === true
+        const streamIds = targetsStreams?.[tIdOfSource] === true
           ? Object.keys(target.streams)
-          : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
+          : targetsStreams?.[tIdOfSource] as string[] ?? Object.keys(target.streams);
 
         for (const streamId of streamIds) {
-          const sourceStream = project.getTargetStreamByTargetIdAndStreamId(sIdOfSource, streamId);
+          const sourceStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfSource, streamId);
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
 
           await project.getEnvVersioningByTarget(target).overrideStream(

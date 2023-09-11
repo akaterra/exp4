@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectFlowActionDef } from '../project';
+import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -17,7 +17,10 @@ export class MoveFromActionService extends EntityService implements IActionServi
     return 'moveFrom';
   }
 
-  async run(action: IProjectFlowActionDef, targetsStreams?: Record<string, [ string, ...string[] ] | true>): Promise<void> {
+  async run(
+    action: IProjectFlowActionDef,
+    targetsStreams?: Record<IProjectTarget['id'], [ IProjectTargetStream['id'], ...IProjectTargetStream['id'][] ] | true>,
+  ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
     const sourceTargetIds = targetsStreams
       ? Object.keys(targetsStreams)
@@ -36,7 +39,7 @@ export class MoveFromActionService extends EntityService implements IActionServi
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
-            await project.getEnvStreamByTargetStream(sourceStream)
+            await project.getEnvStreamByTargetStream(targetStream)
               .streamMove(targetStream, sourceStream);
 
             sourceStream.isDirty = true;

@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectFlowActionDef } from '../project';
+import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired, iter } from '../utils';
@@ -15,7 +15,7 @@ export class VersionPatchActionService extends EntityService implements IActionS
 
   async run(
     action: IProjectFlowActionDef,
-    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    targetsStreams?: Record<IProjectTarget['id'], [ IProjectTargetStream['id'], ...IProjectTargetStream['id'][] ] | true>,
     params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);

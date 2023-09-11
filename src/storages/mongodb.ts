@@ -3,87 +3,49 @@ import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
-import { Autowired } from '../utils';
-import { IntegrationsService } from '../integrations.service';
-import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
+import { MongoClient, Db } from 'mongodb';
 import {Log} from '../logger';
 
 @Service()
-export class GithubStorageService extends EntityService implements IStorageService {
-  static readonly type: string = 'github';
+export class MongodbStorageService extends EntityService implements IStorageService {
+  static readonly type: string = 'mongodb';
 
-  @Autowired() protected integrationsService: IntegrationsService;
   protected cache = new AwaitedCache();
+  protected client: MongoClient;
+  protected db: Db;
 
-  private get integration() {
-    return this.integrationsService.get(
-      this.config?.integration ?? 'default',
-      this.type,
-    ) as GithubIntegrationService;
-  }
-
-  constructor(protected config?: { integration?: string }) {
+  constructor(protected config?: { url?: string, collectionName?: string }) {
     super();
   }
 
   @Log('debug')
   async userGet(id: string): Promise<IUser> {
-    const member = (await this.integration.orgMembersList()).find((member) => String(member.id) === id);
-
-    if (member) {
-      const user = await this.integration.userGet(member.login);
-
-      return {
-        id,
-        type: this.type,
-
-        email: null,
-        name: user.name,
-        phoneNumber: null,
-        status: null,
-      };
-    }
-
     return null;
   }
 
   @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
-    const intKey = GithubStorageService.getKey(key);
+    const intKey = MongodbStorageService.getKey(key);
+    const cacheKey = `${intKey}:target`;
     
-    if (this.cache.has(intKey)) {
-      return this.cache.get(intKey);
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
     }
+    
+    const collection = await this.getCollection();
 
-    const val = isComplex
-      ? GithubStorageService.tryParseComplex(await this.integration.orgVarGet(intKey))
-      : await this.integration.orgVarGet(intKey);
-
-    if (val !== undefined) {
-      this.cache.set(intKey, val, 60);
-    }
-
-    return val !== undefined ? val : def;
+    return (await collection.findOne({ key: intKey, type: 'target' }))?.val ?? def;
   }
 
   @Log('debug')
   async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
-    const intKey = GithubStorageService.getKey(key);
+    const intKey = MongodbStorageService.getKey(key);
+    const collection = await this.getCollection();
 
-    if (await this.varGet(target, key) === null) {
-      await this.integration.orgVarCreate(intKey, isComplex
-        ? GithubStorageService.getVarComplex(val)
-        : val,
-      );
-    } else {
-      await this.integration.orgVarUpdate(intKey, isComplex
-        ? GithubStorageService.getVarComplex(val)
-        : val,
-      );
-    }
+    await collection.updateOne({ key: intKey, type: 'target' }, { $set: { val } }, { upsert: true });
 
-    this.cache.set(intKey, val, 60);
+    this.cache.set(`${intKey}:target`, val, 10);
   }
 
   @Log('debug')
@@ -132,41 +94,27 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return intVal;
   }
 
-  @Log('debug')
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
-    const intKey = GithubStorageService.getKeyStream(key, stream.id);
-
-    if (this.cache.has(intKey)) {
-      return this.cache.get(intKey);
+    const intKey = MongodbStorageService.getKey(key);
+    const cacheKey = `${intKey}:stream`;
+    
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
     }
+    
+    const collection = await this.getCollection();
 
-    const val = isComplex
-      ? GithubStorageService.tryParseComplex(await this.integration.orgVarGet(intKey))
-      : await this.integration.orgVarGet(intKey);
-
-    if (val !== undefined) {
-      this.cache.set(intKey, val, 60);
-    }
-
-    return val !== undefined ? val : def;
+    return (await collection.findOne({ key: intKey, type: 'stream' }))?.val ?? def;
   }
 
+  @Log('debug')
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
-    const intKey = GithubStorageService.getKeyStream(key, stream.id);
+    const intKey = MongodbStorageService.getKey(key);
+    const collection = await this.getCollection();
 
-    if (await this.varGetStream(stream, key) === null) {
-      await this.integration.orgVarCreate(intKey, isComplex
-        ? GithubStorageService.getVarComplex(val)
-        : val,
-      );
-    } else {
-      await this.integration.orgVarUpdate(intKey, isComplex
-        ? GithubStorageService.getVarComplex(val)
-        : val,
-      );
-    }
+    await collection.updateOne({ key: intKey, type: 'stream' }, { $set: { val } }, { upsert: true });
 
-    this.cache.set(intKey, val, 60);
+    this.cache.set(`${intKey}:stream`, val, 10);
   }
 
   @Log('debug')
@@ -218,24 +166,28 @@ export class GithubStorageService extends EntityService implements IStorageServi
   protected static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `rc__${key}`.toLowerCase().replace(/\-/g, '_');
+    return `${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
-  protected static getKeyStream(key: string | string[], streamId: string): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `rc__${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');
-  }
-
-  protected static getVarComplex(val) {
-    return JSON.stringify(val);
-  }
-
-  protected static tryParseComplex(val) {
-    try {
-      return JSON.parse(val);
-    } catch (err) {
-      return undefined;
+  protected async getClient() {
+    if (!this.db) {
+      this.client = new MongoClient(this.config?.url ?? process.env.MONGODB_URL);
+      await this.client.connect();
+      this.db = this.client.db();
+      await this.db.collection(this.config?.collectionName ?? 'storage').createIndex({
+        key: 1,
+        type: 1,
+      }, {
+        unique: true
+      });
     }
+
+    return this.client;
+  }
+
+  protected async getCollection() {
+    await this.getClient();
+
+    return this.db.collection(this.config?.collectionName ?? 'storage');
   }
 }

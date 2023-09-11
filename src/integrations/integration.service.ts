@@ -7,14 +7,12 @@ export interface IIntegrationService extends IService {
 
 export function IncStatistics() {
   return function (target: Record<string, any>, propertyName: string, descriptor) {
-    const fn = target[propertyName];
+    const fn = descriptor.value;
 
-    Object.assign(descriptor, {
-      value: function (...args) {
-        statistics.inc(`integrations.${this.type}.calls ${fn.name}`);
+    descriptor.value = function (...args) {
+      statistics.inc(`integrations.${this.type}.${fn.name} calls`);
 
-        return fn.call(this, ...args);
-      }
-    });
+      return fn.call(this, ...args);
+    };
   }
 }

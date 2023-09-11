@@ -1,13 +1,13 @@
-export class AwaitedCache<T = any> {
-  protected cache = new Map<string, [ number, number, T | Promise<T> ]>(); // expire, version, val
+export class AwaitedCache<T = any, K = string> {
+  protected cache = new Map<K, [ number, number, T | Promise<T> ]>(); // expire, version, val
 
-  del(key: string) {
+  del(key: K) {
     this.cache.delete(key);
 
     return this;
   }
 
-  get(key: string, def?: T): T | Promise<T> {
+  get(key: K, def?: T): T | Promise<T> {
     if (this.cache.has(key)) {
       const [ expire, , val ] = this.cache.get(key);
 
@@ -19,7 +19,7 @@ export class AwaitedCache<T = any> {
     return def;
   }
 
-  has(key: string) {
+  has(key: K) {
     if (this.cache.has(key)) {
       const [ expire, ] = this.cache.get(key);
 
@@ -31,7 +31,7 @@ export class AwaitedCache<T = any> {
     return false;
   }
 
-  set(key: string, val: T | Promise<T>, ttlSec?: number, updTtl?: boolean) {
+  set(key: K, val: T | Promise<T>, ttlSec?: number, updTtl?: boolean) {
     let expire;
     let version;
     let set = true;

@@ -110,6 +110,10 @@ export interface IProjectTarget<C extends (Record<string, unknown> | string) = s
 export type IProjectTargetDef = IProjectTarget<Record<string, unknown>>;
 
 export interface IProject extends IProjectDef {
+  info?: {
+    contactEmail?: string;
+    contactName?: string;
+  }
   resync?: {
     intervalSeconds?: number;
   };
@@ -128,9 +132,8 @@ export type IProjectTargetInput = Omit<IProjectTarget, 'isSyncing'>;
 export type IProjectTargetStreamInput = Omit<IProjectTargetStream, 'isSyncing'>;
 
 export interface IProjectInput extends IProjectDef {
-  resync?: {
-    intervalSeconds?: number;
-  };
+  info?: IProject['info'];
+  resync?: IProject['resync'];
 
   artifacts: Record<string, IProjectDefInput & Pick<IProjectArtifact, 'dependsOn'>>;
   definitions: Record<string, Record<string, unknown>>;
@@ -158,6 +161,8 @@ export class Project implements IProject {
     targets: TargetsService;
     versionings: VersioningsService;
   };
+
+  info?: IProject['info'];
 
   resync?: {
     intervalSeconds?: number;
@@ -189,10 +194,8 @@ export class Project implements IProject {
       this.id = config.id;
     }
 
-    this.resync = {
-      ...config?.resync,
-      at: null,
-    };
+    this.info = { ...config?.info };
+    this.resync = { ...config?.resync, at: null };
 
     if (config.artifacts) {
       this.artifacts = config.artifacts;

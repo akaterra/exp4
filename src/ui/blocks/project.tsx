@@ -41,7 +41,15 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
         projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
           const lastAction = streamState?.history?.action?.[0];
           const lastChange = streamState?.history?.change?.[0];
-          const isFailed = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED;
+          const infoButton = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED
+            ? 'failure'
+            : streamState?.history?.artifact?.some((artefact) => {
+                return typeof artefact.description === 'object'
+                  ? artefact.description?.level !== 'success'
+                  : false
+              })
+              ? 'warning'
+              : 'default';
 
           return <div key={i} className={lastChange ? '' : 'opacity-med'}>
             <Checkbox
@@ -57,7 +65,7 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
               </div>
             </Checkbox>
             <Button
-              className={isFailed ? 'button-sml failure auto' : 'button-sml default auto'}
+              className={ `button-sml ${infoButton ?? ''} auto` }
               x={null}
               onClick={() => projectTarget.applyTargetStreamDetails(stream.id)}
             >Info</Button>
@@ -75,22 +83,22 @@ export const ProjectStatistics = observer(({ project }: { project?: ProjectStore
 
   return <div className='paragraph children-gap'>
     <SubTitle>General</SubTitle>
+    <div className='list'>
     {
       Object.entries(project?.projectStatistics).map(([ key, val ]) => {
-        return <div className='list'>
-          <div className='list-item'>
-            <TitledLine title={ `${_.startCase(key)}:` }>
-              {
-                Array.isArray(val) ? null : val
-              }
-              {
-                Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
-              }
-            </TitledLine>
-          </div>
+        return <div className='list-item'>
+          <TitledLine title={ `${_.startCase(key)}:` }>
+            {
+              Array.isArray(val) ? null : val
+            }
+            {
+              Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
+            }
+          </TitledLine>
         </div>;
       })
     }
+    </div>
   </div>;    
 });
 

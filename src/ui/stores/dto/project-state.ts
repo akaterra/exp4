@@ -34,7 +34,7 @@ export interface IProjectTargetStreamState {
       type: string;
 
       author: { name: string; link: string; };
-      description: string;
+      description: { level: string, value: string } | string;
       link: string;
       metadata: Record<string, unknown>;
       steps: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;

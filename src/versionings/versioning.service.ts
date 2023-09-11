@@ -2,7 +2,7 @@ import { IService } from '../entities.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 
 export interface IVersioningService extends IService {
-  getCurrent(target: IProjectTargetDef, format?: string): Promise<string>;
+  getCurrent(target: IProjectTargetDef, format?: false | string): Promise<string>;
 
   format(version: string, format?: string): Promise<any>;
 
@@ -14,7 +14,7 @@ export interface IVersioningService extends IService {
 
   rollback(target: IProjectTargetDef, params?: Record<string, any>): Promise<string>;
 
-  getCurrentStream(stream: IProjectTargetStreamDef, format?: string): Promise<string>;
+  getCurrentStream(stream: IProjectTargetStreamDef, format?: false | string): Promise<string>;
 
   formatStream(version: string, format?: string): Promise<any>;
 

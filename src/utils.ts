@@ -274,6 +274,20 @@ export function *iter(iterable, predicate?: (val?: any, ind?: number) => boolean
   }
 }
 
+export function *iterComplex(iterable, predicate?: (val?: any, ind?: number | string) => boolean): Generator<any> {
+  if (iterable && typeof iterable === 'object') {
+    for (const [ key, item ] of Object(iterable)) {
+      if (!predicate || predicate(item, key)) {
+        yield [ key, item ];
+      }
+    }
+  } else {
+    for (const [ key, item] of iter(iterable)) {
+      yield [ key, item ];
+    }
+  }
+}
+
 export async function requestJson(url, data?, method?, authorization?) {
   const response = await fetch(url, {
     method: method ?? 'post',

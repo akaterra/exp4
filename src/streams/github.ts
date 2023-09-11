@@ -10,6 +10,7 @@ import { GithubIntegrationService } from '../integrations/github';
 import { ProjectsService } from '../projects.service';
 import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
+import {Log} from '../logger';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
@@ -23,6 +24,7 @@ const JOB_STATUS_TO_STATUS_MAP = {
 export type IGithubTargetStream = IProjectTargetStream<{
   integration?: string;
   org: string;
+  repo: string;
   branch: string;
 }, 'github'>;
 
@@ -44,6 +46,35 @@ export class GithubStreamService extends EntityService implements IStreamService
 
   }
 
+  @Log('debug')
+  async streamBookmark(stream: IGithubTargetStream): Promise<IStream> {
+    const project = this.projectsService.get(stream.ref?.projectId);
+
+    project.env.streams.assertTypes(stream.type, this.type);
+
+    const source = await this.projectsService
+      .get(stream.ref?.projectId)
+      .getStreamStateByTargetIdAndStreamId(stream.ref?.targetId, stream.ref?.streamId, { change: true });
+
+    if (!source?.history?.change?.[0]?.id) {
+      return;
+    }
+
+    const integration = this.getIntegrationService(stream);
+
+    await integration.tagCreate(
+      source?.history?.change?.[0]?.id,
+      source.version,
+      null,
+      stream?.config?.repo ?? stream?.id,
+      null,
+      false,
+    );
+
+    return null;
+  }
+
+  @Log('debug')
   async streamDetach(stream: IGithubTargetStream): Promise<IStream> {
     const integration = this.getIntegrationService(stream);
     const branchName = await this.getBranch(stream);
@@ -56,6 +87,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     return null;
   }
 
+  @Log('debug')
   async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>): Promise<IStream> {
     const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
     const state: IStream = await this.cache.get(cacheKey) ?? {
@@ -171,6 +203,8 @@ export class GithubStreamService extends EntityService implements IStreamService
           },
         );
       }
+
+      // stream.isDirty = false;
     })().catch((err) => {
       console.error(err);
     }).finally(() => {
@@ -186,6 +220,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     return state;
   }
 
+  @Log('debug')
   async streamMove(sourceStream: IGithubTargetStream, targetStream: IGithubTargetStream) {
     const project = this.projectsService.get(sourceStream.ref?.projectId);
 
@@ -200,10 +235,9 @@ export class GithubStreamService extends EntityService implements IStreamService
     }
 
     const sourceBranchName = await this.getBranch(sourceStream);
-    const targetIntegration = this.projectsService
-      .get(targetStream.ref.projectId)
-      .getEnvIntegraionByTargetStream<GithubIntegrationService>(targetStream);
     const targetBranchName = await this.getBranch(targetStream);
+
+    const targetIntegration = project.getEnvIntegraionByTargetStream<GithubIntegrationService>(targetStream);
 
     if (!await targetIntegration.gitGetBranch(
       targetBranchName,
@@ -224,6 +258,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     )
   }
 
+  @Log('debug')
   async targetGetState(config: IProjectTarget): Promise<ITarget> {
     return {
       id: config.id,

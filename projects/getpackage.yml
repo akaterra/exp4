@@ -5,6 +5,9 @@ id: "getpackage"
 title: "GetPackage"
 description: "Org"
 
+info:
+  contactEmail: admin@getpackage.com
+
 resync:
   intervalSeconds: 300
 
@@ -42,10 +45,10 @@ artifacts:
           - valueMapping:
               OutOfSync:
                 level: warning
-                value: "Out of sync"
+                value: "out of sync"
               Synced:
                 level: success
-                value: "Synced"
+                value: "synced"
             valuePath: "status"
         to: "link"
         type: "argocd:syncStatus"
@@ -89,6 +92,10 @@ integrations:
       branch: "main"
 
 storages:
+  mongodb:
+    type: "mongodb"
+    config:
+      url: "mongodb://localhost:27017/streamflow"
   github:
     type: "github"
     config:
@@ -190,6 +197,10 @@ flows:
             title: ""
             targets:
               - "dev"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg"
       mergeFromHotfix:
         title: "Merge latest hotfix"
         steps:
@@ -197,6 +208,10 @@ flows:
             title: ""
             targets:
               - "hotfix"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg"
       mergeFromProduction:
         title: "Merge latest production"
         steps:
@@ -204,6 +219,10 @@ flows:
             title: ""
             targets:
               - "production"
+          - type: "streamVersion:override"
+            title: ""
+            targets:
+              - "stg"
       exclude:
         title: "Exclude"
         steps:
@@ -262,6 +281,10 @@ flows:
             title: ""
             targets:
               - "stgHotfix"
+          - type: "bookmark"
+            title: ""
+            targets:
+              - "production"
       mergeToQa:
         title: "Merge to QA"
         steps:

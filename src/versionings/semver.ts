@@ -6,6 +6,7 @@ import { EntityService } from '../entities.service';
 import { IStorageService } from '../storages/storage.service';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
+import {Log} from '../logger';
 
 export interface ISemverConfig {
   format?: string;
@@ -29,7 +30,8 @@ export class SemverVersioningService extends EntityService implements IVersionin
     super();
   }
 
-  async getCurrent(target: IProjectTargetDef, format?: string): Promise<string> {
+  @Log('debug')
+  async getCurrent(target: IProjectTargetDef, format?: false | string): Promise<string> {
     const version = await this.getStorage(target).varGet(
       target,
       [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
@@ -37,18 +39,19 @@ export class SemverVersioningService extends EntityService implements IVersionin
     );
 
     if (format ?? this.config?.format) {
-      return this.format(version, format);
+      return this.format(version, format as string);
     }
 
     return version;
   }
 
   async format(version: string, format?: string) {
-    return this.getFormatted(version, format ?? this.config?.format);
+    return this.getFormatted(version, typeof format === 'string' ? format : this.config?.format);
   }
 
+  @Log('debug')
   async override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string> {
-    const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source) ?? '0.1.0';
+    const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source, false) ?? '0.1.0';
     const storage = this.getStorage(target);
 
     await this.setTargetVersionHistory(target, storage, sourceVersion);
@@ -57,8 +60,9 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return sourceVersion;
   }
 
+  @Log('debug')
   async patch(target: IProjectTargetDef, params?: Record<string, any>): Promise<string> {
-    let version = await this.getCurrent(target);
+    let version = await this.getCurrent(target, false);
     const storage = this.getStorage(target);
 
     if (version) {
@@ -77,8 +81,9 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
+  @Log('debug')
   async release(target: IProjectTargetDef, params?: Record<string, any>): Promise<string> {
-    let version = await this.getCurrent(target);
+    let version = await this.getCurrent(target, false);
     const storage = this.getStorage(target);
 
     if (version) {
@@ -97,9 +102,10 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
+  @Log('debug')
   async rollback(target: IProjectTargetDef): Promise<string> {
     const storage = this.getStorage(target);
-    const targetVersion = await this.getCurrent(target);
+    const targetVersion = await this.getCurrent(target, false);
     const versionHistory = await storage.varGet<ISemverHistoryItem[]>(
       target,
       [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
@@ -131,7 +137,8 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
-  async getCurrentStream(target: IProjectTargetStreamDef, format?: string): Promise<string> {
+  @Log('debug')
+  async getCurrentStream(target: IProjectTargetStreamDef, format?: false | string): Promise<string> {
     const version = await this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId)).varGetStream(
       target,
       [ 'version', target.ref.projectId, this.config?.namespace ?? target.ref.targetId ],
@@ -139,18 +146,19 @@ export class SemverVersioningService extends EntityService implements IVersionin
     );
 
     if (format || this.config?.format) {
-      return this.formatStream(version, format);
+      return this.formatStream(version, format as string);
     }
 
     return version;
   }
 
   async formatStream(version: string, format?: string) {
-    return this.getFormatted(version, format ?? this.config?.format);
+    return this.getFormatted(version, typeof format === 'string' ? format : this.config?.format);
   }
 
+  @Log('debug')
   async overrideStream(source: IProjectTargetDef, target: IProjectTargetStreamDef): Promise<string> {
-    const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source) ?? '0.1.0';
+    const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source, false) ?? '0.1.0';
     const storage = this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId));
 
     await this.setStreamVersionHistory(target, storage, sourceVersion);
@@ -159,8 +167,9 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return sourceVersion;
   }
 
+  @Log('debug')
   async patchStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
-    let version = await this.getCurrentStream(stream);
+    let version = await this.getCurrentStream(stream, false);
     const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
     if (version) {
@@ -179,8 +188,9 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
+  @Log('debug')
   async releaseStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
-    let version = await this.getCurrentStream(stream);
+    let version = await this.getCurrentStream(stream, false);
     const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
     if (version) {
@@ -199,9 +209,10 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
+  @Log('debug')
   async rollbackStream(stream: IProjectTargetStreamDef): Promise<string> {
     const target = this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId);
-    const targetVersion = await this.getCurrent(target);
+    const targetVersion = await this.getCurrent(target, false);
     const storage = this.getStorage(target);
     const versionHistory = await storage.varGetStream<ISemverHistoryItem[]>(
       stream,
@@ -234,6 +245,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
+  @Log('debug')
   async exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string> {
     switch (action) {
     case 'current':

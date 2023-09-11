@@ -8,6 +8,7 @@ import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.servi
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
 import { prepareAuthData } from '../auth.service';
+import {Log} from '../logger';
 
 @Service()
 export class GithubAuthStrategyService extends EntityService implements IAuthStrategyService {
@@ -54,10 +55,12 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
     }
   }
 
+  @Log('debug')
   async authorize(data: Record<string, any>): Promise<IUser> { // eslint-disable-line
     return null;
   }
 
+  @Log('debug')
   async request(): Promise<IAuthStrategyMethod> {
     return {
       id: this.id,
@@ -68,6 +71,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
     };
   }
 
+  @Log('debug')
   async configureServer(app: express.Application, path?: string): Promise<void> {
     if (!path) {
       path = `/auth/methods/${this.id ?? this.type}`;

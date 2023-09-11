@@ -6,11 +6,11 @@ import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 
 @Service()
-export class DetachActionService extends EntityService implements IActionService {
+export class BookmarkActionService extends EntityService implements IActionService {
   @Autowired() protected projectsService: ProjectsService;
 
   get type() {
-    return 'detach';
+    return 'bookmark';
   }
 
   async run(
@@ -18,7 +18,7 @@ export class DetachActionService extends EntityService implements IActionService
     targetsStreams?: Record<IProjectTarget['id'], [ IProjectTargetStream['id'], ...IProjectTargetStream['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
-    const sourceTargetIds = targetsStreams
+    const sourceTargetIds: IProjectTarget['id'][] = targetsStreams
       ? Object.keys(targetsStreams)
       : project.getFlowByFlowId(action.ref.flowId).targets;
 
@@ -34,7 +34,7 @@ export class DetachActionService extends EntityService implements IActionService
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId, true);
 
           if (targetStream) {
-            await project.getEnvStreamByTargetStream(targetStream).streamDetach(
+            await project.getEnvStreamByTargetStream(targetStream).streamBookmark(
               targetStream,
             );
 

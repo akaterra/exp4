@@ -1,13 +1,14 @@
 import { Inject, Service } from 'typedi';
-import { IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
+import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef, Project } from './project';
 import { IStream } from './stream';
 import { ITarget } from './target';
-import { AwaitableContainer, iter as iterArr } from './utils';
+import { AwaitableContainer, iter, iterComplex } from './utils';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
 import { ProjectState } from './project-state';
 import { StatisticsService } from './statistics.service';
 import moment from 'moment-timezone';
+import {logger} from './logger';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
@@ -37,6 +38,14 @@ export class ProjectsService extends EntitiesService<Project> {
       project.validateParams(flowId, aId, params);
 
       for (const action of flow.actions[aId].steps) {
+        logger.info({
+          message: 'flowActionRun',
+          action: { id: action.type },
+          flow: { id: flow.id },
+          params,
+          targetsStreams,
+        });
+
         try {
           await project.env.actions.get(action.type).run(action, targetsStreams, params);
         } catch (err) {
@@ -55,8 +64,8 @@ export class ProjectsService extends EntitiesService<Project> {
   }
 
   async getState(
-    projectId: string,
-    targetId?: string | string[],
+    projectId: IProjectDef['id'],
+    targetId?: Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
     scopes?: Record<string, boolean>,
   ): Promise<ProjectState> {
     const project = this.get(projectId);
@@ -70,14 +79,22 @@ export class ProjectsService extends EntitiesService<Project> {
           return this.statesCache.get(projectId);
         }
       } else {
-        targetId = replaceDirtyTargetIds;
+        if (!targetId) {
+          targetId = {};
+        }
+
+        for (const tId of replaceDirtyTargetIds) {
+          if (!targetId[tId]) {
+            targetId[tId] = true;
+          }
+        }
       }
     }
 
     return this.statesCache.set(projectId, (async () => {
       const targetContainer = new AwaitableContainer(1);
   
-      for (const [ ,tId ] of iterArr(targetId ?? Object.keys(project.targets))) {
+      for (const [ ,tId ] of iter(targetId ? Object.keys(targetId) : Object.keys(project.targets))) {
         const target = project.getTargetByTargetId(tId);
   
         await targetContainer.push(async () => {
@@ -96,6 +113,10 @@ export class ProjectsService extends EntitiesService<Project> {
                 !replaceDirtyStreamIds.includes(stream.id)
               )
             ) {
+              continue;
+            }
+
+            if (targetId?.[tId] === true || target?.[tId]?.includes(stream.id)) {
               continue;
             }
 

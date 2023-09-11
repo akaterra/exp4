@@ -33,8 +33,8 @@ export class RootStore {
 
     setInterval(function (this: RootStore) {
       if (this.isAuthorized) {
-        this.projectsStore.fetch();
-        this.statisticsStore.fetch();
+        // this.projectsStore.fetch();
+        // this.statisticsStore.fetch();
       }
     }.bind(this), 30000);
   }
