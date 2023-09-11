@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SubSubTitle, SubTitle, Title } from '../atoms/title';
+import { SubTitle, Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { StatisticsStore } from '../stores/statistics';
 import { TitledLine } from '../atoms/status-line';

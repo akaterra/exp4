@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import fetch from 'node-fetch-native';
 import YAML from 'yaml'
 import fs from 'fs';
+import { logError } from './logger';
 
 const EXTENSIONS = {
   json: 'json',
@@ -113,7 +114,7 @@ export class AwaitableContainer {
         }
 
         await Promise.all(promises).catch((err) => {
-          console.error(err);
+          logError(err, 'AwaitableContainer.exec');
         });
       }
 
@@ -282,7 +283,7 @@ export function *iterComplex(iterable, predicate?: (val?: any, ind?: number | st
       }
     }
   } else {
-    for (const [ key, item] of iter(iterable)) {
+    for (const [ key, item ] of iter(iterable)) {
       yield [ key, item ];
     }
   }

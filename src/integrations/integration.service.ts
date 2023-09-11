@@ -1,5 +1,5 @@
 import { IService } from '../entities.service';
-import {statistics} from '../statistics.service';
+import { statistics } from '../statistics.service';
 
 export interface IIntegrationService extends IService {
 

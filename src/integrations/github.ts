@@ -3,7 +3,7 @@ import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import fetch from 'node-fetch-native';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 export interface IGithubConfig {
   branch?: string;

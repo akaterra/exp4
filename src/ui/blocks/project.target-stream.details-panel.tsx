@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SubSubTitle, Title } from '../atoms/title';
+import { Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
@@ -151,23 +151,23 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     {
       projectTarget?.actions?.length
         ? <div className='paragraph paragraph-lrg children-gap'>
-        <div>
-          {
-            projectTarget?.actions?.map((action, i) => {
-              return <div key={ i }>
-                <Button
-                  className='button-sml success auto'
-                  x={ null }
-                  onClick={ () => {
-                    if (projectTargetStreamState?.id) {
-                      projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
-                    }
-                  } }
-                >{ action.title ?? action.id }</Button>
-              </div>;
-            })
-          }
-        </div>
+          <div>
+            {
+              projectTarget?.actions?.map((action, i) => {
+                return <div key={ i }>
+                  <Button
+                    className='button-sml success auto'
+                    x={ null }
+                    onClick={ () => {
+                      if (projectTargetStreamState?.id) {
+                        projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
+                      }
+                    } }
+                  >{ action.title ?? action.id }</Button>
+                </div>;
+              })
+            }
+          </div>
         </div>
         : null
     }

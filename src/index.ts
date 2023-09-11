@@ -18,6 +18,10 @@ import { err } from './utils';
 import { authMethodList } from './api/auth/list-methods';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
+import { logError } from './logger';
+
+process.on('uncaughtException', function(err) {
+});
 
 function auth(req, res, next) {
   req.user = authorize(req.headers.authorization);
@@ -43,7 +47,7 @@ function auth(req, res, next) {
   app.use(express.json());
 
   function error(err, req, res) {
-    console.error(err, err.stack);
+    logError(err);
 
     if (!res.statusCode || res.statusCode < 300) {
       res.status(500);
@@ -78,8 +82,5 @@ function auth(req, res, next) {
 
   projects.runStatesResync();
 })().catch((err) => {
-  console.error({
-    err,
-    stack: err.stack,
-  })
+  logError(err);
 });

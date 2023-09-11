@@ -2,13 +2,13 @@ import { Inject, Service } from 'typedi';
 import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef, Project } from './project';
 import { IStream } from './stream';
 import { ITarget } from './target';
-import { AwaitableContainer, iter, iterComplex } from './utils';
+import { AwaitableContainer, iter } from './utils';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
 import { ProjectState } from './project-state';
 import { StatisticsService } from './statistics.service';
 import moment from 'moment-timezone';
-import {logger} from './logger';
+import { Log, logger } from './logger';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
@@ -63,6 +63,7 @@ export class ProjectsService extends EntitiesService<Project> {
     return true;
   }
 
+  @Log('debug')
   async getState(
     projectId: IProjectDef['id'],
     targetStreams?: Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
@@ -102,36 +103,23 @@ export class ProjectsService extends EntitiesService<Project> {
             version: await project.env.versionings.getByTarget(target).getCurrent(target),
           })
   
-          const replaceDirtyStreamIds = projectState.getDirtyTargetStreamIds(tId);
           const streamContainer = new AwaitableContainer(1);
+          const streamIds: IProjectTargetStream['id'][] = targetStreams?.[tId]
+            ? targetStreams[tId] === true
+              ? Object.keys(target.streams)
+              : targetStreams[tId] as IProjectTargetStream['id'][]
+            : scopes
+              ? Object.keys(target.streams)
+              : projectState.getDirtyTargetStreamIds(tId);
 
-          for (const stream of Object.values(target.streams)) {
-            if (
-              !scopes &&
-              (
-                !replaceDirtyStreamIds.length ||
-                !replaceDirtyStreamIds.includes(stream.id)
-              )
-            ) {
-              continue;
+          for (const sId of streamIds) {
+            const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
+
+            if (stream) {
+              await streamContainer.push(async () => {
+                projectState.setTargetStream(tId, await this.streamGetState(stream, scopes));
+              });
             }
-
-            if (targetStreams) {
-              if (
-                Array.isArray(targetStreams?.[tId]) &&
-                !(targetStreams?.[tId] as IProjectTargetStream['id'][])?.includes(stream.id)
-              ) {
-                continue;
-              }
-
-              if (!targetStreams[tId]) {
-                continue;
-              }
-            }
-
-            await streamContainer.push(async () => {
-              projectState.setTargetStream(tId, await this.streamGetState(stream, scopes));
-            });
           }
 
           await streamContainer.wait();

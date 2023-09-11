@@ -52,13 +52,13 @@ export class PublicRestApiService {
     });
   }
 
-	protected doRequestHeaders() {
+  protected doRequestHeaders() {
 	  const headers: Record<string, string> = {
 	    // 'Accept': '*',
 	  };
 
 	  return headers;
-	}
+  }
 }
 
 export class RestApiService extends PublicRestApiService {

@@ -5,7 +5,7 @@ import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { MongoClient, Db } from 'mongodb';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 @Service()
 export class MongodbStorageService extends EntityService implements IStorageService {

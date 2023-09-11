@@ -56,7 +56,7 @@ export class EntitiesService<T extends IService = IService> {
     }
 
     if (assertType !== null) {
-      this.assertTypes(assertType, entity.assertType);
+      this.assertTypes(assertType, entity.assertType, assertTypeNonStrict);
     }
 
     return entity;

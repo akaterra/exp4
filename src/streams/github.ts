@@ -5,12 +5,11 @@ import { IStream } from '../stream';
 import { Service } from 'typedi';
 import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
-import { Autowired, hasScope } from '../utils';
+import { hasScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
-import { ProjectsService } from '../projects.service';
 import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
-import {Log} from '../logger';
+import { Log, logError } from '../logger';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
@@ -206,7 +205,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
       // stream.isDirty = false;
     })().catch((err) => {
-      console.error(err);
+      logError(err, 'GithubStreamService.streamGetState');
     }).finally(() => {
       state.isSyncing = false;
     });

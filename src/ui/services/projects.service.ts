@@ -1,3 +1,4 @@
+import { Status } from '../enums/status';
 import { IProject, IProjectFlowAction, IProjectFlow, IProjectTarget } from '../stores/dto/project';
 import { IProjectState } from '../stores/dto/project-state';
 import { RestApiService } from './rest-api.service';
@@ -9,10 +10,29 @@ export class ProjectsService {
     return this.rest.get('projects');
   }
 
-  listState(projectId: IProject['id'], filter?: {
+  async listState(projectId: IProject['id'], filter?: {
     targetId?: IProjectTarget['id'][],
   }): Promise<IProjectState> {
-    return this.rest.get(`projects/${projectId}/streams`, filter);
+    const res: IProjectState = await this.rest.get(`projects/${projectId}/streams`, filter);
+
+    for (const target of Object.values(res.targets)) {
+      for (const streams of Object.values(target.streams)) {
+        const lastAction = streams?.history?.action?.[0];
+        const lastChange = streams?.history?.change?.[0];
+
+        streams._label = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED
+          ? 'failure'
+          : streams?.history?.artifact?.some((artefact) => {
+            return typeof artefact.description === 'object'
+              ? artefact.description?.level !== 'success'
+              : false
+          })
+            ? 'warning'
+            : 'default';
+      }
+    }
+
+    return res;
   }
 
   listStatistics(id: IProject['id']): Promise<Record<string, any>> {

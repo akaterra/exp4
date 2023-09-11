@@ -1,6 +1,6 @@
 import Container from 'typedi';
 import { AuthStrategiesService } from '../../auth-strategies.service';
-import {Log, logger} from '../../logger';
+import { logger } from '../../logger';
 
 const authStrategiesServiceauth = Container.get(AuthStrategiesService);
 

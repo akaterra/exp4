@@ -6,7 +6,7 @@ import { EntityService } from '../entities.service';
 import { IStorageService } from '../storages/storage.service';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 export interface ISemverConfig {
   format?: string;

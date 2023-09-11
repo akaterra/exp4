@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from './project';
 import { ProjectsService } from './projects.service';
 import { IStream } from './stream';
 import { Autowired } from './utils';
@@ -33,7 +33,7 @@ export class ProjectState {
     return ids;
   }
 
-  getDirtyTargetStreamIds(targetId: IProjectTargetDef['id']): IProjectTargetStreamDef['id'][] {
+  getDirtyTargetStreamIds(targetId: IProjectTarget['id']): IProjectTargetStream['id'][] {
     const project = this.projectsService.get(this.id);
     const ids: IProjectTargetStreamDef['id'][] = [];
 

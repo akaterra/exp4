@@ -1,6 +1,6 @@
 import Container from 'typedi';
 import { ProjectsService } from '../../projects.service';
-import {Log, logger} from '../../logger';
+import { logger } from '../../logger';
 
 const projectsService = Container.get(ProjectsService);
 

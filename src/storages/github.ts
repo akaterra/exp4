@@ -7,7 +7,7 @@ import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {

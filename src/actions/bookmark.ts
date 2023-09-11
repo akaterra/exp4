@@ -1,4 +1,4 @@
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';

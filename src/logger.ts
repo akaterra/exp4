@@ -1,4 +1,4 @@
-import { Logger, createLogger, format, transports } from 'winston';
+import { createLogger, format, transports } from 'winston';
 
 export const logger = createLogger({
   level: 'debug',
@@ -7,6 +7,10 @@ export const logger = createLogger({
     new transports.Console({ eol: '\r\n\r\n' }),
   ],
 });
+
+export function logError(err, message = 'error') {
+  logger.error({ message, error: err?.message ?? err, stack: err?.stack });
+}
 
 function argNames(fn) {
   return (fn + '')
@@ -43,7 +47,7 @@ export function Log(level: string = logger.level) {
 
         if (result instanceof Promise) {
           result.catch((err) => {
-            logger.error({ message: fnName, error: err });
+            logError(err, fnName);
 
             return Promise.reject(err);
           });
@@ -51,7 +55,7 @@ export function Log(level: string = logger.level) {
 
         return result;
       } catch (err) {
-        logger.error({ message: fnName, error: err });
+        logError(err, fnName);
       }
     };
     

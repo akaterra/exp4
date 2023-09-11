@@ -57,6 +57,8 @@ export interface IProjectTargetStreamState {
   link: string;
   metadata: Record<string, unknown>;
   version: string;
+
+  _label: 'default' | 'failure' | 'success' | 'warning';
 }
 
 export type IProjectTargetState = {

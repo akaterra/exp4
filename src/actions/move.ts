@@ -1,4 +1,4 @@
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
 import { IActionService } from './action.service';
 import { ProjectsService } from '../projects.service';
@@ -35,7 +35,7 @@ export class MoveActionService extends EntityService implements IActionService {
           tIdOfTarget = tId;
         }
 
-        const source = project.getTargetByTargetId(tIdOfSource);
+        project.getTargetByTargetId(tIdOfSource);
         const target = project.getTargetByTargetId(tIdOfTarget);
         const streamIds = targetsStreams?.[tIdOfSource] === true
           ? Object.keys(target.streams)

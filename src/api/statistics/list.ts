@@ -1,4 +1,4 @@
-import {Log, logger} from '../../logger';
+import { logger } from '../../logger';
 import { statistics } from '../../statistics.service';
 
 export function statisticsList(req, res) {

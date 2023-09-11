@@ -5,7 +5,6 @@ import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
-import { Status } from '../enums/status';
 import { InfoCollapse } from '../atoms/info-collapse';
 import { Tabs } from '../atoms/tabs';
 import { TitledLine } from '../atoms/status-line';
@@ -29,8 +28,8 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
       <InfoCollapse isIdle={ true } showTitle='Actions'>
         {
           projectTarget.actions.map((action, i) => {
-            return <div key={i}>
-              <Button className='button-sml success auto' x={null} onClick={() => projectTarget.applyRunAction(null, action.id)}>{action.title ?? action.id}</Button>
+            return <div key={ i }>
+              <Button className='button-sml success auto' x={ null } onClick={() => projectTarget.applyRunAction(null, action.id)}>{action.title ?? action.id}</Button>
             </div>;
           })
         }
@@ -39,19 +38,9 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
     <div className='paragraph paragraph-lrg'>
       {
         projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
-          const lastAction = streamState?.history?.action?.[0];
           const lastChange = streamState?.history?.change?.[0];
-          const infoButton = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED
-            ? 'failure'
-            : streamState?.history?.artifact?.some((artefact) => {
-                return typeof artefact.description === 'object'
-                  ? artefact.description?.level !== 'success'
-                  : false
-              })
-              ? 'warning'
-              : 'default';
 
-          return <div key={i} className={lastChange ? '' : 'opacity-med'}>
+          return <div key={i} className={ lastChange ? '' : 'opacity-med' }>
             <Checkbox
               currentValue={isSelected}
               onChange={() => projectTarget.applyStreamSelection(stream.id)}
@@ -60,12 +49,12 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
                 <div className='overflow'>
                   { stream.title ?? stream.id }
                   &nbsp;
-                  <span className='font-sml sup'>{streamState?.version}</span>
+                  <span className='font-sml sup'>{ streamState?.version }</span>
                 </div>
               </div>
             </Checkbox>
             <Button
-              className={ `button-sml ${infoButton ?? ''} auto` }
+              className={ `button-sml ${streamState._label ?? ''} auto` }
               x={null}
               onClick={() => projectTarget.applyTargetStreamDetails(stream.id)}
             >Info</Button>
@@ -84,20 +73,20 @@ export const ProjectStatistics = observer(({ project }: { project?: ProjectStore
   return <div className='paragraph children-gap'>
     <SubTitle>General</SubTitle>
     <div className='list'>
-    {
-      Object.entries(project?.projectStatistics).map(([ key, val ]) => {
-        return <div className='list-item'>
-          <TitledLine title={ `${_.startCase(key)}:` }>
-            {
-              Array.isArray(val) ? null : val
-            }
-            {
-              Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
-            }
-          </TitledLine>
-        </div>;
-      })
-    }
+      {
+        Object.entries(project?.projectStatistics).map(([ key, val ]) => {
+          return <div className='list-item'>
+            <TitledLine title={ `${_.startCase(key)}:` }>
+              {
+                Array.isArray(val) ? null : val
+              }
+              {
+                Array.isArray(val) ? <div className='paragraph paragraph-sml code font-s-m'><div className='ccc'>{ val.map((val) => <div>{ JSON.stringify(val, undefined, 2) }</div>) }</div></div> : null
+              }
+            </TitledLine>
+          </div>;
+        })
+      }
     </div>
   </div>;    
 });

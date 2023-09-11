@@ -8,7 +8,7 @@ import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.servi
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
 import { prepareAuthData } from '../auth.service';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 @Service()
 export class GithubAuthStrategyService extends EntityService implements IAuthStrategyService {

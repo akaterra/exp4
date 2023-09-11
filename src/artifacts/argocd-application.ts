@@ -1,7 +1,6 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
-import { IStream } from '../stream';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { ProjectsService } from '../projects.service';
@@ -26,8 +25,6 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
 
   async run(
     entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
-    streamState: IStream,
-    params?: Record<string, any>,
   ): Promise<void> {
     const result = this.cache.get(this.config?.integration) ?? await this.getIntegration(entity.ref).getApplication();
 

@@ -385,7 +385,7 @@ export class Project implements IProject {
   }
 
   getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
-    return this.env.streams.get(stream.type) as T;
+    return this.env.streams.get(stream.type, assertType) as T;
   }
 
   getEnvVersioningByVersioningId(versiningId: IProjectVersioning['id'], assertType?: IProjectVersioning['type']) {
