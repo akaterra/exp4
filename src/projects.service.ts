@@ -65,7 +65,7 @@ export class ProjectsService extends EntitiesService<Project> {
 
   async getState(
     projectId: IProjectDef['id'],
-    targetId?: Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
+    targetStreams?: Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
     scopes?: Record<string, boolean>,
   ): Promise<ProjectState> {
     const project = this.get(projectId);
@@ -79,13 +79,13 @@ export class ProjectsService extends EntitiesService<Project> {
           return this.statesCache.get(projectId);
         }
       } else {
-        if (!targetId) {
-          targetId = {};
+        if (!targetStreams) {
+          targetStreams = {};
         }
 
         for (const tId of replaceDirtyTargetIds) {
-          if (!targetId[tId]) {
-            targetId[tId] = true;
+          if (!targetStreams[tId]) {
+            targetStreams[tId] = true;
           }
         }
       }
@@ -94,7 +94,7 @@ export class ProjectsService extends EntitiesService<Project> {
     return this.statesCache.set(projectId, (async () => {
       const targetContainer = new AwaitableContainer(1);
   
-      for (const [ ,tId ] of iter(targetId ? Object.keys(targetId) : Object.keys(project.targets))) {
+      for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
         const target = project.getTargetByTargetId(tId);
   
         await targetContainer.push(async () => {
@@ -116,15 +116,15 @@ export class ProjectsService extends EntitiesService<Project> {
               continue;
             }
 
-            if (targetId) {
+            if (targetStreams) {
               if (
-                Array.isArray(targetId?.[tId]) &&
-                !(targetId?.[tId] as IProjectTargetStream['id'][])?.includes(stream.id)
+                Array.isArray(targetStreams?.[tId]) &&
+                !(targetStreams?.[tId] as IProjectTargetStream['id'][])?.includes(stream.id)
               ) {
                 continue;
               }
 
-              if (!targetId[tId]) {
+              if (!targetStreams[tId]) {
                 continue;
               }
             }
