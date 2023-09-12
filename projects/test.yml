@@ -71,7 +71,7 @@ integrations:
     type: "git"
     config:
       dir: "/Users/Nikolay.klyuchev/dev/gp-analytics-service"
-      branch: "master"
+      branch: "main"
   bitbucketStg:
     type: "bitbucket"
     config:
@@ -367,18 +367,18 @@ targets:
         title: "Deliveries"
         config:
           integration: "githubDev"
-      gp-deliveries-history-service:
-        type: "github"
-        title: "Deliveries history"
-        config:
-          integration: "githubDev"
-        # artifacts:
-        #   - "githubActionLogImageTag"
-      gp-routes-calc-dev:
-        type: "github"
-        title: "Routes calc"
-        config:
-          integration: "githubDev"
+      # gp-deliveries-history-service:
+      #   type: "github"
+      #   title: "Deliveries history"
+      #   config:
+      #     integration: "githubDev"
+      #   # artifacts:
+      #   #   - "githubActionLogImageTag"
+      # gp-routes-calc-dev:
+      #   type: "github"
+      #   title: "Routes calc"
+      #   config:
+      #     integration: "githubDev"
     versioning: null
 
   stg:
@@ -389,28 +389,28 @@ targets:
         title: "Test A"
         config:
           integration: "gitlabStg"
-      gp-deliveries-crud-service:
-        type: "github"
-        title: "Deliveries CRUD"
-        config:
-          integration: "githubStg"
-      gp-deliveries-service:
-        type: "github"
-        title: "Deliveries"
-        config:
-          integration: "githubStg"
-      gp-deliveries-history-service:
-        type: "github"
-        title: "Deliveries history"
-        config:
-          integration: "githubStg"
-        artifacts:
-          - "argocdApplicationImageTag"
-      gp-uam-service:
-        type: "github"
-        title: "UAM"
-        config:
-          integration: "githubStg"
+      # gp-deliveries-crud-service:
+      #   type: "github"
+      #   title: "Deliveries CRUD"
+      #   config:
+      #     integration: "githubStg"
+      # gp-deliveries-service:
+      #   type: "github"
+      #   title: "Deliveries"
+      #   config:
+      #     integration: "githubStg"
+      # gp-deliveries-history-service:
+      #   type: "github"
+      #   title: "Deliveries history"
+      #   config:
+      #     integration: "githubStg"
+      #   artifacts:
+      #     - "argocdApplicationImageTag"
+      # gp-uam-service:
+      #   type: "github"
+      #   title: "UAM"
+      #   config:
+      #     integration: "githubStg"
     versioning: "release"
 
   stgHotfix:
@@ -421,26 +421,34 @@ targets:
         title: "Test GIT"
         config:
           integration: "gitHotfix"
-      testa:
-        type: "bitbucket"
-        title: "Test A bb"
-        config:
-          integration: "bitbucketHotfix"
-      akaterra1/testa:
-        type: "gitlab"
-        title: "Test A"
-        config:
-          integration: "gitlabHotfix"
-      gp-analytics-service:
-        type: "github"
-        title: "Analytics"
-        config:
-          integration: "githubHotfix"
-      gp-deliveries-service:
-        type: "github"
-        title: "Deliveries"
-        config:
-          integration: "githubHotfix"
+        actions:
+          test:
+            title: "Push to remove"
+            steps:
+              - type: "runAction"
+                title: "Run tests"
+                config:
+                  name: "test"
+      # testa:
+      #   type: "bitbucket"
+      #   title: "Test A bb"
+      #   config:
+      #     integration: "bitbucketHotfix"
+      # akaterra1/testa:
+      #   type: "gitlab"
+      #   title: "Test A"
+      #   config:
+      #     integration: "gitlabHotfix"
+      # gp-analytics-service:
+      #   type: "github"
+      #   title: "Analytics"
+      #   config:
+      #     integration: "githubHotfix"
+      # gp-deliveries-service:
+      #   type: "github"
+      #   title: "Deliveries"
+      #   config:
+      #     integration: "githubHotfix"
     versioning: "hotfix"
 
   production:
@@ -451,24 +459,24 @@ targets:
         title: "Test GIT"
         config:
           integration: "gitMaster"
-      testa:
-        type: "bitbucket"
-        title: "Test A bb"
-        config:
-          integration: "bitbucketMaster"
-      akaterra1/testa:
-        type: "gitlab"
-        title: "Test A"
-        config:
-          integration: "gitlabMain"
-      gp-analytics-service:
-        type: "github"
-        title: "Analytics"
-        config:
-          integration: "githubMain"
-      gp-deliveries-service:
-        type: "github"
-        title: "Deliveries"
-        config:
-          integration: "githubMaster"
+      # testa:
+      #   type: "bitbucket"
+      #   title: "Test A bb"
+      #   config:
+      #     integration: "bitbucketMaster"
+      # akaterra1/testa:
+      #   type: "gitlab"
+      #   title: "Test A"
+      #   config:
+      #     integration: "gitlabMain"
+      # gp-analytics-service:
+      #   type: "github"
+      #   title: "Analytics"
+      #   config:
+      #     integration: "githubMain"
+      # gp-deliveries-service:
+      #   type: "github"
+      #   title: "Deliveries"
+      #   config:
+      #     integration: "githubMaster"
     versioning: "current"

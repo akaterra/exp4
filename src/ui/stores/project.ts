@@ -282,12 +282,20 @@ export class ProjectStore extends BaseStore {
     const projectFlow = Object
       .values(this.project?.flows)
       .find((flow) => flow.targets.includes(targetId));
-
-    const projectFlowActionParamsStore = new ProjectFlowActionParamsStore(this.projectsStore, projectFlow?.actions?.[actionId]);
+    const projectFlowAction = projectFlow?.actions?.[actionId] ?? this.getTargetStreamByTargetIdAndStreamId(
+      targetId, selectedStreamIds[0]
+    )?.actions?.[actionId];
+console.log({actionId, projectFlowAction, x:this.getTargetStreamByTargetIdAndStreamId(
+  targetId, selectedStreamIds[0]
+), targetId, selectedStreamIds})
+    const projectFlowActionParamsStore = new ProjectFlowActionParamsStore(
+      this.projectsStore,
+      projectFlowAction,
+    );
     const action = yield modalStore.show({
       content: ProjectRunActionModalContent,
       props: {
-        projectFlowAction: projectFlow?.actions?.[actionId],
+        projectFlowAction,
         projectFlowActionParamsStore,
         projectTarget: this.getTargetByTargetId(targetId),
         projectTargetStreams: Object

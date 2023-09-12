@@ -33,12 +33,12 @@ export const ProjectTargetStreamDetailsModalTitle = observer(({
 export const ProjectTargetStreamDetailsModalContent = observer(({
   // store,
   projectTarget,
-  // projectTargetStream,
+  projectTargetStream,
   projectTargetStreamState,
 }: {
   // store: ModalStore;
   projectTarget?: ProjectTargetStore;
-  // projectTargetStream?: IProjectTargetStream;
+  projectTargetStream?: IProjectTargetStream;
   projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
   const lastAction = projectTargetStreamState?.history?.action?.[0];
@@ -47,11 +47,9 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
   const isFailed = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED;
 
   return <React.Fragment>
-    {
-      projectTargetStreamState?.link
-        ? <div><a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a></div>
-        : null
-    }
+    <div>
+      <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a>
+    </div>
     <div>
       {
         lastChange
@@ -149,11 +147,26 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
         : null
     }
     {
-      projectTarget?.actions?.length
+      projectTarget?.actions?.length || (projectTargetStream?.actions && Object.keys(projectTargetStream?.actions).length)
         ? <div className='paragraph paragraph-lrg children-gap'>
           <div>
             {
               projectTarget?.actions?.map((action, i) => {
+                return <div key={ i }>
+                  <Button
+                    className='button-sml success auto'
+                    x={ null }
+                    onClick={ () => {
+                      if (projectTargetStreamState?.id) {
+                        projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
+                      }
+                    } }
+                  >{ action.title ?? action.id }</Button>
+                </div>;
+              })
+            }
+            {
+              projectTargetStream?.actions && Object.values(projectTargetStream?.actions)?.map((action, i) => {
                 return <div key={ i }>
                   <Button
                     className='button-sml success auto'

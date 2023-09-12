@@ -10,15 +10,6 @@ import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
 
-const JOB_CONSLUSION_TO_STATUS_MAP = {
-  failure: Status.FAILED,
-  skipped: Status.COMPLETED,
-  success: Status.COMPLETED,
-}
-const JOB_STATUS_TO_STATUS_MAP = {
-  is_progress: Status.PROCESSING,
-}
-
 export type IGitTargetStream = IProjectTargetStream<{
   integration?: string;
   branch: string;
@@ -109,58 +100,11 @@ export class GitStreamService extends EntityService implements IStreamService {
       const versioningService = await this.projectsService
         .get(stream.ref.projectId)
         .getEnvVersioningByTargetId(stream.ref.targetId);
-      // const workflowRuns = hasScope('action', scopes) && branch
-      //   ? await integration.workflowRunsGet(stream.config.branch, stream.id)
-      //   : null;
-      // const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id)
-      //   ? await integration.workflowRunJobsGet(workflowRuns[0].id, stream.id, stream.config.org)
-      //   : null;
 
       const metadata = {
         // org: stream.config?.org ?? integration.config?.org,
         branch: branchName,
       };
-
-      // if (hasScope('action', scopes)) {
-      //   state.history.action = workflowRuns?.length ? workflowRuns.map((w) => {
-      //     const isJobStepsNotFailed = workflowRunsJobs?.[0]
-      //       ? workflowRunsJobs[0].steps.every((jobStep) => jobStep.conclusion !== 'failure')
-      //       : null;
-
-      //     return {
-      //       id: String(w.id),
-      //       type: 'github:workflow',
-    
-      //       author: {
-      //         name: w.actor?.name ?? w.actor?.login ?? null,
-      //         link: w.actor?.html_url ?? null,
-      //       },
-      //       description: w.name,
-      //       link: w.html_url ?? null,
-      //       metadata: {},
-      //       steps: workflowRunsJobs?.[0]
-      //         ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
-      //           acc[jobStep.number] = {
-      //             id: String(jobStep.number),
-      //             type: 'github:workflow:job',
-
-      //             description: jobStep.name,
-      //             link: workflowRunsJobs[0].html_url,
-      //             status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
-      //           };
-
-      //           return acc;
-      //         }, {})
-      //         : state.history.action?.[0]?.steps ?? null,
-      //       status: typeof isJobStepsNotFailed === 'boolean'
-      //         ? isJobStepsNotFailed
-      //           ? (JOB_STATUS_TO_STATUS_MAP[w.status] ?? w.status ?? null)
-      //           : Status.FAILED
-      //         : state.history.action?.[0]?.status ?? Status.COMPLETED,
-      //       time: w.run_started_at,
-      //     };
-      //   }) : [];
-      // }
 
       if (hasScope('change', scopes)) {
         state.history.change = branch ? [ {
@@ -189,14 +133,10 @@ export class GitStreamService extends EntityService implements IStreamService {
           { artifacts: stream.artifacts, ref: stream.ref },
           state,
           {
-            // githubWorkflowRunJobId: workflowRunsJobs?.[0]?.id,
-            githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
             ref: stream.ref,
           },
         );
       }
-
-      // stream.isDirty = false;
     })().catch((err) => {
       logError(err, 'GitStreamService.streamGetState');
     }).finally(() => {

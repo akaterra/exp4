@@ -87,11 +87,11 @@ export interface IProjectFlow<C extends (Record<string, unknown> | string) = str
 
 export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
-export interface IProjectTargetStream<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<unknown, T> {
+export interface IProjectTargetStream<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
-  config?: C;
+  actions?: Record<string, IProjectFlowAction>;
   tags?: string[];
   targets?: IProjectTarget['id'][];
 }
@@ -120,10 +120,10 @@ export interface IProject extends IProjectDef {
 
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>>;
   definitions: Record<string, Record<string, unknown>>;
-  flows: Record<string, IProjectFlow<Record<string, unknown>>>;
+  flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDef>;
   storages?: Record<string, IProjectDef>;
-  targets: Record<string, IProjectTarget<Record<string, unknown>>>;
+  targets: Record<string, IProjectTargetDef>;
   versionings: Record<string, Record<string, unknown>>;
 }
 
@@ -271,6 +271,36 @@ export class Project implements IProject {
                 config: this.getDefinition(actDef.config),
                 title: actDef.title,
                 description: actDef.description,
+                actions: Object
+                  .entries(actDef.actions ?? {})
+                  .reduce((acc, [ actKey, actDef ]) => {
+                    acc[actKey] = {
+                      id: actDef.id ?? actKey,
+                      type: actDef.type,
+                      ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id, streamId: actDef.id ?? actKey, targetId: key },
+                      title: actDef.title,
+                      description: actDef.description,
+                      artifacts: actDef.artifacts,
+                      params: actDef.params,
+                      steps: actDef.steps.map((step) => ({
+                        id: step.id ?? actKey,
+                        type: step.type,
+                        ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id },
+                        config: this.getDefinition(step.config),
+                        description: step.description,
+                        params: actDef.params
+                          ? _.mapValues(actDef.params, (param) => {
+                            param.validationSchema = this.getFlowActionParamValidationSchema(param);
+      
+                            return param;
+                          })
+                          : null,
+                        targets: step.targets ?? actDef.targets ?? [],
+                      })),
+                    };
+      
+                    return acc;
+                  }, {}),
                 artifacts: actDef.artifacts,
                 tags: actDef.tags ?? [],
                 targets: actDef.targets ?? [],

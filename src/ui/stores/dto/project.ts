@@ -59,6 +59,7 @@ export interface IProjectTargetStream {
   title: string;
   description: string;
 
+  actions: Record<string, IProjectFlowAction>;
   tags: string[];
   targets: string[];
 }
@@ -73,6 +74,7 @@ export interface IProjectTarget {
   description: string;
 
   streams: Record<string, IProjectTargetStream>;
+  tags: string[];
   versioning: string;
 }
 
