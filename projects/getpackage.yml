@@ -92,6 +92,10 @@ integrations:
       branch: "main"
 
 storages:
+  postgresql:
+    type: "sql"
+    config:
+      url: "postgresql://postgres:postgres@localhost:5432/streamFlow"
   mongodb:
     type: "mongodb"
     config:
@@ -106,19 +110,19 @@ versionings:
     type: "semver"
     config:
       namespace: "release"
-      storage: "github"
+      storage: "postgresql"
       format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
   hotfix: &versioningHotfix
     type: "semver"
     config:
       namespace: "hotfix"
-      storage: "github"
+      storage: "postgresql"
       format: "${version.major}.${version.minor}.${version.patch}"
   current: &versioningCurrent
     type: "semver"
     config:
       namespace: "current"
-      storage: "github"
+      storage: "postgresql"
       format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
 
 flows:

@@ -62,6 +62,36 @@ definitions:
   none: null
 
 integrations:
+  bitbucketStg:
+    type: "bitbucket"
+    config:
+      workspace: "dd80"
+      branch: "v${version.major}.${version.minor}"
+  bitbucketHotfix:
+    type: "bitbucket"
+    config:
+      workspace: "dd80"
+      branch: "v${version.major}.${version.minor}-hotfix"
+  bitbucketMaster:
+    type: "bitbucket"
+    config:
+      workspace: "dd80"
+      branch: "master"
+  gitlabStg:
+    type: "gitlab"
+    config:
+      org: "getpackageltd"
+      branch: "v${version.major}.${version.minor}"
+  gitlabHotfix:
+    type: "gitlab"
+    config:
+      org: "getpackageltd"
+      branch: "v${version.major}.${version.minor}-hotfix"
+  gitlabMain:
+    type: "gitlab"
+    config:
+      org: "getpackageltd"
+      branch: "main"
   argocdStg:
     type: "argocd"
     config:
@@ -98,7 +128,7 @@ integrations:
 
 storages:
   github:
-    type: "github"
+    type: "file"
     config:
       integration: "github"
 
@@ -344,6 +374,11 @@ targets:
   stg:
     title: "QA"
     streams:
+      akaterra1/testa:
+        type: "gitlab"
+        title: "Test A"
+        config:
+          integration: "gitlabStg"
       gp-deliveries-crud-service:
         type: "github"
         title: "Deliveries CRUD"
@@ -371,6 +406,16 @@ targets:
   stgHotfix:
     title: "QA Hotfix"
     streams:
+      testa:
+        type: "bitbucket"
+        title: "Test A bb"
+        config:
+          integration: "bitbucketHotfix"
+      akaterra1/testa:
+        type: "gitlab"
+        title: "Test A"
+        config:
+          integration: "gitlabHotfix"
       gp-analytics-service:
         type: "github"
         title: "Analytics"
@@ -386,6 +431,16 @@ targets:
   production:
     title: "Production"
     streams:
+      testa:
+        type: "bitbucket"
+        title: "Test A bb"
+        config:
+          integration: "bitbucketMaster"
+      akaterra1/testa:
+        type: "gitlab"
+        title: "Test A"
+        config:
+          integration: "gitlabMain"
       gp-analytics-service:
         type: "github"
         title: "Analytics"

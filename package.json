@@ -1,4 +1,5 @@
 {
+  "license": "MIT",
   "scripts": {
     "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/typescript/bin/tsc && node ./dist/src/index.js\"",
     "dev:fe": "webpack serve",
@@ -6,10 +7,12 @@
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
+    "@gitbeaker/rest": "^39.14.0",
     "@octokit/rest": "^20.0.1",
     "@theme-ui/components": "^0.16.1",
     "@types/react": "^18.2.20",
     "ajv": "^8.12.0",
+    "bitbucket": "^2.11.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.1",
@@ -21,6 +24,7 @@
     "npx": "^10.2.2",
     "passport": "^0.6.0",
     "passport-github2": "^0.1.12",
+    "pg": "^8.11.3",
     "react-router-dom": "^6.15.0",
     "reflect-metadata": "^0.1.13",
     "semver": "^7.5.4",

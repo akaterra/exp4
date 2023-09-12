@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
@@ -221,7 +221,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return `rc__${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
-  protected static getKeyStream(key: string | string[], streamId: string): string {
+  protected static getKeyStream(key: string | string[], streamId: IProjectTargetStream['id']): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
     return `rc__${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');

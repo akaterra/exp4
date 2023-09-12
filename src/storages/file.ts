@@ -4,18 +4,17 @@ import { AwaitedCache } from '../cache';
 import { IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
-import { MongoClient, Db } from 'mongodb';
 import { Log } from '../logger';
+import fs from 'node:fs/promises';
+import path from 'path';
 
 @Service()
-export class MongodbStorageService extends EntityService implements IStorageService {
-  static readonly type: string = 'mongodb';
+export class FileStorageService extends EntityService implements IStorageService {
+  static readonly type: string = 'file';
 
   protected cache = new AwaitedCache();
-  protected client: MongoClient;
-  protected db: Db;
 
-  constructor(protected config?: { url?: string, collectionName?: string }) {
+  constructor(protected config?: { dir? }) {
     super();
   }
 
@@ -26,24 +25,21 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
-    const intKey = MongodbStorageService.getKey(key);
+    const intKey = FileStorageService.getKey(key);
     const cacheKey = `${intKey}:target`;
     
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
-    
-    const collection = await this.getCollection();
 
-    return (await collection.findOne({ key: intKey, type: 'target' }))?.val ?? def;
+    return (await this.getJson(intKey)) ?? def;
   }
 
   @Log('debug')
   async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
-    const intKey = MongodbStorageService.getKey(key);
-    const collection = await this.getCollection();
+    const intKey = FileStorageService.getKey(key);
 
-    await collection.updateOne({ key: intKey, type: 'target' }, { $set: { val } }, { upsert: true });
+    await this.putJson(intKey, val);
 
     this.cache.set(`${intKey}:target`, val, 10);
   }
@@ -95,24 +91,21 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   }
 
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
-    const intKey = MongodbStorageService.getKeyStream(key, stream.id);
+    const intKey = FileStorageService.getKeyStream(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
     
-    const collection = await this.getCollection();
-
-    return (await collection.findOne({ key: intKey, type: 'stream' }))?.val ?? def;
+    return (await this.getJson(intKey)) ?? def;
   }
 
   @Log('debug')
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
-    const intKey = MongodbStorageService.getKeyStream(key, stream.id);
-    const collection = await this.getCollection();
+    const intKey = FileStorageService.getKeyStream(key, stream.id);
 
-    await collection.updateOne({ key: intKey, type: 'stream' }, { $set: { val } }, { upsert: true });
+    await this.putJson(intKey, val);
 
     this.cache.set(`${intKey}:stream`, val, 10);
   }
@@ -175,29 +168,17 @@ export class MongodbStorageService extends EntityService implements IStorageServ
     return `${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');
   }
 
-  protected async getClient() {
-    if (!this.client) {
-      const client = new MongoClient(this.config?.url ?? process.env.MONGODB_URL);
-      await client.connect();
+  protected getJsonPath(file: string): string {
+    file = encodeURI(file).replace(/\//g, '__');
 
-      const db = client.db();
-      await db.collection(this.config?.collectionName ?? 'storage').createIndex({
-        key: 1,
-        type: 1,
-      }, {
-        unique: true
-      });
-
-      this.client = client;
-      this.db = db;
-    }
-
-    return this.client;
+    return path.resolve(this.config?.dir ?? './projects', `${file}.json`);
   }
 
-  protected async getCollection() {
-    await this.getClient();
+  protected getJson(file: string): Promise<any> {
+    return fs.readFile(this.getJsonPath(file), 'utf8').then(JSON.parse).catch(() => null);
+  }
 
-    return this.db.collection(this.config?.collectionName ?? 'storage');
+  protected putJson(file: string, json: any): Promise<any> {
+    return fs.writeFile(this.getJsonPath(file), JSON.stringify(json), 'utf8');
   }
 }

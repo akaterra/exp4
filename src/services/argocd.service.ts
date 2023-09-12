@@ -8,7 +8,7 @@ export class ArgocdService {
   }
 
   constructor(
-    private domain: string = process.env.ARGOCD_DOMAIN,
+    private host: string = process.env.ARGOCD_HOST,
     private username: string = process.env.ARGOCD_USERNAME,
     private password: string = process.env.ARGOCD_PASSWORD,
   ) {
@@ -19,12 +19,12 @@ export class ArgocdService {
       await this.login();
     }
 
-    return requestJson(`${this.domain}/api/v1/applications/${name}`, undefined, 'get', this.accessToken);
+    return requestJson(`${this.host}/api/v1/applications/${name}`, undefined, 'get', this.accessToken);
   }
 
   async login(username?: string, password?: string) {
     this.accessToken = (await requestJson(
-      `${this.domain}/api/v1/session`,
+      `${this.host}/api/v1/session`,
       {
         username: username ?? this.username,
         password: password ?? this.password,

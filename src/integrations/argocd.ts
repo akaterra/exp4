@@ -4,7 +4,7 @@ import { EntityService } from '../entities.service';
 import { ArgocdService } from '../services/argocd.service';
 
 export interface IArgocdConfig {
-  domain?: string;
+  host?: string;
   username?: string;
   password?: string;
   applicationName?: string;
@@ -20,7 +20,7 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     super();
 
     this.client = new ArgocdService(
-      config?.domain,
+      config?.host,
       config?.username,
       config?.password,
     );

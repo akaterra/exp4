@@ -38,7 +38,7 @@ export class GithubActionStepLogArtifactService extends EntityService implements
       return;
     }
 
-    const result = this.cache.get(params.githubWorkflowRunJobId) ?? await this.getIntegration(entity.ref).gitGetWorkflowJobLog(
+    const result = this.cache.get(params.githubWorkflowRunJobId) ?? await this.getIntegration(entity.ref).workflowRunJobLogGet(
       params?.githubWorkflowRunJobId,
       entity.ref?.streamId,
     );

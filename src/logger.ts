@@ -8,8 +8,12 @@ export const logger = createLogger({
   ],
 });
 
-export function logError(err, message = 'error') {
-  logger.error({ message, error: err?.message ?? err, stack: err?.stack });
+export function logError(err, message = 'error', extra?: Record<string, any>) {
+  logger.error({ message, error: err?.error ?? err?.message ?? err, stack: err?.stack, ...extra });
+}
+
+export function logErrorWarn(err, message = 'warn', extra?: Record<string, any>) {
+  logger.warn({ message, error: err?.error ?? err?.message ?? err, stack: err?.stack, ...extra });
 }
 
 function argNames(fn) {

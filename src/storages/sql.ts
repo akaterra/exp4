@@ -4,18 +4,17 @@ import { AwaitedCache } from '../cache';
 import { IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
-import { MongoClient, Db } from 'mongodb';
+import { knex, Knex } from 'knex';
 import { Log } from '../logger';
 
 @Service()
-export class MongodbStorageService extends EntityService implements IStorageService {
-  static readonly type: string = 'mongodb';
+export class SqlStorageService extends EntityService implements IStorageService {
+  static readonly type: string = 'sql';
 
   protected cache = new AwaitedCache();
-  protected client: MongoClient;
-  protected db: Db;
+  protected client: Knex;
 
-  constructor(protected config?: { url?: string, collectionName?: string }) {
+  constructor(protected config?: { url?: string, tableName?: string }) {
     super();
   }
 
@@ -26,24 +25,26 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
-    const intKey = MongodbStorageService.getKey(key);
+    const intKey = SqlStorageService.getKey(key);
     const cacheKey = `${intKey}:target`;
     
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
     
-    const collection = await this.getCollection();
+    const qb = (await this.getTable()).qb;
 
-    return (await collection.findOne({ key: intKey, type: 'target' }))?.val ?? def;
+    return (await qb.where({ key: intKey, type: 'target' }).first())?.val ?? def;
   }
 
   @Log('debug')
   async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
-    const intKey = MongodbStorageService.getKey(key);
-    const collection = await this.getCollection();
+    const intKey = SqlStorageService.getKey(key);
+    const qb = (await this.getTable()).qb;
 
-    await collection.updateOne({ key: intKey, type: 'target' }, { $set: { val } }, { upsert: true });
+    await qb.insert({ key: intKey, type: 'target', val: JSON.stringify(val) })
+      .onConflict([ 'key', 'type' ])
+      .merge([ 'val' ]);
 
     this.cache.set(`${intKey}:target`, val, 10);
   }
@@ -95,24 +96,26 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   }
 
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
-    const intKey = MongodbStorageService.getKeyStream(key, stream.id);
+    const intKey = SqlStorageService.getKeyStream(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
     
-    const collection = await this.getCollection();
+    const qb = (await this.getTable()).qb;
 
-    return (await collection.findOne({ key: intKey, type: 'stream' }))?.val ?? def;
+    return (await qb.where({ key: intKey, type: 'stream' }).first())?.val ?? def;
   }
 
   @Log('debug')
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
-    const intKey = MongodbStorageService.getKeyStream(key, stream.id);
-    const collection = await this.getCollection();
+    const intKey = SqlStorageService.getKeyStream(key, stream.id);
+    const qb = (await this.getTable()).qb;
 
-    await collection.updateOne({ key: intKey, type: 'stream' }, { $set: { val } }, { upsert: true });
+    await qb.insert({ key: intKey, type: 'stream', val: JSON.stringify(val) })
+      .onConflict([ 'key', 'type' ])
+      .merge([ 'val' ]);
 
     this.cache.set(`${intKey}:stream`, val, 10);
   }
@@ -177,27 +180,24 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   protected async getClient() {
     if (!this.client) {
-      const client = new MongoClient(this.config?.url ?? process.env.MONGODB_URL);
-      await client.connect();
+      const client = knex(this.config?.url ?? process.env.SQL_URL);
 
-      const db = client.db();
-      await db.collection(this.config?.collectionName ?? 'storage').createIndex({
-        key: 1,
-        type: 1,
-      }, {
-        unique: true
-      });
+      if (!await client.schema.hasTable(this.config?.tableName ?? 'storage')) {
+        await client.schema.createTableIfNotExists(this.config?.tableName ?? 'storage', (table) => {
+          table.string('key', 100).notNullable();
+          table.string('type', 20).notNullable();
+          table.jsonb('val');
+          table.unique([ 'key', 'type' ]);
+        });
+      }
 
       this.client = client;
-      this.db = db;
     }
 
     return this.client;
   }
 
-  protected async getCollection() {
-    await this.getClient();
-
-    return this.db.collection(this.config?.collectionName ?? 'storage');
+  protected async getTable(): Promise<{ qb: Knex.QueryBuilder }> {
+    return { qb: (await this.getClient())(this.config?.tableName ?? 'storage') };
   }
 }
