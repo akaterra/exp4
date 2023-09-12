@@ -7,14 +7,20 @@ import * as _ from 'lodash';
 import { iter } from '../utils';
 
 export interface FetchByArtifactConfigFilter {
-  complex?: Record<string, FetchByArtifactConfigFilter>;
+  and?: Record<string, FetchByArtifactConfigFilter>[];
   contains?: any;
   eq?: any;
   gte?: any;
+  if?: {
+    condition: Record<string, FetchByArtifactConfigFilter>;
+    then: Record<string, FetchByArtifactConfigFilter>;
+    else?: Record<string, FetchByArtifactConfigFilter>;
+  };
   in?: any;
   lte?: any;
   ne?: any;
   notEmpty?: boolean;
+  or?: Record<string, FetchByArtifactConfigFilter>[];
   pattern?: RegExp | string;
 }
 
@@ -155,13 +161,37 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
         return false;
       }
 
-      if (condition.complex) {
-        if (!FetchByArtifactService.filter(
+      if (condition.and) {
+        if (condition.and.some((condition) => !FetchByArtifactService.filter(
           val,
-          condition.complex,
+          condition,
           params,
-        )) {
+        ))) {
           return false;
+        }
+      }
+
+      if (condition.or) {
+        if (condition.or.every((condition) => !FetchByArtifactService.filter(
+          val,
+          condition,
+          params,
+        ))) {
+          return false;
+        }
+      }
+
+      if (condition.if) {
+        const check = FetchByArtifactService.filter(val, condition.if.condition, params);
+
+        if (check) {
+          if (!FetchByArtifactService.filter(val, condition.if.then, params)) {
+            return false;
+          }
+        } else if (condition.if.else) {
+          if (!FetchByArtifactService.filter(val, condition.if.else, params)) {
+            return false;
+          }
         }
       }
 

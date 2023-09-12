@@ -62,6 +62,16 @@ definitions:
   none: null
 
 integrations:
+  gitHotfix:
+    type: "git"
+    config:
+      dir: "/Users/Nikolay.klyuchev/dev/gp-analytics-service"
+      branch: "v${version.major}.${version.minor}-hotfix"
+  gitMaster:
+    type: "git"
+    config:
+      dir: "/Users/Nikolay.klyuchev/dev/gp-analytics-service"
+      branch: "master"
   bitbucketStg:
     type: "bitbucket"
     config:
@@ -406,6 +416,11 @@ targets:
   stgHotfix:
     title: "QA Hotfix"
     streams:
+      analytics:
+        type: "git"
+        title: "Test GIT"
+        config:
+          integration: "gitHotfix"
       testa:
         type: "bitbucket"
         title: "Test A bb"
@@ -431,6 +446,11 @@ targets:
   production:
     title: "Production"
     streams:
+      analytics:
+        type: "git"
+        title: "Test GIT"
+        config:
+          integration: "gitMaster"
       testa:
         type: "bitbucket"
         title: "Test A bb"
