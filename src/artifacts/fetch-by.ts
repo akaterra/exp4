@@ -6,19 +6,32 @@ import { EntityService } from '../entities.service';
 import * as _ from 'lodash';
 import { iter } from '../utils';
 
+export type Primitive = boolean | null | number | string;
+
+export type FetchByArtifactConfigFilterValue = Primitive | {
+  get?: string;
+  getRoot?: string;
+  if?: {
+    condition: Record<string, FetchByArtifactConfigFilter>;
+    then: FetchByArtifactConfigFilterValue;
+    else: FetchByArtifactConfigFilterValue;
+  }
+  param?: string;
+};
+
 export interface FetchByArtifactConfigFilter {
   and?: Record<string, FetchByArtifactConfigFilter>[];
-  contains?: any;
-  eq?: any;
-  gte?: any;
+  contains?: FetchByArtifactConfigFilterValue;
+  eq?: FetchByArtifactConfigFilterValue;
+  gte?: FetchByArtifactConfigFilterValue;
   if?: {
     condition: Record<string, FetchByArtifactConfigFilter>;
     then: Record<string, FetchByArtifactConfigFilter>;
     else?: Record<string, FetchByArtifactConfigFilter>;
   };
-  in?: any;
-  lte?: any;
-  ne?: any;
+  in?: FetchByArtifactConfigFilterValue;
+  lte?: FetchByArtifactConfigFilterValue;
+  ne?: FetchByArtifactConfigFilterValue;
   notEmpty?: boolean;
   or?: Record<string, FetchByArtifactConfigFilter>[];
   pattern?: RegExp | string;
@@ -150,9 +163,9 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
   }
 
   private static filter(
-    entity: any,
+    entity: unknown,
     filter: Record<string, FetchByArtifactConfigFilter>,
-    params: Record<string, any>,
+    params: Record<string, unknown>,
   ) {
     for (const [ key, condition ] of Object.entries(filter)) {
       const val = key !== '...' ? _.get(entity, key) : entity;
@@ -196,6 +209,8 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       if (condition.contains && !val?.includes(FetchByArtifactService.getFilterValue(
+        val,
+        entity,
         condition.contains,
         params,
       ))) {
@@ -203,6 +218,8 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       if (condition.eq !== undefined && val !== FetchByArtifactService.getFilterValue(
+        val,
+        entity,
         condition.eq,
         params,
       )) {
@@ -210,6 +227,8 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       if (condition.gte !== undefined && val <= FetchByArtifactService.getFilterValue(
+        val,
+        entity,
         condition.gte,
         params,
       )) {
@@ -217,6 +236,8 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       if (condition.in && !FetchByArtifactService.getFilterValue(
+        val,
+        entity,
         condition.in,
         params,
       )?.includes(val)) {
@@ -224,6 +245,8 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       if (condition.lte !== undefined && val >= FetchByArtifactService.getFilterValue(
+        val,
+        entity,
         condition.lte,
         params,
       )) {
@@ -231,6 +254,8 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       if (condition.ne !== undefined && val === FetchByArtifactService.getFilterValue(
+        val,
+        entity,
         condition.ne,
         params,
       )) {
@@ -251,10 +276,31 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
     return true;
   }
 
-  private static getFilterValue(filter, params) {
+  private static getFilterValue(
+    entityVal: unknown,
+    entity: unknown,
+    filter: FetchByArtifactConfigFilterValue,
+    params: Record<string, unknown>,
+  ) {
     if (filter && typeof filter === 'object') {
-      if (filter.key) {
-        return _.get(params, filter.key);
+      if (filter.get) {
+        return _.get(entityVal, filter.get);
+      }
+
+      if (filter.getRoot) {
+        return _.get(entity, filter.getRoot);
+      }
+
+      if (filter.if) {
+        if (FetchByArtifactService.filter(entityVal, { '...': filter.if.condition }, params)) {
+          return FetchByArtifactService.getFilterValue(entityVal, entity, filter.if.then, params);
+        } else if (filter.if.else) {
+          return FetchByArtifactService.getFilterValue(entityVal, entity, filter.if.else, params);
+        }
+      }
+
+      if (filter.param) {
+        return _.get(params, filter.param);
       }
 
       return undefined;

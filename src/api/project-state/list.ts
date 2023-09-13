@@ -8,5 +8,20 @@ const projectsService = Container.get(ProjectsService);
 export async function projectStreamList(req, res) {
   logger.info({ message: 'projectStreamList', data: req.data });
 
-  res.json(await projectsService.getState(req.params.projectId /*, req.query.targetId?.split(',') */));
+  const targetStreams = req.query.targetId
+    ? req.query.targetId.split(',').reduce((acc, targetId) => {
+      acc[targetId] = true;
+
+      return acc
+    }, {})
+    : null;
+  const scopes = req.query.scopes
+    ? req.query.scopes.split(',').reduce((acc, scope) => {
+      acc[scope] = true;
+
+      return acc
+    }, {})
+    : null;
+
+  res.json(await projectsService.getState(req.params.projectId, targetStreams, scopes));
 }

@@ -31,8 +31,8 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
 
 export interface IProjectRef {
   actionId?: IProjectFlowAction['id'],
-  projectId?: IProject['id'],
   flowId?: IProjectFlow['id'],
+  projectId?: IProject['id'],
   streamId?: IProjectTargetStream['id'],
   targetId?: IProjectTarget['id'],
 }
@@ -70,7 +70,7 @@ export interface IProjectFlowActionStep<C extends (Record<string, unknown> | str
 export interface IProjectFlowAction<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<unknown, T> {
   isDirty?: boolean;
 
-  artifacts?: IProjectArtifact['id'][];
+  streams?: IProjectTargetStream['id'][];
   steps?: IProjectFlowActionStep<C>[];
   params?: Record<string, IProjectFlowActionParam>;
   targets?: IProjectTarget['id'][];
@@ -150,7 +150,7 @@ export class Project implements IProject {
   id: string = 'unknown';
 
   title: string;
-  descriptopn: string;
+  description: string;
 
   env: {
     artifacts: ArtifactsService;
@@ -177,10 +177,6 @@ export class Project implements IProject {
   targets: Record<string, IProjectTargetDef> = {};
   versionings: Record<string, Record<string, unknown>>;
 
-  get description() {
-    return '';
-  }
-
   get assertType() {
     return '*';
   }
@@ -193,6 +189,9 @@ export class Project implements IProject {
     if (config.id) {
       this.id = config.id;
     }
+
+    this.title = config?.title;
+    this.description = config?.description;
 
     this.info = { ...config?.info };
     this.resync = { ...config?.resync, at: null };
@@ -211,38 +210,50 @@ export class Project implements IProject {
 
     if (config.flows) {
       for (const [ key, def ] of Object.entries(config.flows)) {
-        this.flows[key] = {
-          id: key,
+        const flowId = def.id ?? key;
+        this.assertKey(flowId);
+
+        this.flows[flowId] = {
+          id: flowId,
           type: 'flow',
-          ref: { projectId: this.id },
+
+          ref: { flowId, projectId: this.id },
+
           title: def.title,
           description: def.description,
+
           targets: def.targets ?? [],
           actions: Object
             .entries(def.actions ?? {})
-            .reduce((acc, [ actKey, actDef ]) => {
-              acc[actKey] = {
-                id: actDef.id ?? actKey,
-                type: actDef.type,
-                ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id },
-                title: actDef.title,
-                description: actDef.description,
-                artifacts: actDef.artifacts,
-                params: actDef.params,
-                steps: actDef.steps.map((step) => ({
-                  id: step.id ?? actKey,
+            .reduce((acc, [ actionKey, actionDef ]) => {
+              const actionId = actionDef.id ?? actionKey;
+              this.assertKey(actionId);
+
+              acc[actionId] = {
+                id: actionId,
+                type: actionDef.type,
+
+                ref: { actionId, flowId, projectId: this.id },
+
+                title: actionDef.title,
+                description: actionDef.description,
+
+                params: actionDef.params,
+                streams: actionDef.streams,
+                steps: actionDef.steps.map((step, i) => ({
+                  id: step.id ?? i,
                   type: step.type,
-                  ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id },
+                  ref: { actionId, flowId, projectId: this.id },
                   config: this.getDefinition(step.config),
                   description: step.description,
-                  params: actDef.params
-                    ? _.mapValues(actDef.params, (param) => {
+                  params: actionDef.params
+                    ? _.mapValues(actionDef.params, (param) => {
                       param.validationSchema = this.getFlowActionParamValidationSchema(param);
 
                       return param;
                     })
                     : null,
-                  targets: step.targets ?? actDef.targets ?? [],
+                  targets: step.targets ?? actionDef.targets ?? [],
                 })),
               };
 
@@ -254,57 +265,93 @@ export class Project implements IProject {
 
     if (config.targets) {
       for (const [ key, def ] of Object.entries(config.targets)) {
-        this.targets[key] = {
-          id: key,
+        const targetId = def.id ?? key;
+        this.assertKey(targetId);
+
+        this.targets[targetId] = {
+          id: targetId,
           type: 'target',
+
           ref: { projectId: this.id },
+
           title: def.title,
           description: def.description,
+
           artifacts: def.artifacts,
           streams: Object
             .entries(def.streams ?? {})
-            .reduce((acc, [ actKey, actDef ]) => {
-              acc[actKey] = {
-                id: actDef.id ?? actKey,
-                type: actDef.type,
-                ref: { projectId: this.id, streamId: actDef.id ?? actKey, targetId: key },
-                config: this.getDefinition(actDef.config),
-                title: actDef.title,
-                description: actDef.description,
-                actions: Object
-                  .entries(actDef.actions ?? {})
-                  .reduce((acc, [ actKey, actDef ]) => {
-                    acc[actKey] = {
-                      id: actDef.id ?? actKey,
-                      type: actDef.type,
-                      ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id, streamId: actDef.id ?? actKey, targetId: key },
-                      title: actDef.title,
-                      description: actDef.description,
-                      artifacts: actDef.artifacts,
-                      params: actDef.params,
-                      steps: actDef.steps.map((step) => ({
-                        id: step.id ?? actKey,
-                        type: step.type,
-                        ref: { actionId: actDef.id ?? actKey, flowId: key, projectId: this.id },
-                        config: this.getDefinition(step.config),
-                        description: step.description,
-                        params: actDef.params
-                          ? _.mapValues(actDef.params, (param) => {
-                            param.validationSchema = this.getFlowActionParamValidationSchema(param);
-      
-                            return param;
-                          })
-                          : null,
-                        targets: step.targets ?? actDef.targets ?? [],
-                      })),
-                    };
-      
-                    return acc;
-                  }, {}),
-                artifacts: actDef.artifacts,
-                tags: actDef.tags ?? [],
-                targets: actDef.targets ?? [],
+            .reduce((acc, [ streamKey, streamDef ]) => {
+              const streamId = streamDef.id ?? streamKey;
+              this.assertKey(streamId);
+
+              acc[streamId] = {
+                id: streamId,
+                type: streamDef.type,
+
+                ref: { projectId: this.id, streamId, targetId },
+
+                title: streamDef.title,
+                description: streamDef.description,
+
+                config: this.getDefinition(streamDef.config),
+                artifacts: streamDef.artifacts,
+                tags: streamDef.tags ?? [],
+                targets: streamDef.targets ?? [],
               };
+
+              if (streamDef.actions) {
+                Object.entries(streamDef.actions).forEach(([ actionKey, actionDef ], i) => {
+                  const flowId = `${Date.now()}:${i}:${targetId}:${streamId}`;
+
+                  this.flows[flowId] = {
+                    id: flowId,
+                    type: 'flow',
+
+                    ref: { flowId, projectId: this.id, streamId, targetId },
+
+                    title: null,
+                    description: null,
+
+                    targets: [ def.id ?? key ],
+                    actions: Object
+                      .entries(streamDef.actions ?? {})
+                      .reduce((acc, [ actionKey, actionDef ]) => {
+                        const actionId = actionDef.id ?? actionKey;
+                        this.assertKey(actionId);
+
+                        acc[actionId] = {
+                          id: actionId,
+                          type: actionDef.type,
+
+                          ref: { actionId, flowId, projectId: this.id, streamId, targetId },
+
+                          title: actionDef.title,
+                          description: actionDef.description,
+
+                          params: actionDef.params,
+                          streams: actionDef.streams,
+                          steps: actionDef.steps.map((step, i) => ({
+                            id: step.id ?? i,
+                            type: step.type,
+                            ref: { actionId, flowId, projectId: this.id, streamId, targetId },
+                            config: this.getDefinition(step.config),
+                            description: step.description,
+                            params: actionDef.params
+                              ? _.mapValues(actionDef.params, (param) => {
+                                param.validationSchema = this.getFlowActionParamValidationSchema(param);
+          
+                                return param;
+                              })
+                              : null,
+                            targets: step.targets ?? actionDef.targets ?? [],
+                          })),
+                        };
+          
+                        return acc;
+                      }, {}),
+                  };
+                });
+              }
 
               return acc;
             }, {}),
@@ -430,9 +477,18 @@ export class Project implements IProject {
     return this.env.versionings.get(target.versioning, assertType);
   }
 
+  assertKey(key: string) {
+    if (key.includes(':')) {
+      throw new Error(`Key "${key}" contains reserved character ":"`);
+    }
+  }
+
   toJSON() {
     return {
       id: this.id,
+
+      title: this.title ?? null,
+      description: this.description ?? null,
 
       definitions: this.definitions,
       flows: this.flows,

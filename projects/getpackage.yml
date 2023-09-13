@@ -26,7 +26,7 @@ artifacts:
         filter:
           "...":
             contains:
-              key: "ref.streamId"
+              param: "ref.streamId"
         pattern: "\\:([\\w\\-\\.]+)$"
         keys:
           - 1
@@ -37,7 +37,7 @@ artifacts:
         filter:
           name:
             in:
-              key: "ref.streamId"
+              param: "ref.streamId"
           kind:
             eq: "StatefulSet"
         pattern: null
@@ -110,19 +110,19 @@ versionings:
     type: "semver"
     config:
       namespace: "release"
-      storage: "postgresql"
+      storage: "github"
       format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
   hotfix: &versioningHotfix
     type: "semver"
     config:
       namespace: "hotfix"
-      storage: "postgresql"
+      storage: "github"
       format: "${version.major}.${version.minor}.${version.patch}"
   current: &versioningCurrent
     type: "semver"
     config:
       namespace: "current"
-      storage: "postgresql"
+      storage: "github"
       format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
 
 flows:

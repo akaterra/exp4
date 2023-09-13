@@ -21,8 +21,7 @@ artifacts:
         filter:
           "...":
             contains:
-              key: "ref.streamId"
-        filterPath: null
+              param: "ref.streamId"
         pattern: "\\:([\\w\\-\\.]+)$"
         keys:
           - 1
@@ -33,11 +32,10 @@ artifacts:
         filter:
           name:
             contain:
-              key: "ref.streamId"
+              param: "ref.streamId"
           kind:
             eq: "StatefulSet"
-        filterPath: "name"
-        pattern: null
+            pattern: null
         keys:
           - valuePath: "status"
         to: "link"
@@ -175,6 +173,15 @@ flows:
             title: "Run tests"
             config:
               name: "test"
+      test2:
+        title: "Run tests 2"
+        steps:
+          - type: "runAction"
+            title: "Run tests"
+            config:
+              name: "test"
+        streams:
+          - gp-deliveries-service
 
   release:
     title: ""
@@ -367,13 +374,13 @@ targets:
         title: "Deliveries"
         config:
           integration: "githubDev"
-      # gp-deliveries-history-service:
-      #   type: "github"
-      #   title: "Deliveries history"
-      #   config:
-      #     integration: "githubDev"
-      #   # artifacts:
-      #   #   - "githubActionLogImageTag"
+      gp-deliveries-history-service:
+        type: "github"
+        title: "Deliveries history"
+        config:
+          integration: "githubDev"
+        # artifacts:
+        #   - "githubActionLogImageTag"
       # gp-routes-calc-dev:
       #   type: "github"
       #   title: "Routes calc"
@@ -423,7 +430,7 @@ targets:
           integration: "gitHotfix"
         actions:
           test:
-            title: "Push to remove"
+            title: "Push to remote"
             steps:
               - type: "runAction"
                 title: "Run tests"

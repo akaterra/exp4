@@ -12,12 +12,12 @@ import { IProjectTargetStream } from '../stores/dto/project';
 
 export const ProjectTargetStreamDetailsModalTitle = observer(({
   // store,
-  // projectTarget,
+  // projectTargetStore,
   projectTargetStream,
   projectTargetStreamState,
 }: {
   // store: ModalStore;
-  // projectTarget?: ProjectTargetStore;
+  // projectTargetStore?: ProjectTargetStore;
   projectTargetStream?: IProjectTargetStream;
   projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
@@ -32,12 +32,12 @@ export const ProjectTargetStreamDetailsModalTitle = observer(({
 
 export const ProjectTargetStreamDetailsModalContent = observer(({
   // store,
-  projectTarget,
+  projectTargetStore,
   projectTargetStream,
   projectTargetStreamState,
 }: {
   // store: ModalStore;
-  projectTarget?: ProjectTargetStore;
+  projectTargetStore?: ProjectTargetStore;
   projectTargetStream?: IProjectTargetStream;
   projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
@@ -53,8 +53,8 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     <div>
       {
         lastChange
-          ? <span>In <span className='bold'>{ projectTarget?.target?.title ?? projectTarget?.target?.id }</span></span>
-          : <span className='span warning'>Not in <span className='bold'>{ projectTarget?.target?.title ?? projectTarget?.target?.id }</span></span>
+          ? <span>In <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
+          : <span className='span warning'>Not in <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
       }
     </div>
     <StatusLine isFailed={ isFailed } />
@@ -147,33 +147,28 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
         : null
     }
     {
-      projectTarget?.actions?.length || (projectTargetStream?.actions && Object.keys(projectTargetStream?.actions).length)
+      projectTargetStore?.actionsForStream(projectTargetStream.id)?.length
         ? <div className='paragraph paragraph-lrg children-gap'>
           <div>
             {
-              projectTarget?.actions?.map((action, i) => {
+              projectTargetStore?.actionsForStream(projectTargetStream.id)?.map(({ action, streamIds }, i) => {
+                if (
+                  action.ref.targetId && (
+                    action.ref.targetId !== projectTargetStream.ref.targetId ||
+                    action.ref.streamId !== projectTargetStream.id
+                  )
+                ) {
+                  return null;
+                }
+
                 return <div key={ i }>
                   <Button
                     className='button-sml success auto'
+                    disabled={ streamIds ? !streamIds.length : false }
                     x={ null }
                     onClick={ () => {
                       if (projectTargetStreamState?.id) {
-                        projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
-                      }
-                    } }
-                  >{ action.title ?? action.id }</Button>
-                </div>;
-              })
-            }
-            {
-              projectTargetStream?.actions && Object.values(projectTargetStream?.actions)?.map((action, i) => {
-                return <div key={ i }>
-                  <Button
-                    className='button-sml success auto'
-                    x={ null }
-                    onClick={ () => {
-                      if (projectTargetStreamState?.id) {
-                        projectTarget.applyRunAction(projectTargetStreamState.id, action.id)
+                        projectTargetStore.applyRunAction(projectTargetStreamState.id, action.id, action.ref.flowId);
                       }
                     } }
                   >{ action.title ?? action.id }</Button>

@@ -1,5 +1,6 @@
 import { makeObservable, observable, computed, flow } from 'mobx';
-import { IProject, IProjectFlowAction, IProjectTargetStream } from "./dto/project";
+import { computedFn } from 'mobx-utils';
+import { IProject, IProjectFlowAction, IProjectTarget, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
 import { BaseStore } from './base-store';
@@ -16,17 +17,66 @@ export class ProjectTargetStore extends BaseStore {
     selectedProjectTargetStreamIds: Record<string, boolean> = {};
 
   @computed
-  get actions(): IProjectFlowAction[] {
+  get actions(): { action: IProjectFlowAction, streamIds: IProjectTargetStream['id'][] | null }[] {
     if (this.projectStore.project?.flows) {
-      const flows: IProjectFlowAction[] = [];
+      const actions: { action: IProjectFlowAction, streamIds: IProjectTargetStream['id'][] | null }[] = [];
 
       for (const flow of Object.values(this.projectStore.project?.flows)) {
-        if (flow.targets.includes(this.projectTargetState.id)) {
-          flows.push(...Object.values(flow.actions));
+        if (!flow.targets.includes(this.projectTargetState.id) || flow.ref?.streamId) {
+          continue;
+        }
+
+        for (const action of Object.values(flow.actions)) {
+          if (action.streams && Object.keys(this.selectedProjectTargetStreamIds).length) {
+            actions.push({
+              action,
+              streamIds: action.streams.filter((actionStreamId) => this.selectedProjectTargetStreamIds[actionStreamId]),
+            });
+
+            continue;
+          }
+
+          actions.push({
+            action,
+            streamIds: action.streams ?? null,
+          });
         }
       }
 
-      return flows;
+      return actions;
+    }
+
+    return [];
+  }
+
+  // @computed
+  actionsForStream(streamId: IProjectTargetStream['id']): { action: IProjectFlowAction, streamIds: IProjectTargetStream['id'][] | null }[] {
+    if (this.projectStore.project?.flows) {
+      const actions: { action: IProjectFlowAction, streamIds: IProjectTargetStream['id'][] | null }[] = [];
+
+      for (const flow of Object.values(this.projectStore.project?.flows)) {
+        if (!flow.targets.includes(this.projectTargetState.id)) {
+          continue;
+        }
+
+        for (const action of Object.values(flow.actions)) {
+          if (action.streams) {
+            actions.push({
+              action,
+              streamIds: action.streams.filter((actionStreamId) => actionStreamId === streamId),
+            });
+
+            continue;
+          }
+
+          actions.push({
+            action,
+            streamIds: action.streams ?? null,
+          });
+        }
+      }
+
+      return actions;
     }
 
     return [];
@@ -77,12 +127,17 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @flow
+  *fetchState() {
+    yield this.projectStore.fetchState([ this.target?.id ], [ '*' ]);
+  }
+
+  @flow
   *applyTargetStreamDetails(streamId: string | null) {
     yield this.projectStore.applyTargetStreamDetails(this.target?.id, streamId);
   }
 
   @flow
-  *applyRunAction(streamId: string | null, actionId: string | null) {
+  *applyRunAction(streamId: string | null, actionId: string | null, flowId?) {
     let selectedStreamIds: string[];
 
     if (!streamId) {
@@ -95,7 +150,7 @@ export class ProjectTargetStore extends BaseStore {
       selectedStreamIds = [ streamId ];
     }
 
-    yield this.projectStore.applyRunAction(this.target?.id, selectedStreamIds, actionId);
+    yield this.projectStore.applyRunAction(this.target?.id, selectedStreamIds, actionId, flowId);
   }
 
   @flow
@@ -247,8 +302,14 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *fetchState() {
-    const res: IProjectState = yield this.projectsStore.service.listState(this.project.id);
+  *fetchState(targetId?: IProjectTarget['id'][], scopes?: string[]) {
+    const res: IProjectState = yield this.projectsStore.service.listState(
+      this.project.id,
+      {
+        targetId,
+        scopes,
+      },
+    );
 
     this.projectTargetsStores = this.mapToStores(res.targets, (val, key) => {
       return this.projectTargetsStores[key]
@@ -265,7 +326,7 @@ export class ProjectStore extends BaseStore {
     yield detailsPanelStore.show({
       content: ProjectTargetStreamDetailsModalContent,
       props: {
-        projectTarget: this.getTargetStoreByTargetId(targetId),
+        projectTargetStore: targetStore,
         projectTargetStream: target?.streams?.[streamId],
         projectTargetStreamState: targetStore?.projectTargetState?.streams[streamId],
       },
@@ -275,19 +336,14 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyRunAction(targetId: string, streamId: string | string[] | null, actionId: string) {
+  *applyRunAction(targetId: string, streamId: string | string[] | null, actionId: string, flowId?: string) {
     const selectedStreamIds = streamId
       ? Array.isArray(streamId) ? streamId : [ streamId ]
       : Object.values(this.getTargetByTargetId(targetId).streams).map((stream) => stream.id);
-    const projectFlow = Object
+    const projectFlow = flowId ? this.project?.flows[flowId] : Object
       .values(this.project?.flows)
       .find((flow) => flow.targets.includes(targetId));
-    const projectFlowAction = projectFlow?.actions?.[actionId] ?? this.getTargetStreamByTargetIdAndStreamId(
-      targetId, selectedStreamIds[0]
-    )?.actions?.[actionId];
-console.log({actionId, projectFlowAction, x:this.getTargetStreamByTargetIdAndStreamId(
-  targetId, selectedStreamIds[0]
-), targetId, selectedStreamIds})
+    const projectFlowAction = projectFlow?.actions?.[actionId];
     const projectFlowActionParamsStore = new ProjectFlowActionParamsStore(
       this.projectsStore,
       projectFlowAction,

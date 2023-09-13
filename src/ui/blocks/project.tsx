@@ -16,20 +16,28 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
   }
 
   return <div className='children-gap span default'>
-    <div>
-      <SubTitle>
-        {projectTarget.target?.title ?? projectTarget.target?.id}
-        &nbsp;
-        <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
-      </SubTitle>
-      <Label>{projectTarget.target?.description ?? 'No description'}</Label>
+    <div className='flex flex-hor'>
+      <div>
+        <SubTitle>
+          {projectTarget.target?.title ?? projectTarget.target?.id}
+          &nbsp;
+          <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
+        </SubTitle>
+        <Label>{projectTarget.target?.description ?? 'No description'}</Label>
+      </div>
+      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     <div>
       <InfoCollapse isIdle={ true } showTitle='Actions'>
         {
-          projectTarget.actions.map((action, i) => {
+          projectTarget.actions.map(({ action, streamIds }, i) => {
             return <div key={ i }>
-              <Button className='button-sml success auto' x={ null } onClick={() => projectTarget.applyRunAction(null, action.id)}>{action.title ?? action.id}</Button>
+              <Button
+                className='button-sml success auto'
+                disabled={ streamIds ? !streamIds.length : false }
+                x={ null }
+                onClick={() => projectTarget.applyRunAction(null, action.id)}
+              >{action.title ?? action.id}</Button>
             </div>;
           })
         }

@@ -43,7 +43,7 @@ export class PublicRestApiService {
       });
     }
 
-    return fetch(`${this.domain}/${this.rootPath}${path}`, { method, headers }).then((res) => {
+    return fetch(`${this.domain}/${this.rootPath}${path}?${encodeQuery(query)}`, { method, headers }).then((res) => {
       if (res.status >= 200 && res.status <= 299) {
         return res.json();
       }
@@ -84,12 +84,16 @@ export class RestApiService extends PublicRestApiService {
 function encodeQuery(query: Record<string, any>) {
   if (query && typeof query === 'object') {
     return Object.entries(query).map(([ key, val ]) => {
+      if (val == null) {
+        return null;
+      }
+
       if (Array.isArray(val)) {
         return `${key}=${val.map((val) => encodeURIComponent(val)).join(',')}`;
       }
 
       return `${key}=${encodeURIComponent(val)}`;
-    }).join('&');
+    }).filter((val) => !!val).join('&');
   }
 
   return '';

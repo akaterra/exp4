@@ -12,6 +12,7 @@ export class ProjectsService {
 
   async listState(projectId: IProject['id'], filter?: {
     targetId?: IProjectTarget['id'][],
+    scopes?: string[],
   }): Promise<IProjectState> {
     const res: IProjectState = await this.rest.get(`projects/${projectId}/streams`, filter);
 

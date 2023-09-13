@@ -100,12 +100,10 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
   }
 
   if (definition.flows) {
-    const artifactsService = definition.env.artifacts;
     const actionsService = definition.env.actions;
 
     for (const [ ,flow ] of Object.entries(definition.flows)) {
       for (const [ , defConfig ] of Object.entries(flow.actions)) {
-        defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
         defConfig.steps?.forEach((actionType) => actionsService.get(actionType.type));
       }
     }

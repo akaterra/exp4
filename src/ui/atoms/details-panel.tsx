@@ -19,7 +19,7 @@ export const DetailsPanel = ({ children, title = undefined, titleContent = undef
                   }
                   {
                     onClose
-                      ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose ? () => onClose(null) : null }>✖</Button>
+                      ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose ? () => onClose(null) : null }><i className="fa-solid fa-xmark fa-lg"></i></Button>
                       : null
                   }
                 </div>
