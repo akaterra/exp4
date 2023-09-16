@@ -4,6 +4,7 @@ import fetch from 'node-fetch-native';
 import YAML from 'yaml'
 import fs from 'fs';
 import { logError } from './logger';
+import {rest} from './services/rest-api.service';
 
 const EXTENSIONS = {
   json: 'json',
@@ -289,18 +290,12 @@ export function *iterComplex(iterable, predicate?: (val?: any, ind?: number | st
   }
 }
 
-export async function requestJson(url, data?, method?, authorization?) {
-  const response = await fetch(url, {
-    method: method ?? 'post',
-    headers: {
-      'Accept': 'application/json',
-      'Authorization': authorization ? `Bearer ${authorization}` : undefined,
-      'Content-Type': 'application/json',
-    },
-    body: data ? JSON.stringify(data) : undefined,
-  });
-
-  return response.json();
+export async function request(url, data?, method?, authorization?) {
+  return rest.withHeaders({
+    'Accept': 'application/json',
+    'Authorization': authorization ? `Bearer ${authorization}` : undefined,
+    'Content-Type': 'application/json',
+  }).doRequest(url, method, data);
 }
 
 export function resolvePlaceholders(template, params) {

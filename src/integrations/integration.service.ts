@@ -14,5 +14,7 @@ export function IncStatistics() {
 
       return fn.call(this, ...args);
     };
+
+    Object.defineProperty(descriptor.value, 'name', { value: fn.name });
   }
 }

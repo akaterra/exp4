@@ -1,4 +1,4 @@
-import { requestJson } from '../utils';
+import { request } from '../utils';
 
 export class ArgocdService {
   private accessToken: string = null;
@@ -19,11 +19,11 @@ export class ArgocdService {
       await this.login();
     }
 
-    return requestJson(`${this.host}/api/v1/applications/${name}`, undefined, 'get', this.accessToken);
+    return request(`${this.host}/api/v1/applications/${name}`, undefined, 'get', this.accessToken);
   }
 
   async login(username?: string, password?: string) {
-    this.accessToken = (await requestJson(
+    this.accessToken = (await request(
       `${this.host}/api/v1/session`,
       {
         username: username ?? this.username,

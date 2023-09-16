@@ -1,7 +1,7 @@
 import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
-import { Autowired, err, requestJson } from '../utils';
+import { Autowired, err, request } from '../utils';
 import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
@@ -88,7 +88,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
     });
 
     app.get(path + '/callback', err(async (req, res) => {
-      const githubAuth = await requestJson(
+      const githubAuth = await request(
         'https://github.com/login/oauth/access_token',
         {
           client_id: this.config?.credentials?.clientId,
@@ -98,7 +98,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
         },
         'post',
       );
-      const githubUser = await requestJson(
+      const githubUser = await request(
         'https://api.github.com/user',
         undefined,
         'get',
