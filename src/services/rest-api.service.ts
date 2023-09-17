@@ -86,7 +86,7 @@ export class RestApiService {
     }
     
     return request.then((res: Response) => {
-      let tempRes: Promise<any> = res;
+      let tempRes: any = res;
 
       switch (format) {
         case 'json':

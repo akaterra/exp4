@@ -13,7 +13,9 @@ export class JenkinsService {
       'get',
     );
 
-    return jobRuns.find(())
+    return [];
+
+    // return jobRuns.find(())
   }
 
   async getLastJobRunLog(name: string, stageName: string, stageFlowName: string) {

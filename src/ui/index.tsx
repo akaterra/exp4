@@ -19,6 +19,7 @@ import {
 } from "react-router-dom";
 import { IProject } from './stores/dto/project';
 import { Statistics } from './blocks/statistics';
+import { Top } from './blocks/top';
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
   return <Project project={ projects.selectedProjectStore } />;
@@ -27,18 +28,14 @@ export const RouteProject = observer(({ projects }: { projects: ProjectsStore })
 export const Layout = observer(({ rootStore }: { rootStore: RootStore }) => {
   return <React.Fragment>
     <div className='c-3 -s-'>
-      <div className='paragraph paragraph-lrg'>
-        <Navigation projects={ rootStore.projectsStore } root={ rootStore } />
-      </div>
+      <Navigation projects={ rootStore.projectsStore } root={ rootStore } />
     </div>
     <div className='c15 -s-'>
-      <div className='paragraph paragraph-lrg'>
-        {
-          rootStore.isAuthorized
-            ? <Outlet />
-            : null
-        }
-      </div>
+      {
+        rootStore.isAuthorized
+          ? <Outlet />
+          : null
+      }
     </div>
   </React.Fragment>;
 });
@@ -46,12 +43,25 @@ export const Layout = observer(({ rootStore }: { rootStore: RootStore }) => {
 let router;
 
 export const App = () => {
-  return <Row.M>
+  return <React.Fragment>
     <GlobalAlerts />
     <GlobalDetailsPanel />
     <GlobalModal />
-    <RouterProvider router={ router } />
-  </Row.M>;
+    <div className='children-gap children-gap-full'>
+      <div style={{backgroundColor:'#444'}}>
+        <div className="container med ltr square">
+          <div className='row flex flex-middle'>
+            <Top />
+          </div>
+        </div>
+      </div>
+      <div className="container med ltr square">
+        <div className='row'>
+          <RouterProvider router={ router } />
+        </div>
+      </div>
+    </div>
+  </React.Fragment>;
 }
 
 (async () => {

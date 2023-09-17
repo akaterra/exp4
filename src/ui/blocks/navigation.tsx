@@ -4,6 +4,7 @@ import { Link, NavLink } from '../atoms/link';
 import { ProjectsStore } from '../stores/projects';
 import { observer } from 'mobx-react-lite';
 import { RootStore, rootStore } from '../stores/root';
+import { Logo } from '../atoms/logo';
 
 export const Navigation = observer(({ projects, root }: { projects: ProjectsStore, root: RootStore }) => {
   // bootstrap, app loading
@@ -13,6 +14,7 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
 
   if (root.isAuthorized === false) {
     return <div className='block no-scroll children-gap'>
+      {/* <Logo /> */}
       <div>
         <SubTitle><Link activeClassName="link active" href={ root.authMethods?.github?.actions?.redirect } className='link'>
                     Login
@@ -22,6 +24,7 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
   }
 
   return <div className='block no-scroll children-gap'>
+    {/* <Logo /> */}
     <div>
       <SubTitle><NavLink activeClassName="link active" href='/statistics' className='link'>
                 Statistics

@@ -1,5 +1,4 @@
 import { makeObservable, observable, computed, flow } from 'mobx';
-import { computedFn } from 'mobx-utils';
 import { IProject, IProjectFlowAction, IProjectTarget, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
