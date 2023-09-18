@@ -44,9 +44,11 @@ let router;
 
 export const App = () => {
   return <React.Fragment>
-    <GlobalAlerts />
-    <GlobalDetailsPanel />
-    <GlobalModal />
+    <div className="container med ltr square">
+      <GlobalAlerts />
+      <GlobalDetailsPanel />
+      <GlobalModal />
+    </div>
     <div className='children-gap children-gap-full'>
       <div style={{backgroundColor:'#444'}}>
         <div className="container med ltr square">

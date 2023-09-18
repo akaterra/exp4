@@ -45,6 +45,11 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
   const lastChange = projectTargetStreamState?.history?.change?.[0];
 
   const isFailed = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED;
+  const status = isFailed
+    ? Status.FAILED
+    : lastAction?.status === Status.PROCESSING || lastChange?.status === Status.PROCESSING
+      ? Status.PROCESSING
+      : Status.SUCCESS;
 
   return <React.Fragment>
     <div>
@@ -57,7 +62,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           : <span className='span warning'>Not in <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
       }
     </div>
-    <StatusLine isFailed={ isFailed } />
+    <StatusLine isFailed={ isFailed } status={ status } />
     {
       lastAction
         ? <div className='paragraph paragraph-lrg children-gap'>

@@ -17,7 +17,7 @@ const JOB_CONSLUSION_TO_STATUS_MAP = {
   success: Status.COMPLETED,
 }
 const JOB_STATUS_TO_STATUS_MAP = {
-  is_progress: Status.PROCESSING,
+  in_progress: Status.PROCESSING,
 }
 
 export type IGithubTargetStream = IProjectTargetStream<{
