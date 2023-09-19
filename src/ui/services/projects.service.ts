@@ -6,8 +6,26 @@ import { RestApiService } from './rest-api.service';
 export class ProjectsService {
   protected rest = new RestApiService();
 
-  list(): Promise<Record<string, IProject>> {
-    return this.rest.get('projects');
+  async list(): Promise<Record<string, IProject>> {
+    const res: Record<string, IProject> = await this.rest.get('projects');
+
+    for (const project of Object.values(res)) {
+      for (const target of Object.values(project.targets)) {
+        for (const stream of Object.values(target.streams)) {
+          const search = stream._search = new Set<string>();
+
+          for (const word of split(stream.title)) {
+            search.add(word.toLowerCase());
+          }
+
+          for (const tag of stream.tags ?? []) {
+            search.add(`:${tag.toLowerCase()}`);
+          }
+        }
+      }
+    }
+
+    return res;
   }
 
   async listState(projectId: IProject['id'], filter?: {
@@ -17,19 +35,33 @@ export class ProjectsService {
     const res: IProjectState = await this.rest.get(`projects/${projectId}/streams`, filter);
 
     for (const target of Object.values(res.targets)) {
-      for (const streams of Object.values(target.streams)) {
-        const lastAction = streams?.history?.action?.[0];
-        const lastChange = streams?.history?.change?.[0];
+      for (const stream of Object.values(target.streams)) {
+        const lastAction = stream?.history?.action?.[0];
+        const lastChange = stream?.history?.change?.[0];
 
-        streams._label = lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED
-          ? 'failure'
-          : streams?.history?.artifact?.some((artefact) => {
+        if (lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED) {
+          stream._label = 'failure';
+        } else if (lastAction?.status === Status.PROCESSING || lastChange?.status === Status.PROCESSING) {
+          stream._label = 'warning';
+        } else if (
+          stream?.history?.artifact?.some((artefact) => {
             return typeof artefact.description === 'object'
               ? artefact.description?.level !== 'success'
               : false
           })
-            ? 'warning'
-            : 'default';
+        ) {
+          stream._label = 'warning';
+        } else {
+          stream._label = 'default';
+        }
+
+        const search = stream._search = new Set<string>();
+
+        for (const artefact of stream.history.artifact ?? []) {
+          for (const word of split(typeof artefact.description === 'string' ? artefact.description: artefact.description.value)) {
+            search.add(word.toLowerCase());
+          }
+        }
       }
     }
 
@@ -52,4 +84,12 @@ export class ProjectsService {
       params,
     });
   }
+}
+
+function split(word) {
+  if (!word) {
+    return [];
+  }
+
+  return word.split(/\s+/).filter((word) => !!word);
 }

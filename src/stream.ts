@@ -6,6 +6,7 @@ export interface IStreamHistoryStep {
 
   description: string;
   link: string;
+  runningTimeSeconds?: number;
   status: Status;
 }
 

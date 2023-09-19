@@ -49,15 +49,15 @@ export const App = () => {
       <GlobalDetailsPanel />
       <GlobalModal />
     </div>
-    <div className='children-gap children-gap-full'>
-      <div style={{backgroundColor:'#444'}}>
-        <div className="container med ltr square">
-          <div className='row flex flex-middle'>
-            <Top />
-          </div>
+    {/* <div className=''>
+      <div className="container med ltr square pad-hor triple">
+        <div className='row flex flex-middle'>
+          <Top />
         </div>
       </div>
-      <div className="container med ltr square">
+    </div> */}
+    <div className='paragraph paragraph-lrg'>
+      <div className="container med ltr square pad-hor triple">
         <div className='row'>
           <RouterProvider router={ router } />
         </div>
@@ -80,13 +80,7 @@ export const App = () => {
           await rootStore.projectsStore.fetchProject(params.id as IProject['id']);
 
           if (rootStore.projectsStore.selectedProjectStore) {
-            switch (params.tab) {
-            case 'statistics':
-              rootStore.projectsStore.selectedProjectStore.selectedTab = 1;
-              break;
-            default:
-              rootStore.projectsStore.selectedProjectStore.selectedTab = 0;
-            }
+            rootStore.projectsStore.selectedProjectStore.selectedTab = params.tab;
           }
   
           return null;

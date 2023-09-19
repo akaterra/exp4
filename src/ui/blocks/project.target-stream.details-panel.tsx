@@ -84,7 +84,15 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                         href={ step.link }
                         target='__blank'
                       >
-                        <span className={ step.status === Status.FAILED ? 'span failure bold' : 'span success' }>{ step.description }</span>
+                        <span className={
+                          step.status === Status.FAILED
+                            ? 'span failure bold'
+                            : step.status === Status.COMPLETED
+                              ? 'span success'
+                              : step.status === Status.PROCESSING
+                                ? 'span warning bold'
+                                : 'span default opacity-med'
+                        }>{ step.description } { step.runningTimeSeconds ? `[ ${step.runningTimeSeconds} sec. ]` : '' }</span>
                       </a>
                     </li>) }
                 </ul>

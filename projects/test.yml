@@ -466,6 +466,9 @@ targets:
         title: "Test GIT"
         config:
           integration: "gitMaster"
+        tags:
+          - ggg
+          - aaa
       # testa:
       #   type: "bitbucket"
       #   title: "Test A bb"

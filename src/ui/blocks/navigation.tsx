@@ -34,7 +34,7 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
         {
           projects.projectsList.map((e, i) => {
             return <div className='list-item bold' key={ i }><NavLink activeClassName="link active" href={ `/projects/${e.id}` } className='link'>
-              { e.id }
+              { e.title ?? e.id }
             </NavLink></div>
           })
         }

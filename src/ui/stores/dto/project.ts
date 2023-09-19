@@ -74,6 +74,8 @@ export interface IProjectTargetStream {
   actions: Record<string, IProjectFlowAction>;
   tags: string[];
   targets: string[];
+
+  _search: Set<string>;
 }
 
 export interface IProjectTarget {

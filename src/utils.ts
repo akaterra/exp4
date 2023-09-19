@@ -247,12 +247,16 @@ export function err(fn) {
 }
 
 export function hasScope(scope: string, scopes?: Record<string, boolean>): boolean {
-  if (!scopes) {
+  if (!scopes || scopes['*']) {
     return true;
   }
 
-  if (scopes['*']) {
-    return true;
+  return !!scopes[scope];
+}
+
+export function hasStrictScope(scope: string, scopes?: Record<string, boolean>): boolean {
+  if (!scopes) {
+    return false;
   }
 
   return !!scopes[scope];

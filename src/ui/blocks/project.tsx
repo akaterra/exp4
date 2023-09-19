@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { SubTitle, Title } from '../atoms/title';
+import { SubSubTitle, SubTitle, Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
-import { Checkbox } from '../atoms/input';
+import { Checkbox, Input } from '../atoms/input';
 import { Button } from '../atoms/button';
 import { InfoCollapse } from '../atoms/info-collapse';
 import { Tabs } from '../atoms/tabs';
-import { TitledLine } from '../atoms/status-line';
+import { TitledLine, ValueMaybeSuccess } from '../atoms/status-line';
 import * as _ from 'lodash';
 
 export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
@@ -37,7 +37,7 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
                 disabled={ streamIds ? !streamIds.length : false }
                 x={ null }
                 onClick={() => projectTarget.applyRunAction(null, action.id)}
-              >{action.title ?? action.id}</Button>
+              >{ action.title ?? action.id }</Button>
             </div>;
           })
         }
@@ -104,12 +104,84 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
     return null;
   }
 
-  return <div className='row paragraph'>
+  return <div className='row paragraph1'>
+    <div className='c18 -s-'>
+      <div className='row flex flex-right'>
+        <Input currentValue={ project.filter } label='Search' x={ 6 } placeholder='Space separated :tag / word' onChange={ (value) => project.filter = value } />
+      </div>
+    </div>
     {
       Object.values(project.projectTargetsStores).map((projectTargetStore) => {
         return <div className='ccc -s- w25'>
-          <div className='panel primary shadow shadow-low unbound'>
+          <div className='panel default shadow shadow-low unbound'>
             <ProjectTarget projectTarget={projectTargetStore} />
+          </div>
+        </div>;
+      })
+    }
+  </div>;
+});
+
+export const ProjectTargetArtefacts = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
+  if (!projectTarget?.target?.id) {
+    return null;
+  }
+
+  return <div className='children-gap span default'>
+    <div className='flex flex-hor'>
+      <div>
+        <SubTitle>
+          {projectTarget.target?.title ?? projectTarget.target?.id}
+          &nbsp;
+          <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
+        </SubTitle>
+        <Label>{projectTarget.target?.description ?? 'No description'}</Label>
+      </div>
+      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
+    </div>
+    <div className='paragraph paragraph-lrg'>
+      <div className='table highlighted underlined zebra fine'>
+        <div className='row header'>
+          <div className='c-4'>Stream</div>
+          <div className='c-7'>Artifact</div>
+          <div className='c-7'>Artifact value</div>
+        </div>
+        {
+          projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
+            if (!streamState.history.artifact?.length) {
+              return null;
+            }
+
+            return streamState.history.artifact?.map((artefact, j) => {
+              return <div className='row'>
+                <div className='c-4'>{ j === 0 ? stream.title ?? stream.id : '' }</div>
+                <div className='c-7'>{ artefact.id }</div>
+                <div className='c-7'><ValueMaybeSuccess value={ artefact.description } /></div>
+              </div>;
+            });
+          })
+        }
+      </div>
+    </div>
+  </div>;
+});
+
+export const ProjectTargetsArtefacts = observer(({ project }: { project?: ProjectStore }) => {
+  if (!project?.project?.id) {
+    return null;
+  }
+
+  return <div className='row paragraph1'>
+    <div className='c18 -s-'>
+      <div className='row flex flex-right'>
+        <Input currentValue={ project.filter } label='Search' x={ 6 } placeholder='Space separated :tag / word' onChange={ (value) => project.filter = value } />
+      </div>
+    </div>
+    {
+      Object.values(project.projectTargetsStores).map((projectTargetStore) => {
+        return <div className='ccc -s- w00'>
+          <div className='panel default shadow shadow-low unbound'>
+            <ProjectTargetArtefacts projectTarget={projectTargetStore} />
           </div>
         </div>;
       })
@@ -129,12 +201,14 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
       <Tabs
         selectedIndex={ project.selectedTab }
         tabs={ [
-          { type: 'link', href: `/projects/${project.project.id}`, title: 'Targets' },
-          { type: 'link', href: `/projects/${project.project.id}/statistics`, title: 'Statistics' },
+          { id: 'targets', type: 'link', href: `/projects/${project.project.id}/targets`, title: 'Targets' },
+          { id: 'targetsArtefacts', type: 'link', href: `/projects/${project.project.id}/targetsArtefacts`, title: 'Targets artefacts' },
+          { id: 'statistics', type: 'link', href: `/projects/${project.project.id}/statistics`, title: 'Statistics' },
         ] }
         tabsDecoration='default'
       >
         <ProjectTargets project={ project } />
+        <ProjectTargetsArtefacts project={ project } />
         <ProjectStatistics project={ project } />
       </Tabs>
     </div>

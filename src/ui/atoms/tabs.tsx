@@ -5,12 +5,16 @@ import { Row } from './row';
 import { NavLink } from './link';
 
 export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false, onlyChild = false, selectedIndex = 0, tabs, tabsDecoration = undefined, onSelect = undefined }: any) => {
-  const [ currentSelectedIndex, setCurrentSelectedIndex ] = useState(selectedIndex ?? 0);
+  const [ currentSelectedIndex, setCurrentSelectedIndex ] = useState(
+    typeof selectedIndex === 'number'
+    ? selectedIndex
+    : tabs.findIndex((tab) => tab.id === selectedIndex) ?? 0
+  );
   const child = Array.isArray(children) ? children[currentSelectedIndex] : children;
 
   useEffect(() => {
-    setCurrentSelectedIndex(selectedIndex);
-  }, [ selectedIndex ?? 0 ]);
+    setCurrentSelectedIndex(currentSelectedIndex);
+  }, [ currentSelectedIndex ?? 0 ]);
 
   return <Fragment>
     {

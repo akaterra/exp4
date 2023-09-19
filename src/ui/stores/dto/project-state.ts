@@ -7,6 +7,7 @@ export interface IStreamHistoryStep {
 
   description: string;
   link: string;
+  runningTimeSeconds: number;
   status: Status;
 }
 
@@ -59,6 +60,7 @@ export interface IProjectTargetStreamState {
   version: string;
 
   _label: 'default' | 'failure' | 'success' | 'warning';
+  _search: Set<string>;
 }
 
 export type IProjectTargetState = {

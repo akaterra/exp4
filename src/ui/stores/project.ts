@@ -95,10 +95,99 @@ export class ProjectTargetStore extends BaseStore {
       }[] = [];
 
       for (const stream of Object.values(this.target.streams)) {
+        const streamState = this.projectTargetState?.streams?.[stream.id];
+
+        if (this.projectStore.filter) {
+          let pass;
+
+          for (const filterSelector of this.projectStore.filter.toLowerCase().split(/\s+/)) {
+            if (!filterSelector) {
+              continue;
+            }
+
+            const isExcluded = filterSelector.at(0) === '-';
+            const filterSelectorValue = isExcluded ? filterSelector.slice(1) : filterSelector;
+
+            if (isExcluded) {
+              if (!stream._search.has(filterSelectorValue.slice(1))) {
+                pass = true;
+                break;
+              }
+            } else {
+              if (stream._search.has(filterSelectorValue)) {
+                pass = true;
+                break;
+              }
+            }
+          }
+
+          if (!pass) {
+            continue;
+          }
+        }
+
         streamsWithStates.push({
           stream,
-          streamState: this.projectTargetState?.streams?.[stream.id],
+          streamState,
           isSelected: !!this.selectedProjectTargetStreamIds[stream.id],
+        });
+      }
+
+      return streamsWithStates;
+    }
+
+    return [];
+  }
+
+  @computed
+  get streamsWithStatesAndArtefacts(): {
+    stream: IProjectTargetStream,
+    streamState: IProjectTargetStreamState,
+    artefacts: IProjectTargetStreamState['history']['artifact'],
+  }[] {
+    if (this.target) {
+      const streamsWithStates: {
+        stream: IProjectTargetStream,
+        streamState: IProjectTargetStreamState,
+        artefacts: IProjectTargetStreamState['history']['artifact'],
+      }[] = [];
+
+      for (const stream of Object.values(this.target.streams)) {
+        const streamState = this.projectTargetState?.streams?.[stream.id];
+
+        if (this.projectStore.filter) {
+          let pass;
+
+          for (const filterSelector of this.projectStore.filter.toLowerCase().split(/\s+/)) {
+            if (!filterSelector) {
+              continue;
+            }
+
+            const isExcluded = filterSelector.at(0) === '-';
+            const filterSelectorValue = isExcluded ? filterSelector.slice(1) : filterSelector;
+
+            if (isExcluded) {
+              if (!stream._search.has(filterSelectorValue.slice(1)) && !streamState._search.has(filterSelectorValue.slice(1))) {
+                pass = true;
+                break;
+              }
+            } else {
+              if (stream._search.has(filterSelectorValue) || streamState._search.has(filterSelectorValue)) {
+                pass = true;
+                break;
+              }
+            }
+          }
+
+          if (!pass) {
+            continue;
+          }
+        }
+
+        streamsWithStates.push({
+          stream,
+          streamState,
+          artefacts: filterArtifacts(this.projectTargetState?.streams?.[stream.id].history?.artifact) ?? [],
         });
       }
 
@@ -269,6 +358,8 @@ export class ProjectFlowActionParamsStore extends BaseStore {
 
 export class ProjectStore extends BaseStore {
   @observable
+    filter: string = '';
+  @observable
     project: IProject;
   @observable
     projectStatistics: Record<string, any> = {};
@@ -279,7 +370,7 @@ export class ProjectStore extends BaseStore {
   @observable
     selectedStreamWithState: { stream: IProjectTargetStream, streamState: IProjectTargetStreamState, targetStore: ProjectTargetStore } | null;
   @observable
-    selectedTab: number = 0;
+    selectedTab?: number | string = 0;
 
   constructor(public projectsStore: ProjectsStore, project: IProject) {
     super();
@@ -380,4 +471,18 @@ export class ProjectStore extends BaseStore {
       break;
     }
   }
+}
+
+function filterArtifacts(artefacts: IProjectTargetStreamState['history']['artifact'], filter?: string) {
+  return filter ? artefacts.filter((artifact) => isArtefactIncludes(artifact, filter)) : artefacts;
+}
+
+function isArtefactIncludes(artefact: IProjectTargetStreamState['history']['artifact'][0], filter?: string) {
+  return filter
+    ? (
+    typeof artefact?.description === 'string'
+      ? artefact?.description
+      : artefact?.description?.value
+    )?.includes(filter)
+    : true;
 }

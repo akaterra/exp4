@@ -27,6 +27,18 @@ export const StatusLine = ({ isFailed = false, status = undefined, title = undef
   </div>;
 };
 
+export const Value = ({ children: value }: any) => {
+  return value && typeof value === 'object'
+    ? <span className={ `span ${value.level ?? 'default'} bold` }>{ value.value }</span>
+    : <span className={ `span default bold` }>{ value }</span>;
+};
+
+export const ValueMaybeSuccess = ({ value }: any) => {
+  return value && typeof value === 'object'
+    ? <span className={ `span ${value.level ?? 'success'} bold` }>{ value.value }</span>
+    : <span className='span success bold'>{ value }</span>;
+};
+
 function getChildren(children) {
   if (Array.isArray(children)) {
     return children.map(

@@ -5,14 +5,16 @@ import { IStream } from '../stream';
 import { Service } from 'typedi';
 import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
-import { hasScope } from '../utils';
+import { hasScope, hasStrictScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
 import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
+import moment from 'moment-timezone';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
+  in_progress: Status.PROCESSING,
   skipped: Status.COMPLETED,
   success: Status.COMPLETED,
 }
@@ -116,10 +118,10 @@ export class GithubStreamService extends EntityService implements IStreamService
       const workflowRuns = hasScope('action', scopes) && branch
         ? await integration.workflowRunsGet(stream.config.branch, stream.id)
         : null;
-      const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id)
+      const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && (hasStrictScope('*', scopes) || hasStrictScope('action', scopes) || workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id))
         ? await integration.workflowRunJobsGet(workflowRuns[0].id, stream.id, stream.config.org)
         : null;
-  
+
       const metadata = {
         org: stream.config?.org ?? integration.config?.org,
         branch: branchName,
@@ -150,7 +152,10 @@ export class GithubStreamService extends EntityService implements IStreamService
 
                   description: jobStep.name,
                   link: workflowRunsJobs[0].html_url,
-                  status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion] ?? Status.UNKNOWN,
+                  runningTimeSeconds: jobStep.started_at && jobStep.completed_at
+                    ? moment(jobStep.completed_at).diff(jobStep.started_at, 'seconds')
+                    : null,
+                  status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion ?? jobStep.status] ?? Status.UNKNOWN,
                 };
 
                 return acc;
@@ -246,8 +251,8 @@ export class GithubStreamService extends EntityService implements IStreamService
       );
     } else {
       await targetIntegration.merge(
-        sourceBranchName,
         targetBranchName,
+        sourceBranchName,
         `Release ${source.version}`,
         targetStream.id,
       );

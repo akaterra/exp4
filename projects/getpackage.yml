@@ -513,18 +513,27 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+        tags:
+          - fe
+          - op
       gp-fe-sender:
         use: "dev"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+        tags:
+          - fe
+          - sender
       gp-fe-tracker:
         use: "dev"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+        tags:
+          - fe
+          - tracker
       gp-finance-service:
         use: "dev"
         config:
@@ -638,14 +647,23 @@ targets:
         use: "dev"
         config:
           integration: "githubHotfix"
+        tags:
+          - fe
+          - op
       gp-fe-sender:
         use: "dev"
         config:
           integration: "githubHotfix"
+        tags:
+          - fe
+          - sender
       gp-fe-tracker:
         use: "dev"
         config:
           integration: "githubHotfix"
+        tags:
+          - fe
+          - tracker
       gp-finance-service:
         use: "dev"
         config:
@@ -735,14 +753,23 @@ targets:
         use: "dev"
         config:
           integration: "githubMaster"
+        tags:
+          - fe
+          - op
       gp-fe-sender:
         use: "dev"
         config:
           integration: "githubMaster"
+        tags:
+          - fe
+          - sender
       gp-fe-tracker:
         use: "dev"
         config:
           integration: "githubMaster"
+        tags:
+          - fe
+          - tracker
       gp-finance-service:
         use: "dev"
         config:
