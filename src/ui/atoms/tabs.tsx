@@ -5,11 +5,10 @@ import { Row } from './row';
 import { NavLink } from './link';
 
 export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false, onlyChild = false, selectedIndex = 0, tabs, tabsDecoration = undefined, onSelect = undefined }: any) => {
-  const [ currentSelectedIndex, setCurrentSelectedIndex ] = useState(
-    typeof selectedIndex === 'number'
+  const tabIndex = typeof selectedIndex === 'number'
     ? selectedIndex
-    : tabs.findIndex((tab) => tab.id === selectedIndex) ?? 0
-  );
+    : tabs.findIndex((tab) => tab.id === selectedIndex);
+  const [ currentSelectedIndex, setCurrentSelectedIndex ] = useState(tabIndex >= 0 ? tabIndex : 0);
   const child = Array.isArray(children) ? children[currentSelectedIndex] : children;
 
   useEffect(() => {

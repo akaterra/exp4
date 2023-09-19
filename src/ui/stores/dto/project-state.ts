@@ -41,6 +41,8 @@ export interface IProjectTargetStreamState {
       steps: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
       status: Status;
       time: string;
+
+      _search: Set<string>;
     }[];
     change: {
       id: string;

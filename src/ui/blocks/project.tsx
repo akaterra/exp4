@@ -107,7 +107,7 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
   return <div className='row paragraph1'>
     <div className='c18 -s-'>
       <div className='row flex flex-right'>
-        <Input currentValue={ project.filter } label='Search' x={ 6 } placeholder='Space separated :tag / word' onChange={ (value) => project.filter = value } />
+        <Input currentValue={ project.filterTargets } label='Search' x={ 6 } placeholder='Space separated :tag / word' onChange={ (value) => project.filterTargets = value } />
       </div>
     </div>
     {
@@ -122,7 +122,7 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
   </div>;
 });
 
-export const ProjectTargetArtefacts = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
+export const ProjectTargetArtifacts = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
   if (!projectTarget?.target?.id) {
     return null;
   }
@@ -140,33 +140,49 @@ export const ProjectTargetArtefacts = observer(({ projectTarget }: { projectTarg
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     <div className='paragraph paragraph-lrg'>
-      <div className='table highlighted underlined zebra fine'>
-        <div className='row header'>
-          <div className='c-4'>Stream</div>
-          <div className='c-7'>Artifact</div>
-          <div className='c-7'>Artifact value</div>
-        </div>
-        {
-          projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
-            if (!streamState.history.artifact?.length) {
-              return null;
-            }
+      {
+        projectTarget.streamsWithStatesAndArtifacts?.length
+          ? <div className='table highlighted underlined zebra fine'>
+            <div className='row header'>
+              <div className='c-4'>Stream</div>
+              <div className='c-7'>Artifact</div>
+              <div className='c-7'>Artifact value</div>
+            </div>
+            {
+              projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }, i) => {
+                if (!artifacts?.length) {
+                  return null;
+                }
 
-            return streamState.history.artifact?.map((artefact, j) => {
-              return <div className='row'>
-                <div className='c-4'>{ j === 0 ? stream.title ?? stream.id : '' }</div>
-                <div className='c-7'>{ artefact.id }</div>
-                <div className='c-7'><ValueMaybeSuccess value={ artefact.description } /></div>
-              </div>;
-            });
-          })
-        }
-      </div>
+                const lastHistory = streamState.history?.change[0];
+    
+                return artifacts?.map((artifact, j) => {
+                  return <div className='row'>
+                    <div className={ lastHistory ? `c-4` : `c-4 opacity-med` }>
+                      {
+                        j === 0
+                          ? <span className={ `span ${streamState._label}` }>
+                              { stream.title ?? stream.id }
+                              &nbsp;
+                            <span className='font-sml sup'>{streamState?.version}</span>
+                          </span>
+                          : null
+                      }
+                    </div>
+                    <div className={ lastHistory ? 'c-7' : 'c-7 opacity-med' }>{ artifact.id }</div>
+                    <div className={ lastHistory ? 'c-7' : 'c-7 opacity-med' }><ValueMaybeSuccess value={ artifact.description } /></div>
+                  </div>;
+                });
+              })
+            }
+          </div>
+          : <Label>No artifacts available</Label>
+      }
     </div>
   </div>;
 });
 
-export const ProjectTargetsArtefacts = observer(({ project }: { project?: ProjectStore }) => {
+export const ProjectTargetsartifacts = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
     return null;
   }
@@ -174,14 +190,14 @@ export const ProjectTargetsArtefacts = observer(({ project }: { project?: Projec
   return <div className='row paragraph1'>
     <div className='c18 -s-'>
       <div className='row flex flex-right'>
-        <Input currentValue={ project.filter } label='Search' x={ 6 } placeholder='Space separated :tag / word' onChange={ (value) => project.filter = value } />
+        <Input currentValue={ project.filterTargetsArtifacts } label='Search' x={ 6 } placeholder='Space separated :tag / word' onChange={ (value) => project.filterTargetsArtifacts = value } />
       </div>
     </div>
     {
       Object.values(project.projectTargetsStores).map((projectTargetStore) => {
         return <div className='ccc -s- w00'>
           <div className='panel default shadow shadow-low unbound'>
-            <ProjectTargetArtefacts projectTarget={projectTargetStore} />
+            <ProjectTargetArtifacts projectTarget={ projectTargetStore } />
           </div>
         </div>;
       })
@@ -202,13 +218,13 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
         selectedIndex={ project.selectedTab }
         tabs={ [
           { id: 'targets', type: 'link', href: `/projects/${project.project.id}/targets`, title: 'Targets' },
-          { id: 'targetsArtefacts', type: 'link', href: `/projects/${project.project.id}/targetsArtefacts`, title: 'Targets artefacts' },
+          { id: 'targetsArtifacts', type: 'link', href: `/projects/${project.project.id}/targetsArtifacts`, title: 'Targets artifacts' },
           { id: 'statistics', type: 'link', href: `/projects/${project.project.id}/statistics`, title: 'Statistics' },
         ] }
         tabsDecoration='default'
       >
         <ProjectTargets project={ project } />
-        <ProjectTargetsArtefacts project={ project } />
+        <ProjectTargetsartifacts project={ project } />
         <ProjectStatistics project={ project } />
       </Tabs>
     </div>

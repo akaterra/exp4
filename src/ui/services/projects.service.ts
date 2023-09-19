@@ -1,6 +1,7 @@
 import { Status } from '../enums/status';
 import { IProject, IProjectFlowAction, IProjectFlow, IProjectTarget } from '../stores/dto/project';
 import { IProjectState } from '../stores/dto/project-state';
+import {splitFilterTokens} from '../stores/utils';
 import { RestApiService } from './rest-api.service';
 
 export class ProjectsService {
@@ -14,12 +15,12 @@ export class ProjectsService {
         for (const stream of Object.values(target.streams)) {
           const search = stream._search = new Set<string>();
 
-          for (const word of split(stream.title)) {
-            search.add(word.toLowerCase());
+          for (const token of splitFilterTokens(stream.title)) {
+            search.add(token);
           }
 
           for (const tag of stream.tags ?? []) {
-            search.add(`:${tag.toLowerCase()}`);
+            search.add(`:${tag}`);
           }
         }
       }
@@ -44,9 +45,9 @@ export class ProjectsService {
         } else if (lastAction?.status === Status.PROCESSING || lastChange?.status === Status.PROCESSING) {
           stream._label = 'warning';
         } else if (
-          stream?.history?.artifact?.some((artefact) => {
-            return typeof artefact.description === 'object'
-              ? artefact.description?.level !== 'success'
+          stream?.history?.artifact?.some((artifact) => {
+            return typeof artifact.description === 'object'
+              ? artifact.description?.level !== 'success'
               : false
           })
         ) {
@@ -57,9 +58,12 @@ export class ProjectsService {
 
         const search = stream._search = new Set<string>();
 
-        for (const artefact of stream.history.artifact ?? []) {
-          for (const word of split(typeof artefact.description === 'string' ? artefact.description: artefact.description.value)) {
-            search.add(word.toLowerCase());
+        for (const artifact of stream.history.artifact ?? []) {
+          artifact._search = new Set<string>();
+
+          for (const token of splitFilterTokens(artifact.id)) {
+            artifact._search.add(token);
+            search.add(token);
           }
         }
       }
@@ -84,12 +88,4 @@ export class ProjectsService {
       params,
     });
   }
-}
-
-function split(word) {
-  if (!word) {
-    return [];
-  }
-
-  return word.split(/\s+/).filter((word) => !!word);
 }

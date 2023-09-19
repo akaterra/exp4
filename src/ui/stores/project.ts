@@ -7,7 +7,7 @@ import { modalStore } from '../blocks/modal';
 import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
-import { processing } from './utils';
+import { processing, splitFilterTokens } from './utils';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -97,25 +97,21 @@ export class ProjectTargetStore extends BaseStore {
       for (const stream of Object.values(this.target.streams)) {
         const streamState = this.projectTargetState?.streams?.[stream.id];
 
-        if (this.projectStore.filter) {
-          let pass;
+        if (this.projectStore.filterTargets) {
+          let pass = true;
 
-          for (const filterSelector of this.projectStore.filter.toLowerCase().split(/\s+/)) {
-            if (!filterSelector) {
-              continue;
-            }
-
-            const isExcluded = filterSelector.at(0) === '-';
-            const filterSelectorValue = isExcluded ? filterSelector.slice(1) : filterSelector;
+          for (const token of splitFilterTokens(this.projectStore.filterTargets)) {
+            const isExcluded = token.at(0) === '-';
+            const tokenValue = isExcluded ? token.slice(1) : token;
 
             if (isExcluded) {
-              if (!stream._search.has(filterSelectorValue.slice(1))) {
-                pass = true;
+              if (stream._search.has(tokenValue)) {
+                pass = false;
                 break;
               }
             } else {
-              if (stream._search.has(filterSelectorValue)) {
-                pass = true;
+              if (!stream._search.has(tokenValue)) {
+                pass = false;
                 break;
               }
             }
@@ -140,40 +136,36 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @computed
-  get streamsWithStatesAndArtefacts(): {
+  get streamsWithStatesAndArtifacts(): {
     stream: IProjectTargetStream,
     streamState: IProjectTargetStreamState,
-    artefacts: IProjectTargetStreamState['history']['artifact'],
+    artifacts: IProjectTargetStreamState['history']['artifact'],
   }[] {
     if (this.target) {
       const streamsWithStates: {
         stream: IProjectTargetStream,
         streamState: IProjectTargetStreamState,
-        artefacts: IProjectTargetStreamState['history']['artifact'],
+        artifacts: IProjectTargetStreamState['history']['artifact'],
       }[] = [];
 
       for (const stream of Object.values(this.target.streams)) {
         const streamState = this.projectTargetState?.streams?.[stream.id];
 
-        if (this.projectStore.filter) {
-          let pass;
+        if (this.projectStore.filterTargetsArtifacts) {
+          let pass = true;
 
-          for (const filterSelector of this.projectStore.filter.toLowerCase().split(/\s+/)) {
-            if (!filterSelector) {
-              continue;
-            }
-
-            const isExcluded = filterSelector.at(0) === '-';
-            const filterSelectorValue = isExcluded ? filterSelector.slice(1) : filterSelector;
+          for (const token of splitFilterTokens(this.projectStore.filterTargetsArtifacts)) {
+            const isExcluded = token.at(0) === '-';
+            const tokenValue = isExcluded ? token.slice(1) : token;
 
             if (isExcluded) {
-              if (!stream._search.has(filterSelectorValue.slice(1)) && !streamState._search.has(filterSelectorValue.slice(1))) {
-                pass = true;
+              if (stream._search.has(tokenValue) || streamState._search.has(tokenValue)) {
+                pass = false;
                 break;
               }
             } else {
-              if (stream._search.has(filterSelectorValue) || streamState._search.has(filterSelectorValue)) {
-                pass = true;
+              if (!stream._search.has(tokenValue) && !streamState._search.has(tokenValue)) {
+                pass = false;
                 break;
               }
             }
@@ -184,11 +176,15 @@ export class ProjectTargetStore extends BaseStore {
           }
         }
 
-        streamsWithStates.push({
-          stream,
-          streamState,
-          artefacts: filterArtifacts(this.projectTargetState?.streams?.[stream.id].history?.artifact) ?? [],
-        });
+        const artifacts = filterArtifacts(this.projectTargetState?.streams?.[stream.id].history?.artifact, this.projectStore.filterTargetsArtifacts);
+
+        if (artifacts?.length) {
+          streamsWithStates.push({
+            stream,
+            streamState,
+            artifacts,
+          });
+        }
       }
 
       return streamsWithStates;
@@ -358,7 +354,9 @@ export class ProjectFlowActionParamsStore extends BaseStore {
 
 export class ProjectStore extends BaseStore {
   @observable
-    filter: string = '';
+    filterTargets: string = '';
+  @observable
+    filterTargetsArtifacts: string = '';
   @observable
     project: IProject;
   @observable
@@ -473,16 +471,37 @@ export class ProjectStore extends BaseStore {
   }
 }
 
-function filterArtifacts(artefacts: IProjectTargetStreamState['history']['artifact'], filter?: string) {
-  return filter ? artefacts.filter((artifact) => isArtefactIncludes(artifact, filter)) : artefacts;
-}
+function filterArtifacts(artifacts: IProjectTargetStreamState['history']['artifact'], filter?: string): IProjectTargetStreamState['history']['artifact'] {
+  if (!filter || !artifacts?.length) {
+    return artifacts;
+  }
 
-function isArtefactIncludes(artefact: IProjectTargetStreamState['history']['artifact'][0], filter?: string) {
-  return filter
-    ? (
-    typeof artefact?.description === 'string'
-      ? artefact?.description
-      : artefact?.description?.value
-    )?.includes(filter)
-    : true;
+  const filteredArtifacts: IProjectTargetStreamState['history']['artifact'] = [];
+  
+  for (const artifact of artifacts) {
+    let pass = true;
+
+    for (const token of splitFilterTokens(filter)) {
+      const isExcluded = token.at(0) === '-';
+      const tokenValue = isExcluded ? token.slice(1) : token;
+  
+      if (isExcluded) {
+        if (artifact._search.has(tokenValue)) {
+          pass = false;
+          break;
+        }
+      } else {
+        if (!artifact._search.has(tokenValue)) {
+          pass = false;
+          break;
+        }
+      }
+
+      if (pass) {
+        filteredArtifacts.push(artifact);
+      }
+    }  
+  }
+
+  return filteredArtifacts;
 }

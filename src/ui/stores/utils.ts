@@ -67,3 +67,16 @@ export function processingRequest(target, prop, descriptor) {
     }
   }
 }
+
+export function *splitFilterTokens(str) {
+  if (!str) {
+    return;
+  }
+
+  for (const token of str.split(/[^\w\-\:]+/)) {
+    if (token) {
+      yield token.toLowerCase();
+    }
+  }
+}
+
