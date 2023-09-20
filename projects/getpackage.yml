@@ -12,6 +12,46 @@ resync:
   intervalSeconds: 300
 
 artifacts:
+  argocdApplicationDev:
+    type: "argocd:application"
+    config:
+      integration: "argocdDev"
+  argocdApplicationImageTagDev:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplicationDev
+    config:
+      "ArgoCD Image tag":
+        source: "argocdApplication.status.summary.images"
+        filter:
+          "...":
+            contains:
+              param: "ref.streamId"
+        pattern: "\\:([\\w\\-\\.]+)$"
+        keys:
+          - 1
+        to: null
+        type: "dockerImage"
+      "ArgoCD Deploy status":
+        source: "argocdApplication.status.resources"
+        filter:
+          name:
+            in:
+              param: "ref.streamId"
+          kind:
+            eq: "StatefulSet"
+        pattern: null
+        keys:
+          - valueMapping:
+              OutOfSync:
+                level: warning
+                value: "out of sync"
+              Synced:
+                level: success
+                value: "synced"
+            valuePath: "status"
+        to: "link"
+        type: "argocd:syncStatus"
   argocdApplication:
     type: "argocd:application"
     config:
@@ -57,6 +97,10 @@ definitions:
   none: null
 
 integrations:
+  argocdDev:
+    type: "argocd"
+    config:
+      applicationName: "dev-namespace-settings"
   argocdStg:
     type: "argocd"
     config:
@@ -344,171 +388,217 @@ targets:
         title: "AIP"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-alerts-service:
         type: "github"
         title: "Alerts"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-analytics-service:
         type: "github"
         title: "Analytics"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-charge-service:
         type: "github"
         title: "Charge"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-deliveries-crud-service:
         type: "github"
         title: "Deliveries CRUD"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-deliveries-service:
         type: "github"
         title: "Deliveries"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-deliveries-history-service:
         type: "github"
         title: "Deliveries history"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-events-service:
         type: "github"
         title: "Events"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-frontend-client:
         type: "github"
         title: "FE Operator"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-fe-sender:
         type: "github"
         title: "FE Sender"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-fe-tracker:
         type: "github"
         title: "FE Tracker"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-finance-service:
         type: "github"
         title: "Finance"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-finance-calc:
         type: "github"
         title: "Finance calc"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-graphql-gateway:
         type: "github"
         title: "API Gateway"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-links-service:
         type: "github"
         title: "Links"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-locations-service:
         type: "github"
         title: "Locations"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-notifications-service:
         type: "github"
         title: "Notifications"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-offers-service:
         type: "github"
         title: "Offers"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-postil-service:
         type: "github"
         title: "Post IL"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-processing-service:
         type: "github"
         title: "Processing"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-routes-calc-dev:
         type: "github"
         title: "Routes calc"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-uam-service:
         type: "github"
         title: "UAM"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-webhooks-service:
         type: "github"
         title: "Webhooks"
         config:
           integration: "githubDev"
+        artifacts:
+          - "argocdApplicationImageTagDev"
     versioning: null
 
   stg:
     title: "QA"
     streams:
       gp-account-info-processor:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-alerts-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-analytics-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-charge-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-deliveries-crud-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-deliveries-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-deliveries-history-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-events-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-frontend-client:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
@@ -517,7 +607,7 @@ targets:
           - fe
           - op
       gp-fe-sender:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
@@ -526,7 +616,7 @@ targets:
           - fe
           - sender
       gp-fe-tracker:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
@@ -535,73 +625,73 @@ targets:
           - fe
           - tracker
       gp-finance-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-finance-calc:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-graphql-gateway:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-links-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-locations-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-notifications-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-offers-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-postil-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-processing-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-routes-calc-dev:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-uam-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-webhooks-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
         artifacts:
@@ -612,210 +702,256 @@ targets:
     title: "QA Hotfix"
     streams:
       gp-account-info-processor:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-alerts-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-analytics-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-charge-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-deliveries-crud-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-deliveries-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-deliveries-history-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-events-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-frontend-client:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         tags:
           - fe
           - op
+        artifacts:
       gp-fe-sender:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         tags:
           - fe
           - sender
+        artifacts:
       gp-fe-tracker:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         tags:
           - fe
           - tracker
+        artifacts:
       gp-finance-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-finance-calc:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-graphql-gateway:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-links-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-locations-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-notifications-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-offers-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-postil-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-processing-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-routes-calc-dev:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-uam-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
       gp-webhooks-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+        artifacts:
     versioning: "hotfix"
 
   production:
     title: "Production"
     streams:
       gp-account-info-processor:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-alerts-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-analytics-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMain"
+        artifacts:
       gp-charge-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-deliveries-crud-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-deliveries-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-deliveries-history-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-events-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-frontend-client:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
         tags:
           - fe
           - op
       gp-fe-sender:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
         tags:
           - fe
           - sender
       gp-fe-tracker:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
         tags:
           - fe
           - tracker
       gp-finance-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-finance-calc:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-graphql-gateway:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-links-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMain"
+        artifacts:
       gp-locations-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-notifications-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-offers-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-postil-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-processing-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMain"
+        artifacts:
       gp-routes-calc-dev:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-uam-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
       gp-webhooks-service:
-        use: "dev"
+        use: "targets.dev.streams.%"
         config:
           integration: "githubMaster"
+        artifacts:
     versioning: "current"

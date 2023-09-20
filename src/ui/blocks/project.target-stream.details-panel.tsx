@@ -176,7 +176,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
 
                 return <div key={ i }>
                   <Button
-                    className='button-sml success auto'
+                    className='button-sml success w-auto'
                     disabled={ streamIds ? !streamIds.length : false }
                     x={ null }
                     onClick={ () => {

@@ -1,4 +1,4 @@
-import { makeObservable, observable, computed, flow } from 'mobx';
+import { makeObservable, observable, computed, flow, FlowCancellationError } from 'mobx';
 import { IProject, IProjectFlowAction, IProjectTarget, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
@@ -8,6 +8,7 @@ import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blo
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
 import { processing, splitFilterTokens } from './utils';
+import {alertsStore} from '../blocks/alerts';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -176,15 +177,11 @@ export class ProjectTargetStore extends BaseStore {
           }
         }
 
-        const artifacts = filterArtifacts(this.projectTargetState?.streams?.[stream.id].history?.artifact, this.projectStore.filterTargetsArtifacts);
-
-        if (artifacts?.length) {
-          streamsWithStates.push({
-            stream,
-            streamState,
-            artifacts,
-          });
-        }
+        streamsWithStates.push({
+          stream,
+          streamState,
+          artifacts: filterArtifacts(stream, this.projectTargetState?.streams?.[stream.id], this.projectStore.filterTargetsArtifacts),
+        });
       }
 
       return streamsWithStates;
@@ -408,6 +405,17 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
+  *applyArtifactCopyToClipboard(artifact: IProjectTargetStreamState['history']['artifact'][0]) {
+    yield navigator.clipboard.writeText(
+      typeof artifact.description === 'string'
+        ? artifact.description
+        : artifact.description.value
+    );
+
+    alertsStore.push({ level: 'success', value: 'Copied' });
+  }
+
+  @flow @processing
   *applyTargetStreamDetails(targetId: string, streamId: string) {
     const target = this.getTargetByTargetId(targetId);
     const targetStore = this.getTargetStoreByTargetId(targetId);
@@ -471,14 +479,14 @@ export class ProjectStore extends BaseStore {
   }
 }
 
-function filterArtifacts(artifacts: IProjectTargetStreamState['history']['artifact'], filter?: string): IProjectTargetStreamState['history']['artifact'] {
-  if (!filter || !artifacts?.length) {
-    return artifacts;
+function filterArtifacts(stream: IProjectTargetStream, streamState: IProjectTargetStreamState, filter?: string): IProjectTargetStreamState['history']['artifact'] {
+  if (!filter || !streamState?.history?.artifact?.length) {
+    return streamState?.history?.artifact;
   }
 
   const filteredArtifacts: IProjectTargetStreamState['history']['artifact'] = [];
   
-  for (const artifact of artifacts) {
+  for (const artifact of streamState?.history?.artifact) {
     let pass = true;
 
     for (const token of splitFilterTokens(filter)) {
@@ -486,21 +494,21 @@ function filterArtifacts(artifacts: IProjectTargetStreamState['history']['artifa
       const tokenValue = isExcluded ? token.slice(1) : token;
   
       if (isExcluded) {
-        if (artifact._search.has(tokenValue)) {
+        if (stream._search.has(tokenValue) || artifact._search.has(tokenValue)) {
           pass = false;
           break;
         }
       } else {
-        if (!artifact._search.has(tokenValue)) {
+        if (!stream._search.has(tokenValue) && !artifact._search.has(tokenValue)) {
           pass = false;
           break;
         }
       }
+    }
 
-      if (pass) {
-        filteredArtifacts.push(artifact);
-      }
-    }  
+    if (pass) {
+      filteredArtifacts.push(artifact);
+    }
   }
 
   return filteredArtifacts;

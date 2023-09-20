@@ -5,8 +5,9 @@ import { StreamsService } from './streams.service';
 import { ActionsService } from './actions.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
-import { loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules } from './utils';
+import { iter, loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules } from './utils';
 import { ArtifactsService } from './artifacts.service';
+import * as _ from 'lodash';
 
 export function loadProjectsFromDirectory(path: string, ids?: string[]): Promise<Project[]> {
   const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
@@ -67,6 +68,14 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
     definition.env.versionings.addFactory(versioning);
   }
 
+  resolveUse(definition.artifacts, definition);
+  resolveUse(definition.definitions, definition);
+  resolveUse(definition.flows, definition);
+  resolveUse(definition.integrations, definition);
+  resolveUse(definition.storages, definition);
+  resolveUse(definition.targets, definition);
+  resolveUse(definition.versionings, definition);
+
   if (definition.artifacts) {
     const artifactsService = definition.env.artifacts;
 
@@ -115,17 +124,17 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
 
     for (const [ ,target ] of Object.entries(definition.targets)) {
       for (const [ defId, defConfig ] of Object.entries(target.streams)) {
-        const use = defConfig.use ? definition.targets[defConfig.use]?.streams?.[defId] : null;
+        // const use = defConfig.use ? definition.targets[defConfig.use]?.streams?.[defId] : null;
 
-        if (use) {
-          for (const [ key, val ] of Object.entries(use)) {
-            if (defConfig[key] === undefined) {
-              defConfig[key] = val;
-            }
-          }
+        // if (use) {
+        //   for (const [ key, val ] of Object.entries(use)) {
+        //     if (defConfig[key] === undefined) {
+        //       defConfig[key] = val;
+        //     }
+        //   }
 
-          delete defConfig.use;
-        }
+        //   delete defConfig.use;
+        // }
 
         defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
         streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
@@ -137,4 +146,38 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
   }
 
   return new Project(definition);
+}
+
+function resolveUse(section, definition, sectionKey = null) {
+  if (section) {
+    if (Array.isArray(section)) {
+      section.forEach((subSection, i) => resolveUse(subSection, definition, `${sectionKey}.${i}`));
+    } else if (typeof section === 'object') {
+      if (section.use) {
+        for (let [ ,sectionUse ] of iter(section.use)) {
+          if (sectionKey) {
+            sectionUse = sectionUse.replace('%', sectionKey);
+          }
+  
+          const use = _.get(definition, sectionUse);
+  
+          if (use && typeof use === 'object') {
+            for (const [ key, val ] of Object.entries(use)) {
+              if (section[key] === undefined) {
+                section[key] = val;
+              }
+            }
+          }
+        }
+
+        delete section.use;
+      }
+
+      for (const [ subSectionKey, subSection ] of Object.entries(section)) {
+        resolveUse(subSection, definition, subSectionKey);
+      }
+    }
+  }
+
+  return section;
 }
