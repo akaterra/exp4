@@ -15,10 +15,11 @@ import { loadGlobalConfigFromFile } from './global-config-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
 import { err } from './utils';
-import { authMethodList } from './api/auth/list-methods';
+import { authMethodList } from './api/auth/method.list';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
 import { logError } from './logger';
+import { authUserGetCurrent } from './api/auth/user.get-current';
 
 process.on('uncaughtException', function(err) {
 });
@@ -60,6 +61,9 @@ function auth(req, res, next) {
 
   app.get(
     '/auth/methods', err(authMethodList),
+  );
+  app.get(
+    '/auth/users/current', err(auth), err(authUserGetCurrent),
   );
   app.get(
     '/projects', err(auth), err(projectList),

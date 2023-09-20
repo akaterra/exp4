@@ -45,25 +45,32 @@ export class RootStore {
     this.accessToken = RestApiService.accessToken = localStorage.getItem('accessToken');
 
     if (this.accessToken) {
+      const user = yield this.usersService.getCurrent();
+
+      if (user) {
+        this.user = user;
+      }
+
       this.isAuthorized = true;
     } else {
-      this.isAuthorized = false;
-
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
 
       if (code) {
-        const { accessToken } = yield this.usersService.authorize('github', code);
+        const { accessToken, user } = yield this.usersService.authorize('github', code);
 
         if (accessToken) {
           localStorage.setItem('accessToken', accessToken);
 
           this.accessToken = RestApiService.accessToken = accessToken;
           this.isAuthorized = true;
+          this.user = user;
         }
       } else {
         yield this.fetchAuthMethodActions('github');
       }
+
+      this.isAuthorized = false;
     }
   }
 

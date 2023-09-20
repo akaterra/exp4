@@ -6,7 +6,11 @@ export class UsersService {
   protected rest = new RestApiService();
 
   authorize(id: string, code: string): Promise<{ accessToken: string, user: IUser }> {
-    return this.rest.get(`auth/methods/${id}/callback`, { code })
+    return this.rest.get(`auth/methods/${id}/callback`, { code });
+  }
+
+  getCurrent(): Promise<IUser> {
+    return this.rest.get(`auth/users/current`);
   }
 
   listAuthMethods(): Promise<Record<string, IAuthStrategyMethod>> {

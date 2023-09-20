@@ -20,6 +20,7 @@ import {
 import { IProject } from './stores/dto/project';
 import { Statistics } from './blocks/statistics';
 import { Top } from './blocks/top';
+import { Logo } from './blocks/logo';
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
   return <Project project={ projects.selectedProjectStore } />;
@@ -44,6 +45,7 @@ let router;
 
 export const App = () => {
   return <React.Fragment>
+    <Logo store={ rootStore } />
     <div className="container med ltr square">
       <GlobalAlerts />
       <GlobalDetailsPanel />
