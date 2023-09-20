@@ -28,6 +28,7 @@ const style = {
     backgroundSize: '1290px 45px',
     height: '45px',
     minHeight: '45px',
+    filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.25))',
   },
 }
 
