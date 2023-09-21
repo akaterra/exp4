@@ -6,9 +6,12 @@ import { processing } from './utils';
 import { RestApiService } from '../services/rest-api.service';
 import { ProjectsStore } from './projects';
 import { StatisticsStore } from './statistics';
+import {IProject} from './dto/project';
+import { Router } from '@remix-run/router/router';
 
 export class RootStore {
   private isReadyResolve: () => any;
+  private router: Router;
 
   readonly projectsStore = new ProjectsStore();
   readonly statisticsStore = new StatisticsStore();
@@ -39,6 +42,12 @@ export class RootStore {
     }.bind(this), 30000);
   }
 
+  setRouter(router: Router) {
+    this.router = router;
+
+    return this;
+  }
+
   @flow @processing
   *authenticate() {
     this.authMethods = yield this.usersService.listAuthMethods();
@@ -53,24 +62,24 @@ export class RootStore {
 
       this.isAuthorized = true;
     } else {
+      this.isAuthorized = false;
+
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
 
       if (code) {
         const { accessToken, user } = yield this.usersService.authorize('github', code);
 
-        if (accessToken) {
-          localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('accessToken', accessToken);
 
-          this.accessToken = RestApiService.accessToken = accessToken;
-          this.isAuthorized = true;
-          this.user = user;
-        }
+        this.accessToken = RestApiService.accessToken = accessToken;
+        this.isAuthorized = true;
+        this.user = user;
+
+        yield this.start(':first');
       } else {
         yield this.fetchAuthMethodActions('github');
       }
-
-      this.isAuthorized = false;
     }
   }
 
@@ -98,7 +107,7 @@ export class RootStore {
   }
 
   @flow @processing
-  *start() {
+  *start(selectedProjectId?: IProject['id'] | ':first') {
     yield this.authenticate();
 
     if (this.isAuthorized) {
@@ -106,6 +115,22 @@ export class RootStore {
     }
 
     this.isReadyResolve();
+
+    if (this.isAuthorized) {
+      if (selectedProjectId) {
+        if (selectedProjectId === ':first') {
+          this.navigate(`/projects/${Object.values(this.projectsStore.projects)?.[0]?.id}`);
+        } else if (this.projectsStore.projects[selectedProjectId]) {
+          this.navigate(`/projects/${selectedProjectId}`);
+        }
+      }
+    }
+  }
+
+  navigate(path) {
+    if (this.router) {
+      this.router.navigate(path);
+    }
   }
 }
 

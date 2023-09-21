@@ -44,7 +44,7 @@ export const Modal = ({
                 }
                 {
                   onClose
-                    ? <Button className='button-sml default transparent w-auto' x={null} onClick={ onClose }><i className="fa-solid fa-xmark fa-lg"></i></Button>
+                    ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose }><i className="fa-solid fa-xmark fa-lg"></i></Button>
                     : null
                 }
               </div>

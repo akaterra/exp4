@@ -50,7 +50,7 @@ export const ProjectTarget = observer(({ projectTarget }: { projectTarget?: Proj
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     <div>
-      <InfoCollapse isIdle={ true } showTitle='Actions'>
+      <InfoCollapse isDisabled={ !projectTarget.streamsWithStates?.length } isIdle={ true } showTitle='Actions'>
         {
           projectTarget.actions.map(({ action, streamIds }, i) => {
             return <div key={ i }>

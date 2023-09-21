@@ -13,11 +13,11 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
 
   if (root.isAuthorized === false) {
     return <div className='block no-scroll children-gap'>
-      <div>
+      {/* <div>
         <SubTitle><Link activeClassName="link active" href={ root.authMethods?.github?.actions?.redirect } className='link'>
           Login
         </Link></SubTitle>
-      </div>
+      </div> */}
     </div>;
   }
 
@@ -37,10 +37,10 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
         }
       </div>
     </div>
-    <div>
+    {/* <div>
       <SubTitle><Link activeClassName="link failure" className='link failure' onClick={ () => rootStore.logout() }>
         Logout
       </Link></SubTitle>
-    </div>
+    </div> */}
   </div>;
 });

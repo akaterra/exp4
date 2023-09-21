@@ -9,6 +9,7 @@ import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
 import { processing, splitFilterTokens } from './utils';
 import {alertsStore} from '../blocks/alerts';
+import * as _ from 'lodash';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -101,7 +102,7 @@ export class ProjectTargetStore extends BaseStore {
         if (this.projectStore.filterTargets) {
           let pass = true;
 
-          for (const token of splitFilterTokens(this.projectStore.filterTargets)) {
+          for (const token of splitFilterTokens(this.projectStore.filterTargets, true)) {
             const isExcluded = token.at(0) === '-';
             const tokenValue = isExcluded ? token.slice(1) : token;
 
@@ -155,7 +156,7 @@ export class ProjectTargetStore extends BaseStore {
         if (this.projectStore.filterTargetsArtifacts) {
           let pass = true;
 
-          for (const token of splitFilterTokens(this.projectStore.filterTargetsArtifacts)) {
+          for (const token of splitFilterTokens(this.projectStore.filterTargetsArtifacts, true)) {
             const isExcluded = token.at(0) === '-';
             const tokenValue = isExcluded ? token.slice(1) : token;
 
@@ -225,8 +226,13 @@ export class ProjectTargetStore extends BaseStore {
       selectedStreamIds = Object.keys(this.selectedProjectTargetStreamIds);
 
       if (!selectedStreamIds.length) {
-        selectedStreamIds = Object.keys(this.target.streams);
+        selectedStreamIds = Object.values(this.target.streams).map((stream) => stream.id);
       }
+
+      selectedStreamIds = _.intersection(
+        this.streamsWithStates.map(({ stream }) => stream.id),
+        selectedStreamIds,
+      );
     } else {
       selectedStreamIds = [ streamId ];
     }
@@ -489,7 +495,7 @@ function filterArtifacts(stream: IProjectTargetStream, streamState: IProjectTarg
   for (const artifact of streamState?.history?.artifact) {
     let pass = true;
 
-    for (const token of splitFilterTokens(filter)) {
+    for (const token of splitFilterTokens(filter, true)) {
       const isExcluded = token.at(0) === '-';
       const tokenValue = isExcluded ? token.slice(1) : token;
   

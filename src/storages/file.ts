@@ -20,7 +20,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async userGet(id: string): Promise<IUser> {
-    return null;
+    return (await this.getJson('users'))?.[id] ?? null;
   }
 
   @Log('debug')

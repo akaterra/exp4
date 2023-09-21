@@ -65,6 +65,11 @@ export class ProjectsService {
             artifact._search.add(token);
             search.add(token);
           }
+
+          for (const token of splitFilterTokens(typeof artifact.description === 'string' ? artifact.description : artifact.description.value)) {
+            artifact._search.add(token);
+            search.add(token);
+          }
         }
       }
     }

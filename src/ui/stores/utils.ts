@@ -68,12 +68,12 @@ export function processingRequest(target, prop, descriptor) {
   }
 }
 
-export function *splitFilterTokens(str) {
+export function *splitFilterTokens(str, forFilter?) {
   if (!str) {
     return;
   }
 
-  for (const token of str.split(/[^\w\-\:]+/)) {
+  for (const token of forFilter ? str.split(/[^\d\w\-\:]+/) : str.split(/[^\d\w]+/)) {
     if (token) {
       yield token.toLowerCase();
     }

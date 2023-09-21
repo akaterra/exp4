@@ -7,13 +7,21 @@ import { Link } from '../atoms/link';
 
 const style = {
   container: {
-    backgroundColor: '#ff0055',
-    color: 'white',
+    // backgroundColor: '#ff3377',
+    // color: 'white',
+    position: 'relative',
+  } as React.CSSProperties,
+  containerColor: {
+    // color: '#fff',
   },
   containerProfile: {
-    backgroundColor: '#ff0055',
-    color: '#ffff80',
-  },
+    // color: '#fff',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: '10px',
+  } as React.CSSProperties,
   layer: {
     position: 'fixed',
     bottom: 0,
@@ -28,31 +36,32 @@ const style = {
     backgroundSize: '1290px 45px',
     height: '45px',
     minHeight: '45px',
-    filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.25))',
+    filter: 'drop-shadow(0px 2px 1px rgba(0, 0, 0, .2))',
   },
 }
 
 export const Logo = observer(({ store }: { store: RootStore }) => {
   return <React.Fragment>
-    <div className='show-sml' style={ style.container }>
+    <div className='show-sml1' style={ style.container }>
       <div style={ style.logo } />
-    </div>
-    <div className='show-med show-lrg' style={ style.layer }>
-      <div className="container med ltr square pad-hor triple">
-        <div className='row'>
-          <div className='c-3 clear-padding' style={ style.container }>
-            <div className='paragraph paragraph-lrg'>
-              <div style={ style.logo } />
-            </div>
-            <div className='c18'>
-              <div className='paragraph paragraph-lrg flex flex-ver flex-middle'>
-                <SubTitle>
-                  <span style={ style.containerProfile }>{ store.user?.name ?? store.user?.id }</span>
-                </SubTitle>
-                <SubSubTitle><Link activeClassName="link failure" className='link failure' onClick={ () => store.logout() }>
-                  <span style={ style.container }>Logout</span>
-                </Link></SubSubTitle>
-              </div>
+      <div className='flex flex-end' style={ style.containerProfile }>
+        <div className="container med ltr square pad-hor triple h-auto">
+          <div className='row flex flex-right'>
+            <div className='c-6 flex flex-hor flex-right children-gap-hor'>
+              {
+                store.isAuthorized
+                  ? <React.Fragment>
+                    <SubSubTitle className='w-auto'>
+                      <span style={ style.container }>{ store.user?.name ?? store.user?.id }</span>
+                    </SubSubTitle>
+                    <SubSubTitle className='w-auto'><Link activeClassName="link failure" className='link failure' onClick={ () => store.logout() }>
+                      <span style={ style.container }>Logout</span>
+                    </Link></SubSubTitle>
+                  </React.Fragment>
+                  : <SubSubTitle className='w-auto'><Link activeClassName="link active" href={ store.authMethods?.github?.actions?.redirect } className='link'>
+                    Login
+                  </Link></SubSubTitle>
+              }
             </div>
           </div>
         </div>

@@ -14,13 +14,19 @@ export class SqlStorageService extends EntityService implements IStorageService 
   protected cache = new AwaitedCache();
   protected client: Knex;
 
-  constructor(protected config?: { url?: string, tableName?: string }) {
+  constructor(protected config?: {
+    url?: string,
+    tableNameUsers?: string,
+    tableNameVars?: string,
+  }) {
     super();
   }
 
   @Log('debug')
   async userGet(id: string): Promise<IUser> {
-    return null;
+    const qb = (await this.getTableUsers()).qb;
+
+    return (await qb.where({ key: id }).first()) ?? null;
   }
 
   @Log('debug')
@@ -31,8 +37,8 @@ export class SqlStorageService extends EntityService implements IStorageService 
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
-    
-    const qb = (await this.getTable()).qb;
+
+    const qb = (await this.getTableVars()).qb;
 
     return (await qb.where({ key: intKey, type: 'target' }).first())?.val ?? def;
   }
@@ -40,7 +46,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   @Log('debug')
   async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
     const intKey = SqlStorageService.getKey(key);
-    const qb = (await this.getTable()).qb;
+    const qb = (await this.getTableVars()).qb;
 
     await qb.insert({ key: intKey, type: 'target', val: JSON.stringify(val) })
       .onConflict([ 'key', 'type' ])
@@ -103,7 +109,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
       return this.cache.get(cacheKey);
     }
     
-    const qb = (await this.getTable()).qb;
+    const qb = (await this.getTableVars()).qb;
 
     return (await qb.where({ key: intKey, type: 'stream' }).first())?.val ?? def;
   }
@@ -111,7 +117,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   @Log('debug')
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
     const intKey = SqlStorageService.getKeyStream(key, stream.id);
-    const qb = (await this.getTable()).qb;
+    const qb = (await this.getTableVars()).qb;
 
     await qb.insert({ key: intKey, type: 'stream', val: JSON.stringify(val) })
       .onConflict([ 'key', 'type' ])
@@ -182,8 +188,17 @@ export class SqlStorageService extends EntityService implements IStorageService 
     if (!this.client) {
       const client = knex(this.config?.url ?? process.env.SQL_URL);
 
-      if (!await client.schema.hasTable(this.config?.tableName ?? 'storage')) {
-        await client.schema.createTableIfNotExists(this.config?.tableName ?? 'storage', (table) => {
+      if (!await client.schema.hasTable(this.config?.tableNameUsers ?? 'storageUsers')) {
+        await client.schema.createTableIfNotExists(this.config?.tableNameUsers ?? 'storageUsers', (table) => {
+          table.string('key', 100).notNullable();
+          table.string('name', 50).notNullable();
+          table.string('email', 50);
+          table.unique([ 'key' ]);
+        });
+      }
+
+      if (!await client.schema.hasTable(this.config?.tableNameVars ?? 'storageVars')) {
+        await client.schema.createTableIfNotExists(this.config?.tableNameVars ?? 'storageVars', (table) => {
           table.string('key', 100).notNullable();
           table.string('type', 20).notNullable();
           table.jsonb('val');
@@ -197,7 +212,11 @@ export class SqlStorageService extends EntityService implements IStorageService 
     return this.client;
   }
 
-  protected async getTable(): Promise<{ qb: Knex.QueryBuilder }> {
-    return { qb: (await this.getClient())(this.config?.tableName ?? 'storage') };
+  protected async getTableUsers(): Promise<{ qb: Knex.QueryBuilder }> {
+    return { qb: (await this.getClient())(this.config?.tableNameVars ?? 'storageUsers') };
+  }
+
+  protected async getTableVars(): Promise<{ qb: Knex.QueryBuilder }> {
+    return { qb: (await this.getClient())(this.config?.tableNameVars ?? 'storageVars') };
   }
 }

@@ -299,7 +299,12 @@ export async function request(url, data?, method?, authorization?) {
     'Accept': 'application/json',
     'Authorization': authorization ? `Bearer ${authorization}` : undefined,
     'Content-Type': 'application/json',
-  }).doRequest(url, method, data);
+  }).doRequest(
+    url,
+    method,
+    !method || method === 'get' ? undefined : data,
+    !method || method === 'get' ? data : undefined,
+  );
 }
 
 export function resolvePlaceholders(template, params) {

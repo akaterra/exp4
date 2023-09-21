@@ -102,6 +102,8 @@ export const App = () => {
     basename: '',
   });
 
+  rootStore.setRouter(router);
+
   const root = ReactDOM.createRoot(document.getElementById('container'));
   
   root.render(<App />);

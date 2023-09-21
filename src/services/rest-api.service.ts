@@ -31,20 +31,20 @@ export class RestApiService {
     return this;
   }
 
-  delete(path: string) {
-    return this.doRequest(path, 'delete');
+  delete(path: string, query?: Record<string, any>) {
+    return this.doRequest(path, 'delete', undefined, query);
   }
 
   get(path: string, query?: Record<string, any>) {
     return this.doRequest(path, 'get', undefined, query);
   }
 
-  post(path: string, data?: any) {
-    return this.doRequest(path, 'post', data);
+  post(path: string, data?: any, query?: Record<string, any>) {
+    return this.doRequest(path, 'post', data, query);
   }
 
-  put(path: string, data?: any) {
-    return this.doRequest(path, 'put', data);
+  put(path: string, data?: any, query?: Record<string, any>) {
+    return this.doRequest(path, 'put', data, query);
   }
 
   doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, { toString }>) {
