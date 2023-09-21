@@ -33,7 +33,7 @@ const style = {
     backgroundImage: `url(${logo})`,
     backgroundPosition: '50%',
     backgroundRepeat: 'no-repeat',
-    backgroundSize: '1290px 45px',
+    backgroundSize: '2030px 45px',
     height: '45px',
     minHeight: '45px',
     filter: 'drop-shadow(0px 2px 1px rgba(0, 0, 0, .2))',
