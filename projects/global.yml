@@ -10,8 +10,14 @@ auth:
         callbackUrl: null
       integration: "github"
       storage: "github"
+  jumpcloud:
+    type: "saml2"
+    config:
+      integration: "jumpcloud"
 
 integrations:
+  jumpcloud:
+    type: "saml2"
   github:
     type: "github"
     config:

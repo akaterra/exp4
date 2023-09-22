@@ -3,6 +3,8 @@
 .idea/
 .vscode/
 coverage/
-node_modules/
 dist/*
+node_modules/
+saml2/*
+!saml2/.gitignore
 .env.local

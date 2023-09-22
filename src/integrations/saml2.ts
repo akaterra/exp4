@@ -15,6 +15,9 @@ export interface ISaml2Config {
     login?: string;
     logout?: string;
   };
+  extra?: {
+    entityId?: string;
+  }
 }
 
 @Service()
@@ -36,6 +39,11 @@ export class Saml2IntegrationService extends EntityService implements IIntegrati
   @IncStatistics()
   getLoginUrl() {
     return this.client.getLoginUrl();
+  }
+
+  @IncStatistics()
+  getMetadata() {
+    return this.client.metadata;
   }
 
   @IncStatistics()

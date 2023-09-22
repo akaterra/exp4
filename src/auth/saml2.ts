@@ -61,6 +61,10 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
       res.json(await this.request());
     }));
 
+    app.get(path + '/metadata.xml', async (req, res) => {
+      res.send(this.integration.getMetadata());
+    });
+
     app.get(path + '/redirect', async (req, res) => {
       res.redirect((await this.request()).actions.redirect);
     });

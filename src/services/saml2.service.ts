@@ -2,6 +2,8 @@ import * as saml2 from 'saml2-js';
 import { existsSync, readFileSync } from "fs";
 
 export class Saml2Service {
+  public metadata;
+
   private serviceProvider;
   private identityProvider;
   private serviceProviderOptions;
@@ -17,18 +19,23 @@ export class Saml2Service {
       login?: string;
       logout?: string;
     },
+    extra?: {
+      entityId?: string;
+    },
   ) {
     if (!publicDomain) {
-      publicDomain = 'http://localhost:7000';
+      publicDomain = process.env.PUBLIC_DOMAIN ?? 'http://localhost:7000';
     }
 
-    const crtPath = paths?.crt ?? `${process.cwd}/src/saml2/certificate.crt`;
+    const crtPath = paths?.crt ?? process.env.SAML2_CRT_PATH ?? `${process.cwd()}/saml2/certificate.crt`;
     const crt = readFileSync(crtPath).toString();
-    const pemPath = paths?.pem ?? `${process.cwd}/src/saml2/certificate.pem`;
+    const pemPath = paths?.pem ?? process.env.SAML2_PEM_PATH ?? `${process.cwd()}/saml2/certificate.pem`;
     const pem = readFileSync(pemPath).toString();
+    const metadataPath = paths?.metadata ?? process.env.SAML2_METADATA_PATH ?? `${process.cwd()}/saml2/metadata.xml`;
+    this.metadata = readFileSync(metadataPath).toString();
 
     this.serviceProviderOptions = {
-      entity_id: `${publicDomain}/auth/methods/saml2/metadata.xml`,
+      entity_id: extra?.entityId ?? process.env.SAML2_ENTITY_ID ?? `${publicDomain}/auth/methods/saml2/metadata.xml`,
       certificate: crt,
       private_key: pem,
       assert_endpoint: `${publicDomain}/auth/methods/saml2/acs`,
@@ -39,8 +46,8 @@ export class Saml2Service {
       allow_unencrypted_assertion: true
     }
     const idPOptions = {
-      sso_login_url: `${publicDomain}/auth/methods/saml2/login`,
-      sso_logout_url: `${publicDomain}/auth/methods/saml2/logout`,
+      sso_login_url: process.env.SAML2_LOGIN_URL ?? `${publicDomain}/auth/methods/saml2/login`,
+      sso_logout_url: process.env.SAML2_LOGOUT_URL ?? `${publicDomain}/auth/methods/saml2/logout`,
       certificates: [ crt, pem ],
     };
 
