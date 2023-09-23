@@ -2,35 +2,48 @@ import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Autowired, err, request } from '../utils';
-import { IntegrationsService } from '../integrations.service';
-import { GithubIntegrationService } from '../integrations/github';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
-import { prepareAuthData } from '../auth.service';
+import { authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
-import {Saml2IntegrationService} from '../integrations/saml2';
+import {Saml2Service} from '../services/saml2.service';
 
 @Service()
 export class Saml2AuthStrategyService extends EntityService implements IAuthStrategyService {
   static readonly type: string = 'saml2';
 
-  @Autowired() protected integrationsService: IntegrationsService;
+  protected client: Saml2Service;
   @Autowired() protected storagesService: StoragesService;
-
-  private get integration() {
-    return this.integrationsService.get(this.config?.integration ?? 'default', this.type) as Saml2IntegrationService;
-  }
 
   private get storage() {
     return this.storagesService.get(this.config?.storage ?? 'default');
   }
 
   constructor(protected config?: {
-    integration?: string;
+    publicDomain?: string;
+    paths?: {
+      crt?: string;
+      pem?: string;
+      metadata?: string;
+    };
+    urls?: {
+      login?: string;
+      logout?: string;
+      ui?: string;
+    };
+    extra?: {
+      entityId?: string;
+    };
     storage?: string;
   }) {
     super();
+
+    this.client = new Saml2Service(
+      config?.publicDomain,
+      config?.paths,
+      config?.urls,
+    );
   }
 
   @Log('debug')
@@ -44,7 +57,7 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
       id: this.id,
       type: this.type,
       actions: {
-        redirect: await this.integration.getLoginUrl(),
+        redirect: await this.client.getLoginUrl(),
       },
     };
   }
@@ -61,12 +74,30 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
       res.json(await this.request());
     }));
 
-    app.get(path + '/metadata.xml', async (req, res) => {
-      res.send(this.integration.getMetadata());
-    });
+    app.post(path + '/acs', err(async (req, res) => {
+      const authData = await this.client.assert(req.body);
+      const user = {
+        id: String(authData.id),
+        type: this.type,
 
-    app.get(path + '/redirect', async (req, res) => {
+        // name: authData.name,
+        email: authData.email,
+      }
+      const ott = generateOneTimeToken(user);
+
+      res.redirect(`${this.config?.urls?.ui ?? 'http://localhost:9002/auth/saml2/callback'}?code=${ott}`);
+    }));
+
+    app.get(path + '/callback', err(async (req, res) => {
+      res.json(prepareAuthData(authorizeByOneTimeToken(req.query.code)));
+    }));
+
+    app.get(path + '/metadata.xml', err(async (req, res) => {
+      res.send(this.client.getMetadata());
+    }));
+
+    app.get(path + '/redirect', err(async (req, res) => {
       res.redirect((await this.request()).actions.redirect);
-    });
+    }));
   }
 }

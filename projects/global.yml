@@ -16,8 +16,6 @@ auth:
       integration: "jumpcloud"
 
 integrations:
-  jumpcloud:
-    type: "saml2"
   github:
     type: "github"
     config:

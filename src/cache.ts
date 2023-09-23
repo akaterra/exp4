@@ -1,4 +1,5 @@
 export class AwaitedCache<T = any, K = string> {
+  protected autoInvalidateTimeout;
   protected cache = new Map<K, [ number, number, T | Promise<T> ]>(); // expire, version, val
 
   del(key: K) {
@@ -71,5 +72,23 @@ export class AwaitedCache<T = any, K = string> {
     }
 
     return val;
+  }
+
+  runAutoInvalidate() {
+    if (!this.autoInvalidateTimeout) {
+      this.autoInvalidateTimeout = setInterval(() => {
+        const now = Date.now();
+
+        for (const [ key, val ] of this.cache.entries()) {
+          const [ expire, ] = val;
+
+          if (expire && expire >= now - 2000) {
+            this.cache.delete(key);
+          }
+        }
+      }, 30000);
+    }
+
+    return this;
   }
 }

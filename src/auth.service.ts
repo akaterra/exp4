@@ -1,5 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { IUser } from './user';
+import { v4 } from 'uuid';
+import {AwaitedCache} from './cache';
 
 const jwtSecret = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 
@@ -22,4 +24,18 @@ export function prepareAuthData(user: IUser) {
     accessToken,
     user,
   };
+}
+
+const OTT_DATA = new AwaitedCache<IUser>().runAutoInvalidate();
+
+export function generateOneTimeToken(user: IUser) {
+  const id = v4();
+
+  OTT_DATA.set(id, user, 600);
+
+  return id;
+}
+
+export function authorizeByOneTimeToken(id: string): IUser {
+  return OTT_DATA.get(id) as IUser;
 }

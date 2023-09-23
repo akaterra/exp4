@@ -46,6 +46,7 @@ function auth(req, res, next) {
   const app = express();
   app.use(cors());
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
   function error(err, req, res) {
     logError(err);

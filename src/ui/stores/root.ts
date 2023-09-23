@@ -49,11 +49,11 @@ export class RootStore {
   }
 
   @flow @processing
-  *authenticate() {
+  *authenticate(id?: string) {
     this.authMethods = yield this.usersService.listAuthMethods();
     this.accessToken = RestApiService.accessToken = localStorage.getItem('accessToken');
 
-    if (this.accessToken) {
+    if (this.accessToken && !id) {
       const user = yield this.usersService.getCurrent();
 
       if (user) {
@@ -68,7 +68,7 @@ export class RootStore {
       const code = urlParams.get('code');
 
       if (code) {
-        const { accessToken, user } = yield this.usersService.authorize('github', code);
+        const { accessToken, user } = yield this.usersService.authorize(id ?? 'github', code);
 
         localStorage.setItem('accessToken', accessToken);
 
@@ -78,7 +78,7 @@ export class RootStore {
 
         yield this.start(':first');
       } else {
-        yield this.fetchAuthMethodActions('github');
+        yield this.fetchAuthMethodActions(id ?? 'github');
       }
     }
   }

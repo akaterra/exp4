@@ -14,12 +14,7 @@ import { Log } from '../logger';
 export class GithubAuthStrategyService extends EntityService implements IAuthStrategyService {
   static readonly type: string = 'github';
 
-  @Autowired() protected integrationsService: IntegrationsService;
   @Autowired() protected storagesService: StoragesService;
-
-  private get integration() {
-    return this.integrationsService.get(this.config?.integration ?? 'default', this.type) as GithubIntegrationService;
-  }
 
   private get storage() {
     return this.storagesService.get(this.config?.storage ?? 'default');
@@ -31,7 +26,6 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
       clientSecret?: string;
       callbackUrl?: string;
     };
-    integration?: string;
     storage?: string;
   }) {
     super();
@@ -83,9 +77,9 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
       res.json(await this.request());
     }));
 
-    app.get(path + '/redirect', async (req, res) => {
+    app.get(path + '/redirect', err(async (req, res) => {
       res.redirect((await this.request()).actions.redirect);
-    });
+    }));
 
     app.get(path + '/callback', err(async (req, res) => {
       const githubAuth = await request(

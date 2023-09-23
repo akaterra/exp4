@@ -75,6 +75,15 @@ export const App = () => {
       element: <Layout rootStore={ rootStore } />,
       errorElement: <div />,
       children: [ {
+        path: '/auth/:id/callback',
+        element: <div />,
+        loader: async ({ params }) => {
+          console.log(params);
+          await rootStore.authenticate(params.id);
+  
+          return null;
+        },
+      }, {
         path: '/projects/:id/:tab?',
         element: <RouteProject projects={ rootStore.projectsStore } />,
         loader: async ({ params }) => {

@@ -1,5 +1,6 @@
 import * as saml2 from 'saml2-js';
 import { existsSync, readFileSync } from "fs";
+import {logError} from '../logger';
 
 export class Saml2Service {
   public metadata;
@@ -95,10 +96,12 @@ export class Saml2Service {
     return this.serviceProvider.create_metadata();
   }
 
-  async assert(assertion: string): Promise<{ email: string, id: string, samlSessionId: string }> {
+  async assert(data: Record<string, unknown>): Promise<{ email: string, id: string, samlSessionId: string }> {
     return new Promise((resolve, reject) => {
-      this.serviceProvider.post_assert(this.identityProvider, { request_body: assertion }, (err, samlResponse) => {
+      this.serviceProvider.post_assert(this.identityProvider, { request_body: data }, (err, samlResponse) => {
         if (err) {
+          logError(err, 'Saml2Service.assert');
+
           reject(err);
         } else {
           resolve({ email: samlResponse.user.name_id, id: samlResponse.user.name_id, samlSessionId: samlResponse.user.session_index });
