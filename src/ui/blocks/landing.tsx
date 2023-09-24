@@ -83,8 +83,8 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
     return <div style={ style.container }>
       <div className='flex flex-ver flex-middle children-gap' style={ style.landing.container }>
         <div style={ style.landing.logo } />
-        <div>
-          Manage your versioned code sources easily
+        <div className='pad-hor triple'>
+          Manage your versioned code sources easily. Streamline deployment process, ensuring every change is tracked and retrievable.
         </div>
       </div>
       <div className="container med ltr square">

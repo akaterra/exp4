@@ -1,6 +1,6 @@
-import * as saml2 from 'saml2-js';
 import { readFileSync } from "fs";
 import { logError } from '../logger';
+const saml2 = require('saml2-js');
 
 export class Saml2Service {
   public metadata;
