@@ -27,6 +27,11 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
+  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+    await request(this.getUrl('user'), { ...data, id, type }, 'post');
+  }
+
+  @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = ExternalRestServiceStorageService.getKey(key);
     

@@ -49,6 +49,11 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
+  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+    throw new Error('Not supported');
+  }
+
+  @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKey(key);
     

@@ -31,6 +31,22 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   }
 
   @Log('debug')
+  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+    const collection = await this.getCollectionUsers();
+
+    await collection.updateOne({
+      key: id,
+    }, {
+      $set: {
+        ...data,
+        key: id,
+      },
+    }, {
+      upsert: true,
+    });
+  }
+
+  @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = MongodbStorageService.getKey(key);
     const cacheKey = `${intKey}:target`;

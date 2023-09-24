@@ -24,6 +24,14 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
+  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+    const user = await this.userGet(id) ?? {};
+    user[id] = { ...data, id, type };
+    
+    await this.putJson('users', user);
+  }
+
+  @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = FileStorageService.getKey(key);
     const cacheKey = `${intKey}:target`;

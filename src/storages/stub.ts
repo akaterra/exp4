@@ -15,6 +15,11 @@ export class StubStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
+  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+
+  }
+
+  @Log('debug')
   async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     return null;
   }

@@ -6,6 +6,7 @@ import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { knex, Knex } from 'knex';
 import { Log } from '../logger';
+import * as _ from 'lodash';
 
 @Service()
 export class SqlStorageService extends EntityService implements IStorageService {
@@ -27,6 +28,22 @@ export class SqlStorageService extends EntityService implements IStorageService 
     const qb = (await this.getTableUsers()).qb;
 
     return (await qb.where({ key: id }).first()) ?? null;
+  }
+
+  @Log('debug')
+  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+    const qb = (await this.getTableUsers()).qb;
+
+    await qb.insert({
+      ..._.mapValues(data, (val) => {
+        return val && typeof val === 'object'
+          ? JSON.stringify(val)
+          : val;
+      }),
+      key: id,
+    })
+      .onConflict([ 'key', 'type' ])
+      .merge(Object.keys(data));
   }
 
   @Log('debug')

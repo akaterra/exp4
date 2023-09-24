@@ -9,6 +9,15 @@ export class UsersService {
     return this.rest.get(`auth/methods/${id}/callback`, { code });
   }
 
+  authorizeByData(id: string, data: Record<string, unknown>, method: 'get' | 'post' = 'get'): Promise<{ accessToken: string, user: IUser }> {
+    return this.rest.doRequest(
+      `auth/methods/${id}/callback`,
+      method,
+      method === 'get' ? undefined : data,
+      method === 'get' ? data : undefined,
+    );
+  }
+
   getCurrent(): Promise<IUser> {
     return this.rest.get(`auth/users/current`);
   }

@@ -1,4 +1,4 @@
-export interface IUser {
+export interface IUser extends Record<string, unknown> {
   id: string;
   type: string;
 

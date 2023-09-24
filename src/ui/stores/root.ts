@@ -66,22 +66,13 @@ export class RootStore {
   }
 
   @flow @processing
-  *authenticateByUsernamePassword(id?: IAuthStrategyMethod['id']) {
-    if (!id) {
-      id = 'password';
-    }
-
-    yield this.fetchAuthMethodActions(id);
-
-    // if (this.authMethods[id]?.actions?.redirect) {
-    //   window.location.href = this.authMethods[id]?.actions.redirect;
-    // }
-  }
-
-  @flow @processing
-  *authorize(id?: string) {
+  *authorize(id?: string, data?: Record<string, unknown>) {
     this.authMethods = yield this.usersService.listAuthMethods();
     this.accessToken = RestApiService.accessToken = localStorage.getItem('accessToken');
+
+    if (id) {
+      yield this.fetchAuthMethodActions(id);
+    }
 
     if (this.accessToken && !id) {
       const user = yield this.usersService.getCurrent();
@@ -95,10 +86,17 @@ export class RootStore {
       this.isAuthorized = false;
 
       const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
 
-      if (code) {
-        const { accessToken, user } = yield this.usersService.authorize(id, code);
+      if (!data && urlParams.get('code')) {
+        data = { code: urlParams.get('code') };
+      }
+
+      if (data) {
+        const { accessToken, user } = yield this.usersService.authorizeByData(
+          id,
+          data,
+          this.authMethods[id]?.actions?.callbackUrl?.method ?? 'get',
+        );
 
         localStorage.setItem('accessToken', accessToken);
 
@@ -108,13 +106,23 @@ export class RootStore {
 
         yield this.start(':first');
       } else {
-        yield this.fetchAuthMethodActions(id);
-
         this.isAuthorized = false;
       }
     } else {
       this.isAuthorized = false;
     }
+  }
+
+  @flow @processing
+  *authorizeByUsernamePassword(id?: IAuthStrategyMethod['id']) {
+    if (!id) {
+      id = 'password';
+    }
+
+    yield this.authorize(id, {
+      username: this.authUsername,
+      password: this.authPassword,
+    });
   }
 
   @flow @processing

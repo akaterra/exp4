@@ -24,7 +24,7 @@ export class PublicRestApiService {
   }
 
   @processingRequest
-  protected doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, any>) {
+  doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, any>) {
     const headers = this.doRequestHeaders();
 
     if (data !== undefined) {

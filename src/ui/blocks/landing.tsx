@@ -7,6 +7,7 @@ import { SubSubTitle } from '../atoms/title';
 import { Link } from '../atoms/link';
 import { Input } from '../atoms/input';
 import { Button } from '../atoms/button';
+import {getLandingLogoGradient} from './landing.utils';
 
 const style = {
   container: {
@@ -21,7 +22,7 @@ const style = {
   } as React.CSSProperties,
   landing: {
     container: {
-      backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 6%, rgba(255, 223, 233, 1) 6%, rgba(255, 223, 233, 1) 12%, rgba(255, 191, 212, 1) 12%, rgba(255, 191, 212, 1) 18%, rgba(255, 159, 191, 1) 18%, rgba(255, 159, 191, 1) 25%, rgba(255, 127, 170, 1) 25%, rgba(255, 127, 170, 1) 31%, rgba(255, 95, 148, 1) 31%, rgba(255, 95, 148, 1) 37%, rgba(255, 63, 127, 1) 37%, rgba(255, 63, 127, 1) 43%, rgba(255, 31, 106, 1) 43%, rgba(255, 31, 106, 1) 50%, rgba(255, 0, 85, 1) 50%, rgba(255, 0, 85, 1) 100%)',
+      backgroundImage: getLandingLogoGradient(),
 
       backgroundColor: '#ff0055',
       color: 'white',
@@ -109,7 +110,7 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
                 <Button
                   disabled={ !store.authPassword || !store.authUsername }
                   x={ 4 }
-                  onClick={ () => store.authenticate(authMethodPassword.id) }
+                  onClick={ () => store.authorizeByUsernamePassword(authMethodPassword.id) }
                 >Login</Button>
               </div>
             </div>

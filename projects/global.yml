@@ -15,6 +15,10 @@ auth:
     title: "JumpCloud"
     config:
       integration: "jumpcloud"
+  password:
+    type: "password"
+    config:
+      storage: "file"
 
 integrations:
   github:
@@ -27,3 +31,5 @@ storages:
     type: "github"
     config:
       integration: "github"
+  file:
+    type: "file"
