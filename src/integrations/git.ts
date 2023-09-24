@@ -1,4 +1,4 @@
-import { simpleGit, SimpleGit, SimpleGitOptions } from 'simple-git';
+import { simpleGit, SimpleGit } from 'simple-git';
 import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
@@ -30,12 +30,12 @@ export class GitIntegrationService extends EntityService implements IIntegration
   }
 
   @IncStatistics() @Log('debug')
-  async branchCheckout(branch, repo?, org?) {
+  async branchCheckout(branch) {
     return this.client.checkout(branch);
   }
 
   @IncStatistics() @Log('debug')
-  async branchCreate(branch, sha, repo?, org?) {
+  async branchCreate(branch, sha) {
     return this.client.checkoutLocalBranch(branch, [ sha ]).catch((err) => {
       logErrorWarn(err, 'GitIntegrationService.branchCreate', { branch: this.branch(branch) });
 
@@ -48,7 +48,7 @@ export class GitIntegrationService extends EntityService implements IIntegration
   }
 
   @IncStatistics() @Log('debug')
-  async branchDelete(branch, repo?, org?) {
+  async branchDelete(branch) {
     await this.branchCreate('source_flow_tmp', 'HEAD');
     await this.branchCheckout('source_flow_tmp');
     await this.client.deleteLocalBranch(branch).catch((err) => {
@@ -63,7 +63,7 @@ export class GitIntegrationService extends EntityService implements IIntegration
   }
 
   @IncStatistics() @Log('debug')
-  async branchGet(branch?, repo?, org?) {
+  async branchGet(branch?) {
     return this.client.log([ this.branch(branch), '-1' ]).then(
       (res) => res.latest ? res : null
     ).catch((err) => {
@@ -78,12 +78,12 @@ export class GitIntegrationService extends EntityService implements IIntegration
   }
 
   @IncStatistics() @Log('debug')
-  async orgMembersList(org?) {
+  async orgMembersList() {
     return [];
   }
 
   @IncStatistics() @Log('debug')
-  async merge(sourceBranch, targetBranch, commitMessage?, repo?, org?) {
+  async merge(sourceBranch, targetBranch, commitMessage?) {
     await this.client.mergeFromTo(sourceBranch, targetBranch);
   }
 
@@ -104,7 +104,7 @@ export class GitIntegrationService extends EntityService implements IIntegration
   }
 
   @IncStatistics() @Log('debug')
-  async userGet(username) {
+  async userGet() {
     return null;
   }
 

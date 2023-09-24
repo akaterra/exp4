@@ -5,7 +5,6 @@ import './mini.min.css';
 import 'normalize.css';
 import { Navigation } from './blocks/navigation';
 import { ProjectsStore } from './stores/projects';
-import { Row } from './atoms/row';
 import { Project } from './blocks/project';
 import { observer } from 'mobx-react-lite';
 import { GlobalModal } from './blocks/modal';
@@ -19,8 +18,7 @@ import {
 } from "react-router-dom";
 import { IProject } from './stores/dto/project';
 import { Statistics } from './blocks/statistics';
-import { Top } from './blocks/top';
-import { Logo } from './blocks/logo';
+import { Landing } from './blocks/landing';
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
   return <Project project={ projects.selectedProjectStore } />;
@@ -45,19 +43,12 @@ let router;
 
 export const App = () => {
   return <React.Fragment>
-    <Logo store={ rootStore } />
+    <Landing store={ rootStore } />
     <div className="container med ltr square">
       <GlobalAlerts />
       <GlobalDetailsPanel />
       <GlobalModal />
     </div>
-    {/* <div className=''>
-      <div className="container med ltr square pad-hor triple">
-        <div className='row flex flex-middle'>
-          <Top />
-        </div>
-      </div>
-    </div> */}
     <div className='paragraph paragraph-lrg'>
       <div className="container med ltr square pad-hor triple">
         <div className='row'>
@@ -78,8 +69,8 @@ export const App = () => {
         path: '/auth/:id/callback',
         element: <div />,
         loader: async ({ params }) => {
-          console.log(params);
-          await rootStore.authenticate(params.id);
+          await rootStore.isReady;
+          await rootStore.authorize(params.id);
   
           return null;
         },

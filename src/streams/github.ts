@@ -1,4 +1,3 @@
-import { Octokit } from '@octokit/rest';
 import { IStreamService } from './stream.service';
 import { IProjectTarget, IProjectTargetStream } from '../project';
 import { IStream } from '../stream';

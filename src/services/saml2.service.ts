@@ -1,6 +1,6 @@
 import * as saml2 from 'saml2-js';
-import { existsSync, readFileSync } from "fs";
-import {logError} from '../logger';
+import { readFileSync } from "fs";
+import { logError } from '../logger';
 
 export class Saml2Service {
   public metadata;
@@ -41,7 +41,7 @@ export class Saml2Service {
       private_key: pem,
       assert_endpoint: `${publicDomain}/auth/methods/saml2/acs`,
       force_authn: true,
-      auth_context: { comparison: "exact", class_refs: ["urn:oasis:names:tc:SAML:1.0:am:password"] },
+      auth_context: { comparison: "exact", class_refs: [ "urn:oasis:names:tc:SAML:1.0:am:password" ] },
       nameid_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
       sign_get_request: false,
       allow_unencrypted_assertion: true
@@ -82,7 +82,7 @@ export class Saml2Service {
 
   async getLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.serviceProvider.create_login_request_url(this.identityProvider, this.serviceProviderOptions, (err, loginUrl, requestId) => {
+      this.serviceProvider.create_login_request_url(this.identityProvider, this.serviceProviderOptions, (err, loginUrl) => {
         if (err) {
           reject(err);
         } else {

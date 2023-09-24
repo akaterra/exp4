@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { IUser } from './user';
 import { v4 } from 'uuid';
-import {AwaitedCache} from './cache';
+import { AwaitedCache } from './cache';
 
 const jwtSecret = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 

@@ -6,7 +6,7 @@ import { EntityService } from '../entities.service';
 import { request } from '../utils';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import {rest} from '../services/rest-api.service';
+import { rest } from '../services/rest-api.service';
 
 @Service()
 export class ExternalRestServiceStorageService extends EntityService implements IStorageService {
@@ -27,7 +27,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = ExternalRestServiceStorageService.getKey(key);
     
     if (this.cache.has(intKey)) {
@@ -47,7 +47,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = ExternalRestServiceStorageService.getKey(key);
 
     await rest.withHeaders(this.config?.headers).post(
@@ -67,7 +67,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
     maxLength?: number,
   ): Promise<D> {
-    let intVal = await this.varGet(target, key, null, true);
+    let intVal = await this.varGet(target, key, null);
 
     if (Array.isArray(intVal)) {
       if (uniq) {
@@ -91,7 +91,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
       intVal = intVal.slice(-maxLength);
     }
 
-    await this.varSet(target, key, intVal, true);
+    await this.varSet(target, key, intVal);
 
     return val;
   }
@@ -106,7 +106,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = ExternalRestServiceStorageService.getKeyStream(key, stream.id);
 
     if (this.cache.has(intKey)) {
@@ -125,7 +125,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     return val !== undefined ? val : def;
   }
 
-  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = ExternalRestServiceStorageService.getKeyStream(key, stream.id);
 
     await rest.withHeaders(this.config?.headers).post(
@@ -145,7 +145,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
     maxLength?: number,
   ): Promise<D> {
-    let intVal = await this.varGetStream(stream, key, null, true);
+    let intVal = await this.varGetStream(stream, key, null);
 
     if (Array.isArray(intVal)) {
       if (uniq) {
@@ -169,7 +169,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
       intVal = intVal.slice(-maxLength);
     }
 
-    await this.varSetStream(stream, key, intVal, true);
+    await this.varSetStream(stream, key, intVal);
 
     return val;
   }

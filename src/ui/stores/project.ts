@@ -1,4 +1,4 @@
-import { makeObservable, observable, computed, flow, FlowCancellationError } from 'mobx';
+import { makeObservable, observable, computed, flow } from 'mobx';
 import { IProject, IProjectFlowAction, IProjectTarget, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
@@ -8,7 +8,7 @@ import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blo
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
 import { processing, splitFilterTokens } from './utils';
-import {alertsStore} from '../blocks/alerts';
+import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 
 export class ProjectTargetStore extends BaseStore {

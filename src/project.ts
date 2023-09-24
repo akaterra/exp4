@@ -300,7 +300,7 @@ export class Project implements IProject {
               };
 
               if (streamDef.actions) {
-                Object.entries(streamDef.actions).forEach(([ actionKey, actionDef ], i) => {
+                Object.entries(streamDef.actions).forEach((action, i) => {
                   const flowId = `${Date.now()}:${i}:${targetId}:${streamId}`;
 
                   this.flows[flowId] = {

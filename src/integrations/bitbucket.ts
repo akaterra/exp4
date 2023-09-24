@@ -75,7 +75,7 @@ export class BitbucketIntegrationService extends EntityService implements IInteg
   }
 
   @IncStatistics() @Log('debug')
-  async orgMembersList(workspace?) {
+  async orgMembersList() {
     return [];
   }
 
@@ -115,7 +115,7 @@ export class BitbucketIntegrationService extends EntityService implements IInteg
   }
 
   @IncStatistics() @Log('debug')
-  async tagCreate(sha, tag, commitMessage?, repo?, workspace?, noRecreate?) {
+  async tagCreate(sha, tag, commitMessage?, repo?, workspace?) {
     return (await this.client.refs.createTag({
       _body: { name: tag, target: { hash: sha } } as any,
       repo_slug: this.repo(repo),
@@ -126,7 +126,7 @@ export class BitbucketIntegrationService extends EntityService implements IInteg
       if (err?.error?.error?.message.includes('already exists')) {
         await this.client.refs.deleteTag({ name: tag, repo_slug: this.repo(repo), workspace: this.workspace(workspace) });
 
-        return { data: await this.tagCreate(sha, tag, commitMessage, repo, workspace, true) };
+        return { data: await this.tagCreate(sha, tag, commitMessage, repo, workspace) };
       }
 
       return Promise.reject(err);

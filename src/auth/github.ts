@@ -2,8 +2,6 @@ import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Autowired, err, request } from '../utils';
-import { IntegrationsService } from '../integrations.service';
-import { GithubIntegrationService } from '../integrations/github';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
@@ -60,7 +58,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
       id: this.id,
       type: this.type,
       actions: {
-        redirect: `https://github.com/login/oauth/authorize?client_id=${this.config?.credentials?.clientId}&client_secret=${this.config?.credentials?.clientSecret}&redirect_uri=${encodeURIComponent(this.config?.credentials?.callbackUrl)}`,
+        redirect: `https://github.com/login/oauth/authorize?client_id=${this.config?.credentials?.clientId}&client_secret=${this.config?.credentials?.clientSecret}&redirect_uri=${encodeURIComponent(this.getRedirectUri())}`,
       },
     };
   }
@@ -88,7 +86,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
           client_id: this.config?.credentials?.clientId,
           client_secret: this.config?.credentials?.clientSecret,
           code: req.query.code,
-          redirect_uri: this.config?.credentials?.callbackUrl,
+          redirect_uri: this.getRedirectUri(),
         },
         'post',
       );
@@ -109,5 +107,9 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
 
       res.json(prepareAuthData(user));
     }));
+  }
+
+  private getRedirectUri() {
+    return this.config?.credentials?.callbackUrl || `${process.env.DOMAIN || 'http://localhost:9002'}/auth/${this.id}/callback`;
   }
 }

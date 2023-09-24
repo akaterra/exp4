@@ -62,22 +62,22 @@ export class RestApiService {
       : `${this.opts?.domain}/${this.opts?.path}${path}?${encodeQuery(query)}`;
 
     switch (format) {
-      case 'json':
-        headers['Accept'] = 'application/json';
-        break;
-      case 'text':
-        headers['Accept'] = 'text/plain';
-        break;
+    case 'json':
+      headers['Accept'] = 'application/json';
+      break;
+    case 'text':
+      headers['Accept'] = 'text/plain';
+      break;
     }
 
     let request;
 
     if (data !== undefined) {
       switch (format) {
-        case 'json':
-          headers['Content-Type'] = 'application/json';
-          data = JSON.stringify(data);
-          break;
+      case 'json':
+        headers['Content-Type'] = 'application/json';
+        data = JSON.stringify(data);
+        break;
       }
 
       request = fetch(url, { method, body: data, headers });
@@ -89,12 +89,12 @@ export class RestApiService {
       let tempRes: any = res;
 
       switch (format) {
-        case 'json':
-          tempRes = res.json();
-          break;
-        case 'text':
-          tempRes = res.text();
-          break;
+      case 'json':
+        tempRes = res.json();
+        break;
+      case 'text':
+        tempRes = res.text();
+        break;
       }
 
       if (res.status >= 200 && res.status <= 299) {

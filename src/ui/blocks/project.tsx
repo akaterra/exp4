@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SubSubTitle, SubTitle, Title } from '../atoms/title';
+import { SubTitle, Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
@@ -190,7 +190,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
               <div className='c-6'>Artifact value</div>
             </div>
             {
-              projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }, i) => {
+              projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }) => {
                 if (!artifacts?.length) {
                   return null;
                 }
@@ -203,7 +203,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                       {
                         j === 0
                           ? <span className={ `span ${streamState._label} overflow` }>
-                              { stream.title ?? stream.id }
+                            { stream.title ?? stream.id }
                               &nbsp;
                             <span className='font-sml sup'>{streamState?.version}</span>
                           </span>

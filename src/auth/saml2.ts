@@ -1,13 +1,13 @@
 import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
-import { Autowired, err, request } from '../utils';
+import { Autowired, err } from '../utils';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
 import { authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
-import {Saml2Service} from '../services/saml2.service';
+import { Saml2Service } from '../services/saml2.service';
 
 @Service()
 export class Saml2AuthStrategyService extends EntityService implements IAuthStrategyService {
@@ -30,7 +30,7 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
     urls?: {
       login?: string;
       logout?: string;
-      ui?: string;
+      callbackUrl?: string;
     };
     extra?: {
       entityId?: string;
@@ -85,7 +85,7 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
       }
       const ott = generateOneTimeToken(user);
 
-      res.redirect(`${this.config?.urls?.ui ?? 'http://localhost:9002/auth/saml2/callback'}?code=${ott}`);
+      res.redirect(`${this.config?.urls?.callbackUrl ?? `${process.env.DOMAIN || 'http://localhost:9002'}/auth/${this.id}/callback`}?code=${ott}`);
     }));
 
     app.get(path + '/callback', err(async (req, res) => {

@@ -24,7 +24,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = FileStorageService.getKey(key);
     const cacheKey = `${intKey}:target`;
     
@@ -36,7 +36,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = FileStorageService.getKey(key);
 
     await this.putJson(intKey, val);
@@ -52,7 +52,7 @@ export class FileStorageService extends EntityService implements IStorageService
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
     maxLength?: number,
   ): Promise<D> {
-    let intVal = await this.varGet(target, key, null, true);
+    let intVal = await this.varGet(target, key, null);
 
     if (Array.isArray(intVal)) {
       if (uniq) {
@@ -76,7 +76,7 @@ export class FileStorageService extends EntityService implements IStorageService
       intVal = intVal.slice(-maxLength);
     }
 
-    await this.varSet(target, key, intVal, true);
+    await this.varSet(target, key, intVal);
 
     return val;
   }
@@ -90,7 +90,7 @@ export class FileStorageService extends EntityService implements IStorageService
     return intVal;
   }
 
-  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = FileStorageService.getKeyStream(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
@@ -102,7 +102,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = FileStorageService.getKeyStream(key, stream.id);
 
     await this.putJson(intKey, val);
@@ -118,7 +118,7 @@ export class FileStorageService extends EntityService implements IStorageService
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
     maxLength?: number,
   ): Promise<D> {
-    let intVal = await this.varGetStream(stream, key, null, true);
+    let intVal = await this.varGetStream(stream, key, null);
 
     if (Array.isArray(intVal)) {
       if (uniq) {
@@ -142,7 +142,7 @@ export class FileStorageService extends EntityService implements IStorageService
       intVal = intVal.slice(-maxLength);
     }
 
-    await this.varSetStream(stream, key, intVal, true);
+    await this.varSetStream(stream, key, intVal);
 
     return val;
   }

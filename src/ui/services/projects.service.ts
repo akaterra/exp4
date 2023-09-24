@@ -1,7 +1,7 @@
 import { Status } from '../enums/status';
 import { IProject, IProjectFlowAction, IProjectFlow, IProjectTarget } from '../stores/dto/project';
 import { IProjectState } from '../stores/dto/project-state';
-import {splitFilterTokens} from '../stores/utils';
+import { splitFilterTokens } from '../stores/utils';
 import { RestApiService } from './rest-api.service';
 
 export class ProjectsService {

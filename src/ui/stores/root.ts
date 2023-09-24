@@ -6,7 +6,7 @@ import { processing } from './utils';
 import { RestApiService } from '../services/rest-api.service';
 import { ProjectsStore } from './projects';
 import { StatisticsStore } from './statistics';
-import {IProject} from './dto/project';
+import { IProject } from './dto/project';
 import { Router } from '@remix-run/router/router';
 
 export class RootStore {
@@ -19,6 +19,10 @@ export class RootStore {
 
   @observable
     authMethods: Record<string, IAuthStrategyMethod> = {};
+  @observable
+    authPassword: string | null = null;
+  @observable
+    authUsername: string | null = null;
   @observable
     isAuthorized: boolean | null = null;
   @observable
@@ -49,7 +53,33 @@ export class RootStore {
   }
 
   @flow @processing
-  *authenticate(id?: string) {
+  *authenticate(id?: IAuthStrategyMethod['id']) {
+    if (!id) {
+      id = 'github';
+    }
+
+    yield this.fetchAuthMethodActions(id);
+
+    if (this.authMethods[id]?.actions?.redirect) {
+      window.location.href = this.authMethods[id]?.actions.redirect;
+    }
+  }
+
+  @flow @processing
+  *authenticateByUsernamePassword(id?: IAuthStrategyMethod['id']) {
+    if (!id) {
+      id = 'password';
+    }
+
+    yield this.fetchAuthMethodActions(id);
+
+    // if (this.authMethods[id]?.actions?.redirect) {
+    //   window.location.href = this.authMethods[id]?.actions.redirect;
+    // }
+  }
+
+  @flow @processing
+  *authorize(id?: string) {
     this.authMethods = yield this.usersService.listAuthMethods();
     this.accessToken = RestApiService.accessToken = localStorage.getItem('accessToken');
 
@@ -61,14 +91,14 @@ export class RootStore {
       }
 
       this.isAuthorized = true;
-    } else {
+    } else if (id) {
       this.isAuthorized = false;
 
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
 
       if (code) {
-        const { accessToken, user } = yield this.usersService.authorize(id ?? 'github', code);
+        const { accessToken, user } = yield this.usersService.authorize(id, code);
 
         localStorage.setItem('accessToken', accessToken);
 
@@ -78,22 +108,30 @@ export class RootStore {
 
         yield this.start(':first');
       } else {
-        yield this.fetchAuthMethodActions(id ?? 'github');
+        yield this.fetchAuthMethodActions(id);
+
+        this.isAuthorized = false;
       }
+    } else {
+      this.isAuthorized = false;
     }
   }
 
   @flow @processing
-  *fetchAuthMethodActions(id: IAuthStrategyMethod['id']): IAuthStrategyMethod['actions'] {
+  *fetchAuthMethodActions(id?: IAuthStrategyMethod['id']): IAuthStrategyMethod['actions'] {
+    if (!id) {
+      id = 'github';
+    }
+
     const authMethod = this.authMethods[id];
 
     if (authMethod) {
       this.authMethods[id] = { ...authMethod, ...yield this.usersService.listAuthMethodActions(id) };
 
-      return authMethod.actions;
+      yield this.authMethods[id].actions;
+    } else {
+      yield null;      
     }
-
-    return null;
   }
 
   @flow @processing
@@ -103,12 +141,12 @@ export class RootStore {
     this.accessToken = null;
     this.isAuthorized = false;
 
-    yield this.authenticate();
+    yield this.authorize();
   }
 
   @flow @processing
   *start(selectedProjectId?: IProject['id'] | ':first') {
-    yield this.authenticate();
+    yield this.authorize();
 
     if (this.isAuthorized) {
       yield this.projectsStore.fetch();

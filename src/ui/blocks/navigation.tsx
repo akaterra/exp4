@@ -1,9 +1,9 @@
 import React from 'react';
 import { SubTitle } from '../atoms/title';
-import { Link, NavLink } from '../atoms/link';
+import { NavLink } from '../atoms/link';
 import { ProjectsStore } from '../stores/projects';
 import { observer } from 'mobx-react-lite';
-import { RootStore, rootStore } from '../stores/root';
+import { RootStore } from '../stores/root';
 
 export const Navigation = observer(({ projects, root }: { projects: ProjectsStore, root: RootStore }) => {
   // bootstrap, app loading

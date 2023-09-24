@@ -1,12 +1,9 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
-import { AwaitedCache } from '../cache';
-import { IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import fs from 'node:fs/promises';
-import path from 'path';
 
 @Service()
 export class StubStorageService extends EntityService implements IStorageService {
@@ -18,12 +15,12 @@ export class StubStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     return null;
   }
 
   @Log('debug')
-  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
 
   }
 
@@ -43,12 +40,12 @@ export class StubStorageService extends EntityService implements IStorageService
     return null;
   }
 
-  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
     return null;
   }
 
   @Log('debug')
-  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
     return null;
   }
 

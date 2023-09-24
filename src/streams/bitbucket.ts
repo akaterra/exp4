@@ -6,19 +6,18 @@ import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
 import { hasScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
-import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
-import {BitbucketIntegrationService} from '../integrations/bitbucket';
+import { BitbucketIntegrationService } from '../integrations/bitbucket';
 
-const JOB_CONSLUSION_TO_STATUS_MAP = {
-  failure: Status.FAILED,
-  skipped: Status.COMPLETED,
-  success: Status.COMPLETED,
-}
-const JOB_STATUS_TO_STATUS_MAP = {
-  is_progress: Status.PROCESSING,
-}
+// const JOB_CONSLUSION_TO_STATUS_MAP = {
+//   failure: Status.FAILED,
+//   skipped: Status.COMPLETED,
+//   success: Status.COMPLETED,
+// }
+// const JOB_STATUS_TO_STATUS_MAP = {
+//   is_progress: Status.PROCESSING,
+// }
 
 export type IBitbucketTargetStream = IProjectTargetStream<{
   integration?: string;

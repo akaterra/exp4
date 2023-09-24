@@ -52,20 +52,22 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       : Status.SUCCESS;
 
   return <React.Fragment>
-    <div>
-      <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a>
+    <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
+      <div>
+        <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a>
+      </div>
+      <div>
+        {
+          lastChange
+            ? <span>In <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
+            : <span className='span warning'>Not in <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
+        }
+      </div>
+      <StatusLine isFailed={ isFailed } status={ status } />
     </div>
-    <div>
-      {
-        lastChange
-          ? <span>In <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
-          : <span className='span warning'>Not in <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
-      }
-    </div>
-    <StatusLine isFailed={ isFailed } status={ status } />
     {
       lastAction
-        ? <div className='paragraph paragraph-lrg children-gap'>
+        ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
             <div className='caption smallest clear-padding-top'>Last action</div>
             <Label>{ lastAction?.description ?? 'No description' }</Label>
@@ -110,7 +112,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     }
     {
       lastChange
-        ? <div className='paragraph paragraph-lrg children-gap'>
+        ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
             <div className='caption smallest clear-padding-top'>Last change</div>
             <Label>{ lastChange?.description ?? 'No description' }</Label>
@@ -147,7 +149,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     }
     {
       projectTargetStreamState?.history?.artifact?.length
-        ? <div className='paragraph paragraph-lrg children-gap'>
+        ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div className='caption smallest clear-padding-top'>Artifacts</div>
           {
             projectTargetStreamState?.history?.artifact.map((artifact) => {
@@ -161,7 +163,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     }
     {
       projectTargetStore?.actionsForStream(projectTargetStream.id)?.length
-        ? <div className='paragraph paragraph-lrg children-gap'>
+        ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
             {
               projectTargetStore?.actionsForStream(projectTargetStream.id)?.map(({ action, streamIds }, i) => {

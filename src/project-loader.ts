@@ -123,19 +123,7 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
     const streamsService = definition.env.streams;
 
     for (const [ ,target ] of Object.entries(definition.targets)) {
-      for (const [ defId, defConfig ] of Object.entries(target.streams)) {
-        // const use = defConfig.use ? definition.targets[defConfig.use]?.streams?.[defId] : null;
-
-        // if (use) {
-        //   for (const [ key, val ] of Object.entries(use)) {
-        //     if (defConfig[key] === undefined) {
-        //       defConfig[key] = val;
-        //     }
-        //   }
-
-        //   delete defConfig.use;
-        // }
-
+      for (const [ , defConfig ] of Object.entries(target.streams)) {
         defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
         streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
       }

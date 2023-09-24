@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Logo } from '../atoms/logo';
-import { Input } from '../atoms/input';
 
 export const Top = () => {
   return <React.Fragment>

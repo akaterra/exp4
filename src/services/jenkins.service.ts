@@ -1,4 +1,3 @@
-import { request } from '../utils';
 import { rest } from './rest-api.service';
 
 export class JenkinsService {

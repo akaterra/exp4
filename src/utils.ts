@@ -1,10 +1,9 @@
 import Container from 'typedi';
 import * as _ from 'lodash';
-import fetch from 'node-fetch-native';
 import YAML from 'yaml'
 import fs from 'fs';
 import { logError } from './logger';
-import {rest} from './services/rest-api.service';
+import { rest } from './services/rest-api.service';
 
 const EXTENSIONS = {
   json: 'json',

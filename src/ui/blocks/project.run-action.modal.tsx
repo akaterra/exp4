@@ -89,7 +89,7 @@ export const ProjectRunActionModalContent = ({
   }
 
   return <div className='row'>
-    <div className='c18 children-gap'>
+    <div className='c18 flex flex-ver children-gap'>
       <div>
         Are you sure to run action <span className='bold'>"{ projectFlowAction?.title }"</span> for
         <ul>

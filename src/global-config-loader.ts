@@ -29,8 +29,8 @@ export async function createGlobalConfig(definition: IGlobalConfig, notThrow?: b
       authStrategiesService.addFactory(auth);
     }
 
-    for (const [ , defConfig ] of Object.entries(definition.auth)) {
-      authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defConfig.type);
+    for (const [ defId, defConfig ] of Object.entries(definition.auth)) {
+      authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 

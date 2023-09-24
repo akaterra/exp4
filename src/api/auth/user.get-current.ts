@@ -1,5 +1,3 @@
-import Container from 'typedi';
-import { AuthStrategiesService } from '../../auth-strategies.service';
 import { logger } from '../../logger';
 
 // /auth/users/current

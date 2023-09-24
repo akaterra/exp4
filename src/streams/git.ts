@@ -6,7 +6,6 @@ import { ITarget } from '../target';
 import { EntityService } from '../entities.service';
 import { hasScope } from '../utils';
 import { GitIntegrationService } from '../integrations/git';
-import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
 
@@ -62,10 +61,7 @@ export class GitStreamService extends EntityService implements IStreamService {
     const integration = this.getIntegrationService(stream);
     const branchName = await this.getBranch(stream);
 
-    await integration.branchDelete(
-      branchName,
-      stream.id,
-    );
+    await integration.branchDelete(branchName);
 
     return null;
   }
@@ -96,7 +92,7 @@ export class GitStreamService extends EntityService implements IStreamService {
 
       const integration = this.getIntegrationService(stream);
       const branchName = await this.getBranch(stream);
-      const branch = hasScope('change', scopes) ? await integration.branchGet(branchName, stream.id) : null;
+      const branch = hasScope('change', scopes) ? await integration.branchGet(branchName) : null;
       const versioningService = await this.projectsService
         .get(stream.ref.projectId)
         .getEnvVersioningByTargetId(stream.ref.targetId);
@@ -173,19 +169,16 @@ export class GitStreamService extends EntityService implements IStreamService {
 
     if (!await targetIntegration.branchGet(
       targetBranchName,
-      targetStream.id,
     )) {
       await targetIntegration.branchCreate(
         targetBranchName,
         source.history.change[0]?.id,
-        targetStream.id,
       );
     } else {
       await targetIntegration.merge(
         sourceBranchName,
         targetBranchName,
         `Release ${source.version}`,
-        targetStream.id,
       );
     }
   }
