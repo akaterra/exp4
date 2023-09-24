@@ -14,11 +14,11 @@ export const FormButton = observer(({ store, id, ...props }: { store: FormStore,
 });
 
 export const FormInput = observer(({ store, id, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
-  return <Input { ...props } currentValue={ store[id] ?? '' } error={ store.$isError[id] } key={ id } label={ store.$opts[id]?.title ?? props.label } onBlur={ () => store.validate(id) } onChange={ (val) => store.onChange(id, val) } />;
+  return <Input { ...props } currentValue={ store[id] ?? '' } error={ store.$isError[id] } id={ id } label={ store.$opts[id]?.title ?? props.label } onBlur={ () => store.validate(id) } onChange={ (val) => store.onChange(id, val) } />;
 });
 
 export const FormSelect = observer(({ store, id, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
-  return <Select { ...props } currentValue={ store[id] } key={ id } label={ store.$opts[id]?.title ?? props.label } onBlur={ () => store.validate(id) } onChange={ (val) => store.onChange(id, val) } />;
+  return <Select { ...props } currentValue={ store[id] } id={ id } label={ store.$opts[id]?.title ?? props.label } onBlur={ () => store.validate(id) } onChange={ (val) => store.onChange(id, val) } />;
 });
 
 export const FormSubmit = observer(({ store, id, ...props }: { store: FormStore, id?: string } & Record<string, unknown>) => {
@@ -26,6 +26,8 @@ export const FormSubmit = observer(({ store, id, ...props }: { store: FormStore,
 });
 
 function formOnClick(store: FormStore, cb) {
+  store.validateAll();
+
   if (store.$isValid && cb) {
     cb();
   }

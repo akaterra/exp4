@@ -29,9 +29,9 @@ export class FormStore {
   clear() {
     for (const [ key, def ] of Object.entries(this.$opts)) {
       this[key] = def.value ?? null;
-
-      this.validate(key, def.value ?? null, true);
     }
+
+    this.validateAll(true);
   }
 
   onChange(key, val) {
@@ -52,8 +52,9 @@ export class FormStore {
       val = this[key];
     }
 
-    const optsKey = this.$opts[key];
     let err: null | string = null;
+
+    const optsKey = this.$opts[key];
 
     if (optsKey?.constraints) {
       const c = optsKey?.constraints;
@@ -93,6 +94,12 @@ export class FormStore {
       this.$isValid = false;
     } else {
       this.$isValid = Object.values(this.$isError).every((error) => !error) && Object.values(this.$isErrorCheck).every((error) => !error);
+    }
+  }
+
+  validateAll(onlyCheck?) {
+    for (const key of Object.keys(this.$opts)) {
+      this.validate(key, undefined, onlyCheck);
     }
   }
 }

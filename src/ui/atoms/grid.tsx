@@ -23,7 +23,7 @@ export function getStyleByGrid(grid: number | '*', style, ns?) {
   return styleCache[ns];
 }
 
-export function C({ x, className = '', children }: { x?: number | string, className?: string, children? }) {
+export function C({ x, className = '', children, id }: { x?: number | string, className?: string, children?, id? }) {
   if (!className) {
     className = '';
   }
@@ -42,5 +42,5 @@ export function C({ x, className = '', children }: { x?: number | string, classN
     }
   }
 
-  return <div className={ className }>{ children }</div>;
+  return <div className={ className } key={ id }>{ children }</div>;
 }

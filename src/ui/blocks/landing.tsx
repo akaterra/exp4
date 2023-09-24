@@ -104,7 +104,7 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
                 <FormInput
                   store={ store.authPasswordStore }
                   id='password'
-                  x={ 4 } label='Password'
+                  x={ 4 } label='Password' type='password'
                 />
               </div>
               <div className='row flex flex-center'>
