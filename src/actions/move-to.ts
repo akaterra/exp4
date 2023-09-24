@@ -9,9 +9,7 @@ import { Autowired } from '../utils';
 export class MoveToActionService extends EntityService implements IActionService {
   @Autowired() protected projectsService: ProjectsService;
 
-  get description() {
-    return 'Moves selected streams between targets';
-  }
+  description = 'Moves selected streams between targets';
 
   get type() {
     return 'moveTo';

@@ -8,21 +8,19 @@ import { ProjectsStore } from './projects';
 import { StatisticsStore } from './statistics';
 import { IProject } from './dto/project';
 import { Router } from '@remix-run/router/router';
+import { FormStore } from './form';
 
 export class RootStore {
   private isReadyResolve: () => any;
   private router: Router;
 
+  readonly authPasswordStore = new FormStore({ username: { constraints: { minLength: 3 } }, password: { constraints: { minLength: 3 } } });
   readonly projectsStore = new ProjectsStore();
   readonly statisticsStore = new StatisticsStore();
   readonly usersService = new UsersService();
 
   @observable
     authMethods: Record<string, IAuthStrategyMethod> = {};
-  @observable
-    authPassword: string | null = null;
-  @observable
-    authUsername: string | null = null;
   @observable
     isAuthorized: boolean | null = null;
   @observable
@@ -120,8 +118,8 @@ export class RootStore {
     }
 
     yield this.authorize(id, {
-      username: this.authUsername,
-      password: this.authPassword,
+      username: this.authPasswordStore['username'],
+      password: this.authPasswordStore['password'],
     });
   }
 
@@ -148,6 +146,7 @@ export class RootStore {
 
     this.accessToken = null;
     this.isAuthorized = false;
+    this.authPasswordStore.clear();
 
     yield this.authorize();
   }

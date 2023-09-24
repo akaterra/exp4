@@ -7,7 +7,7 @@ import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
 import { prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
-import { compare } from 'bcrypt';
+const { compare } = require('bcrypt');
 
 @Service()
 export class PasswordAuthStrategyService extends EntityService implements IAuthStrategyService {

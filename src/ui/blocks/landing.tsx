@@ -8,6 +8,7 @@ import { Link } from '../atoms/link';
 import { Input } from '../atoms/input';
 import { Button } from '../atoms/button';
 import {getLandingLogoGradient} from './landing.utils';
+import { FormInput, FormSubmit } from './form';
 
 const style = {
   container: {
@@ -88,30 +89,30 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
           Manage your versioned code sources easily. Streamline deployment process, ensuring every change is tracked and retrievable.
         </div>
       </div>
-      <div className="container med ltr square">
+      <div className="container med ltr square pad-hor triple">
         {
           authMethodPassword
             ? <div className='paragraph'>
               <div className='row flex flex-center'>
-                <Input
-                  label='Username'
-                  x={ 4 }
-                  onChange={ (value) => store.authUsername = value }
+                <FormInput
+                  store={ store.authPasswordStore }
+                  id='username'
+                  x={ 4 } label='Username'
                 />
               </div>
               <div className='row flex flex-center'>
-                <Input
-                  label='Password'
-                  x={ 4 }
-                  onChange={ (value) => store.authPassword = value }
+                <FormInput
+                  store={ store.authPasswordStore }
+                  id='password'
+                  x={ 4 } label='Password'
                 />
               </div>
               <div className='row flex flex-center'>
-                <Button
-                  disabled={ !store.authPassword || !store.authUsername }
-                  x={ 4 }
+                <FormSubmit
+                  store={ store.authPasswordStore }
                   onClick={ () => store.authorizeByUsernamePassword(authMethodPassword.id) }
-                >Login</Button>
+                  x={ 4 }
+                >Login</FormSubmit>
               </div>
             </div>
             : null

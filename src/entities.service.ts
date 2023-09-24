@@ -16,9 +16,8 @@ export class EntityService {
 
   id: string;
 
-  get description() {
-    return '';
-  }
+  title: string;
+  description: string;
 
   get assertType() {
     return (this.constructor as any).assertType ?? (this.constructor as any).type;
