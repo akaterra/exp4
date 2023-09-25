@@ -14,7 +14,10 @@ export class RootStore {
   private isReadyResolve: () => any;
   private router: Router;
 
-  readonly authPasswordStore = new FormStore({ username: { constraints: { minLength: 3 } }, password: { constraints: { minLength: 3 } } });
+  readonly authPasswordStore = new FormStore({
+    username: { constraints: { minLength: 3, optional: false } },
+    password: { constraints: { minLength: 3, optional: false } },
+  });
   readonly projectsStore = new ProjectsStore();
   readonly statisticsStore = new StatisticsStore();
   readonly usersService = new UsersService();
@@ -146,7 +149,7 @@ export class RootStore {
 
     this.accessToken = null;
     this.isAuthorized = false;
-    this.authPasswordStore.clear();
+    this.authPasswordStore.__clear();
 
     yield this.authorize();
   }

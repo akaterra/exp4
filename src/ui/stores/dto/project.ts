@@ -18,20 +18,20 @@ export interface IProjectFlowActionStep {
 }
 
 export interface IProjectFlowActionParam {
-  type: string;
+  type: 'boolean' | 'enum' | 'number' | 'string';
 
   title?: string;
   description?: string;
 
   constraints?: {
-    enum?: any[];
+    enum?: unknown[];
     min?: number;
     minLength?: number;
     max?: number;
     maxLength?: number;
     optional?: boolean;
   };
-  initialValue: any;
+  initialValue: unknown;
 }
 
 export interface IProjectFlowAction {

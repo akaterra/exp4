@@ -5,8 +5,6 @@ import logo from '../atoms/logo.top.inv.png';
 import landingLogo from '../atoms/logo.inv.png';
 import { SubSubTitle } from '../atoms/title';
 import { Link } from '../atoms/link';
-import { Input } from '../atoms/input';
-import { Button } from '../atoms/button';
 import {getLandingLogoGradient} from './landing.utils';
 import { FormInput, FormSubmit } from './form';
 
@@ -92,19 +90,19 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
       <div className="container med ltr square pad-hor triple">
         {
           authMethodPassword
-            ? <div className='paragraph'>
+            ? <form className='paragraph'>
               <div className='row flex flex-center'>
                 <FormInput
                   store={ store.authPasswordStore }
                   id='username'
-                  x={ 4 } label='Username'
+                  x={ 4 } autoComplete='username' label='Username'
                 />
               </div>
               <div className='row flex flex-center'>
                 <FormInput
                   store={ store.authPasswordStore }
                   id='password'
-                  x={ 4 } label='Password' type='password'
+                  x={ 4 } autoComplete='password' label='Password' type='password'
                 />
               </div>
               <div className='row flex flex-center'>
@@ -114,7 +112,7 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
                   x={ 4 }
                 >Login</FormSubmit>
               </div>
-            </div>
+            </form>
             : null
         }
         <div className='flex flex-center paragraph paragraph-lrg'>

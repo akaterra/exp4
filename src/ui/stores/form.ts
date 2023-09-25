@@ -2,82 +2,110 @@ import * as React from 'react-dom';
 import { computed, makeObservable, observable } from 'mobx';
 
 export class FormStore {
-  $isError: Record<string, null | string> = {};
-  $isErrorCheck: Record<string, null | string> = {};
-  $isValid: boolean = false;
+  __isError: Record<string, null | string> = {};
+  __isErrorCheck: Record<string, null | string> = {};
+  __isValid: boolean = false;
 
-  constructor(public readonly $opts: Record<string, {
+  constructor(public readonly __opts: Record<string, {
     constraints?: {
-      max?: Number;
+      enum?: unknown[];
+      max?: number;
       min?: number;
-      maxLength?: Number;
+      maxLength?: number;
       minLength?: number;
+      optional?: boolean;
     };
     title?: string;
-    type?: 'number' | 'string';
-    value?: unknown;
+    type?: 'boolean' | 'enum' | 'number' | 'string';
+    initialValue?: unknown;
   }>) {
-    this.clear();
+    this.__clear();
 
-    makeObservable(this, Object.keys($opts).reduce((acc, key) => {
+    makeObservable(this, Object.keys(__opts).reduce((acc, key) => {
       acc[key] = observable;
 
       return acc;
-    }, { $isError: observable, $isValid: observable }));
+    }, { __isError: observable, __isValid: observable }));
   }
 
-  clear() {
-    for (const [ key, def ] of Object.entries(this.$opts)) {
-      this[key] = def.value ?? null;
+  getState() {
+    const state: Record<string, unknown> = {};
+
+    for (const key of Object.keys(this.__opts)) {
+      state[key] = this[key];
     }
 
-    this.validateAll(true);
+    return state;
   }
 
-  onChange(key, val) {
-    const optsKey = this.$opts[key];
+  __clear() {
+    for (const [ key, def ] of Object.entries(this.__opts)) {
+      this[key] = def.initialValue ?? null;
+    }
+
+    this.__validateAll(true);
+  }
+
+  __onChange(key, val) {
+    const optsKey = this.__opts[key];
 
     switch (optsKey?.type) {
+      case 'boolean':
+        val = val === 'true' ? true : val === 'false' ? false : !!val;
+        break;
       case 'number':
         val = parseInt(val, 10);
+        break;
     }
 
     this[key] = val;
 
-    this.validate(key, val, true);
+    this.__validate(key, val, true);
   }
 
-  validate(key, val?, onlyCheck?) {
+  __validate(key, val?, onlyCheck?) {
     if (val === undefined) {
       val = this[key];
     }
 
     let err: null | string = null;
 
-    const optsKey = this.$opts[key];
+    const optsKey = this.__opts[key];
 
     if (optsKey?.constraints) {
       const c = optsKey?.constraints;
 
-      if (typeof c?.max === 'number') {
+      if (typeof c?.optional === 'boolean') {
+        if (!c.optional && (val === '' || val == undefined)) {
+          err = `Required`;
+        }
+      }
+
+      if (!err && Array.isArray(c?.enum)) {
+        if (!c.enum.includes(val)) {
+          err = `Must be one of ${c.enum.map((e) => `"${e}"`).join(', ')} values`;
+        }
+      }
+
+      if (!err && typeof c?.max === 'number') {
         if (parseInt(val, 10) > c.max) {
           err = `Must be less than ${c.max}`;
         }
       }
 
-      if (typeof c?.min === 'number') {
+      if (!err && typeof c?.min === 'number') {
         if (parseInt(val, 10) < c.min) {
           err = `Must be greater than ${c.min}`;
         }
       }
 
-      if (typeof c?.maxLength === 'number') {
+      if (!err && typeof c?.maxLength === 'number') {
         if ((val?.length ?? 0) > c.maxLength) {
           err = `Must not exceed ${c.maxLength} ${c.maxLength === 1 ? 'symbol' : 'symbols'}`;
         }
       }
 
-      if (typeof c?.minLength === 'number') {
+      if (!err && typeof c?.minLength === 'number') {
         if ((val?.length ?? 0) < c.minLength) {
           err = `Must have at least ${c.minLength} ${c.minLength === 1 ? 'symbol' : 'symbols'}`;
         }
@@ -85,21 +113,21 @@ export class FormStore {
     }
 
     if (!onlyCheck || !err) {
-      this.$isError[key] = err;
+      this.__isError[key] = err;
     }
 
-    this.$isErrorCheck[key] = err;
+    this.__isErrorCheck[key] = err;
 
     if (err) {
-      this.$isValid = false;
+      this.__isValid = false;
     } else {
-      this.$isValid = Object.values(this.$isError).every((error) => !error) && Object.values(this.$isErrorCheck).every((error) => !error);
+      this.__isValid = Object.values(this.__isError).every((error) => !error) && Object.values(this.__isErrorCheck).every((error) => !error);
     }
   }
 
-  validateAll(onlyCheck?) {
-    for (const key of Object.keys(this.$opts)) {
-      this.validate(key, undefined, onlyCheck);
+  __validateAll(onlyCheck?) {
+    for (const key of Object.keys(this.__opts)) {
+      this.__validate(key, undefined, onlyCheck);
     }
   }
 }

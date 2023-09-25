@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { maybeLabeledControl } from './utils';
 
-export const Select = ({ className = undefined, currentValue = undefined, decoration = undefined, disabled = false, error = undefined, items, id = undefined, label = undefined, onBlur = undefined, onChange = undefined, x = 2 }: { items: string[] | Record<string, any> } & any) => {
+export const Select = ({ autoComplete = undefined, className = undefined, currentValue = undefined, decoration = undefined, disabled = false, error = undefined, items, id = undefined, label = undefined, onBlur = undefined, onChange = undefined, x = 2 }: { items: string[] | Record<string, any> } & any) => {
   if (error) {
     className = className ? `${className} failure` : 'failure';
   }
@@ -10,6 +10,7 @@ export const Select = ({ className = undefined, currentValue = undefined, decora
 
   const control = Array.isArray(items)
     ? <select
+      autoComplete={ autoComplete }
       className={ disabled ? `control ${decoration ?? ''} disabled` : `control ${decoration ?? ''}` }
       disabled={ disabled }
       key={ id }

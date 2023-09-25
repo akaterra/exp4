@@ -8,16 +8,19 @@ export const componentSingleStyle = {
 
 };
 
-export const Button = ({ children, className = null, disabled = false, key = undefined, label = null, x = undefined, onBlur = undefined, onClick = undefined, style = {} }: any) => {
+export const Button = ({ children, className = null, disabled = false, error = undefined, key = undefined, label = null, preventDefault = undefined, x = undefined, type = undefined, onBlur = undefined, onClick = undefined, style = {} }: any) => {
   const Component = <button
     className={ disabled ? `button unbound ${className ?? ''} disabled` : `button unbound ${className ?? ''}` }
     disabled={ disabled }
     key={ key }
     style={ style }
+    type={ type }
     onBlur={ !disabled && onBlur ? ((e) => onBlur((e.target as HTMLInputElement).value)) : undefined }
     onClick={ !disabled
-      ? () => {
-        // e.preventDefault();
+      ? (e) => {
+        if (preventDefault) {
+          e.preventDefault();
+        }
 
         if (onClick) {
           onClick();
@@ -27,7 +30,7 @@ export const Button = ({ children, className = null, disabled = false, key = und
     }
   >{ children }</button>;
 
-  return maybeLabeledControl(Component, x, label);
+  return maybeLabeledControl(Component, x, label, error);
 }
 
 Button.Failure = stylize(Button, { className: 'failure' });

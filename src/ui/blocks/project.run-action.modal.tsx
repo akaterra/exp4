@@ -5,6 +5,7 @@ import { ProjectFlowActionParamsStore } from '../stores/project';
 import { Select } from '../atoms/select';
 import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
+import { FormInput, FormSelect } from './form';
 
 export const ProjectRunActionModalTitle = ({
   // store,
@@ -50,38 +51,27 @@ export const ProjectRunActionModalContent = ({
     for (const [ key, param ] of Object.entries(projectFlowActionParamsStore?.projectFlowAction?.params)) {
       switch (param.type) {
       case 'enum':
-        ParamsElements.push(<div key={ key }>
-          <Select
-            items={ param.constraints?.enum ?? [] } currentValue={ projectFlowActionParamsStore.paramsValues[key] ?? '' }
-            error={ projectFlowActionParamsStore.paramsErrors[key] }
-            key={ key }
+        ParamsElements.push(
+          <FormSelect
+            store={ projectFlowActionParamsStore }
+            items={ param.constraints?.enum ?? [] }
+            id={ key }
             label={ param.title ?? key }
-            x={ null }
-            onBlur={ (val) => {
-              projectFlowActionParamsStore.setValue(key, val);
-              projectFlowActionParamsStore.validate();
-            } }
-            onChange={ _ => _ }
+            // x={ null }
           />
-        </div>);
+        );
 
         break;
 
       case 'string':
-        ParamsElements.push(<div key={ key }>
-          <Input
-            currentValue={ projectFlowActionParamsStore.paramsValues[key] ?? '' }
-            error={ projectFlowActionParamsStore.paramsErrors[key] }
-            key={ key }
+        ParamsElements.push(
+          <FormInput
+            store={ projectFlowActionParamsStore }
+            id={ key }
             label={ param.title ?? key }
-            x={ null }
-            onBlur={ (val) => {
-              projectFlowActionParamsStore.setValue(key, val);
-              projectFlowActionParamsStore.validate();
-            } }
-            onChange={ _ => _ }
+            // x={ null }
           />
-        </div>);
+        );
 
         break;
       }

@@ -10,6 +10,7 @@ import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModal
 import { processing, splitFilterTokens } from './utils';
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
+import { FormStore } from './form';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -258,100 +259,9 @@ export class ProjectTargetStore extends BaseStore {
   }
 }
 
-export class ProjectFlowActionParamsStore extends BaseStore {
-  @observable
-    isValid: boolean = true;
-  @observable
-    projectFlowAction: IProjectFlowAction;
-  @observable
-    paramsErrors: Record<string, string | null> = {};
-  @observable
-    paramsValues: Record<string, any> = {};
-
-  constructor(public projectsStore: ProjectsStore, projectFlowAction: IProjectFlowAction) {
-    super();
-    makeObservable(this);
-
-    this.projectFlowAction = projectFlowAction;
-
-    if (projectFlowAction.params) {
-      for (const [ key, val ] of Object.entries(projectFlowAction.params)) {
-        this.paramsValues[key] = val.initialValue;
-      }
-    }
-  }
-
-  setValue(key, val) {
-    if (val !== '') {
-      this.paramsValues[key] = val;
-    } else {
-      this.paramsValues[key] = undefined;
-    }
-  }
-
-  validate() {
-    const params = this.projectFlowAction.params;
-    let isValid = true;
-
-    if (params) {
-      for (const [ key, val ] of Object.entries(this.paramsValues)) {
-        const constraints = params[key].constraints;
-
-        if (constraints) {
-          const errors: string[] = [];
-
-          if (typeof constraints.optional === 'boolean' && !constraints.optional && (val === '' || val === undefined)) {
-            errors.push('Required');
-          }
-
-          if (constraints.optional && (val === '' || val === undefined)) {
-            this.paramsErrors[key] = null;
-
-            continue;
-          }
-
-          if (Array.isArray(constraints.enum) && !constraints.enum.includes(val)) {
-            errors.push(`Only ${constraints.enum.map((e) => `"${e}"`).join(', ')} values allowed`);
-          }
-
-          if (typeof constraints.max === 'number' && parseInt(val) > constraints.max) {
-            errors.push(`${constraints.max} is a max value`);
-          }
-
-          if (typeof constraints.maxLength === 'number' && (val?.length ?? 0) > constraints.maxLength) {
-            errors.push(`Max ${constraints.maxLength} ${constraints.maxLength === 1 ? 'symbol is' : 'symbols are'} allowed`);
-          }
-
-          if (typeof constraints.min === 'number' && parseInt(val) < constraints.min) {
-            errors.push(`${constraints.min} is a min value`);
-          }
-
-          if (typeof constraints.minLength === 'number' && (val?.length ?? 0) < constraints.minLength) {
-            errors.push(`Min ${constraints.minLength} ${constraints.minLength === 1 ? 'symbol' : 'symbols'} required`);
-          }
-
-          if (errors.length) {
-            this.paramsErrors[key] = errors.join(', ');
-          } else {
-            if (this.paramsErrors[key]) {
-              this.paramsErrors[key] = null;
-            }
-          }
-
-          if (errors.length) {
-            isValid = false;
-          }
-        }
-      }
-
-      if (this.isValid !== isValid) {
-        this.isValid = isValid;
-
-        modalStore.updateButtonState('ok', { disabled: !isValid });
-      }
-    }
-
-    return isValid;
+export class ProjectFlowActionParamsStore extends FormStore {
+  constructor(public projectsStore: ProjectsStore, public projectFlowAction: IProjectFlowAction) {
+    super(projectFlowAction.params ?? {});
   }
 }
 
@@ -460,7 +370,7 @@ export class ProjectStore extends BaseStore {
           .values(this.getTargetByTargetId(targetId).streams)
           .filter((stream) => selectedStreamIds.includes(stream.id)),
       },
-      onBeforeSelect: (action) => action === 'ok' ? projectFlowActionParamsStore.validate() : true,
+      onBeforeSelect: (action) => action === 'ok' ? projectFlowActionParamsStore.__isValid : true,
       title: ProjectRunActionModalTitle,
       withClose: true,
     });
@@ -476,7 +386,7 @@ export class ProjectStore extends BaseStore {
         {
           [targetId]: selectedStreamIds as [ string, ...string[] ],
         },
-        projectFlowActionParamsStore.paramsValues,
+        projectFlowActionParamsStore.getState(),
       );
       yield this.fetchState();
 

@@ -71,7 +71,7 @@ export const RadioGroup = ({ children, className = undefined, currentValue = und
   return maybeLabeledControl(Element, null, label, error);
 }
 
-export const Input = ({ className = undefined, currentValue = undefined, disabled = undefined, error = undefined, id = undefined, label = undefined, min = undefined, type = undefined, x = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
+export const Input = ({ autoComplete = undefined, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, id = undefined, label = undefined, min = undefined, type = undefined, x = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
   if (error) {
     className = className ? `${className} failure` : 'failure';
   }
@@ -79,6 +79,7 @@ export const Input = ({ className = undefined, currentValue = undefined, disable
   const [ value, setValue ] = useState(currentValue);
 
   const Element = <input
+    autoComplete={ autoComplete }
     className={ className ? `control ${className}` : 'control' }
     disabled={ disabled }
     key={ id }
