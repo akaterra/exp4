@@ -67,8 +67,10 @@ const style = {
 }
 
 const authMethodTypeToLogoMap = {
+  bitbucket: 'fa-brands fa-bitbucket fa-lg',
   default: 'fa-solid fa-arrow-right-to-bracket fa-lg',
   github: 'fa-brands fa-github fa-lg',
+  gitlab: 'fa-brands fa-gitlab fa-lg',
   saml2: 'fa-solid fa-key fa-lg',
 }
 
@@ -122,13 +124,17 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
                 return null;
               }
 
-              return <div className='center upper'>
+              return <div className='center'>
                 <button
                   className={ `button default transparent unbound ${authMethodTypeToLogoMap[authMethod.type] ?? authMethodTypeToLogoMap.default}` }
                   style={ style.landing.authMethodButton }
                   onClick={ () => store.authenticate(authMethod.id) }
                 />
-                { authMethod.title ?? authMethod.id }
+                {
+                  authMethod.title
+                    ? <span className='font-sml'>{ authMethod.title }</span>
+                    : <span className='font-sml upper'>{ authMethod.id }</span>
+                }
               </div>
             })
           }

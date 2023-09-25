@@ -30,7 +30,7 @@ export async function createGlobalConfig(definition: IGlobalConfig, notThrow?: b
     }
 
     for (const [ defId, defConfig ] of Object.entries(definition.auth)) {
-      authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defId);
+      authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defId, defConfig.title, defConfig.description);
     }
   }
 

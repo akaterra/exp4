@@ -51,27 +51,27 @@ export const ProjectRunActionModalContent = ({
     for (const [ key, param ] of Object.entries(projectFlowActionParamsStore?.projectFlowAction?.params)) {
       switch (param.type) {
       case 'enum':
-        ParamsElements.push(
+        ParamsElements.push(<div>
           <FormSelect
             store={ projectFlowActionParamsStore }
             items={ param.constraints?.enum ?? [] }
             id={ key }
             label={ param.title ?? key }
-            // x={ null }
+            x={ null }
           />
-        );
+        </div>);
 
         break;
 
       case 'string':
-        ParamsElements.push(
+        ParamsElements.push(<div>
           <FormInput
             store={ projectFlowActionParamsStore }
             id={ key }
             label={ param.title ?? key }
-            // x={ null }
+            x={ null }
           />
-        );
+        </div>);
 
         break;
       }

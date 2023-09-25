@@ -349,9 +349,18 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *applyRunAction(targetId: string, streamId: string | string[] | null, actionId: string, flowId?: string) {
-    const selectedStreamIds = streamId
-      ? Array.isArray(streamId) ? streamId : [ streamId ]
-      : Object.values(this.getTargetByTargetId(targetId).streams).map((stream) => stream.id);
+    let selectedStreamIds: IProjectTargetStream['id'][];
+
+    if (streamId) {
+      selectedStreamIds = Array.isArray(streamId)
+        ? streamId
+        : [ streamId ];
+    } else {
+      selectedStreamIds = this.getTargetStoreByTargetId(targetId)
+        ?.actions
+        ?.find((action) => action.action.id === actionId)?.streamIds ?? [];
+    }
+
     const projectFlow = flowId ? this.project?.flows[flowId] : Object
       .values(this.project?.flows)
       .find((flow) => flow.targets.includes(targetId));

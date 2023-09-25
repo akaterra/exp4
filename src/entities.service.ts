@@ -3,8 +3,11 @@ import { Autowired } from "./utils";
 
 export interface IService {
   id: string;
+
+  title: string;
+  description: string;
+
   readonly assertType: string;
-  readonly description: string;
   readonly type: string;
 }
 
@@ -61,11 +64,19 @@ export class EntitiesService<T extends IService = IService> {
     return entity;
   }
 
-  add(entity: T, id?: string) {
+  add(entity: T, id?: string, title?: string, description?: string) {
     this.entities[id ?? entity.type] = entity;
 
     if (id) {
       entity.id = id;
+    }
+
+    if (title) {
+      entity.title = title;
+    }
+
+    if (description) {
+      entity.description = title;
     }
 
     return this;
