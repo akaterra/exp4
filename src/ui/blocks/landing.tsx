@@ -7,6 +7,7 @@ import { SubSubTitle } from '../atoms/title';
 import { Link } from '../atoms/link';
 import {getLandingLogoGradient} from './landing.utils';
 import { FormInput, FormSubmit } from './form';
+import {SLOGAN} from '../const';
 
 const style = {
   container: {
@@ -85,9 +86,7 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
     return <div style={ style.container }>
       <div className='flex flex-ver flex-middle children-gap' style={ style.landing.container }>
         <div style={ style.landing.logo } />
-        <div className='pad-hor triple'>
-          Manage your versioned code sources easily. Streamline deployment process, ensuring every change is tracked and retrievable.
-        </div>
+        <div className='pad-hor triple'>{ SLOGAN }</div>
       </div>
       <div className="container med ltr square pad-hor triple">
         {

@@ -44,6 +44,7 @@
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",
+    "docsify-cli": "^4.4.4",
     "eslint": "^8.48.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "file-loader": "^6.2.0",

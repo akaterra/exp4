@@ -137,14 +137,38 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
 }
 
 function resolveUse(section, definition, sectionKey = null) {
+  if (!sectionKey) {
+    sectionKey = [];
+  }
+
   if (section) {
     if (Array.isArray(section)) {
-      section.forEach((subSection, i) => resolveUse(subSection, definition, `${sectionKey}.${i}`));
+      section.forEach((subSection, i) => {
+        sectionKey.push(i);
+        resolveUse(subSection, definition, sectionKey)
+        sectionKey.pop(i);
+      });
     } else if (typeof section === 'object') {
       if (section.use) {
         for (let [ ,sectionUse ] of iter(section.use)) {
-          if (sectionKey) {
-            sectionUse = sectionUse.replace('%', sectionKey);
+          if (sectionKey && sectionUse.includes('%')) {
+            sectionUse = sectionUse.split('.').map((key) => {
+              if (key.charAt('0') === '%') {
+                if (key.length === 1) {
+                  return sectionKey[sectionKey.length - 1];
+                } else {
+                  const index = parseInt(key.slice(1), 10);
+
+                  if (index < 0) {
+                    return sectionKey[sectionKey.length + index - 1] ?? key;
+                  } else {
+                    return sectionKey[index - 1] ?? key;
+                  }
+                }
+              }
+
+              return key;
+            }).join('.');
           }
   
           const use = _.get(definition, sectionUse);
@@ -152,7 +176,7 @@ function resolveUse(section, definition, sectionKey = null) {
           if (use && typeof use === 'object') {
             for (const [ key, val ] of Object.entries(use)) {
               if (section[key] === undefined) {
-                section[key] = val;
+                section[key] = _.cloneDeep(val);
               }
             }
           }
@@ -162,7 +186,9 @@ function resolveUse(section, definition, sectionKey = null) {
       }
 
       for (const [ subSectionKey, subSection ] of Object.entries(section)) {
-        resolveUse(subSection, definition, subSectionKey);
+        sectionKey.push(subSectionKey);
+        resolveUse(subSection, definition, sectionKey);
+        sectionKey.pop();
       }
     }
   }

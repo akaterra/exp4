@@ -37,7 +37,9 @@ artifacts:
         filter:
           name:
             in:
-              param: "ref.streamId"
+              coalesce:
+                - param: "stream.config.argocdServiceName"
+                - param: "ref.streamId"
           kind:
             eq: "StatefulSet"
         pattern: null
@@ -77,7 +79,9 @@ artifacts:
         filter:
           name:
             in:
-              param: "ref.streamId"
+              coalesce:
+                - param: "stream.config.argocdServiceName"
+                - param: "ref.streamId"
           kind:
             eq: "StatefulSet"
         pattern: null
@@ -118,12 +122,12 @@ integrations:
     type: "github"
     config:
       org: "getpackageltd"
-      branch: "v${version.major}.${version.minor}.${version.patch}"
+      branch: "v${version.major}.${version.minor}"
   githubHotfix:
     type: "github"
     config:
       org: "getpackageltd"
-      branch: "v${version.major}.${version.minor}.${version.patch}"
+      branch: "v${version.major}.${version.minor}.${version.patch}-hotfix"
   githubMaster:
     type: "github"
     config:
@@ -155,7 +159,7 @@ versionings:
     config:
       namespace: "release"
       storage: "github"
-      format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
+      format: "${version.major}.${version.minor} ${version.prerelease}"
   hotfix: &versioningHotfix
     type: "semver"
     config:
@@ -167,7 +171,7 @@ versionings:
     config:
       namespace: "current"
       storage: "github"
-      format: "${version.major}.${version.minor}.${version.patch} ${version.prerelease}"
+      format: "${version.major}.${version.minor} ${version.prerelease}"
 
 flows:
   dev:
@@ -562,9 +566,10 @@ targets:
         artifacts:
           - "argocdApplicationImageTag"
       gp-analytics-service:
-        use: "targets.dev.streams.%"
+        use: "targets.dev.%-1.%"
         config:
           integration: "githubStg"
+          argocdServiceName: "gp-analytics-web"
         artifacts:
           - "argocdApplicationImageTag"
       gp-charge-service:
@@ -676,6 +681,7 @@ targets:
         use: "targets.dev.streams.%"
         config:
           integration: "githubStg"
+          argocdServiceName: "gp-processing-web"
         artifacts:
           - "argocdApplicationImageTag"
       gp-routes-calc-dev:
@@ -809,6 +815,7 @@ targets:
         use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
+          argocdServiceName: "gp-processing-web"
         artifacts:
       gp-routes-calc-dev:
         use: "targets.dev.streams.%"
@@ -938,6 +945,7 @@ targets:
         use: "targets.dev.streams.%"
         config:
           integration: "githubMain"
+          argocdServiceName: "gp-processing-web"
         artifacts:
       gp-routes-calc-dev:
         use: "targets.dev.streams.%"

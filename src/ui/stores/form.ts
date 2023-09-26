@@ -44,6 +44,10 @@ export class FormStore {
     }
 
     this.__validateAll(true);
+
+    if (!Object.keys(this.__opts).length) {
+     this.__isValid = true; 
+    }
   }
 
   __onChange(key, val) {

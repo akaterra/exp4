@@ -115,7 +115,7 @@ export class GithubStreamService extends EntityService implements IStreamService
         .get(stream.ref.projectId)
         .getEnvVersioningByTargetId(stream.ref.targetId);
       const workflowRuns = hasScope('action', scopes) && branch
-        ? await integration.workflowRunsGet(stream.config.branch, stream.id)
+        ? await integration.workflowRunsGet(stream.config.branch ?? branchName, stream.id)
         : null;
       const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && (hasStrictScope('*', scopes) || hasStrictScope('action', scopes) || workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id))
         ? await integration.workflowRunJobsGet(workflowRuns[0].id, stream.id, stream.config.org)
@@ -200,6 +200,7 @@ export class GithubStreamService extends EntityService implements IStreamService
             githubWorkflowRunJobId: workflowRunsJobs?.[0]?.id,
             githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
             ref: stream.ref,
+            stream,
           },
         );
       }

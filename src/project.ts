@@ -26,7 +26,7 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
   isSyncing?: boolean;
   ref?: IProjectRef;
 
-  config?: C;
+  config?: C & Record<string, unknown>;
 }
 
 export interface IProjectRef {

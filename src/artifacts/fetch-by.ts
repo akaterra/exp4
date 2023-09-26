@@ -9,6 +9,7 @@ import { iter } from '../utils';
 export type Primitive = boolean | null | number | string;
 
 export type FetchByArtifactConfigFilterValue = Primitive | {
+  coalesce?: FetchByArtifactConfigFilterValue[];
   get?: string;
   getRoot?: string;
   if?: {
@@ -283,6 +284,21 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
     params: Record<string, unknown>,
   ) {
     if (filter && typeof filter === 'object') {
+      if (filter.coalesce) {
+        for (const filterVariant of filter.coalesce) {
+          const val = FetchByArtifactService.getFilterValue(
+            entityVal,
+            entity,
+            filterVariant,
+            params,
+          );
+
+          if (val != null) {
+            return val;
+          }
+        }
+      }
+
       if (filter.get) {
         return _.get(entityVal, filter.get);
       }
