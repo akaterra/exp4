@@ -101,5 +101,5 @@ export const Input = ({ autoComplete = undefined, className = undefined, current
     }
   />;
 
-  return maybeLabeledControl(Element, x, label, error, id);
+  return maybeLabeledControl(Element, x, label, error);
 }

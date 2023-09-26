@@ -1,5 +1,4 @@
-import * as React from 'react-dom';
-import { computed, makeObservable, observable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 
 export class FormStore {
   __isError: Record<string, null | string> = {};
@@ -46,7 +45,7 @@ export class FormStore {
     this.__validateAll(true);
 
     if (!Object.keys(this.__opts).length) {
-     this.__isValid = true; 
+      this.__isValid = true; 
     }
   }
 
@@ -54,12 +53,12 @@ export class FormStore {
     const optsKey = this.__opts[key];
 
     switch (optsKey?.type) {
-      case 'boolean':
-        val = val === 'true' ? true : val === 'false' ? false : !!val;
-        break;
-      case 'number':
-        val = parseInt(val, 10);
-        break;
+    case 'boolean':
+      val = val === 'true' ? true : val === 'false' ? false : !!val;
+      break;
+    case 'number':
+      val = parseInt(val, 10);
+      break;
     }
 
     this[key] = val;

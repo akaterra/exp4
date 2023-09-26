@@ -1,7 +1,7 @@
 import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
-import { Autowired, err, request } from '../utils';
+import { Autowired, err } from '../utils';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';

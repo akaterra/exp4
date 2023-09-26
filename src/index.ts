@@ -21,7 +21,7 @@ import { authorize } from './auth.service';
 import { logError } from './logger';
 import { authUserGetCurrent } from './api/auth/user.get-current';
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', function() {
 });
 
 function auth(req, res, next) {

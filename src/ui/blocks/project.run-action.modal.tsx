@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { IProjectFlowAction, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { Input } from '../atoms/input';
 import { ProjectFlowActionParamsStore } from '../stores/project';
-import { Select } from '../atoms/select';
 import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
 import { FormInput, FormSelect } from './form';

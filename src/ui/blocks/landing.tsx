@@ -5,9 +5,9 @@ import logo from '../atoms/logo.top.inv.png';
 import landingLogo from '../atoms/logo.inv.png';
 import { SubSubTitle } from '../atoms/title';
 import { Link } from '../atoms/link';
-import {getLandingLogoGradient} from './landing.utils';
+import { getLandingLogoGradient } from './landing.utils';
 import { FormInput, FormSubmit } from './form';
-import {SLOGAN} from '../const';
+import { SLOGAN } from '../const';
 
 const style = {
   container: {

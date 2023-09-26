@@ -49,7 +49,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+  async userSet(): Promise<void> {
     throw new Error('Not supported');
   }
 

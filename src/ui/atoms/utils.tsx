@@ -7,7 +7,7 @@ export function maybeClassName(base, extended) {
   return extended ? `${base} ${extended}` : base;
 }
 
-export function maybeLabeledControl(Element, x, label?, error?, id?) {
+export function maybeLabeledControl(Element, x, label?, error?) {
   const E = <React.Fragment>
     { Element }
     {

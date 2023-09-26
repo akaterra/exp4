@@ -1,7 +1,6 @@
 import * as React from 'react-dom';
 import { observer } from "mobx-react-lite";
 import { ModalStore } from "../stores/modal";
-import { DetailsPanel as DetailsPanelAtom } from "../atoms/details-panel";
 import { FormStore } from '../stores/form';
 import { Button } from '../atoms/button';
 import { Input } from '../atoms/input';
