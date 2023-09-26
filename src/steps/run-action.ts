@@ -1,12 +1,12 @@
 import { Service } from 'typedi';
 import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
-import { IActionService } from './action.service';
+import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 
 @Service()
-export class RunActionActionService extends EntityService implements IActionService {
+export class RunActionStepService extends EntityService implements IStepService {
   @Autowired() protected projectsService: ProjectsService;
 
   get type() {

@@ -2,7 +2,7 @@ import { IProjectInput, Project } from './project';
 import { IntegrationsService } from './integrations.service';
 import { StoragesService } from './storages.service';
 import { StreamsService } from './streams.service';
-import { ActionsService } from './actions.service';
+import { StepsService } from './steps.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { iter, loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules } from './utils';
@@ -36,7 +36,7 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
 
   definition.env = {
     artifacts: new ArtifactsService(),
-    actions: new ActionsService(),
+    steps: new StepsService(),
     integrations: new IntegrationsService(),
     storages: new StoragesService(),
     streams: new StreamsService(),
@@ -48,8 +48,8 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
     definition.env.artifacts.addFactory(artifact);
   }
 
-  for (const action of await loadModules(__dirname + '/actions', 'ActionService')) {
-    definition.env.actions.add(new action());
+  for (const step of await loadModules(__dirname + '/steps', 'StepService')) {
+    definition.env.steps.add(new step());
   }
 
   for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
@@ -109,7 +109,7 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
   }
 
   if (definition.flows) {
-    const actionsService = definition.env.actions;
+    const actionsService = definition.env.steps;
 
     for (const [ ,flow ] of Object.entries(definition.flows)) {
       for (const [ , defConfig ] of Object.entries(flow.actions)) {

@@ -1,4 +1,4 @@
-import { ActionsService } from './actions.service';
+import { StepsService } from './steps.service';
 import { IntegrationsService } from './integrations.service';
 import { IIntegrationService } from './integrations/integration.service';
 import { StoragesService } from './storages.service';
@@ -154,7 +154,7 @@ export class Project implements IProject {
 
   env: {
     artifacts: ArtifactsService;
-    actions: ActionsService;
+    steps: StepsService;
     integrations: IntegrationsService;
     storages: StoragesService;
     streams: StreamsService;
@@ -438,7 +438,7 @@ export class Project implements IProject {
   }
 
   getEnvActionByFlowActionStep(actionStep: IProjectFlowActionStep) {
-    return this.env.actions.get(actionStep.type);
+    return this.env.steps.get(actionStep.type);
   }
 
   getEnvIntegraionByIntegrationId<T extends IIntegrationService>(integrationId: IProjectDef['id'], assertType?: IProjectTargetStreamDef['type']): T {

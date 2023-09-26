@@ -1,6 +1,6 @@
 # General manifest
 
-Describes the general configuration used across all components.
+Declares the general configuration used across all components.
 
 Can be defined only once.
 

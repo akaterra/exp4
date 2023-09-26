@@ -1,6 +1,6 @@
 # Project manifest
 
-Describes the project specified configuration.
+Declares the project specified configuration.
 
 Can be multiple.
 

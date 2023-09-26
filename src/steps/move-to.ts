@@ -1,18 +1,18 @@
 import { Service } from 'typedi';
 import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
-import { IActionService } from './action.service';
+import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 
 @Service()
-export class MoveFromActionService extends EntityService implements IActionService {
+export class MoveToStepService extends EntityService implements IStepService {
   @Autowired() protected projectsService: ProjectsService;
 
   description = 'Moves selected streams between targets';
 
   get type() {
-    return 'moveFrom';
+    return 'moveTo';
   }
 
   async run(
@@ -37,11 +37,11 @@ export class MoveFromActionService extends EntityService implements IActionServi
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
-            await project.getEnvStreamByTargetStream(targetStream)
-              .streamMove(targetStream, sourceStream);
+            await project.getEnvStreamByTargetStream(sourceStream)
+              .streamMove(sourceStream, targetStream);
 
             sourceStream.isDirty = true;
-            targetStream.isDirty = true;
+            targetStream.isDirty = true;    
           }
         }
       }

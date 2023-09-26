@@ -1,7 +1,7 @@
 import { IService } from '../entities.service';
 import { IProjectFlowActionDef } from '../project';
 
-export interface IActionService extends IService {
+export interface IStepService extends IService {
   run(
     action: IProjectFlowActionDef,
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,

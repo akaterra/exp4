@@ -1,16 +1,16 @@
 import { Service } from 'typedi';
 import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
-import { IActionService } from './action.service';
+import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired, iter } from '../utils';
 import { EntityService } from '../entities.service';
 
 @Service()
-export class VersionPatchActionService extends EntityService implements IActionService {
+export class VersionReleaseStepService extends EntityService implements IStepService {
   @Autowired() protected projectsService: ProjectsService;
 
   get type() {
-    return 'version:patch';
+    return 'version:release';
   }
 
   async run(
@@ -23,7 +23,7 @@ export class VersionPatchActionService extends EntityService implements IActionS
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
       const target = project.getTargetByTargetId(tId);
 
-      await project.getEnvVersioningByTarget(target).patch(target, params);
+      await project.getEnvVersioningByTarget(target).release(target, params);
 
       target.isDirty = true;
     }

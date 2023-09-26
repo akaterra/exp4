@@ -47,7 +47,7 @@ export class ProjectsService extends EntitiesService<Project> {
         });
 
         try {
-          await project.env.actions.get(action.type).run(action, targetsStreams, params);
+          await project.env.steps.get(action.type).run(action, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${projectId}.errors`, {
             message: err?.message ?? err ?? null,
