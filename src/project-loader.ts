@@ -1,4 +1,4 @@
-import { IProjectInput, Project } from './project';
+import { IProjectManifest, Project } from './project';
 import { IntegrationsService } from './integrations.service';
 import { StoragesService } from './storages.service';
 import { StreamsService } from './streams.service';
@@ -9,32 +9,16 @@ import { iter, loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules
 import { ArtifactsService } from './artifacts.service';
 import * as _ from 'lodash';
 
-export function loadProjectsFromDirectory(path: string, ids?: string[]): Promise<Project[]> {
-  const definitions: (IProjectInput & { env?: Project['env'] })[] = loadDefinitionsFromDirectory(path);
-
-  return Promise.all(definitions.filter((project) => !!project && (!ids?.length || ids.includes(project?.id)))
-    .map((definition) => createProjectFromDefinition(definition, true))
-  ).then((projects) => projects.filter((project) => !!project));
-}
-
-export function loadProjectFromFile(pathOrName: string): Promise<Project> {
-  const definition: IProjectInput & { env?: Project['env'] } = loadDefinitionFromFile(pathOrName);
-
-  return definition
-    ? createProjectFromDefinition(definition)
-    : null;
-}
-
-export async function createProjectFromDefinition(definition: IProjectInput & { env?: Project['env'] }, notThrow?: boolean): Promise<Project> {
-  if (definition?.type !== 'project') {
+export async function createProject(manifest: IProjectManifest & { env?: Project['env'] }, notThrow?: boolean): Promise<Project> {
+  if (manifest?.type !== 'project') {
     if (notThrow) {
       return null;
     }
 
-    throw new Error('Invalid project definition');
+    throw new Error('Invalid project manifest');
   }
 
-  definition.env = {
+  manifest.env = {
     artifacts: new ArtifactsService(),
     steps: new StepsService(),
     integrations: new IntegrationsService(),
@@ -45,95 +29,95 @@ export async function createProjectFromDefinition(definition: IProjectInput & { 
   }
 
   for (const artifact of await loadModules(__dirname + '/artifacts', 'ArtifactService')) {
-    definition.env.artifacts.addFactory(artifact);
+    manifest.env.artifacts.addFactory(artifact);
   }
 
   for (const step of await loadModules(__dirname + '/steps', 'StepService')) {
-    definition.env.steps.add(new step());
+    manifest.env.steps.add(new step());
   }
 
   for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
-    definition.env.integrations.addFactory(integration);
+    manifest.env.integrations.addFactory(integration);
   }
 
   for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
-    definition.env.storages.addFactory(storage);
+    manifest.env.storages.addFactory(storage);
   }
 
   for (const stream of await loadModules(__dirname + '/streams', 'StreamService')) {
-    definition.env.streams.addFactory(stream);
+    manifest.env.streams.addFactory(stream);
   }
 
   for (const versioning of await loadModules(__dirname + '/versionings', 'VersioningService')) {
-    definition.env.versionings.addFactory(versioning);
+    manifest.env.versionings.addFactory(versioning);
   }
 
-  resolveUse(definition.artifacts, definition);
-  resolveUse(definition.definitions, definition);
-  resolveUse(definition.flows, definition);
-  resolveUse(definition.integrations, definition);
-  resolveUse(definition.storages, definition);
-  resolveUse(definition.targets, definition);
-  resolveUse(definition.versionings, definition);
+  resolveUse(manifest.artifacts, manifest);
+  resolveUse(manifest.definitions, manifest);
+  resolveUse(manifest.flows, manifest);
+  resolveUse(manifest.integrations, manifest);
+  resolveUse(manifest.storages, manifest);
+  resolveUse(manifest.targets, manifest);
+  resolveUse(manifest.versionings, manifest);
 
-  if (definition.artifacts) {
-    const artifactsService = definition.env.artifacts;
+  if (manifest.artifacts) {
+    const artifactsService = manifest.env.artifacts;
 
-    for (const [ defId, defConfig ] of Object.entries(definition.artifacts)) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.artifacts)) {
       artifactsService.add(artifactsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
-  if (definition.integrations) {
-    const integrationsService = definition.env.integrations;
+  if (manifest.integrations) {
+    const integrationsService = manifest.env.integrations;
 
-    for (const [ defId, defConfig ] of Object.entries(definition.integrations)) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
       integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
-  if (definition.storages) {
-    const storagesService = definition.env.storages;
+  if (manifest.storages) {
+    const storagesService = manifest.env.storages;
 
-    for (const [ defId, defConfig ] of Object.entries(definition.storages)) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.storages)) {
       storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
-  if (definition.versionings) {
-    const versioningsService = definition.env.versionings;
+  if (manifest.versionings) {
+    const versioningsService = manifest.env.versionings;
 
-    for (const [ defId, defConfig ] of Object.entries(definition.versionings).concat([ [ null, { type: null } ] ])) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.versionings).concat([ [ null, { type: null } ] ])) {
       versioningsService.add(versioningsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
-  if (definition.flows) {
-    const actionsService = definition.env.steps;
+  if (manifest.flows) {
+    const actionsService = manifest.env.steps;
 
-    for (const [ ,flow ] of Object.entries(definition.flows)) {
+    for (const [ ,flow ] of Object.entries(manifest.flows)) {
       for (const [ , defConfig ] of Object.entries(flow.actions)) {
         defConfig.steps?.forEach((actionType) => actionsService.get(actionType.type));
       }
     }
   }
 
-  if (definition.targets) {
-    const artifactsService = definition.env.artifacts;
-    const streamsService = definition.env.streams;
+  if (manifest.targets) {
+    const artifactsService = manifest.env.artifacts;
+    const streamsService = manifest.env.streams;
 
-    for (const [ ,target ] of Object.entries(definition.targets)) {
+    for (const [ ,target ] of Object.entries(manifest.targets)) {
       for (const [ , defConfig ] of Object.entries(target.streams)) {
         defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
         streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
       }
 
       target.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
-      definition.env.versionings.get(target.versioning);
+      manifest.env.versionings.get(target.versioning);
     }
   }
 
-  return new Project(definition);
+  return new Project(manifest);
 }
 
 function resolveUse(section, definition, sectionKey = null) {
@@ -150,10 +134,10 @@ function resolveUse(section, definition, sectionKey = null) {
       });
     } else if (typeof section === 'object') {
       if (section.use) {
-        for (let [ ,sectionUse ] of iter(section.use)) {
+        for (let [ ,sectionUse ] of iter(section.use as string)) {
           if (sectionKey && sectionUse.includes('%')) {
             sectionUse = sectionUse.split('.').map((key) => {
-              if (key.charAt('0') === '%') {
+              if (key.charAt(0) === '%') {
                 if (key.length === 1) {
                   return sectionKey[sectionKey.length - 1];
                 } else {

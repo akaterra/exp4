@@ -1,12 +1,16 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import fs from 'node:fs/promises';
+import fs, {readFile, readdir} from 'node:fs/promises';
 import path from 'path';
+import {IGeneralManifest} from '../global-config';
+import { lstat, constants } from 'node:fs/promises';
+import {iter} from '../utils';
+import YAML from 'yaml'
 
 @Service()
 export class FileStorageService extends EntityService implements IStorageService {
@@ -16,6 +20,73 @@ export class FileStorageService extends EntityService implements IStorageService
 
   constructor(protected config?: { dir? }) {
     super();
+  }
+
+  @Log('debug')
+  async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
+    const manifests: Array<IGeneralManifest | IProjectManifest> = [];
+
+    for (const [ ,maybeSource ] of iter(source)) {
+      let path;
+
+      if (maybeSource.startsWith('file://')) {
+        path = maybeSource.slice(7);
+      } else {
+        const stat = await lstat(maybeSource);
+
+        if (stat.isDirectory() || stat.isFile()) {
+          path = maybeSource;
+        }
+      }
+
+      if (path) {
+        const stat = await lstat(maybeSource);
+        const filesToCheck: string[] = [];
+
+        if (stat.isDirectory()) {
+          for (const stat of await readdir(path, { withFileTypes: true })) {
+            if (stat.isFile()) {
+              filesToCheck.push(`${path}/${stat.name}`);
+            }
+          }
+        } else if (stat.isFile()) {
+          filesToCheck.push(path);
+        } else {
+          continue;
+        }
+
+        for (const file of filesToCheck) {
+          const fileContent = await readFile(file, 'utf8');
+          let manifest: IGeneralManifest | IProjectManifest;
+
+          switch (file.slice(file.lastIndexOf('.') + 1)) {
+          case 'json':
+            manifest = JSON.parse(fileContent);
+            break;
+          case 'yaml':
+            manifest = YAML.parse(fileContent);
+            break;
+          case 'yml':
+            manifest = YAML.parse(fileContent);
+            break;  
+          }
+
+          if (manifest && typeof manifest === 'object') {
+            if (manifest.type !== 'general' && manifest.type !== 'project') {
+              continue;
+            }
+
+            if (!manifest.id) {
+              manifest.id = file.slice(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
+            }
+
+            manifests.push(manifest);
+          }
+        }
+      }
+    }
+
+    return manifests;
   }
 
   @Log('debug')
@@ -32,8 +103,8 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
-    const intKey = FileStorageService.getKey(key);
+  async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
+    const intKey = FileStorageService.getKeyOfType(key, target.id, 'target');
     const cacheKey = `${intKey}:target`;
     
     if (this.cache.has(cacheKey)) {
@@ -44,8 +115,8 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
-    const intKey = FileStorageService.getKey(key);
+  async varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
+    const intKey = FileStorageService.getKeyOfType(key, target.id, 'target');
 
     await this.putJson(intKey, val);
 
@@ -53,14 +124,14 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varAdd<D>(
+  async varAddTarget<D>(
     target: IProjectTargetDef,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
     maxLength?: number,
   ): Promise<D> {
-    let intVal = await this.varGet(target, key, null);
+    let intVal = await this.varGetTarget(target, key, null);
 
     if (Array.isArray(intVal)) {
       if (uniq) {
@@ -84,22 +155,22 @@ export class FileStorageService extends EntityService implements IStorageService
       intVal = intVal.slice(-maxLength);
     }
 
-    await this.varSet(target, key, intVal);
+    await this.varSetTarget(target, key, intVal);
 
     return val;
   }
 
   @Log('debug')
-  async varInc(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
-    const intVal = parseInt(await this.varGet(target, key, '0'));
+  async varIncTarget(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
+    const intVal = parseInt(await this.varGetTarget(target, key, '0'));
 
-    await this.varSet(target, key, typeof intVal === 'number' ? intVal + add : add);
+    await this.varSetTarget(target, key, typeof intVal === 'number' ? intVal + add : add);
 
     return intVal;
   }
 
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
-    const intKey = FileStorageService.getKeyStream(key, stream.id);
+    const intKey = FileStorageService.getKeyOfType(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
     if (this.cache.has(cacheKey)) {
@@ -111,7 +182,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
-    const intKey = FileStorageService.getKeyStream(key, stream.id);
+    const intKey = FileStorageService.getKeyOfType(key, stream.id);
 
     await this.putJson(intKey, val);
 
@@ -170,10 +241,10 @@ export class FileStorageService extends EntityService implements IStorageService
     return `${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
-  protected static getKeyStream(key: string | string[], streamId: IProjectTargetStream['id']): string {
+  protected static getKeyOfType(key: string | string[], id: IProjectTargetStream['id'], type?: string): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');
+    return `${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected getJsonPath(file: string): string {

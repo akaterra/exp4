@@ -1,59 +1,51 @@
 import Container from 'typedi';
 import { IntegrationsService } from './integrations.service';
-import { IGlobalConfig } from './global-config';
+import { IGeneralManifest } from './global-config';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { StoragesService } from './storages.service';
-import { loadDefinitionFromFile, loadModules } from './utils';
+import { loadModules } from './utils';
 
-export async function loadGlobalConfigFromFile(pathOrName: string): Promise<void> {
-  const definition: IGlobalConfig = loadDefinitionFromFile(pathOrName);
-
-  return definition
-    ? createGlobalConfig(definition)
-    : null;
-}
-
-export async function createGlobalConfig(definition: IGlobalConfig, notThrow?: boolean): Promise<void> {
-  if (definition?.type !== 'global') {
+export async function createGeneral(manifest: IGeneralManifest, notThrow?: boolean): Promise<void> {
+  if (manifest?.type !== 'general') {
     if (notThrow) {
       return null;
     }
 
-    throw new Error('Invalid global config definition');
+    throw new Error('Invalid general manifest');
   }
 
-  if (definition.auth) {
+  if (manifest.auth) {
     const authStrategiesService = Container.get(AuthStrategiesService);
 
     for (const auth of await loadModules(__dirname + '/auth', 'AuthStrategyService')) {
       authStrategiesService.addFactory(auth);
     }
 
-    for (const [ defId, defConfig ] of Object.entries(definition.auth)) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.auth)) {
       authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defId, defConfig.title, defConfig.description);
     }
   }
 
-  if (definition.integrations) {
+  if (manifest.integrations) {
     const integrationsService = Container.get(IntegrationsService);
 
     for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
       integrationsService.addFactory(integration);
     }
 
-    for (const [ defId, defConfig ] of Object.entries(definition.integrations)) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
       integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
-  if (definition.storages) {
+  if (manifest.storages) {
     const storagesService = Container.get(StoragesService);
 
     for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
       storagesService.addFactory(storage);
     }
 
-    for (const [ defId, defConfig ] of Object.entries(definition.storages)) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.storages)) {
       storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }

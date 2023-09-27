@@ -1,4 +1,4 @@
-type: "global"
+type: "general"
 
 auth:
   github:

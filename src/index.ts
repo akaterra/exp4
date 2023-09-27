@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import 'source-map-support/register';
 import 'universal-dotenv/register';
 import cors from 'cors';
-import { loadProjectsFromDirectory } from './project-loader';
+import { createProject } from './project-loader';
 import { GithubStreamService } from './streams/github';
 import Container from 'typedi';
 import { ProjectsService } from './projects.service';
@@ -11,15 +11,18 @@ import express from 'express';
 import { projectStreamList } from './api/project-state/list';
 import { projectList } from './api/project/list';
 import { projectFlowActionRun } from './api/project-flow/action.run';
-import { loadGlobalConfigFromFile } from './global-config-loader';
+import { createGeneral } from './global-config-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
-import { err } from './utils';
+import { err, loadModules } from './utils';
 import { authMethodList } from './api/auth/method.list';
 import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
 import { logError } from './logger';
 import { authUserGetCurrent } from './api/auth/user.get-current';
+import {StoragesService} from './storages.service';
+import {IGeneralManifest} from './global-config';
+import {IProjectManifest} from './project';
 
 process.on('uncaughtException', function() {
 });
@@ -32,13 +35,26 @@ function auth(req, res, next) {
 
 (async () => {
   const projects = Container.get(ProjectsService);
+  const storages = new StoragesService();
+
+  for (const storageSymbol of await loadModules(__dirname + '/storages', 'StorageService')) {
+    storages.addFactory(storageSymbol);
+
+    const storage = storages.getInstance(storageSymbol.type);
+    const manifests = await storage.manifestsLoad('./projects');
+
+    for (const manifest of manifests) {
+      await createGeneral(manifest as IGeneralManifest, true);
+      const project = await createProject(manifest as IProjectManifest, true);
+
+      if (project) {
+        projects.add(project);
+      }
+    }
+  }
+
   const authStrategies = Container.get(AuthStrategiesService);
   authStrategies.addFactory(GithubAuthStrategyService);
-
-  const c = await loadGlobalConfigFromFile('global');
-  const p = await loadProjectsFromDirectory('./projects', (process.env.PROJECT_IDS || '').split(',').filter((id) => !!id));
-
-  p.forEach((p) => projects.add(p));
 
   const ss = Container.get(StreamsService);
   ss.addFactory(GithubStreamService);

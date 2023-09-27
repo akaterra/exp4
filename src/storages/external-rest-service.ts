@@ -1,12 +1,13 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { request } from '../utils';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { rest } from '../services/rest-api.service';
+import {IGeneralManifest} from '../global-config';
 
 @Service()
 export class ExternalRestServiceStorageService extends EntityService implements IStorageService {
@@ -22,6 +23,11 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
+  async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
+    return [];
+  }
+
+  @Log('debug')
   async userGet(id: string, type: string): Promise<IUser> {
     return request(this.getUrl('user'), { id, type });
   }
@@ -32,8 +38,8 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async varGet<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
-    const intKey = ExternalRestServiceStorageService.getKey(key);
+  async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
+    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, target.id, 'target');
     
     if (this.cache.has(intKey)) {
       return this.cache.get(intKey);
@@ -52,8 +58,8 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async varSet<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
-    const intKey = ExternalRestServiceStorageService.getKey(key);
+  async varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
+    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, target.id, 'target');
 
     await rest.withHeaders(this.config?.headers).post(
       this.getUrl('var'),
@@ -65,14 +71,14 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async varAdd<D>(
+  async varAddTarget<D>(
     target: IProjectTargetDef,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
     maxLength?: number,
   ): Promise<D> {
-    let intVal = await this.varGet(target, key, null);
+    let intVal = await this.varGetTarget(target, key, null);
 
     if (Array.isArray(intVal)) {
       if (uniq) {
@@ -96,23 +102,23 @@ export class ExternalRestServiceStorageService extends EntityService implements 
       intVal = intVal.slice(-maxLength);
     }
 
-    await this.varSet(target, key, intVal);
+    await this.varSetTarget(target, key, intVal);
 
     return val;
   }
 
   @Log('debug')
-  async varInc(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
-    const intVal = parseInt(await this.varGet(target, key, '0'));
+  async varIncTarget(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
+    const intVal = parseInt(await this.varGetTarget(target, key, '0'));
 
-    await this.varSet(target, key, typeof intVal === 'number' ? intVal + add : add);
+    await this.varSetTarget(target, key, typeof intVal === 'number' ? intVal + add : add);
 
     return intVal;
   }
 
   @Log('debug')
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
-    const intKey = ExternalRestServiceStorageService.getKeyStream(key, stream.id);
+    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, stream.id);
 
     if (this.cache.has(intKey)) {
       return this.cache.get(intKey);
@@ -131,7 +137,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
-    const intKey = ExternalRestServiceStorageService.getKeyStream(key, stream.id);
+    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, stream.id);
 
     await rest.withHeaders(this.config?.headers).post(
       this.getUrl('var/stream'),
@@ -194,10 +200,10 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     return `rc__${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
-  protected static getKeyStream(key: string | string[], streamId: IProjectTargetStream['id']): string {
+  protected static getKeyOfType(key: string | string[], id: IProjectTargetStream['id'], type?: string): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `rc__${key}__${streamId}`.toLowerCase().replace(/\-/g, '_');
+    return `rc__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected getUrl(resource: string) {

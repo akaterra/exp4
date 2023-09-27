@@ -131,7 +131,7 @@ export type IProjectDefInput = Omit<IProjectDef, 'isSyncing'>;
 export type IProjectTargetInput = Omit<IProjectTarget, 'isSyncing'>;
 export type IProjectTargetStreamInput = Omit<IProjectTargetStream, 'isSyncing'>;
 
-export interface IProjectInput extends IProjectDef {
+export interface IProjectManifest extends IProjectDef {
   info?: IProject['info'];
   resync?: IProject['resync'];
 
@@ -185,7 +185,7 @@ export class Project implements IProject {
     return this.id;
   }
 
-  constructor(config: Partial<IProjectInput & { env?: Project['env'] }>) {
+  constructor(config: Partial<IProjectManifest & { env?: Project['env'] }>) {
     if (config.id) {
       this.id = config.id;
     }

@@ -3,10 +3,17 @@ import { IStorageService } from './storage.service';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
+import {IGeneralManifest} from '../global-config';
+import {IProjectManifest} from '../project';
 
 @Service()
 export class StubStorageService extends EntityService implements IStorageService {
   static readonly type: string = 'stub';
+
+  @Log('debug')
+  async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
+    return [];
+  }
 
   @Log('debug')
   async userGet(): Promise<IUser> {
@@ -19,22 +26,22 @@ export class StubStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varGet<D>(): Promise<D> {
+  async varGetTarget<D>(): Promise<D> {
     return null;
   }
 
   @Log('debug')
-  async varSet(): Promise<void> {
+  async varSetTarget(): Promise<void> {
 
   }
 
   @Log('debug')
-  async varAdd<D>(): Promise<D> {
+  async varAddTarget<D>(): Promise<D> {
     return null;
   }
 
   @Log('debug')
-  async varInc(): Promise<number> {
+  async varIncTarget(): Promise<number> {
     return null;
   }
 

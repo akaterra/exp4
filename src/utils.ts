@@ -261,7 +261,7 @@ export function hasStrictScope(scope: string, scopes?: Record<string, boolean>):
   return !!scopes[scope];
 }
 
-export function *iter(iterable, predicate?: (val?: any, ind?: number) => boolean): Generator<any> {
+export function *iter<T>(iterable: Iterable<T>, predicate?: (val?: any, ind?: number) => boolean): Generator<[ number, T extends Array<T> ? T[0]: T ]> {
   if (Array.isArray(iterable)) {
     let i = 0;
 
@@ -274,12 +274,12 @@ export function *iter(iterable, predicate?: (val?: any, ind?: number) => boolean
     }
   } else {
     if (!predicate || predicate(iterable, 0)) {
-      yield [ 0, iterable ];
+      yield [ 0, iterable as T extends Array<T> ? T[0]: T ];
     }
   }
 }
 
-export function *iterComplex(iterable, predicate?: (val?: any, ind?: number | string) => boolean): Generator<any> {
+export function *iterComplex<T>(iterable: Iterable<T>, predicate?: (val?: any, ind?: number | string) => boolean): Generator<any> {
   if (iterable && typeof iterable === 'object') {
     for (const [ key, item ] of Object(iterable)) {
       if (!predicate || predicate(item, key)) {

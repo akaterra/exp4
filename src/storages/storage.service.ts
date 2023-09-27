@@ -1,17 +1,20 @@
 import { IService } from '../entities.service';
-import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import {IGeneralManifest} from '../global-config';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IUser } from '../user';
 
 export interface IStorageService extends IService {
+  manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>>;
+
   userGet(id: string, type: string): Promise<IUser>;
 
   userSet(id: string, type: string, data: Record<string, unknown>): Promise<void>;
 
-  varGet<D>(target: IProjectTargetDef, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
+  varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
 
-  varSet<D>(target: IProjectTargetDef, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
+  varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
 
-  varAdd<D>(
+  varAddTarget<D>(
     target: IProjectTargetDef,
     key: string | string[],
     val: D,
@@ -19,7 +22,7 @@ export interface IStorageService extends IService {
     maxLength?: number,
   ): Promise<D>;
 
-  varInc(target: IProjectTargetDef, key: string | string[], add: number): Promise<number>;
+  varIncTarget(target: IProjectTargetDef, key: string | string[], add: number): Promise<number>;
 
   varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
 

@@ -32,7 +32,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
   @Log('debug')
   async getCurrent(target: IProjectTargetDef, format?: false | string): Promise<string> {
-    const version = await this.getStorage(target).varGet(
+    const version = await this.getStorage(target).varGetTarget(
       target,
       [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       null,
@@ -106,7 +106,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   async rollback(target: IProjectTargetDef): Promise<string> {
     const storage = this.getStorage(target);
     const targetVersion = await this.getCurrent(target, false);
-    const versionHistory = await storage.varGet<ISemverHistoryItem[]>(
+    const versionHistory = await storage.varGetTarget<ISemverHistoryItem[]>(
       target,
       [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
       null,
@@ -124,7 +124,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
       version = versionHistory[index - 1]?.version ?? null;
 
-      await storage.varSet(
+      await storage.varSetTarget(
         target,
         [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
         versionHistory,
@@ -278,7 +278,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   private async setTargetVersion(target: IProjectTargetDef, storage: IStorageService, version: string) {
-    await storage.varSet(
+    await storage.varSetTarget(
       target,
       [ 'version', target.ref.projectId, this.config?.namespace ?? target.id ],
       version,
@@ -286,7 +286,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   private async setTargetVersionHistory(target: IProjectTargetDef, storage: IStorageService, version: string) {
-    await storage.varAdd<any>(
+    await storage.varAddTarget<any>(
       target,
       [ 'versionHistory', target.ref.projectId, this.config?.namespace ?? target.id ],
       { id: version, at: new Date(), version },
