@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IStream } from './stream';
+import { StreamState } from './stream';
 import { IProjectTargetStreamDef } from './project';
 import { AwaitedCache } from './cache';
 import { ProjectsService } from './projects.service';
@@ -10,7 +10,7 @@ import { Autowired } from './utils';
 @Service()
 export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache<IStream>();
+  protected cache = new AwaitedCache<StreamState>();
 
   get domain() {
     return 'Stream';

@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact } from '../project';
-import { IStream } from '../stream';
+import { StreamState } from '../stream';
 import { EntityService } from '../entities.service';
 import * as _ from 'lodash';
 import { iter } from '../utils';
@@ -18,6 +18,7 @@ export type FetchByArtifactConfigFilterValue = Primitive | {
     else: FetchByArtifactConfigFilterValue;
   }
   param?: string;
+  trim?: { value: FetchByArtifactConfigFilterValue, symbol?: string };
 };
 
 export interface FetchByArtifactConfigFilter {
@@ -64,7 +65,7 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
 
   async run(
     entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
-    streamState: IStream,
+    streamState: StreamState,
     params?: Record<string, any>,
   ): Promise<void> {
     if (!this.config) {
@@ -132,24 +133,18 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
             }
 
             if (artifactVal != null) {
-              let artifact = streamState.history.artifact.find(
-                (artifact) => artifact.id === artifactId && artifact.type === artifactType
-              );
+              const artifact = {
+                id: artifactId,
+                type: artifactType,
+                author: null,
+                description: artifactVal,
+                link: null,
+                metadata: {},
+                steps: null,
+                time: null,
+              };
 
-              if (!artifact) {
-                artifact = {
-                  id: artifactId,
-                  type: artifactType,
-                  author: null,
-                  description: artifactVal,
-                  link: null,
-                  metadata: {},
-                  steps: null,
-                  time: null,
-                };
-
-                streamState.history.artifact.push(artifact);
-              }
+              streamState.pushArtifactUniq(artifact);
 
               artifact.metadata[artifactKey] = artifactVal;
 
@@ -317,6 +312,16 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
 
       if (filter.param) {
         return _.get(params, filter.param);
+      }
+
+      if (filter.trim) {
+        const val = FetchByArtifactService.getFilterValue(entityVal, entity, filter.trim.value, params);
+
+        if (typeof val === 'string') {
+          return val.trim();
+        }
+
+        return val;
       }
 
       return undefined;

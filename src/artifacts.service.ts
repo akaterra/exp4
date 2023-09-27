@@ -3,7 +3,7 @@ import { EntitiesServiceWithFactory } from './entities.service';
 import { IArtifactService } from './artifacts/artifact.service';
 import { Autowired } from './utils';
 import { ProjectsService } from './projects.service';
-import { IStream } from './stream';
+import { StreamState } from './stream';
 import { IProjectArtifact } from './project';
 
 @Service()
@@ -16,7 +16,7 @@ export class ArtifactsService extends EntitiesServiceWithFactory<IArtifactServic
 
   async run(
     entity: { artifacts: IProjectArtifact['id'][], ref: IProjectArtifact['ref'], scope?: Record<string, any> },
-    streamState: IStream,
+    streamState: StreamState,
     params?: Record<string, any>,
   ) {
     return this.runWithDependences(entity, streamState, params);
@@ -24,7 +24,7 @@ export class ArtifactsService extends EntitiesServiceWithFactory<IArtifactServic
 
   private async runWithDependences(
     entity: { artifacts: IProjectArtifact['id'][], ref: IProjectArtifact['ref'], scope?: Record<string, any> },
-    streamState: IStream,
+    streamState: StreamState,
     params?: Record<string, any>,
     isRun?: Record<string, boolean>,
   ) {

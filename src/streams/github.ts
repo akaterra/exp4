@@ -1,8 +1,8 @@
 import { IStreamService } from './stream.service';
 import { IProjectTarget, IProjectTargetStream } from '../project';
-import { IStream } from '../stream';
+import { StreamState } from '../stream';
 import { Service } from 'typedi';
-import { ITarget } from '../target';
+import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
 import { hasScope, hasStrictScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
@@ -28,7 +28,7 @@ export type IGithubTargetStream = IProjectTargetStream<{
   branch: string;
 }, 'github'>;
 
-export type IGithubStream = IStream<{
+export type IGithubStream = StreamState<{
   sha: string;
   branch: string;
 }>;
@@ -37,14 +37,14 @@ export type IGithubStream = IStream<{
 export class GithubStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'github';
 
-  protected cache = new AwaitedCache<IStream>();
+  protected cache = new AwaitedCache<StreamState>();
 
   actionRun(id: string) { // eslint-disable-line
 
   }
 
   @Log('debug')
-  async streamBookmark(stream: IGithubTargetStream): Promise<IStream> {
+  async streamBookmark(stream: IGithubTargetStream): Promise<StreamState> {
     const project = this.projectsService.get(stream.ref?.projectId);
 
     project.env.streams.assertTypes(stream.type, this.type);
@@ -72,7 +72,7 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   @Log('debug')
-  async streamDetach(stream: IGithubTargetStream): Promise<IStream> {
+  async streamDetach(stream: IGithubTargetStream): Promise<StreamState> {
     const integration = this.getIntegrationService(stream);
     const branchName = await this.getBranch(stream);
 
@@ -85,9 +85,9 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   @Log('debug')
-  async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>): Promise<IStream> {
+  async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>): Promise<StreamState> {
     const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
-    const state: IStream = await this.cache.get(cacheKey) ?? {
+    const state: StreamState = await this.cache.get(cacheKey) ?? new StreamState({
       id: stream.id,
       type: this.type,
 
@@ -103,7 +103,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       link: null,
       metadata: {},
       version: null,
-    };
+    });
 
     const detailsPromise = (async () => {
       state.isSyncing = true;
@@ -118,7 +118,7 @@ export class GithubStreamService extends EntityService implements IStreamService
         ? await integration.workflowRunsGet(stream.config.branch ?? branchName, stream.id)
         : null;
       const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && (hasStrictScope('*', scopes) || hasStrictScope('action', scopes) || workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id))
-        ? await integration.workflowRunJobsGet(workflowRuns[0].id, stream.id, stream.config.org)
+        ? await integration.workflowJobsGet(workflowRuns[0].id, stream.id, stream.config.org)
         : null;
 
       const metadata = {
@@ -197,7 +197,8 @@ export class GithubStreamService extends EntityService implements IStreamService
           { artifacts: stream.artifacts, ref: stream.ref },
           state,
           {
-            githubWorkflowRunJobId: workflowRunsJobs?.[0]?.id,
+            githubWorkflowId: workflowRuns?.[0]?.id,
+            githubWorkflowJobId: workflowRunsJobs?.[0]?.id,
             githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
             ref: stream.ref,
             stream,
@@ -260,7 +261,7 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   @Log('debug')
-  async targetGetState(config: IProjectTarget): Promise<ITarget> {
+  async targetGetState(config: IProjectTarget): Promise<TargetState> {
     return {
       id: config.id,
       type: null,

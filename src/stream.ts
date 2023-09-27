@@ -10,7 +10,7 @@ export interface IStreamHistoryStep {
   status: Status;
 }
 
-export interface IStream<
+export class StreamState<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
   HistoryActionMetadata extends Record<string, unknown> = Metadata,
   HistoryChangeMetadata extends Record<string, unknown> = Metadata,
@@ -63,4 +63,52 @@ export interface IStream<
   link?: string;
   metadata?: Metadata;
   version?: string;
+
+  constructor(props) {
+    Reflect.setPrototypeOf(props, StreamState.prototype);
+
+    return props as unknown as StreamState<Metadata, HistoryActionMetadata, HistoryChangeMetadata>;
+  }
+
+  pushArtifact(artifact: StreamState['history']['artifact'][0], update = true) {
+    if (!this.history) {
+      this.history = {};
+    }
+
+    if (!this.history.artifact) {
+      this.history.artifact = [];
+    }
+
+    this.history.artifact.push(artifact);
+
+    return this;
+  }
+
+  pushArtifactUniq(artifact: StreamState['history']['artifact'][0], update = true) {
+    const old = this.history?.artifact?.find((e) => e.id === artifact.id && e.type === artifact.type);
+
+    if (old) {
+      for (const [ key, val ] of Object.entries(artifact)) {
+        if (key === 'metadata') {
+          if (!old.metadata) {
+            old.metadata = {};
+          }
+
+          for (const [ metadataKey, metadataVal ] of Object.entries(artifact.metadata)) {
+            if (val != null) {
+              old.metadata[key] = val;
+            }
+          }
+        } else {
+          if (val != null) {
+            old[key] = val;
+          }
+        }
+      }
+    } else {
+      this.pushArtifact(artifact);
+    }
+
+    return this;
+  }
 }

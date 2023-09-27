@@ -11,7 +11,7 @@ import Ajv from 'ajv';
 import { ArtifactsService } from './artifacts.service';
 import { ProjectsService } from './projects.service';
 import { Autowired } from './utils';
-import { IStream } from './stream';
+import { StreamState } from './stream';
 import { ProjectState } from './project-state';
 
 const ajv = new Ajv();
@@ -377,7 +377,7 @@ export class Project implements IProject {
     targetId: IProjectTarget['id'],
     streamId: IProjectTargetStream['id'],
     scopes?: Record<string, boolean>,
-  ): Promise<IStream> {
+  ): Promise<StreamState> {
     return (await this.projectsService.getState(this.id, { [targetId]: [ streamId ] }, scopes))?.targets?.[targetId]?.streams?.[streamId];
   }
 

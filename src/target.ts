@@ -1,10 +1,14 @@
 import { IProjectTarget } from './project';
 
-export interface ITarget {
-  projectTarget?: IProjectTarget;
-
+export class TargetState {
   id: string;
   type: string;
 
   version?: string;
+
+  constructor(props) {
+    Reflect.setPrototypeOf(props, TargetState.prototype);
+
+    return props as unknown as TargetState;
+  }
 }

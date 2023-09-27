@@ -11,6 +11,7 @@
 * [Artifacts](artifacts.md)
   * [ArgoCD application](artifacts.argocd-application.md)
   * [Fetch by](artifacts.fetch-by.md)
+  * [GitHub workflow artefact](artifacts.github-workflow-artefact.md)
   * [GitHub workflow job log](artifacts.github-workflow-job-log.md)
   * [Customization](artifacts.custom.md)
 * [Auth strategies](auth-strategies.md)

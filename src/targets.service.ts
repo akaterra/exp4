@@ -2,13 +2,13 @@ import { Service } from 'typedi';
 import { IProjectTargetDef } from './project';
 import { AwaitedCache } from './cache';
 import { ProjectsService } from './projects.service';
-import { ITarget } from './target';
+import { TargetState } from './target';
 import { Autowired } from './utils';
 
 @Service()
 export class TargetsService {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache<ITarget>();
+  protected cache = new AwaitedCache<TargetState>();
 
   get domain() {
     return 'Target';

@@ -210,7 +210,27 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   @IncStatistics() @Log('debug')
-  async workflowRunJobsGet(runId, repo?, org?) {
+  async workflowArtifactsGet(runId, repo?, org?) {
+    return (await this.client.actions.listWorkflowRunArtifacts({
+      owner: this.org(org), repo: this.repo(repo), run_id: runId,
+    }).catch((err) => {
+      if (err?.status === 404) {
+        return { data: undefined };
+      }
+
+      return Promise.reject(err);
+    })).data?.artifacts;
+  }
+
+  @IncStatistics() @Log('debug')
+  async workflowArtifactGet(artifactId, repo?, org?) {
+    return (await this.client.actions.downloadArtifact({
+      owner: this.org(org), repo: this.repo(repo), artifact_id: artifactId, archive_format: 'zip',
+    })).data;
+  }
+
+  @IncStatistics() @Log('debug')
+  async workflowJobsGet(runId, repo?, org?) {
     return (await this.client.actions.listJobsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), run_id: runId, filter: 'latest',
     }).catch((err) => {
@@ -223,14 +243,14 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   @IncStatistics() @Log('debug')
-  async workflowRunJobGet(jobId, repo?, org?) {
+  async workflowJobGet(jobId, repo?, org?) {
     return (await this.client.actions.getJobForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), job_id: jobId,
     })).data;
   }
 
   @IncStatistics() @Log('debug')
-  async workflowRunJobLogGet(jobId, repo?, org?) {
+  async workflowJobLogGet(jobId, repo?, org?) {
     return (await this.client.actions.downloadJobLogsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), job_id: jobId,
     })).data;

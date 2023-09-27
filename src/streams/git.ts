@@ -1,8 +1,8 @@
 import { IStreamService } from './stream.service';
 import { IProjectTarget, IProjectTargetStream } from '../project';
-import { IStream } from '../stream';
+import { StreamState } from '../stream';
 import { Service } from 'typedi';
-import { ITarget } from '../target';
+import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
 import { hasScope } from '../utils';
 import { GitIntegrationService } from '../integrations/git';
@@ -14,7 +14,7 @@ export type IGitTargetStream = IProjectTargetStream<{
   branch: string;
 }, 'git'>;
 
-export type IGitStream = IStream<{
+export type IGitStream = StreamState<{
   sha: string;
   branch: string;
 }>;
@@ -23,14 +23,14 @@ export type IGitStream = IStream<{
 export class GitStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'git';
 
-  protected cache = new AwaitedCache<IStream>();
+  protected cache = new AwaitedCache<StreamState>();
 
   actionRun(id: string) { // eslint-disable-line
 
   }
 
   @Log('debug')
-  async streamBookmark(stream: IGitTargetStream): Promise<IStream> {
+  async streamBookmark(stream: IGitTargetStream): Promise<StreamState> {
     const project = this.projectsService.get(stream.ref?.projectId);
 
     project.env.streams.assertTypes(stream.type, this.type);
@@ -57,7 +57,7 @@ export class GitStreamService extends EntityService implements IStreamService {
   }
 
   @Log('debug')
-  async streamDetach(stream: IGitTargetStream): Promise<IStream> {
+  async streamDetach(stream: IGitTargetStream): Promise<StreamState> {
     const integration = this.getIntegrationService(stream);
     const branchName = await this.getBranch(stream);
 
@@ -67,9 +67,9 @@ export class GitStreamService extends EntityService implements IStreamService {
   }
 
   @Log('debug')
-  async streamGetState(stream: IGitTargetStream, scopes?: Record<string, boolean>): Promise<IStream> {
+  async streamGetState(stream: IGitTargetStream, scopes?: Record<string, boolean>): Promise<StreamState> {
     const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
-    const state: IStream = await this.cache.get(cacheKey) ?? {
+    const state: StreamState = await this.cache.get(cacheKey) ?? new StreamState({
       id: stream.id,
       type: this.type,
 
@@ -85,7 +85,7 @@ export class GitStreamService extends EntityService implements IStreamService {
       link: null,
       metadata: {},
       version: null,
-    };
+    });
 
     const detailsPromise = (async () => {
       state.isSyncing = true;
@@ -184,7 +184,7 @@ export class GitStreamService extends EntityService implements IStreamService {
   }
 
   @Log('debug')
-  async targetGetState(config: IProjectTarget): Promise<ITarget> {
+  async targetGetState(config: IProjectTarget): Promise<TargetState> {
     return {
       id: config.id,
       type: null,

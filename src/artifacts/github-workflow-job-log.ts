@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
-import { IStream } from '../stream';
+import { StreamState } from '../stream';
 import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
@@ -9,28 +9,29 @@ import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
 
-export type IGithubActionStepLogArtifactConfig = {
+export type IGithubWorkflowJobLogArtifactConfig = {
   integration: IProjectDef['id'];
   cacheTtlSec?: number;
+  saveAs?: string;
 };
 
 @Service()
-export class GithubActionStepLogArtifactService extends EntityService implements IArtifactService {
+export class GithubWorkflowJobLogArtifactService extends EntityService implements IArtifactService {
   static readonly type: string = 'github:workflowJob:log';
 
   @Autowired() protected projectsService: ProjectsService;
   protected cache = new AwaitedCache();
 
-  constructor(public readonly config?: IGithubActionStepLogArtifactConfig) {
+  constructor(public readonly config?: IGithubWorkflowJobLogArtifactConfig) {
     super();
   }
 
   async run(
     entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
-    streamState: IStream,
+    streamState: StreamState,
     params?: Record<string, any>,
   ): Promise<void> {
-    if (!params?.githubWorkflowRunJobId) {
+    if (!params?.githubWorkflowJobId) {
       return;
     }
 
@@ -38,15 +39,35 @@ export class GithubActionStepLogArtifactService extends EntityService implements
       return;
     }
 
-    const result = this.cache.get(params.githubWorkflowRunJobId) ?? await this.getIntegration(entity.ref).workflowRunJobLogGet(
-      params?.githubWorkflowRunJobId,
-      entity.ref?.streamId,
-    );
+    const resultJobLog = this.cache.get(params.githubWorkflowJobId)
+      ?? await this.getIntegration(entity.ref).workflowJobLogGet(
+        params?.githubWorkflowJobId,
+        entity.ref?.streamId,
+      );
 
-    this.cache.set(params.githubWorkflowRunJobId, result, this.config?.cacheTtlSec ?? 3600);
+    if (!resultJobLog) {
+      return;
+    }
+
+    this.cache.set(params.githubWorkflowJobId, resultJobLog, this.config?.cacheTtlSec ?? 3600);
 
     if (entity.scope) {
-      entity.scope.githubWorkflowRunJobLog = result;
+      entity.scope.githubWorkflowJobLog = resultJobLog;
+
+      if (this.config?.saveAs) {
+        const artifact = {
+          id: this.config.saveAs,
+          type: this.type,
+          author: null,
+          description: entity.scope.githubWorkflowArtifact,
+          link: null,
+          metadata: {},
+          steps: null,
+          time: null,
+        };
+
+        streamState.pushArtifactUniq(artifact);
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 import { Inject, Service } from 'typedi';
 import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef, Project } from './project';
-import { IStream } from './stream';
-import { ITarget } from './target';
+import { StreamState } from './stream';
+import { TargetState } from './target';
 import { AwaitableContainer, iter } from './utils';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
@@ -169,9 +169,9 @@ export class ProjectsService extends EntitiesService<Project> {
     setTimeout(() => this.runStatesResync(), 30000);
   }
 
-  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>): Promise<IStream>;
+  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>): Promise<StreamState>;
 
-  streamGetState(projectId: string, targetId: string, streamId: string, scopes?: Record<string, boolean>): Promise<IStream>;
+  streamGetState(projectId: string, targetId: string, streamId: string, scopes?: Record<string, boolean>): Promise<StreamState>;
 
   async streamGetState(mixed: string | IProjectTargetStreamDef, targetId?: string | Record<string, boolean>, streamId?: string, scopes?: Record<string, boolean>) {
     const project = this.get(typeof mixed === 'string' ? mixed : mixed.ref?.projectId);
@@ -187,9 +187,9 @@ export class ProjectsService extends EntitiesService<Project> {
     return streamState;
   }
 
-  targetGetState(stream: IProjectTargetDef): Promise<ITarget>;
+  targetGetState(stream: IProjectTargetDef): Promise<TargetState>;
 
-  targetGetState(projectId: string, targetId: string): Promise<ITarget>;
+  targetGetState(projectId: string, targetId: string): Promise<TargetState>;
 
   async targetGetState(mixed: string | IProjectTargetDef, targetId?: string) {
     const project = this.get(typeof mixed === 'string' ? mixed : mixed.ref?.projectId);

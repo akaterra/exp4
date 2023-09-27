@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from './project';
 import { ProjectsService } from './projects.service';
-import { IStream } from './stream';
+import { StreamState } from './stream';
 import { Autowired } from './utils';
 
 @Service()
@@ -14,7 +14,7 @@ export class ProjectState {
     public id: IProjectDef['id'] = null,
     public targets: Record<string, {
       id: IProjectTargetDef['id'];
-      streams: Record<string, IStream>;
+      streams: Record<string, StreamState>;
       version: string;
     }> = {},
   ) {
@@ -47,7 +47,7 @@ export class ProjectState {
   }
 
   setTarget(targetId: IProjectTargetDef['id'], config: {
-    streams?: Record<string, IStream>,
+    streams?: Record<string, StreamState>,
     version?: string,
   }) {
     const oldTarget = this.targets[targetId];
@@ -61,7 +61,7 @@ export class ProjectState {
     return this;
   }
 
-  setTargetStream(targetId: IProjectTargetDef['id'], stream: Partial<IStream>) {
+  setTargetStream(targetId: IProjectTargetDef['id'], stream: Partial<StreamState>) {
     if (!this.targets[targetId]) {
       this.setTarget(targetId, {});
     }
@@ -76,7 +76,7 @@ export class ProjectState {
       }
     }
 
-    this.targets[targetId].streams[stream.id] = stream as IStream;
+    this.targets[targetId].streams[stream.id] = stream as StreamState;
 
     return this;
   }

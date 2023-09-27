@@ -44,6 +44,13 @@ artifacts:
     type: "github:workflowJob:log"
     config:
       integration: "github"
+  githubActionArtifact:
+    type: "github:workflowArtifact"
+    config:
+      integration: "github"
+      name: "imagetag"
+      file: "imagetag.txt"
+      saveAs: "Image tag"
   githubActionLogImageTag:
     type: "fetchBy"
     dependsOn:
@@ -369,6 +376,13 @@ targets:
   dev:
     title: "Development"
     streams:
+      gp-finance-service:
+        type: "github"
+        title: "Finance"
+        config:
+          integration: "githubDev"
+        artifacts:
+          - "githubActionArtifact"
       gp-deliveries-service:
         type: "github"
         title: "Deliveries"
