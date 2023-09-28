@@ -31,10 +31,10 @@ export const Modal = ({
   onSelect?: (action?: string) => void,
 }) => {
   return <div className="modal">
-    <div className="modal-content f10 f14-s- back-light shadow shadow-high pad-hor triple">
-      <div className="paragraph">
+    <div className="modal-content f10 f14-s- back-light shadow shadow-high pad-hor triple flex">
+      <div className="paragraph paragraph-lrg">
         <div className='row'>
-          <div className='c18 children-gap children-gap-full'>
+          <div className='c18'>
             <div>
               <div className='flex flex-hor'>
                 {
@@ -49,7 +49,11 @@ export const Modal = ({
                 }
               </div>
             </div>
+          </div>
+          <div className='c18 children-gap'>
             { children }
+          </div>
+          <div className='c18'>
             <div className='row flex-right'>
               {
                 Object.entries(buttons).map(([ key, button ]) => {

@@ -7,7 +7,7 @@ import { IUser } from '../user';
 import { Log } from '../logger';
 import fs, {readFile, readdir} from 'node:fs/promises';
 import path from 'path';
-import {IGeneralManifest} from '../global-config';
+import {IGeneralManifest} from '../general';
 import { lstat, constants } from 'node:fs/promises';
 import {iter} from '../utils';
 import YAML from 'yaml'
@@ -32,9 +32,11 @@ export class FileStorageService extends EntityService implements IStorageService
       if (maybeSource.startsWith('file://')) {
         path = maybeSource.slice(7);
       } else {
-        const stat = await lstat(maybeSource);
+        const stat = await lstat(maybeSource).catch((err) => {
+          return null;
+        });
 
-        if (stat.isDirectory() || stat.isFile()) {
+        if (stat && (stat.isDirectory() || stat.isFile())) {
           path = maybeSource;
         }
       }
@@ -72,10 +74,6 @@ export class FileStorageService extends EntityService implements IStorageService
           }
 
           if (manifest && typeof manifest === 'object') {
-            if (manifest.type !== 'general' && manifest.type !== 'project') {
-              continue;
-            }
-
             if (!manifest.id) {
               manifest.id = file.slice(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
             }

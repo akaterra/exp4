@@ -11,7 +11,7 @@ import express from 'express';
 import { projectStreamList } from './api/project-state/list';
 import { projectList } from './api/project/list';
 import { projectFlowActionRun } from './api/project-flow/action.run';
-import { createGeneral } from './global-config-loader';
+import { createGeneral } from './general-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
 import { err, loadModules } from './utils';
@@ -21,7 +21,7 @@ import { authorize } from './auth.service';
 import { logError } from './logger';
 import { authUserGetCurrent } from './api/auth/user.get-current';
 import {StoragesService} from './storages.service';
-import {IGeneralManifest} from './global-config';
+import {IGeneralManifest} from './general';
 import {IProjectManifest} from './project';
 
 process.on('uncaughtException', function() {
@@ -41,14 +41,17 @@ function auth(req, res, next) {
     storages.addFactory(storageSymbol);
 
     const storage = storages.getInstance(storageSymbol.type);
-    const manifests = await storage.manifestsLoad('./projects');
+    const manifests = await storage.manifestsLoad([ './projects' ]);
+    const projectIds = process.env.PROJECT_IDS?.split(',') ?? null;
 
     for (const manifest of manifests) {
       await createGeneral(manifest as IGeneralManifest, true);
       const project = await createProject(manifest as IProjectManifest, true);
 
       if (project) {
-        projects.add(project);
+        if (!projectIds || projectIds.includes(project.id)) {
+          projects.add(project);
+        }
       }
     }
   }

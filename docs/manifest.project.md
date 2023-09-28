@@ -4,7 +4,7 @@ Declares the project specified configuration.
 
 Can be multiple.
 
-### Structure
+### Config structure
 
     type: "project" (mandatory)
 

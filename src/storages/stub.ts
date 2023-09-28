@@ -3,7 +3,7 @@ import { IStorageService } from './storage.service';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import {IGeneralManifest} from '../global-config';
+import {IGeneralManifest} from '../general';
 import {IProjectManifest} from '../project';
 
 @Service()

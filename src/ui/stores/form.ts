@@ -77,40 +77,47 @@ export class FormStore {
 
     if (optsKey?.constraints) {
       const c = optsKey?.constraints;
+      let ignore = false;
 
       if (typeof c?.optional === 'boolean') {
-        if (!c.optional && (val === '' || val == undefined)) {
-          err = `Required`;
+        if (val === '' || val == null) {
+          if (!c.optional) {
+            err = `Required`;
+          } else {
+            ignore = true;
+          }
         }
       }
 
-      if (!err && Array.isArray(c?.enum)) {
-        if (!c.enum.includes(val)) {
-          err = `Must be one of ${c.enum.map((e) => `"${e}"`).join(', ')} values`;
+      if (!ignore) {
+        if (!err && Array.isArray(c?.enum)) {
+          if (!c.enum.includes(val)) {
+            err = `Must be one of ${c.enum.map((e) => `"${e}"`).join(', ')} values`;
+          }
         }
-      }
 
-      if (!err && typeof c?.max === 'number') {
-        if (parseInt(val, 10) > c.max) {
-          err = `Must be less than ${c.max}`;
+        if (!err && typeof c?.max === 'number') {
+          if (parseInt(val, 10) > c.max) {
+            err = `Must be less than ${c.max}`;
+          }
         }
-      }
 
-      if (!err && typeof c?.min === 'number') {
-        if (parseInt(val, 10) < c.min) {
-          err = `Must be greater than ${c.min}`;
+        if (!err && typeof c?.min === 'number') {
+          if (parseInt(val, 10) < c.min) {
+            err = `Must be greater than ${c.min}`;
+          }
         }
-      }
 
-      if (!err && typeof c?.maxLength === 'number') {
-        if ((val?.length ?? 0) > c.maxLength) {
-          err = `Must not exceed ${c.maxLength} ${c.maxLength === 1 ? 'symbol' : 'symbols'}`;
+        if (!err && typeof c?.maxLength === 'number') {
+          if ((val?.length ?? 0) > c.maxLength) {
+            err = `Must not exceed ${c.maxLength} ${c.maxLength === 1 ? 'symbol' : 'symbols'}`;
+          }
         }
-      }
 
-      if (!err && typeof c?.minLength === 'number') {
-        if ((val?.length ?? 0) < c.minLength) {
-          err = `Must have at least ${c.minLength} ${c.minLength === 1 ? 'symbol' : 'symbols'}`;
+        if (!err && typeof c?.minLength === 'number') {
+          if ((val?.length ?? 0) < c.minLength) {
+            err = `Must have at least ${c.minLength} ${c.minLength === 1 ? 'symbol' : 'symbols'}`;
+          }
         }
       }
     }

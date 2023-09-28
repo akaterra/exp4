@@ -8,7 +8,7 @@ import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import {IGeneralManifest} from '../global-config';
+import {IGeneralManifest} from '../general';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {
@@ -229,13 +229,13 @@ export class GithubStorageService extends EntityService implements IStorageServi
   protected static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `rc__${key}`.toLowerCase().replace(/\-/g, '_');
+    return `sf__${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected static getKeyOfType(key: string | string[], id: IProjectTargetStream['id'], type?: string): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `rc__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
+    return `sf__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected static getVarComplex(val) {

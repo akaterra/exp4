@@ -35,8 +35,8 @@ export class ProjectsService extends EntitiesService<Project> {
     const flow = project.getFlowByFlowId(flowId);
 
     for (const [ , aId ] of iter(actionId)) {
-      project.validateParams(flowId, aId, params);
-
+      project.env.validator.validate(params, aId);
+console.log({params});
       for (const action of flow.actions[aId].steps) {
         logger.info({
           message: 'flowActionRun',

@@ -72,7 +72,11 @@ export class SemverVersioningService extends EntityService implements IVersionin
         version = semver.inc(version, 'patch');
       }
     } else {
-      version = '0.1.0';
+      if (params?.releaseName) {
+        version = `0.1.0-${params?.releaseName}`;
+      } else {
+        version = '0.1.0';
+      }
     }
 
     await this.setTargetVersionHistory(target, storage, version);
@@ -93,7 +97,11 @@ export class SemverVersioningService extends EntityService implements IVersionin
         version = semver.inc(version, 'minor');
       }
     } else {
-      version = '0.1.0';
+      if (params?.releaseName) {
+        version = `0.1.0-${params?.releaseName}`;
+      } else {
+        version = '0.1.0';
+      }
     }
 
     await this.setTargetVersionHistory(target, storage, version);
@@ -173,9 +181,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
     const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
     if (version) {
-      version = semver.inc(version, 'patch');
+      if (params?.releaseName) {
+        version = semver.inc(version, 'prepatch', params?.releaseName, false);
+      } else { 
+        version = semver.inc(version, 'patch');
+      }
     } else {
-      version = '0.1.0';
+      if (params?.releaseName) {
+        version = `0.1.0-${params?.releaseName}`;
+      } else {
+        version = '0.1.0';
+      }
     }
 
     if (params?.releaseName) {
@@ -194,9 +210,17 @@ export class SemverVersioningService extends EntityService implements IVersionin
     const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
     if (version) {
-      version = semver.inc(version, 'minor');
+      if (params?.releaseName) {
+        version = semver.inc(version, 'preminor', params?.releaseName, false);
+      } else {  
+        version = semver.inc(version, 'minor');
+      }
     } else {
-      version = '0.1.0';
+      if (params?.releaseName) {
+        version = `0.1.0-${params?.releaseName}`;
+      } else {
+        version = '0.1.0';
+      }
     }
 
     if (params?.releaseName) {

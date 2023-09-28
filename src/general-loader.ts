@@ -1,12 +1,13 @@
 import Container from 'typedi';
 import { IntegrationsService } from './integrations.service';
-import { IGeneralManifest } from './global-config';
+import { IGeneralManifest } from './general';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { StoragesService } from './storages.service';
 import { loadModules } from './utils';
+import {MANIFEST_GENERAL_TYPE} from './const';
 
 export async function createGeneral(manifest: IGeneralManifest, notThrow?: boolean): Promise<void> {
-  if (manifest?.type !== 'general') {
+  if (manifest?.type !== MANIFEST_GENERAL_TYPE) {
     if (notThrow) {
       return null;
     }

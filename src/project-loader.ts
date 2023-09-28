@@ -8,9 +8,11 @@ import { TargetsService } from './targets.service';
 import { iter, loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules } from './utils';
 import { ArtifactsService } from './artifacts.service';
 import * as _ from 'lodash';
+import {MANIFEST_PROJECT_TYPE} from './const';
+import {ValidatorService} from './validator.service';
 
 export async function createProject(manifest: IProjectManifest & { env?: Project['env'] }, notThrow?: boolean): Promise<Project> {
-  if (manifest?.type !== 'project') {
+  if (manifest?.type !== MANIFEST_PROJECT_TYPE) {
     if (notThrow) {
       return null;
     }
@@ -25,6 +27,7 @@ export async function createProject(manifest: IProjectManifest & { env?: Project
     storages: new StoragesService(),
     streams: new StreamsService(),
     targets: new TargetsService(),
+    validator: new ValidatorService(),
     versionings: new VersioningsService(),
   }
 

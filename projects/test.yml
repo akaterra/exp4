@@ -415,11 +415,11 @@ targets:
       #   title: "Deliveries CRUD"
       #   config:
       #     integration: "githubStg"
-      # gp-deliveries-service:
-      #   type: "github"
-      #   title: "Deliveries"
-      #   config:
-      #     integration: "githubStg"
+      gp-deliveries-service:
+        type: "github"
+        title: "Deliveries"
+        config:
+          integration: "githubStg"
       # gp-deliveries-history-service:
       #   type: "github"
       #   title: "Deliveries history"

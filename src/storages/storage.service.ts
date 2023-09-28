@@ -1,5 +1,5 @@
 import { IService } from '../entities.service';
-import {IGeneralManifest} from '../global-config';
+import {IGeneralManifest} from '../general';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IUser } from '../user';
 

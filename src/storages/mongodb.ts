@@ -6,7 +6,8 @@ import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { MongoClient, Db } from 'mongodb';
 import { Log } from '../logger';
-import {IGeneralManifest} from '../global-config';
+import {IGeneralManifest} from '../general';
+import {iter} from '../utils';
 
 @Service()
 export class MongodbStorageService extends EntityService implements IStorageService {
@@ -17,7 +18,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   protected db: Db;
 
   constructor(protected config?: {
-    url?: string,
+    uri?: string,
     collectionUsersName?: string,
     collectionVarsName?: string,
   }) {
@@ -26,7 +27,22 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   @Log('debug')
   async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
-    return [];
+    const manifests: Array<IGeneralManifest | IProjectManifest> = [];
+
+    for (const [ ,maybeSource ] of iter(source)) {
+      if (maybeSource.startsWith('mongodb://') || maybeSource.startsWith('mongodb+srv://')) {
+        const [ uri, collection ] = maybeSource.split('#');
+        const [ client, db ] = await this.initClient(uri, false);
+
+        manifests.push(...await db.collection<IGeneralManifest | IProjectManifest>(collection ?? 'storageManifests')
+          .find()
+          .toArray());
+
+        await client.close();
+      }
+    }
+
+    return manifests;
   }
 
   @Log('debug')
@@ -205,16 +221,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   protected async getClient() {
     if (!this.client) {
-      const client = new MongoClient(this.config?.url ?? process.env.MONGODB_URL);
-      await client.connect();
-
-      const db = client.db();
-      await db.collection(this.config?.collectionVarsName ?? 'storage').createIndex({
-        key: 1,
-        type: 1,
-      }, {
-        unique: true
-      });
+      const [ client, db ] = await this.initClient(null, true);
 
       this.client = client;
       this.db = db;
@@ -233,5 +240,23 @@ export class MongodbStorageService extends EntityService implements IStorageServ
     await this.getClient();
 
     return this.db.collection(this.config?.collectionVarsName ?? 'storageVars');
+  }
+
+  protected async initClient(uri?, initCollection?) {
+    const client = new MongoClient(uri ?? this.config?.uri ?? process.env.MONGODB_URL);
+    await client.connect();
+
+    const db = client.db();
+
+    if (initCollection) {
+      await db.collection(this.config?.collectionVarsName ?? 'storage').createIndex({
+        key: 1,
+        type: 1,
+      }, {
+        unique: true
+      });
+    }
+
+    return [ client, db ] as [ MongoClient, Db ];
   }
 }

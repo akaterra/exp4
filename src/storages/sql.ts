@@ -7,7 +7,8 @@ import { IUser } from '../user';
 import { knex, Knex } from 'knex';
 import { Log } from '../logger';
 import * as _ from 'lodash';
-import {IGeneralManifest} from '../global-config';
+import {IGeneralManifest} from '../general';
+import {iter} from '../utils';
 
 @Service()
 export class SqlStorageService extends EntityService implements IStorageService {
@@ -17,7 +18,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   protected client: Knex;
 
   constructor(protected config?: {
-    url?: string,
+    uri?: string,
     tableNameUsers?: string,
     tableNameVars?: string,
   }) {
@@ -26,7 +27,28 @@ export class SqlStorageService extends EntityService implements IStorageService 
 
   @Log('debug')
   async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
-    return [];
+    const manifests: Array<IGeneralManifest | IProjectManifest> = [];
+
+    for (const [ ,maybeSource ] of iter(source)) {
+      if (
+        maybeSource.startsWith('mysql://') ||
+        maybeSource.startsWith('postgresql://') || (
+          maybeSource.startsWith('file://') && maybeSource.slice(-3).toLowerCase() === '.db'
+        )
+      ) {
+        const [ uri, collection ] = maybeSource.split('#');
+        const client = await this.initClient(uri, false);
+
+        manifests.push(...(await client(collection ?? 'storageManifests')).map((row) => ({
+          ...row.def,
+          ...row,
+        })));
+
+        await client.destroy();
+      }
+    }
+
+    return manifests;
   }
 
   @Log('debug')
@@ -209,8 +231,24 @@ export class SqlStorageService extends EntityService implements IStorageService 
 
   protected async getClient() {
     if (!this.client) {
-      const client = knex(this.config?.url ?? process.env.SQL_URL);
+      this.client = await this.initClient(null, true);
+    }
 
+    return this.client;
+  }
+
+  protected async getTableUsers(): Promise<{ qb: Knex.QueryBuilder }> {
+    return { qb: (await this.getClient())(this.config?.tableNameVars ?? 'storageUsers') };
+  }
+
+  protected async getTableVars(): Promise<{ qb: Knex.QueryBuilder }> {
+    return { qb: (await this.getClient())(this.config?.tableNameVars ?? 'storageVars') };
+  }
+
+  protected async initClient(uri?, initTables?) {
+    const client = knex(uri ?? this.config?.uri ?? process.env.SQL_URL);
+
+    if (initTables) {
       if (!await client.schema.hasTable(this.config?.tableNameUsers ?? 'storageUsers')) {
         await client.schema.createTableIfNotExists(this.config?.tableNameUsers ?? 'storageUsers', (table) => {
           table.string('key', 100).notNullable();
@@ -228,18 +266,8 @@ export class SqlStorageService extends EntityService implements IStorageService 
           table.unique([ 'key', 'type' ]);
         });
       }
-
-      this.client = client;
     }
 
-    return this.client;
-  }
-
-  protected async getTableUsers(): Promise<{ qb: Knex.QueryBuilder }> {
-    return { qb: (await this.getClient())(this.config?.tableNameVars ?? 'storageUsers') };
-  }
-
-  protected async getTableVars(): Promise<{ qb: Knex.QueryBuilder }> {
-    return { qb: (await this.getClient())(this.config?.tableNameVars ?? 'storageVars') };
+    return client;
   }
 }
