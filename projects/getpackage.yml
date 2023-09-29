@@ -399,6 +399,9 @@ targets:
         title: "AIP"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-account-info-processor"
+            - "gp-account-info-processor-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-alerts-service:
@@ -406,6 +409,9 @@ targets:
         title: "Alerts"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-alerts"
+            - "gp-alerts-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-analytics-service:
@@ -413,6 +419,9 @@ targets:
         title: "Analytics"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-analytics"
+            - "gp-analytics-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-charge-service:
@@ -420,6 +429,9 @@ targets:
         title: "Charge"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-charge"
+            - "gp-charge-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-deliveries-crud-service:
@@ -427,6 +439,9 @@ targets:
         title: "Deliveries CRUD"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-deliveries-crud"
+            - "gp-deliveries-crud-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-deliveries-service:
@@ -434,6 +449,9 @@ targets:
         title: "Deliveries"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-deliveries"
+            - "gp-deliveries-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-deliveries-history-service:
@@ -441,6 +459,9 @@ targets:
         title: "Deliveries history"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-deliveries-history"
+            - "gp-deliveries-history-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-events-service:
@@ -448,6 +469,9 @@ targets:
         title: "Events"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-events"
+            - "gp-events-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-frontend-client:
@@ -455,6 +479,8 @@ targets:
         title: "FE Operator"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-frontend-client-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-fe-sender:
@@ -462,6 +488,8 @@ targets:
         title: "FE Sender"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-fe-sender-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-fe-tracker:
@@ -469,6 +497,8 @@ targets:
         title: "FE Tracker"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-fe-tracker-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-finance-service:
@@ -476,6 +506,9 @@ targets:
         title: "Finance"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-finance"
+            - "gp-finance-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-finance-calc:
@@ -483,6 +516,9 @@ targets:
         title: "Finance calc"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-finance-calc"
+            - "gp-finance-calc-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-graphql-gateway:
@@ -490,6 +526,9 @@ targets:
         title: "API Gateway"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-graphql"
+            - "gp-graphql-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-links-service:
@@ -497,6 +536,9 @@ targets:
         title: "Links"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-links"
+            - "gp-links-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-locations-service:
@@ -504,6 +546,9 @@ targets:
         title: "Locations"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-locations"
+            - "gp-locations-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-notifications-service:
@@ -511,6 +556,9 @@ targets:
         title: "Notifications"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-notifications"
+            - "gp-notifications-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-offers-service:
@@ -518,6 +566,9 @@ targets:
         title: "Offers"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-offers"
+            - "gp-offers-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-postil-service:
@@ -525,6 +576,9 @@ targets:
         title: "Post IL"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-postil"
+            - "gp-postil-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-processing-service:
@@ -532,6 +586,9 @@ targets:
         title: "Processing"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-processing"
+            - "gp-processing-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-routes-calc-dev:
@@ -539,6 +596,9 @@ targets:
         title: "Routes calc"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-routes-calc-dev"
+            - "gp-routes-calc-dev-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-uam-service:
@@ -546,6 +606,9 @@ targets:
         title: "UAM"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-uam"
+            - "gp-uam-web"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-webhooks-service:
@@ -553,6 +616,9 @@ targets:
         title: "Webhooks"
         config:
           integration: "githubDev"
+          argocdServiceName:
+            - "gp-webhooks"
+            - "gp-webhooks-web"
         artifacts:
           - "argocdApplicationImageTagDev"
     versioning: null
@@ -563,55 +629,63 @@ targets:
       gp-account-info-processor:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-alerts-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-analytics-service:
         use: "targets.dev.%-1.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
-          argocdServiceName: "gp-analytics-web"
         artifacts:
           - "argocdApplicationImageTag"
       gp-charge-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-deliveries-crud-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-deliveries-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-deliveries-history-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-events-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-frontend-client:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
@@ -621,6 +695,7 @@ targets:
       gp-fe-sender:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
@@ -630,6 +705,7 @@ targets:
       gp-fe-tracker:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
@@ -639,73 +715,84 @@ targets:
       gp-finance-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-finance-calc:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-graphql-gateway:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-links-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-locations-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-notifications-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-offers-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-postil-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-processing-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
-          argocdServiceName: "gp-processing-web"
         artifacts:
           - "argocdApplicationImageTag"
       gp-routes-calc-dev:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-uam-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
       gp-webhooks-service:
         use: "targets.dev.streams.%"
         config:
+          use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
