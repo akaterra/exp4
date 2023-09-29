@@ -29,11 +29,11 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
 }
 
 export interface IProjectRef {
-  actionId?: IProjectFlowAction['id'],
-  flowId?: IProjectFlow['id'],
-  projectId?: IProject['id'],
-  streamId?: IProjectTargetStream['id'],
-  targetId?: IProjectTarget['id'],
+  actionId?: IProjectFlowActionDef['id'],
+  flowId?: IProjectFlowDef['id'],
+  projectId?: IProjectDef['id'],
+  streamId?: IProjectTargetStreamDef['id'],
+  targetId?: IProjectTargetDef['id'],
 }
 
 export interface IProjectArtifact<C extends Record<string, any> = Record<string, any>> extends IProjectDef<C> {
@@ -59,45 +59,47 @@ export interface IProjectFlowActionParam extends IProjectDef {
   validationSchema?: Record<string, any>;
 }
 
-export interface IProjectFlowActionStep<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<C, T> {
+export interface IProjectFlowActionStep<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
   params?: Record<string, IProjectFlowActionParam>;
-  targets?: IProjectTarget['id'][];
+  targets?: IProjectTargetDef['id'][];
 }
 
-export interface IProjectFlowAction<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<unknown, T> {
+export type IProjectFlowActionStepDef = IProjectFlowActionStep<Record<string, unknown>>;
+
+export interface IProjectFlowAction<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<unknown, T> {
   isDirty?: boolean;
 
-  streams?: IProjectTargetStream['id'][];
+  streams?: IProjectTargetStreamDef['id'][];
   steps?: IProjectFlowActionStep<C>[];
   params?: Record<string, IProjectFlowActionParam>;
-  targets?: IProjectTarget['id'][];
+  targets?: IProjectTargetDef['id'][];
 }
 
 export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
 
-export interface IProjectFlow<C extends (Record<string, unknown> | string) = string> extends IProjectDef {
+export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
 
   actions: Record<string, IProjectFlowAction<C>>;
-  targets: IProjectTarget['id'][];
+  targets: IProjectTargetDef['id'][];
 }
 
 export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
-export interface IProjectTargetStream<C extends (Record<string, unknown> | string) = string, T extends string = string> extends IProjectDef<C, T> {
+export interface IProjectTargetStream<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
-  actions?: Record<string, IProjectFlowAction>;
+  actions?: Record<string, IProjectFlowActionDef>;
   tags?: string[];
-  targets?: IProjectTarget['id'][];
+  targets?: IProjectTargetDef['id'][];
 }
 
 export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknown>>;
 
-export interface IProjectTarget<C extends (Record<string, unknown> | string) = string> extends IProjectDef {
+export interface IProjectTarget<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
@@ -127,8 +129,8 @@ export interface IProject extends IProjectDef {
 }
 
 export type IProjectDefInput = Omit<IProjectDef, 'isSyncing'>;
-export type IProjectTargetInput = Omit<IProjectTarget, 'isSyncing'>;
-export type IProjectTargetStreamInput = Omit<IProjectTargetStream, 'isSyncing'>;
+export type IProjectTargetInput = Omit<IProjectTargetDef, 'isSyncing'>;
+export type IProjectTargetStreamInput = Omit<IProjectTargetStreamDef, 'isSyncing'>;
 
 export interface IProjectManifest extends IProjectDef {
   info?: IProject['info'];
@@ -136,7 +138,7 @@ export interface IProjectManifest extends IProjectDef {
 
   artifacts: Record<string, IProjectDefInput & Pick<IProjectArtifact, 'dependsOn'>>;
   definitions: Record<string, Record<string, unknown>>;
-  flows: Record<string, IProjectFlow>;
+  flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDefInput>;
   storages?: Record<string, IProjectDefInput>;
   targets: Record<string, IProjectTargetInput & { streams: Record<string, IProjectTargetStreamInput & { use?: string }> }>;
@@ -361,17 +363,17 @@ export class Project implements IProject {
     return this.artifacts[artifactId];
   }
 
-  getFlowByFlowId(flowId: IProjectFlow['id']): IProjectFlowDef {
+  getFlowByFlowId(flowId: IProjectFlowDef['id']): IProjectFlowDef {
     return this.flows[flowId];
   }
 
-  getStateByTargetId(targetId: IProjectTarget['id']): Promise<ProjectState> {
+  getStateByTargetId(targetId: IProjectTargetDef['id']): Promise<ProjectState> {
     return this.projectsService.getState(this.id, { [targetId]: true });
   }
 
   async getStreamStateByTargetIdAndStreamId(
-    targetId: IProjectTarget['id'],
-    streamId: IProjectTargetStream['id'],
+    targetId: IProjectTargetDef['id'],
+    streamId: IProjectTargetStreamDef['id'],
     scopes?: Record<string, boolean>,
   ): Promise<StreamState> {
     return (await this.projectsService.getState(this.id, { [targetId]: [ streamId ] }, scopes))?.targets?.[targetId]?.streams?.[streamId];
@@ -433,7 +435,7 @@ export class Project implements IProject {
     return this.env.artifacts.get(artifactId, assertType, true);
   }
 
-  getEnvActionByFlowActionStep(actionStep: IProjectFlowActionStep) {
+  getEnvActionByFlowActionStep(actionStep: IProjectFlowActionStepDef) {
     return this.env.steps.get(actionStep.type);
   }
 

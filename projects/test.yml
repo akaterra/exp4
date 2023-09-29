@@ -267,6 +267,13 @@ flows:
             title: ""
             targets:
               - "stg"
+      sync:
+        title: "Sync"
+        steps:
+          - type: "argocd:sync"
+            title: ""
+            config:
+              integration: "argocdStg"
       test:
         title: "Run tests"
         steps:
@@ -420,6 +427,14 @@ targets:
         title: "Deliveries"
         config:
           integration: "githubStg"
+      gp-event-service:
+        type: "github"
+        title: "Events"
+        config:
+          integration: "githubStg"
+          argocdServiceName:
+            - "gp-events"
+            - "gp-events-web"
       # gp-deliveries-history-service:
       #   type: "github"
       #   title: "Deliveries history"

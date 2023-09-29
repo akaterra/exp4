@@ -1,5 +1,5 @@
 import { IStreamService } from './stream.service';
-import { IProjectTarget, IProjectTargetStream } from '../project';
+import { IProjectTarget, IProjectTargetDef, IProjectTargetStream } from '../project';
 import { StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
@@ -253,7 +253,7 @@ export class BitbucketStreamService extends EntityService implements IStreamServ
   }
 
   @Log('debug')
-  async targetGetState(config: IProjectTarget): Promise<TargetState> {
+  async targetGetState(config: IProjectTargetDef): Promise<TargetState> {
     return {
       id: config.id,
       type: null,

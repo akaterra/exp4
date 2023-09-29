@@ -32,8 +32,7 @@ export const Modal = ({
 }) => {
   return <div className="modal">
     <div className="modal-content f10 f14-s- back-light shadow shadow-high pad-hor triple flex">
-      <div className="paragraph paragraph-lrg">
-        <div className='row'>
+        <div className='w00 paragraph paragraph-lrg'>
           <div className='c18'>
             <div>
               <div className='flex flex-hor'>
@@ -69,7 +68,6 @@ export const Modal = ({
             </div>
           </div>
         </div>
-      </div>
     </div>
   </div>;
 }

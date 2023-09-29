@@ -36,18 +36,19 @@ export class ProjectsService extends EntitiesService<Project> {
 
     for (const [ , aId ] of iter(actionId)) {
       project.env.validator.validate(params, aId);
-console.log({params});
-      for (const action of flow.actions[aId].steps) {
+
+      const action = flow.actions[aId];
+
+      for (const step of action.steps) {
         logger.info({
-          message: 'flowActionRun',
-          action: { id: action.type },
-          flow: { id: flow.id },
+          message: 'flowActionStepRun',
+          ref: step.ref,
           params,
           targetsStreams,
         });
 
         try {
-          await project.env.steps.get(action.type).run(action, targetsStreams, params);
+          await project.env.steps.get(step.type).run(flow, action, step, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${projectId}.errors`, {
             message: err?.message ?? err ?? null,
@@ -66,7 +67,7 @@ console.log({params});
   @Log('debug')
   async getState(
     projectId: IProjectDef['id'],
-    targetStreams?: Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
+    targetStreams?: Record<IProjectTargetDef['id'], IProjectTargetStreamDef['id'][] | boolean>,
     scopes?: Record<string, boolean>,
   ): Promise<ProjectState> {
     const project = this.get(projectId);
@@ -104,10 +105,10 @@ console.log({params});
           })
   
           const streamContainer = new AwaitableContainer(1);
-          const streamIds: IProjectTargetStream['id'][] = targetStreams?.[tId]
+          const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
             ? targetStreams[tId] === true
               ? Object.keys(target.streams)
-              : targetStreams[tId] as IProjectTargetStream['id'][]
+              : targetStreams[tId] as IProjectTargetStreamDef['id'][]
             : scopes
               ? Object.keys(target.streams)
               : projectState.getDirtyTargetStreamIds(tId);

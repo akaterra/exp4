@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectTarget, IProjectTargetStream } from '../project';
+import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -7,15 +7,15 @@ import { Autowired } from '../utils';
 
 @Service()
 export class DetachStepService extends EntityService implements IStepService {
+  static readonly type = 'detach';
+
   @Autowired() protected projectsService: ProjectsService;
 
-  get type() {
-    return 'detach';
-  }
-
   async run(
+    flow: IProjectFlowDef,
     action: IProjectFlowActionDef,
-    targetsStreams?: Record<IProjectTarget['id'], [ IProjectTargetStream['id'], ...IProjectTargetStream['id'][] ] | true>,
+    step: IProjectFlowActionStepDef,
+    targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
     const sourceTargetIds = targetsStreams

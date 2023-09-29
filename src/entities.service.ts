@@ -64,6 +64,10 @@ export class EntitiesService<T extends IService = IService> {
     return entity;
   }
 
+  has(id: string): boolean {
+    return this.entities.hasOwnProperty(id);
+  }
+
   add(entity: T, id?: string, title?: string, description?: string) {
     this.entities[id ?? entity.type] = entity;
 

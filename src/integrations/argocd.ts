@@ -30,4 +30,18 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
   getApplication(name?) {
     return this.client.getApplication(name ?? this.config?.applicationName);
   }
+
+  @IncStatistics()
+  async syncResource(params: {
+    resourceName: string | string[],
+    resourceKind: string
+  } | {
+    resourceNameIn: string | string[],
+    resourceKind: string
+  }, name?) {
+    await this.client.syncResource(
+      name ?? this.config?.applicationName,
+      params,
+    );
+  }
 }

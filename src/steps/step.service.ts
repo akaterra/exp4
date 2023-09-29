@@ -1,9 +1,11 @@
 import { IService } from '../entities.service';
-import { IProjectFlowActionDef } from '../project';
+import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef } from '../project';
 
 export interface IStepService extends IService {
   run(
+    flow: IProjectFlowDef,
     action: IProjectFlowActionDef,
+    step: IProjectFlowActionStepDef,
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
     params?: Record<string, any>,
   ): Promise<void>;

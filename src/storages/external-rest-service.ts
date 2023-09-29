@@ -212,7 +212,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     return `sf__${key}`.toLowerCase().replace(/\-/g, '_');
   }
 
-  protected static getKeyOfType(key: string | string[], id: IProjectTargetStream['id'], type?: string): string {
+  protected static getKeyOfType(key: string | string[], id: IProjectTargetStreamDef['id'], type?: string): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
     return `sf__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');

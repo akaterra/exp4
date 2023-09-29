@@ -35,12 +35,12 @@ export async function createProject(manifest: IProjectManifest & { env?: Project
     manifest.env.artifacts.addFactory(artifact);
   }
 
-  for (const step of await loadModules(__dirname + '/steps', 'StepService')) {
-    manifest.env.steps.add(new step());
-  }
-
   for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
     manifest.env.integrations.addFactory(integration);
+  }
+
+  for (const step of await loadModules(__dirname + '/steps', 'StepService')) {
+    manifest.env.steps.addFactory(step);
   }
 
   for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
@@ -63,59 +63,61 @@ export async function createProject(manifest: IProjectManifest & { env?: Project
   resolveUse(manifest.targets, manifest);
   resolveUse(manifest.versionings, manifest);
 
-  if (manifest.artifacts) {
-    const artifactsService = manifest.env.artifacts;
+  const artifactsService = manifest.env.artifacts;
+  const integrationsService = manifest.env.integrations;
+  const stepsService = manifest.env.steps;
+  const storagesService = manifest.env.storages;
+  const streamsService = manifest.env.streams;
+  const versioningsService = manifest.env.versionings;
 
+  if (manifest.artifacts) {
     for (const [ defId, defConfig ] of Object.entries(manifest.artifacts)) {
       artifactsService.add(artifactsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
   if (manifest.integrations) {
-    const integrationsService = manifest.env.integrations;
-
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
       integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
   if (manifest.storages) {
-    const storagesService = manifest.env.storages;
-
     for (const [ defId, defConfig ] of Object.entries(manifest.storages)) {
       storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
   if (manifest.versionings) {
-    const versioningsService = manifest.env.versionings;
-
     for (const [ defId, defConfig ] of Object.entries(manifest.versionings).concat([ [ null, { type: null } ] ])) {
       versioningsService.add(versioningsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
   if (manifest.flows) {
-    const actionsService = manifest.env.steps;
-
     for (const [ ,flow ] of Object.entries(manifest.flows)) {
       for (const [ , defConfig ] of Object.entries(flow.actions)) {
-        defConfig.steps?.forEach((actionType) => actionsService.get(actionType.type));
+        defConfig.steps?.forEach((step) => {
+          if (!stepsService.has(step.type)) {
+            stepsService.add(stepsService.getInstance(step.type), step.type);
+          }
+        });
       }
     }
   }
 
   if (manifest.targets) {
-    const artifactsService = manifest.env.artifacts;
-    const streamsService = manifest.env.streams;
-
     for (const [ ,target ] of Object.entries(manifest.targets)) {
       for (const [ , defConfig ] of Object.entries(target.streams)) {
-        defConfig.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
-        streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
+        defConfig.artifacts?.forEach((artifact) => {
+          artifactsService.get(artifact);
+        });
+
+        if (!streamsService.has(defConfig.type)) {
+          streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
+        }
       }
 
-      target.artifacts?.forEach((artifactId) => artifactsService.get(artifactId));
       manifest.env.versionings.get(target.versioning);
     }
   }

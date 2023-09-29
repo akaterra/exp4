@@ -282,6 +282,13 @@ flows:
             title: ""
             targets:
               - "stg"
+      sync:
+        title: "Sync"
+        steps:
+          - type: "argocd:sync"
+            title: ""
+            config:
+              integration: "argocdStg"
       test:
         title: "Run tests"
         steps:

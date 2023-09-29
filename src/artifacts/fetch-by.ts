@@ -204,57 +204,57 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
         }
       }
 
-      if (condition.contains && !val?.includes(FetchByArtifactService.getFilterValue(
+      if (condition.contains && !checkContains(FetchByArtifactService.getFilterValue(
         val,
         entity,
         condition.contains,
         params,
-      ))) {
+      ), val)) {
         return false;
       }
 
-      if (condition.eq !== undefined && val !== FetchByArtifactService.getFilterValue(
+      if (condition.eq !== undefined && !checkEq(FetchByArtifactService.getFilterValue(
         val,
         entity,
         condition.eq,
         params,
-      )) {
+      ), val)) {
         return false;
       }
 
-      if (condition.gte !== undefined && val <= FetchByArtifactService.getFilterValue(
+      if (condition.gte !== undefined && !checkGte(FetchByArtifactService.getFilterValue(
         val,
         entity,
         condition.gte,
         params,
-      )) {
+      ), val)) {
         return false;
       }
 
-      if (condition.in && !FetchByArtifactService.getFilterValue(
+      if (condition.in && !checkIn(FetchByArtifactService.getFilterValue(
         val,
         entity,
         condition.in,
         params,
-      )?.includes(val)) {
+      ), val)) {
         return false;
       }
 
-      if (condition.lte !== undefined && val >= FetchByArtifactService.getFilterValue(
+      if (condition.lte !== undefined && !checkLte(FetchByArtifactService.getFilterValue(
         val,
         entity,
         condition.lte,
         params,
-      )) {
+      ), val)) {
         return false;
       }
 
-      if (condition.ne !== undefined && val === FetchByArtifactService.getFilterValue(
+      if (condition.ne !== undefined && checkEq(FetchByArtifactService.getFilterValue(
         val,
         entity,
         condition.ne,
         params,
-      )) {
+      ), val)) {
         return false;
       }
 
@@ -329,4 +329,75 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
 
     return filter;
   }
+}
+
+function checkContains(condition, val) {
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      if (item?.includes(condition)) {
+        return true;
+      }
+    }
+  } else if (val?.includes(condition)) {
+    return true;
+  }
+
+  return false;
+}
+
+
+function checkEq(condition, val) {
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      if (condition === val) {
+        return true;
+      }
+    }
+  } else if (condition === val) {
+    return true;
+  }
+
+  return false;
+}
+
+function checkGte(condition, val) {
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      if (condition <= val) {
+        return true;
+      }
+    }
+  } else if (condition <= val) {
+    return true;
+  }
+
+  return false;
+}
+
+function checkIn(condition, val) {
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      if (condition?.includes(item)) {
+        return true;
+      }
+    }
+  } else if (condition?.includes(val)) {
+    return true;
+  }
+
+  return false;
+}
+
+function checkLte(condition, val) {
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      if (condition >= val) {
+        return true;
+      }
+    }
+  } else if (condition >= val) {
+    return true;
+  }
+
+  return false;
 }

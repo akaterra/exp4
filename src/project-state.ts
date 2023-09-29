@@ -33,7 +33,7 @@ export class ProjectState {
     return ids;
   }
 
-  getDirtyTargetStreamIds(targetId: IProjectTarget['id']): IProjectTargetStream['id'][] {
+  getDirtyTargetStreamIds(targetId: IProjectTargetDef['id']): IProjectTargetStreamDef['id'][] {
     const project = this.projectsService.get(this.id);
     const ids: IProjectTargetStreamDef['id'][] = [];
 
