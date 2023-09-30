@@ -1,5 +1,5 @@
 import { Status } from '../enums/status';
-import { IProject, IProjectFlowAction, IProjectFlow, IProjectTarget } from '../stores/dto/project';
+import { IProject, IProjectFlowAction, IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
 import { IProjectState } from '../stores/dto/project-state';
 import { splitFilterTokens } from '../stores/utils';
 import { RestApiService } from './rest-api.service';
@@ -30,10 +30,10 @@ export class ProjectsService {
   }
 
   async listState(projectId: IProject['id'], filter?: {
-    targetId?: IProjectTarget['id'][],
+    targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
     scopes?: string[],
   }): Promise<IProjectState> {
-    const res: IProjectState = await this.rest.get(`projects/${projectId}/streams`, filter);
+    const res: IProjectState = await this.rest.post(`projects/${projectId}/streams`, filter);
 
     for (const target of Object.values(res.targets)) {
       for (const stream of Object.values(target.streams)) {

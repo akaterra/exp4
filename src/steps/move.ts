@@ -25,7 +25,7 @@ export class MoveStepService extends EntityService implements IStepService {
       : project.getFlowByFlowId(action.ref.flowId).targets;
 
     for (let tIdOfSource of sourceTargetIds) {
-      for (let tIdOfTarget of action.targets) {
+      for (let tIdOfTarget of step.targets) {
         const [ sId, tId ] = tIdOfTarget.split(':');
 
         if (tId) {

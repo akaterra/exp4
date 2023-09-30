@@ -5,6 +5,7 @@ import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import {ArgocdIntegrationService} from '../integrations/argocd';
+import {notEmptyArray} from './utils';
 
 export interface IArgocdSyncStepConfig extends Record<string, unknown> {
   integration: string;
@@ -28,7 +29,7 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
 
-    for (const tIdOfTarget of action.targets ?? flow.targets ?? []) {
+    for (const tIdOfTarget of notEmptyArray(step.targets, flow.targets)) {
       const target = project.getTargetByTargetId(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)

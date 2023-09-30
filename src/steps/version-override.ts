@@ -23,7 +23,7 @@ export class VersionOverrideStepService extends EntityService implements IStepSe
       : project.getFlowByFlowId(action.ref.flowId).targets;
 
     for (let sIdOfSource of sourceTargetIds) {
-      for (let tIdOfTarget of action.targets) {
+      for (let tIdOfTarget of step.targets) {
         const [ sId, tId ] = tIdOfTarget.split(':');
 
         if (tId) {

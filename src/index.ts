@@ -88,7 +88,7 @@ function auth(req, res, next) {
   app.get(
     '/projects', err(auth), err(projectList),
   );
-  app.get(
+  app.post(
     '/projects/:projectId/streams', err(auth), err(projectStreamList),
   );
   app.post(

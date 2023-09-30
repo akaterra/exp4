@@ -211,7 +211,14 @@ export class ProjectTargetStore extends BaseStore {
 
   @flow
   *fetchState() {
-    yield this.projectStore.fetchState([ this.target?.id ], [ '*' ]);
+    const selectedStreamIds = Object.keys(this.selectedProjectTargetStreamIds);
+
+    yield this.projectStore.fetchState(
+      {
+        [this.target.id]: selectedStreamIds.length ? selectedStreamIds : true,
+      },
+      [ '*' ],
+    );
   }
 
   @flow
@@ -303,7 +310,10 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *fetchState(targetId?: IProjectTarget['id'][], scopes?: string[]) {
+  *fetchState(
+    targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
+    scopes?: string[],
+  ) {
     const res: IProjectState = yield this.projectsStore.service.listState(
       this.project.id,
       {

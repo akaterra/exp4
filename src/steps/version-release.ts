@@ -20,7 +20,7 @@ export class VersionReleaseStepService extends EntityService implements IStepSer
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
 
-    for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
+    for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : step.targets)) {
       const target = project.getTargetByTargetId(tId);
 
       await project.getEnvVersioningByTarget(target).release(target, params);

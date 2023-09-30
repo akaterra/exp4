@@ -31,7 +31,7 @@ export class MoveToStepService extends EntityService implements IStepService {
           : targetsStreams?.[tIdOfSource] as string[] ?? []
         : Object.keys(project.getTargetByTargetId(tIdOfSource).streams);
 
-      for (const tIdOfTarget of action.targets) {
+      for (const tIdOfTarget of step.targets) {
         for (const sId of streamIds) {
           const sourceStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfSource, sId, true);
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);

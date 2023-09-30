@@ -19,7 +19,7 @@ export class StreamHistoryRollbackStepService extends EntityService implements I
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
 
-    for (const tIdOfTarget of action.targets) {
+    for (const tIdOfTarget of step.targets) {
       const target = project.getTargetByTargetId(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)

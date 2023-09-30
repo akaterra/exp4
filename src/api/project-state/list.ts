@@ -14,14 +14,20 @@ export async function projectStreamList(req, res) {
 
       return acc
     }, {})
-    : null;
-  const scopes = req.query.scopes
+    : Array.isArray(req.body?.targetId)
+      ? req.body.targetId.reduce((acc, targetId) => {
+        acc[targetId] = true;
+
+        return acc
+      }, {})
+      : req.data?.targetId ?? null;
+  const scopes = req.query?.scopes
     ? req.query.scopes.split(',').reduce((acc, scope) => {
       acc[scope] = true;
 
       return acc
     }, {})
-    : null;
+    : req.body?.scopes ?? null;
 
   res.json(await projectsService.getState(req.params.projectId, targetStreams, scopes));
 }

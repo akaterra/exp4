@@ -23,7 +23,7 @@ export class BookmarkStepService extends EntityService implements IStepService {
       : project.getFlowByFlowId(action.ref.flowId).targets;
 
     for (const tIdOfSource of sourceTargetIds) {
-      for (const tIdOfTarget of action.targets) {
+      for (const tIdOfTarget of step.targets) {
         const source = project.getTargetByTargetId(tIdOfSource);
         const target = project.getTargetByTargetId(tIdOfTarget);
         const streamIds = targetsStreams?.[tIdOfSource] === true

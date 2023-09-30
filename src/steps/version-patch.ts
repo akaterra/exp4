@@ -20,7 +20,7 @@ export class VersionPatchStepService extends EntityService implements IStepServi
   ): Promise<void> {
     const project = this.projectsService.get(action.ref.projectId);
 
-    for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : action.targets)) {
+    for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : step.targets)) {
       const target = project.getTargetByTargetId(tId);
 
       await project.getEnvVersioningByTarget(target).patch(target, params);
