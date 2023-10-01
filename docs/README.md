@@ -18,16 +18,16 @@ All these targets, streams and flow are combined under a [`project`](manifest.pr
 There is a project "x" with two targets (environments) - "dev" and "stg".
 
 "dev" target defines two streams:
-  * serviceA - is an associated GitHub repo "service-a", branch "dev"
-  * serviceB - is an associated GitHub repo "service-b", branch "dev"
+  * serviceA - is an associated GitHub repo "service-a", branch `dev`
+  * serviceB - is an associated GitHub repo "service-b", branch `dev`
 
 "stg" target defines two streams:
-  * serviceA - is an associated GitHub repo "service-a", branch "release-{major}-{minor}-{patch}"
-  * serviceB - is an associated GitHub repo "service-b", branch "release-{major}-{minor}-{patch}"
+  * serviceA - is an associated GitHub repo "service-a", branch `release-${major}-${minor}-${patch}`
+  * serviceB - is an associated GitHub repo "service-b", branch `release-${major}-${minor}-${patch}`
 
 For project defined [`versioning`](versioning) of type "semver" with initial value "0.1.0", versioning associated with the "stg" target and affects to "stg" repositories branch names.
 
-For project defined flows "mergeLatestDevelop" and "release".
+For project has two flows "mergeLatestDevelop" and "release".
 
 "mergeLatestDevelop" flow defined for target "stg" and consists of two steps:
   * "moveFrom" - merges "dev" branch to "stg" branch using current versioning data
@@ -39,13 +39,13 @@ For project defined flows "mergeLatestDevelop" and "release".
 
 Scenarios:
   * on running "mergeLatestDevelop" flow:
-    * "service-a"'s "release-0-1-0" branch merges latest state of "dev" branch
-    * "service-b"'s "release-0-1-0" branch merges latest state of "dev" branch
+    * "service-a" `release-0-1-0` branch merges latest state of "dev" branch
+    * "service-b" `release-0-1-0` branch merges latest state of "dev" branch
     * "run test" GitHub action is triggered on both repositories
-    * UI shows "dev" repositories and "stg" repositories for branch "release-0-1-0"
+    * UI then shows "dev" repositories for branch `dev` and "stg" repositories for branch `release-0-1-0`
 
   * on running "release" flow:
     * versioning value is bumped to "0.2.0"
-    * "service-a"'s "release-0-2-0" branch is created from the latest state of "dev" branch
-    * "service-b"'s "release-0-2-0" branch is created from the latest state of "dev" branch
-    * UI shows "dev" repositories and "stg" repositories for branch "release-0-2-0"
+    * "service-a" `release-0-2-0` branch is created from the latest state of "dev" branch
+    * "service-b" `release-0-2-0` branch is created from the latest state of "dev" branch
+    * UI then shows "dev" repositories for branch `dev` and "stg" repositories for branch `release-0-2-0`

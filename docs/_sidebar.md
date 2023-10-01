@@ -1,7 +1,6 @@
 <!-- docs/_sidebar.md -->
 
 * [Overview](/)
-  * [Components](components.md)
 * [Quick start](quick-start.md)
   * [Examples]()
 * [CLI](cli.md)

@@ -33,11 +33,11 @@ Manifest can be be loaded from:
   mongodb://user:pass@host/db#manifests
   ```
 
-The sources are provided in form of `CLI` param
+The sources are provided in form of CLI param
   ```
   sourceflow --manifest=[ filePath ] --manifest=[ directory ] --manifest=[ URI ]
   ```
-or as `ENV` var
+or as ENV var
   ```
   MANIFEST=[ filePath ],[ directory ],[ URI ]
   ```

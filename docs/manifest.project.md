@@ -17,28 +17,28 @@ Can be multiple.
       contactEmail: [ string ]
 
     artifacts:
-      [ id1: string ]: ArtifactConfig
-      [ id2: string ]: ArtifactConfig
+      [ id1: string ]: ArtifactOptions
+      [ id2: string ]: ArtifactOptions
       ...
 
     integrations:
-      [ id1: string ]: IntegrationConfig
-      [ id2: string ]: IntegrationConfig
+      [ id1: string ]: IntegrationOptions
+      [ id2: string ]: IntegrationOptions
       ...
 
     storages:
-      [ id1: string ]: StorageConfig
-      [ id2: string ]: StorageConfig
+      [ id1: string ]: StorageOptions
+      [ id2: string ]: StorageOptions
       ...
 
     versionings:
-      [ id1: string ]: VersioningConfig
-      [ id2: string ]: VersioningConfig
+      [ id1: string ]: VersioningOptions
+      [ id2: string ]: VersioningOptions
       ...
 
     flows:
-      [ id1: string ]: FlowConfig
-      [ id2: string ]: FlowConfig
+      [ id1: string ]: FlowOptions
+      [ id2: string ]: FlowOptions
       ...
 
     targets:

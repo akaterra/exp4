@@ -9,17 +9,17 @@ Can be defined only once.
     type: "general" (mandatory)
 
     auth:
-      [ id1: string ]: AuthProviderConfig
-      [ id2: string ]: AuthProviderConfig
+      [ id1: string ]: AuthProviderOptions
+      [ id2: string ]: AuthProviderOptions
       ...
 
     integrations:
-      [ id1: string ]: IntegrationConfig
-      [ id2: string ]: IntegrationConfig
+      [ id1: string ]: IntegrationOptions
+      [ id2: string ]: IntegrationOptions
       ...
 
     storages:
-      [ id1: string ]: StorageConfig
-      [ id2: string ]: StorageConfig
+      [ id1: string ]: StorageOptions
+      [ id2: string ]: StorageOptions
       ...
 
