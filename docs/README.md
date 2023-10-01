@@ -15,7 +15,7 @@ All these targets, streams and flow are combined under a [`project`](manifest.pr
 
 ##### Example:
 
-There is a project with two targets (environment) - "dev" and "stg".
+There is a project "x" with two targets (environments) - "dev" and "stg".
 
 "dev" target defines two streams:
   * serviceA - is an associated GitHub repo "service-a", branch "dev"
@@ -25,7 +25,7 @@ There is a project with two targets (environment) - "dev" and "stg".
   * serviceA - is an associated GitHub repo "service-a", branch "release-{major}-{minor}-{patch}"
   * serviceB - is an associated GitHub repo "service-b", branch "release-{major}-{minor}-{patch}"
 
-For project defined [`versioning`](versioning) of type "semver" with initial value "0.1.0", versioning associated with the "stg" target.
+For project defined [`versioning`](versioning) of type "semver" with initial value "0.1.0", versioning associated with the "stg" target and affects to "stg" repositories branch names.
 
 For project defined flows "mergeLatestDevelop" and "release".
 
