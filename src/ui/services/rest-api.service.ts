@@ -26,24 +26,18 @@ export class PublicRestApiService {
   @processingRequest
   doRequest(path: string, method: 'delete' | 'get' | 'post' | 'put', data?, query?: Record<string, any>) {
     const headers = this.doRequestHeaders();
+    const opts = {
+      method,
+      headers,
+      credentials: 'include' as RequestCredentials,
+    }
 
     if (data !== undefined) {
       headers['Content-Type'] = 'application/json';
-
-      return fetch(`${this.domain}/${this.rootPath}${path}?${encodeQuery(query)}`, {
-        method,
-        body: JSON.stringify(data),
-        headers,
-      }).then((res) => {
-        if (res.status >= 200 && res.status <= 299) {
-          return res.json();
-        }
-
-        return res.json().then((res) => Promise.reject(res));
-      });
+      opts['body'] = JSON.stringify(data);
     }
 
-    return fetch(`${this.domain}/${this.rootPath}${path}?${encodeQuery(query)}`, { method, headers }).then((res) => {
+    return fetch(`${this.domain}/${this.rootPath}${path}?${encodeQuery(query)}`, opts).then((res) => {
       if (res.status >= 200 && res.status <= 299) {
         return res.json();
       }
@@ -73,7 +67,7 @@ export class RestApiService extends PublicRestApiService {
   protected doRequestHeaders() {
     const headers: any = super.doRequestHeaders();
 
-    if (RestApiService.accessToken) {
+    if (RestApiService.accessToken && RestApiService.accessToken !== 'null') {
       headers['Authorization'] = `${RestApiService.accessToken}`;
     }
 

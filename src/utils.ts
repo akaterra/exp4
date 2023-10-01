@@ -131,50 +131,6 @@ export class AwaitableContainer {
   }
 }
 
-export function loadDefinitionsFromDirectory(path: string): any[] {
-  const files = fs.readdirSync(path, { withFileTypes: true });
-
-  return files
-    .filter((file) => !file.isDirectory())
-    .map((file) => loadDefinitionFromFile(`${path}/${file.name}`));
-}
-
-export function loadDefinitionFromFile(pathOrName: string): any {
-  let definition;
-
-  if (Object.keys(EXTENSIONS).some((ext) => pathOrName.slice(-ext.length - 1) === `.${ext}`)) {
-    const fileContent = fs.readFileSync(pathOrName, 'utf8');
-
-    switch (pathOrName.slice(pathOrName.lastIndexOf('.') + 1)) {
-    case 'json':
-      definition = JSON.parse(fileContent);
-      break;
-    case 'yaml':
-      definition = YAML.parse(fileContent);
-      break;
-    case 'yml':
-      definition = YAML.parse(fileContent);
-      break;  
-    }
-
-    if (definition && typeof definition === 'object') {
-      if (!definition.id) {
-        definition.id = pathOrName.slice(pathOrName.lastIndexOf('/') + 1, pathOrName.lastIndexOf('.'));
-      }
-    }
-  } else {
-    for (const ext of Object.keys(EXTENSIONS)) {
-      const filename = `${process.cwd()}/projects/${pathOrName}.${ext}`;
-
-      if (fs.existsSync(filename)) {
-        return loadDefinitionFromFile(filename);
-      }
-    }
-  }
-
-  return definition;
-}
-
 export function loadModules(path, symbolPostfix?) {
   function findSymbol(module) {
     if (module.module) {

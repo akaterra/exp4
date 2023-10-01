@@ -90,6 +90,7 @@ export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
 export interface IProjectTargetStream<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
+  ver?: number;
 
   artifacts?: IProjectArtifact['id'][];
   actions?: Record<string, IProjectFlowActionDef>;
@@ -101,6 +102,7 @@ export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknow
 
 export interface IProjectTarget<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
+  ver?: number;
 
   artifacts?: IProjectArtifact['id'][];
   streams: Record<string, IProjectTargetStream<C>>;
@@ -297,6 +299,8 @@ export class Project implements IProject {
                 artifacts: streamDef.artifacts,
                 tags: streamDef.tags ?? [],
                 targets: streamDef.targets ?? [],
+
+                ver: 0,
               };
 
               if (streamDef.actions) {
@@ -354,6 +358,8 @@ export class Project implements IProject {
               return acc;
             }, {}),
           versioning: def.versioning,
+
+          ver: 0,
         };
       }
     }

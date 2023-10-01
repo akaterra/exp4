@@ -5,7 +5,7 @@ import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import {ArgocdIntegrationService} from '../integrations/argocd';
-import {notEmptyArray} from './utils';
+import {makeDirty, notEmptyArray} from './utils';
 
 export interface IArgocdSyncStepConfig extends Record<string, unknown> {
   integration: string;
@@ -50,10 +50,10 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
             },
           );
 
-        targetStream.isDirty = true;
+        makeDirty(targetStream);
       }
 
-      target.isDirty = true;
+      makeDirty(target);
     }
   }
 }

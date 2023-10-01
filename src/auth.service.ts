@@ -3,11 +3,13 @@ import { IUser } from './user';
 import { v4 } from 'uuid';
 import { AwaitedCache } from './cache';
 
-const jwtSecret = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
+const AUTH_DOMAIN = process.env.AUTH_DOMAIN || null;
+const AUTH_MODE = process.env.AUTH_MODE || 'header';
+const JWT_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 
 export function authorize(accessToken: string): IUser {
   try {
-    return jwt.verify(accessToken, jwtSecret);
+    return jwt.verify(accessToken, JWT_SECRET);
   } catch (err) {
     throw new Error('Unauthorized');
   }
@@ -18,7 +20,7 @@ export function prepareAuthData(user: IUser) {
     id: user.id,
     name: user.name,
   };
-  const accessToken = jwt.sign(tokenPayload, jwtSecret);
+  const accessToken = jwt.sign(tokenPayload, JWT_SECRET);
 
   return {
     accessToken,
@@ -38,4 +40,32 @@ export function generateOneTimeToken(user: IUser) {
 
 export function authorizeByOneTimeToken(id: string): IUser {
   return OTT_DATA.get(id) as IUser;
+}
+
+export function authSendData(req, res, data) {
+  switch (AUTH_MODE) {
+  case 'cookie':
+    for (const domain of (AUTH_DOMAIN ?? '').split(',')) {
+      res.cookie('authorization', data.accessToken, { domain: domain || null, httpOnly: true, sameSite: 'none', secure: true });
+    }
+
+    res.json({ accessToken: 'null', user: data.user });
+    break;
+  default:
+    res.json(data);
+    break;
+  }
+}
+
+export function authLogout(req, res) {
+  switch (AUTH_MODE) {
+  case 'cookie':
+    for (const domain of (AUTH_DOMAIN ?? '').split(',')) {
+      res.clearCookie('authorization', { domain: domain || null, sameSite: 'none', secure: true });
+    }
+
+    break;
+  }
+
+  res.json(true);
 }

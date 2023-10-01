@@ -64,10 +64,18 @@ export class StreamState<
   metadata?: Metadata;
   version?: string;
 
+  ver: number = 0;
+
   constructor(props) {
     Reflect.setPrototypeOf(props, StreamState.prototype);
 
     return props as unknown as StreamState<Metadata, HistoryActionMetadata, HistoryChangeMetadata>;
+  }
+
+  incVer() {
+    this.ver += 1;
+
+    return this;
   }
 
   pushArtifact(artifact: StreamState['history']['artifact'][0], update = true) {

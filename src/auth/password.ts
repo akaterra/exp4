@@ -5,7 +5,7 @@ import { Autowired, err } from '../utils';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
-import { prepareAuthData } from '../auth.service';
+import { authSendData as execAuthSendData, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
 const { compare } = require('bcrypt');
 
@@ -61,10 +61,10 @@ export class PasswordAuthStrategyService extends EntityService implements IAuthS
       if (!user || !await this.comparePassword(req.body.password, user.password)) {
         res.status(401);
 
-        throw new Error('Unauthorized');
+        throw new Error('Invalid username or password');
       }
 
-      res.json(prepareAuthData(user));
+      execAuthSendData(req, res, prepareAuthData(user));
     }));
   }
 

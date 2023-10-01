@@ -4,6 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
+import {makeDirty} from './utils';
 
 @Service()
 export class StreamHistoryRollbackStepService extends EntityService implements IStepService {
@@ -32,10 +33,10 @@ export class StreamHistoryRollbackStepService extends EntityService implements I
           targetStream,
         );
 
-        targetStream.isDirty = true;
+        makeDirty(targetStream);
       }
 
-      target.isDirty = true;
+      makeDirty(target);
     }
   }
 }

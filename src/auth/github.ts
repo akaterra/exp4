@@ -5,7 +5,7 @@ import { Autowired, err, request } from '../utils';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
-import { prepareAuthData } from '../auth.service';
+import { authSendData as execAuthSendData, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
 
 @Service()
@@ -105,7 +105,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
         throw new Error('Unauthorized');
       }
 
-      res.json(prepareAuthData(user));
+      execAuthSendData(req, res, prepareAuthData(user));
     }));
   }
 

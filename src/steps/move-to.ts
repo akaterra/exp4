@@ -4,6 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
+import {makeDirty} from './utils';
 
 @Service()
 export class MoveToStepService extends EntityService implements IStepService {
@@ -40,8 +41,7 @@ export class MoveToStepService extends EntityService implements IStepService {
             await project.getEnvStreamByTargetStream(sourceStream)
               .streamMove(sourceStream, targetStream);
 
-            sourceStream.isDirty = true;
-            targetStream.isDirty = true;    
+            makeDirty(sourceStream, targetStream);
           }
         }
       }

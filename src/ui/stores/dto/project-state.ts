@@ -61,6 +61,8 @@ export interface IProjectTargetStreamState {
   metadata: Record<string, unknown>;
   version: string;
 
+  ver: number;
+
   _label: 'default' | 'failure' | 'success' | 'warning';
   _search: Set<string>;
 }

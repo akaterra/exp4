@@ -37,6 +37,12 @@ export class FormStore {
     return state;
   }
 
+  __setError(fields: Record<string, string>) {
+    for (const [ key, val ] of Object.entries(fields)) {
+      this.__isError[key] = val;
+    }
+  }
+
   __clear() {
     for (const [ key, def ] of Object.entries(this.__opts)) {
       this[key] = def.initialValue ?? null;

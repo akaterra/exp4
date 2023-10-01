@@ -4,6 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
+import {makeDirty} from './utils';
 
 @Service()
 export class StreamVersionOverrideStepService extends EntityService implements IStepService {
@@ -46,12 +47,10 @@ export class StreamVersionOverrideStepService extends EntityService implements I
             targetStream,
           );
 
-          sourceStream.isDirty = true;
-          targetStream.isDirty = true;
+          makeDirty(sourceStream, targetStream);
         }
 
-        source.isDirty = true;
-        target.isDirty = true;
+        makeDirty(source, target);
       }
     }
   }

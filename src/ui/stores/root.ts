@@ -93,19 +93,41 @@ export class RootStore {
       }
 
       if (data) {
-        const { accessToken, user } = yield this.usersService.authorizeByData(
+        const { accessToken, user, isError } = yield this.usersService.authorizeByData(
           id,
           data,
           this.authMethods[id]?.actions?.callbackUrl?.method ?? 'get',
-        );
+        ).catch((err) => {
+          if (err === 'Invalid username or password') {
+            this.authPasswordStore.__setError({
+              username: err, password: err,
+            });
 
-        localStorage.setItem('accessToken', accessToken);
+            return { isError: true };
+          }
 
-        this.accessToken = RestApiService.accessToken = accessToken;
-        this.isAuthorized = true;
-        this.user = user;
+          if (err === 'User is blocked') {
+            this.authPasswordStore.__setError({
+              username: err,
+            });
 
-        yield this.start(':first');
+            return { isError: true };
+          }
+
+          return Promise.reject(err);
+        });
+
+        if (!isError) {
+          localStorage.setItem('accessToken', accessToken);
+
+          this.accessToken = RestApiService.accessToken = accessToken;
+          this.isAuthorized = true;
+          this.user = user;
+
+          yield this.start(':first');
+        } else {
+          this.isAuthorized = false;
+        }
       } else {
         this.isAuthorized = false;
       }
@@ -151,6 +173,7 @@ export class RootStore {
     this.isAuthorized = false;
     this.authPasswordStore.__clear();
 
+    yield this.usersService.logout();
     yield this.authorize();
   }
 

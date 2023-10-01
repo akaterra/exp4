@@ -4,6 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
+import {makeDirty} from './utils';
 
 @Service()
 export class DetachStepService extends EntityService implements IStepService {
@@ -38,12 +39,11 @@ export class DetachStepService extends EntityService implements IStepService {
               targetStream,
             );
 
-            targetStream.isDirty = true;
+            makeDirty(targetStream);
           }
         }
 
-        source.isDirty = true;
-        target.isDirty = true;
+        makeDirty(source, target);
       }
     }
   }

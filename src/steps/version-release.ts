@@ -4,6 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired, iter } from '../utils';
 import { EntityService } from '../entities.service';
+import {makeDirty} from './utils';
 
 @Service()
 export class VersionReleaseStepService extends EntityService implements IStepService {
@@ -25,7 +26,7 @@ export class VersionReleaseStepService extends EntityService implements IStepSer
 
       await project.getEnvVersioningByTarget(target).release(target, params);
 
-      target.isDirty = true;
+      makeDirty(target);
     }
   }
 }

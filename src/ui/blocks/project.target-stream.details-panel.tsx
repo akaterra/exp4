@@ -41,6 +41,14 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
   projectTargetStream?: IProjectTargetStream;
   projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
+  const store = projectTargetStream
+    ? projectTargetStore?.projectTargetState?.streams?.[projectTargetStream?.id]
+    : null;
+
+  if (store && store?.ver !== projectTargetStreamState?.ver) {
+    projectTargetStreamState = store;
+  }
+
   const lastAction = projectTargetStreamState?.history?.action?.[0];
   const lastChange = projectTargetStreamState?.history?.change?.[0];
 

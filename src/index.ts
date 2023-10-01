@@ -23,12 +23,14 @@ import { authUserGetCurrent } from './api/auth/user.get-current';
 import {StoragesService} from './storages.service';
 import {IGeneralManifest} from './general';
 import {IProjectManifest} from './project';
+import cookieParser from 'cookie-parser';
+import {authLogout} from './api/auth/logout';
 
 process.on('uncaughtException', function() {
 });
 
 function auth(req, res, next) {
-  req.user = authorize(req.headers.authorization);
+  req.user = authorize(req.headers.authorization || req.cookies.authorization);
 
   next();
 }
@@ -63,12 +65,22 @@ function auth(req, res, next) {
   ss.addFactory(GithubStreamService);
 
   const app = express();
-  app.use(cors());
+  app.use(cors({ credentials: true, origin: 'http://localhost:9002' }));
+  app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use((req, res, next) => {
+    res.set('Access-Control-Allow-Headers', 'Set-Cookie, Cookie');
 
-  function error(err, req, res) {
+    next();
+  })
+
+  function error(err, req, res, next) {
     logError(err);
+
+    if (res.headersSent) {
+      return next(err);
+    }
 
     if (!res.statusCode || res.statusCode < 300) {
       res.status(500);
@@ -79,6 +91,9 @@ function auth(req, res, next) {
  
   await authStrategies.configureServer(app);
 
+  app.post(
+    '/auth/logout', err(authLogout),
+  );
   app.get(
     '/auth/methods', err(authMethodList),
   );

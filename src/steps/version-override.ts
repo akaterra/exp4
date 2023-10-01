@@ -4,6 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
+import {makeDirty} from './utils';
 
 @Service()
 export class VersionOverrideStepService extends EntityService implements IStepService {
@@ -36,8 +37,7 @@ export class VersionOverrideStepService extends EntityService implements IStepSe
 
         await project.getEnvVersioningByTarget(target).override(source, target);
 
-        source.isDirty = true;
-        target.isDirty = true;
+        makeDirty(source, target);
       }
     }
   }

@@ -154,10 +154,10 @@ export class ProjectTargetStore extends BaseStore {
       for (const stream of Object.values(this.target.streams)) {
         const streamState = this.projectTargetState?.streams?.[stream.id];
 
-        if (this.projectStore.filterTargetsArtifacts) {
+        if (this.projectStore.filterTargets) {
           let pass = true;
 
-          for (const token of splitFilterTokens(this.projectStore.filterTargetsArtifacts, true)) {
+          for (const token of splitFilterTokens(this.projectStore.filterTargets, true)) {
             const isExcluded = token.at(0) === '-';
             const tokenValue = isExcluded ? token.slice(1) : token;
 
@@ -182,7 +182,7 @@ export class ProjectTargetStore extends BaseStore {
         streamsWithStates.push({
           stream,
           streamState,
-          artifacts: filterArtifacts(stream, this.projectTargetState?.streams?.[stream.id], this.projectStore.filterTargetsArtifacts),
+          artifacts: filterArtifacts(stream, this.projectTargetState?.streams?.[stream.id], this.projectStore.filterTargets),
         });
       }
 
@@ -276,7 +276,11 @@ export class ProjectStore extends BaseStore {
   @observable
     filterTargets: string = '';
   @observable
-    filterTargetsArtifacts: string = '';
+    mode: {
+      target?: 'artifact' | 'stream';
+    } = {
+      target: 'stream',
+    };
   @observable
     project: IProject;
   @observable

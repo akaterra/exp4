@@ -5,7 +5,7 @@ import { Autowired, err } from '../utils';
 import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
 import { IUser } from '../user';
 import { StoragesService } from '../storages.service';
-import { authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth.service';
+import { authSendData as execAuthSendData, authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
 import { Saml2Service } from '../services/saml2.service';
 
@@ -89,7 +89,7 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
     }));
 
     app.get(path + '/callback', err(async (req, res) => {
-      res.json(prepareAuthData(authorizeByOneTimeToken(req.query.code)));
+      execAuthSendData(req, res, prepareAuthData(authorizeByOneTimeToken(req.query.code)));
     }));
 
     app.get(path + '/metadata.xml', err(async (req, res) => {

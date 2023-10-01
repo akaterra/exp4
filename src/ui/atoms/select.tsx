@@ -21,10 +21,12 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
       }
       onChange={ !disabled
         ? (e) => {
-          setValue(items[(e.target as HTMLSelectElement).selectedIndex]);
+          const value = items[(e.target as HTMLSelectElement).selectedIndex];
+
+          setValue(value);
     
           if (onChange) {
-            onChange(items[(e.target as HTMLSelectElement).selectedIndex]);
+            onChange(value);
           }
         }
         : undefined
@@ -41,10 +43,12 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
       }
       onChange={ !disabled
         ? (e) => {
-          setValue(items[(e.target as HTMLSelectElement).selectedIndex]);
-    
+          const value = Object.keys(items)[(e.target as HTMLSelectElement).selectedIndex];
+
+          setValue(value);
+
           if (onChange) {
-            onChange(items[(e.target as HTMLSelectElement).selectedIndex]);
+            onChange(value);
           }
         }
         : undefined

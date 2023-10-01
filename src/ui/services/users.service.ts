@@ -29,4 +29,8 @@ export class UsersService {
   listAuthMethodActions(id: string): Promise<IAuthStrategyMethod> {
     return this.rest.get(`auth/methods/${id}`)
   }
+
+  logout() {
+    return this.rest.post(`auth/logout`);
+  }
 }

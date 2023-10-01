@@ -206,7 +206,7 @@ export class GithubStreamService extends EntityService implements IStreamService
         );
       }
 
-      // stream.isDirty = false;
+      state.incVer();
     })().catch((err) => {
       logError(err, 'GithubStreamService.streamGetState');
     }).finally(() => {

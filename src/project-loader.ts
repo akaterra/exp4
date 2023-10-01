@@ -5,7 +5,7 @@ import { StreamsService } from './streams.service';
 import { StepsService } from './steps.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
-import { iter, loadDefinitionFromFile, loadDefinitionsFromDirectory, loadModules } from './utils';
+import { iter, loadModules } from './utils';
 import { ArtifactsService } from './artifacts.service';
 import * as _ from 'lodash';
 import {MANIFEST_PROJECT_TYPE} from './const';

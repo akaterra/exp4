@@ -88,19 +88,19 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
         <div style={ style.landing.logo } />
         <div className='pad-hor triple'>{ SLOGAN }</div>
       </div>
-      <div className="container med ltr square pad-hor triple">
+      <div className="container med ltr square pad-hor triple roof">
         {
           authMethodPassword
             ? <form className='paragraph'>
               <div className='row flex flex-center'>
-                <FormInput
+                <FormInput className='transparent'
                   store={ store.authPasswordStore }
                   id='username'
                   x={ 4 } autoComplete='username' label='Username'
                 />
               </div>
               <div className='row flex flex-center'>
-                <FormInput
+                <FormInput className='transparent'
                   store={ store.authPasswordStore }
                   id='password'
                   x={ 4 } autoComplete='password' label='Password' type='password'
