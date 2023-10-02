@@ -17,50 +17,54 @@ export class ArtifactsService extends EntitiesServiceWithFactory<IArtifactServic
   async run(
     entity: { artifacts: IProjectArtifact['id'][], ref: IProjectArtifact['ref'], scope?: Record<string, any> },
     streamState: StreamState,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
+    scopes?: Record<string, boolean>,
   ) {
-    return this.runWithDependences(entity, streamState, params);
+    return this.runWithDependences(entity, streamState, params, scopes);
   }
 
   private async runWithDependences(
-    entity: { artifacts: IProjectArtifact['id'][], ref: IProjectArtifact['ref'], scope?: Record<string, any> },
+    entity: { artifacts: IProjectArtifact['id'][], ref: IProjectArtifact['ref'], context?: Record<string, any> },
     streamState: StreamState,
-    params?: Record<string, any>,
-    isRun?: Record<string, boolean>,
+    params?: Record<string, unknown>,
+    scopes?: Record<string, boolean>,
+    wasRun?: Record<string, boolean>,
   ) {
     if (!entity.artifacts?.length) {
       return;
     }
 
-    if (!isRun) {
-      isRun = {};
+    if (!wasRun) {
+      wasRun = {};
     }
 
     const project = this.projectsService.get(entity.ref?.projectId);
-    const scope = entity.scope ?? {};
+    const context = entity.context ?? {};
 
     for (const artifactId of entity.artifacts) {
       const artifact = project.getArtifactByArtifactId(artifactId);
 
       if (artifact.dependsOn?.length) {
         for (const artifactId of artifact.dependsOn) {
-          if (!isRun[artifactId]) {
-            isRun[artifactId] = true;
+          if (!wasRun[artifactId]) {
+            wasRun[artifactId] = true;
 
             await this.runWithDependences(
-              { artifacts: [ artifactId ], ref: entity.ref, scope },
+              { artifacts: [ artifactId ], ref: entity.ref, context },
               streamState,
               params,
-              isRun,
+              scopes,
+              wasRun,
             );
           }
         }
       }
 
       await project.getEnvArtifactByArtifactId(artifactId).run(
-        { ref: entity.ref, scope },
+        { ref: entity.ref, context },
         streamState,
         params,
+        scopes,
       );
     }
   };

@@ -8,8 +8,8 @@ import { TargetsService } from './targets.service';
 import { iter, loadModules } from './utils';
 import { ArtifactsService } from './artifacts.service';
 import * as _ from 'lodash';
-import {MANIFEST_PROJECT_TYPE} from './const';
-import {ValidatorService} from './validator.service';
+import { MANIFEST_PROJECT_TYPE } from './const';
+import { ValidatorService } from './validator.service';
 
 export async function createProject(manifest: IProjectManifest & { env?: Project['env'] }, notThrow?: boolean): Promise<Project> {
   if (manifest?.type !== MANIFEST_PROJECT_TYPE) {

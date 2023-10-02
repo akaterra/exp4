@@ -1,14 +1,14 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectManifest, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { knex, Knex } from 'knex';
 import { Log } from '../logger';
 import * as _ from 'lodash';
-import {IGeneralManifest} from '../general';
-import {iter} from '../utils';
+import { IGeneralManifest } from '../general';
+import { iter } from '../utils';
 
 @Service()
 export class SqlStorageService extends EntityService implements IStorageService {

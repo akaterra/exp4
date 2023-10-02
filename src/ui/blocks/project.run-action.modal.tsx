@@ -80,16 +80,16 @@ export const ProjectRunActionModalContent = ({
     <div className='flex flex-ver paragraph paragraph children-gap'>
       <div>
           Are you sure to run action <span className='bold'>"{ projectFlowAction?.title }"</span> for
-          <ul>
-            {
-              projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
-            }
-          </ul>
+        <ul>
+          {
+            projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
+          }
+        </ul>
           on <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
-        </div>
-        {
-          ParamsElements
-        }
+      </div>
+      {
+        ParamsElements
+      }
     </div>
   </React.Fragment>
 

@@ -8,7 +8,7 @@ import Container from 'typedi';
 import { ProjectsService } from './projects.service';
 import { StreamsService } from './streams.service';
 import express from 'express';
-import { projectStreamList } from './api/project-state/list';
+import { projectStateList } from './api/project-state/list';
 import { projectList } from './api/project/list';
 import { projectFlowActionRun } from './api/project-flow/action.run';
 import { createGeneral } from './general-loader';
@@ -20,11 +20,11 @@ import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
 import { logError } from './logger';
 import { authUserGetCurrent } from './api/auth/user.get-current';
-import {StoragesService} from './storages.service';
-import {IGeneralManifest} from './general';
-import {IProjectManifest} from './project';
+import { StoragesService } from './storages.service';
+import { IGeneralManifest } from './general';
+import { IProjectManifest } from './project';
 import cookieParser from 'cookie-parser';
-import {authLogout} from './api/auth/logout';
+import { authLogout } from './api/auth/logout';
 
 process.on('uncaughtException', function() {
 });
@@ -104,7 +104,7 @@ function auth(req, res, next) {
     '/projects', err(auth), err(projectList),
   );
   app.post(
-    '/projects/:projectId/streams', err(auth), err(projectStreamList),
+    '/projects/:projectId/state', err(auth), err(projectStateList),
   );
   app.post(
     '/projects/:projectId/flow/:flowId/action/:actionId/run', err(auth), err(projectFlowActionRun),

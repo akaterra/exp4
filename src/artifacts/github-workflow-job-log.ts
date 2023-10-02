@@ -4,7 +4,7 @@ import { IProjectArtifact, IProjectDef } from '../project';
 import { StreamState } from '../stream';
 import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
-import { Autowired } from '../utils';
+import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
@@ -27,39 +27,45 @@ export class GithubWorkflowJobLogArtifactService extends EntityService implement
   }
 
   async run(
-    entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
+    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
     streamState: StreamState,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
+    scopes?: Record<string, boolean>,
   ): Promise<void> {
     if (!params?.githubWorkflowJobId) {
       return;
     }
 
-    if (![ Status.FAILED, Status.COMPLETED ].includes(params?.githubWorkflowRunJobStatus)) {
+    if (![ Status.FAILED, Status.COMPLETED ].includes(params?.githubWorkflowRunJobStatus as Status)) {
       return;
     }
 
-    const resultJobLog = this.cache.get(params.githubWorkflowJobId)
-      ?? await this.getIntegration(entity.ref).workflowJobLogGet(
+    let artifact = hasScope('artifact', scopes)
+      ? null
+      : this.cache.get(params.githubWorkflowJobId as string);
+
+    if (!artifact) {
+      artifact = await this.getIntegration(entity.ref).workflowJobLogGet(
         params?.githubWorkflowJobId,
         entity.ref?.streamId,
       );
+    }
 
-    if (!resultJobLog) {
+    if (!artifact) {
       return;
     }
 
-    this.cache.set(params.githubWorkflowJobId, resultJobLog, this.config?.cacheTtlSec ?? 3600);
+    this.cache.set(params.githubWorkflowJobId as string, artifact, this.config?.cacheTtlSec ?? 3600);
 
-    if (entity.scope) {
-      entity.scope.githubWorkflowJobLog = resultJobLog;
+    if (entity.context) {
+      entity.context.githubWorkflowJobLog = artifact;
 
       if (this.config?.saveAs) {
         const artifact = {
           id: this.config.saveAs,
           type: this.type,
           author: null,
-          description: entity.scope.githubWorkflowArtifact,
+          description: entity.context.githubWorkflowArtifact as string,
           link: null,
           metadata: {},
           steps: null,

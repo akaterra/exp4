@@ -1,14 +1,14 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectManifest, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { IntegrationsService } from '../integrations.service';
 import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import {IGeneralManifest} from '../general';
+import { IGeneralManifest } from '../general';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {

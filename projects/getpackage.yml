@@ -96,6 +96,13 @@ artifacts:
             valuePath: "status"
         to: "link"
         type: "argocd:syncStatus"
+  githubActionArtifact:
+    type: "github:workflowArtifact"
+    config:
+      integration: "githubStg"
+      name: "imagetag"
+      file: "imagetag.txt"
+      saveAs: "GitHub Action Image tag"
 
 definitions:
   none: null
@@ -424,6 +431,15 @@ targets:
             - "gp-analytics-web"
         artifacts:
           - "argocdApplicationImageTagDev"
+      gp-autocomplete-service:
+        type: "github"
+        title: "Autocomplete"
+        config:
+          integration: "githubDev"
+          argocdServiceName:
+            - "gp-autocomplete-web"
+        artifacts:
+          - "argocdApplicationImageTagDev"
       gp-charge-service:
         type: "github"
         title: "Charge"
@@ -647,6 +663,13 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+      gp-autocomplete-service:
+        use: "targets.dev.%-1.%"
+        config:
+          use: "targets.dev.streams.%-1.%"
+          integration: "githubStg"
+        artifacts:
+          - "argocdApplicationImageTag"
       gp-charge-service:
         use: "targets.dev.streams.%"
         config:
@@ -661,6 +684,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-deliveries-service:
         use: "targets.dev.streams.%"
         config:
@@ -668,6 +692,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-deliveries-history-service:
         use: "targets.dev.streams.%"
         config:
@@ -816,6 +841,11 @@ targets:
         config:
           integration: "githubHotfix"
         artifacts:
+      gp-autocomplete-service:
+        use: "targets.dev.streams.%"
+        config:
+          integration: "githubHotfix"
+        artifacts:
       gp-charge-service:
         use: "targets.dev.streams.%"
         config:
@@ -945,6 +975,11 @@ targets:
         use: "targets.dev.streams.%"
         config:
           integration: "githubMain"
+        artifacts:
+      gp-autocomplete-service:
+        use: "targets.dev.streams.%"
+        config:
+          integration: "githubMaster"
         artifacts:
       gp-charge-service:
         use: "targets.dev.streams.%"

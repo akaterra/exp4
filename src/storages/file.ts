@@ -1,15 +1,15 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectManifest, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import fs, {readFile, readdir} from 'node:fs/promises';
+import fs, { readFile, readdir } from 'node:fs/promises';
 import path from 'path';
-import {IGeneralManifest} from '../general';
-import { lstat, constants } from 'node:fs/promises';
-import {iter} from '../utils';
+import { IGeneralManifest } from '../general';
+import { lstat } from 'node:fs/promises';
+import { iter } from '../utils';
 import YAML from 'yaml'
 
 @Service()
@@ -32,7 +32,7 @@ export class FileStorageService extends EntityService implements IStorageService
       if (maybeSource.startsWith('file://')) {
         path = maybeSource.slice(7);
       } else {
-        const stat = await lstat(maybeSource).catch((err) => {
+        const stat = await lstat(maybeSource).catch(() => {
           return null;
         });
 

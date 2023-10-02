@@ -3,8 +3,8 @@ import { IStorageService } from './storage.service';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import {IGeneralManifest} from '../general';
-import {IProjectManifest} from '../project';
+import { IGeneralManifest } from '../general';
+import { IProjectManifest } from '../project';
 
 @Service()
 export class StubStorageService extends EntityService implements IStorageService {

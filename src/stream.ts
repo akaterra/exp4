@@ -69,6 +69,8 @@ export class StreamState<
   constructor(props) {
     Reflect.setPrototypeOf(props, StreamState.prototype);
 
+    props.ver = props.ver ?? 0;
+
     return props as unknown as StreamState<Metadata, HistoryActionMetadata, HistoryChangeMetadata>;
   }
 
@@ -78,7 +80,7 @@ export class StreamState<
     return this;
   }
 
-  pushArtifact(artifact: StreamState['history']['artifact'][0], update = true) {
+  pushArtifact(artifact: StreamState['history']['artifact'][0]) {
     if (!this.history) {
       this.history = {};
     }
@@ -92,7 +94,7 @@ export class StreamState<
     return this;
   }
 
-  pushArtifactUniq(artifact: StreamState['history']['artifact'][0], update = true) {
+  pushArtifactUniq(artifact: StreamState['history']['artifact'][0]) {
     const old = this.history?.artifact?.find((e) => e.id === artifact.id && e.type === artifact.type);
 
     if (old) {
@@ -103,8 +105,8 @@ export class StreamState<
           }
 
           for (const [ metadataKey, metadataVal ] of Object.entries(artifact.metadata)) {
-            if (val != null) {
-              old.metadata[key] = val;
+            if (metadataVal != null) {
+              old.metadata[metadataKey] = metadataVal;
             }
           }
         } else {

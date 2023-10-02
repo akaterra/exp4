@@ -1,5 +1,5 @@
 import { IStreamService } from './stream.service';
-import { IProjectTarget, IProjectTargetDef, IProjectTargetStream } from '../project';
+import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
@@ -203,6 +203,7 @@ export class GithubStreamService extends EntityService implements IStreamService
             ref: stream.ref,
             stream,
           },
+          scopes,
         );
       }
 
@@ -215,7 +216,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
     this.cache.set(cacheKey, state);
 
-    if (stream.isDirty) {
+    if (stream.isDirty || hasStrictScope('resync', scopes)) {
       await detailsPromise;
     }
 

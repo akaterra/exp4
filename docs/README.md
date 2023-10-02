@@ -1,6 +1,6 @@
 # Overview
 
-**SourceFlow** is a tool for easy controlling of versioned code sources.
+**Source Flow** is a tool for easy controlling of versioned code sources.
 It provides a fully controlled flows over the code sources hosted locally or remotely.
 Gives capabilities like aggregation of various integration data and more and provides access to all this through UI and API.
 

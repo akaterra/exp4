@@ -4,8 +4,9 @@ import { StreamState } from '../stream';
 
 export interface IArtifactService extends IService {
   run(
-    entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
+    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
     streamState: StreamState,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
+    scopes?: Record<string, boolean>,
   ): Promise<void>;
 }

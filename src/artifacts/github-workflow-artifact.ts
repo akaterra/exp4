@@ -4,7 +4,7 @@ import { IProjectArtifact, IProjectDef } from '../project';
 import { StreamState } from '../stream';
 import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
-import { Autowired } from '../utils';
+import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
@@ -30,61 +30,72 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
   }
 
   async run(
-    entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
+    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
     streamState: StreamState,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
+    scopes?: Record<string, boolean>,
   ): Promise<void> {
     if (!params?.githubWorkflowId) {
       return;
     }
 
-    if (![ Status.FAILED, Status.COMPLETED ].includes(params?.githubWorkflowRunJobStatus)) {
+    if (![ Status.FAILED, Status.COMPLETED ].includes(params?.githubWorkflowRunJobStatus as Status)) {
       return;
     }
 
-    const resultArtifacts = this.cache.get(params.githubWorkflowId) ??
-      await this.getIntegration(entity.ref).workflowArtifactsGet(
+    let artifact = hasScope('artifact', scopes)
+      ? null
+      : this.cache.get(params.githubWorkflowId as string);
+
+    if (!artifact) {
+      artifact = await this.getIntegration(entity.ref).workflowArtifactsGet(
         params?.githubWorkflowId,
         entity.ref?.streamId,
       );
+    }
 
-    if (!resultArtifacts) {
+    if (!artifact) {
       return;
     }
 
-    this.cache.set(params.githubWorkflowId, resultArtifacts, this.config?.cacheTtlSec ?? 3600);
+    this.cache.set(params.githubWorkflowId as string, artifact, this.config?.cacheTtlSec ?? 3600);
 
-    const artifactId = resultArtifacts?.find((artifact) => artifact.name === this.config?.name)?.id;
+    const artifactId = artifact?.find((artifact) => artifact.name === this.config?.name)?.id;
 
     if (!artifactId) {
       return;
     }
 
-    const resultArtifactContent = this.cache.get(`${params.githubWorkflowId}:${artifactId}`) ??
-      await this.getIntegration(entity.ref).workflowArtifactGet(
+    let artifactContent = hasScope('artifact', scopes)
+      ? null
+      : this.cache.get(`${params.githubWorkflowId}:${artifactId}`);
+    
+    if (!artifactContent) {
+      artifactContent = await this.getIntegration(entity.ref).workflowArtifactGet(
         artifactId,
         entity.ref?.streamId,
       );
+    }
 
-    if (!resultArtifactContent) {
+    if (!artifactContent) {
       return;
     }
 
-    this.cache.set(`${params.githubWorkflowId}:${artifactId}`, resultArtifactContent, this.config?.cacheTtlSec ?? 3600);
+    this.cache.set(`${params.githubWorkflowId}:${artifactId}`, artifactContent, this.config?.cacheTtlSec ?? 3600);
 
-    if (entity.scope) {
-      const zip = new AdmZip(Buffer.from(resultArtifactContent));
+    if (entity.context) {
+      const zip = new AdmZip(Buffer.from(artifactContent));
       const zipEntry = zip.getEntries().find((entry) => entry.entryName === this.config?.file);
   
       if (zipEntry) {
-        entity.scope.githubWorkflowArtifact = zip.readAsText(zipEntry);
+        entity.context.githubWorkflowArtifact = zip.readAsText(zipEntry);
 
         if (this.config?.saveAs) {
           const artifact = {
             id: this.config.saveAs,
             type: this.type,
             author: null,
-            description: entity.scope.githubWorkflowArtifact,
+            description: entity.context.githubWorkflowArtifact as string,
             link: null,
             metadata: {},
             steps: null,

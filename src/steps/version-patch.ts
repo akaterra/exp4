@@ -1,10 +1,10 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired, iter } from '../utils';
 import { EntityService } from '../entities.service';
-import {makeDirty} from './utils';
+import { makeDirty } from './utils';
 
 @Service()
 export class VersionPatchStepService extends EntityService implements IStepService {

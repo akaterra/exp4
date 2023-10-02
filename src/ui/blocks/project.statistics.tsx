@@ -1,13 +1,8 @@
 import * as React from 'react';
-import { SubTitle, Title } from '../atoms/title';
+import { SubTitle } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
-import { ProjectStore, ProjectTargetStore } from '../stores/project';
-import { Label } from '../atoms/label';
-import { Checkbox, Input } from '../atoms/input';
-import { Button } from '../atoms/button';
-import { InfoCollapse } from '../atoms/info-collapse';
-import { Tabs } from '../atoms/tabs';
-import { TitledLine, ValueMaybeSuccess } from '../atoms/status-line';
+import { ProjectStore } from '../stores/project';
+import { TitledLine } from '../atoms/status-line';
 import * as _ from 'lodash';
 
 export const ProjectStatistics = observer(({ project }: { project?: ProjectStore }) => {

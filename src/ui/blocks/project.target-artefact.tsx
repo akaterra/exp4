@@ -1,14 +1,11 @@
 import * as React from 'react';
-import { SubTitle, Title } from '../atoms/title';
+import { SubTitle } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
-import { Checkbox, Input } from '../atoms/input';
 import { Button } from '../atoms/button';
-import { InfoCollapse } from '../atoms/info-collapse';
-import { Tabs } from '../atoms/tabs';
-import { TitledLine, ValueMaybeSuccess } from '../atoms/status-line';
-import * as _ from 'lodash';
+import { ValueMaybeSuccess } from '../atoms/status-line';
+import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
 
 export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projectTarget?: ProjectTargetStore, key? }) => {
   const [ isShown, setIsShown ] = React.useState(true);
@@ -46,7 +43,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
         </SubTitle>
         <Label>{projectTarget.target?.description ?? 'No description'}</Label>
       </div>
-      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
+      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     <div className='paragraph paragraph-lrg'>
       {
@@ -70,11 +67,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                     <div className={ lastHistory ? `c-4` : `c-4 opacity-med` }>
                       {
                         j === 0
-                          ? <span className={ `span ${streamState._label} overflow` }>
-                            { stream.title ?? stream.id }
-                              &nbsp;
-                            <span className='font-sml sup'>{streamState?.version}</span>
-                          </span>
+                          ? <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
                           : null
                       }
                     </div>
@@ -83,11 +76,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                     <div className='c-4 flex flex-right children-gap-hor'>
                       {
                         j === 0
-                          ? <Button
-                            className={ `button-sml ${streamState._label ?? ''} w-auto` }
-                            x={null}
-                            onClick={() => projectTarget.applyTargetStreamDetails(stream.id)}
-                          >Info</Button>
+                          ? <ProjectTargetStreamInfoButton projectTarget={ projectTarget } streamState={ streamState } />
                           : null
                       }
                       <Button

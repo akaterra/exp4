@@ -1,13 +1,13 @@
 import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
-import { IProjectManifest, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { iter, request } from '../utils';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { rest } from '../services/rest-api.service';
-import {IGeneralManifest} from '../general';
+import { IGeneralManifest } from '../general';
 
 @Service()
 export class ExternalRestServiceStorageService extends EntityService implements IStorageService {

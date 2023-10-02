@@ -18,6 +18,10 @@ export type FetchByArtifactConfigFilterValue = Primitive | {
     else: FetchByArtifactConfigFilterValue;
   }
   param?: string;
+  switch?: {
+    condition: Record<string, FetchByArtifactConfigFilter>;
+    then: FetchByArtifactConfigFilterValue;
+  }[];
   trim?: { value: FetchByArtifactConfigFilterValue, symbol?: string };
 };
 
@@ -64,9 +68,9 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
   }
 
   async run(
-    entity: { ref: IProjectArtifact['ref'], scope?: Record<string, any> },
+    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
     streamState: StreamState,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
   ): Promise<void> {
     if (!this.config) {
       return;
@@ -78,7 +82,7 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
       }
 
       for (const [ , source ] of iter(
-        _.get(entity.scope, defConfig.source),
+        _.get(entity.context, defConfig.source),
         defConfig.filter
           ? (val) => FetchByArtifactService.filter(
             val,
@@ -314,6 +318,14 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
         return _.get(params, filter.param);
       }
 
+      if (filter.switch) {
+        for (const { condition, then } of filter.switch) {
+          if (FetchByArtifactService.filter(entityVal, { '...': condition }, params)) {
+            return FetchByArtifactService.getFilterValue(entityVal, entity, then, params);
+          }
+        }
+      }
+
       if (filter.trim) {
         const val = FetchByArtifactService.getFilterValue(entityVal, entity, filter.trim.value, params);
 
@@ -349,7 +361,7 @@ function checkContains(condition, val) {
 function checkEq(condition, val) {
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (condition === val) {
+      if (item === val) {
         return true;
       }
     }
@@ -363,7 +375,7 @@ function checkEq(condition, val) {
 function checkGte(condition, val) {
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (condition <= val) {
+      if (item <= val) {
         return true;
       }
     }
@@ -391,7 +403,7 @@ function checkIn(condition, val) {
 function checkLte(condition, val) {
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (condition >= val) {
+      if (item >= val) {
         return true;
       }
     }

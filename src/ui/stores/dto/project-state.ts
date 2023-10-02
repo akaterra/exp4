@@ -64,6 +64,8 @@ export interface IProjectTargetStreamState {
   ver: number;
 
   _label: 'default' | 'failure' | 'success' | 'warning';
+  _lastActionLabel: 'default' | 'failure' | 'success' | 'warning';
+  _lastChangeLabel: 'default' | 'failure' | 'success' | 'warning';
   _search: Set<string>;
 }
 

@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectFlowActionStep, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowActionDef, IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import {ArgocdIntegrationService} from '../integrations/argocd';
-import {makeDirty, notEmptyArray} from './utils';
+import { ArgocdIntegrationService } from '../integrations/argocd';
+import { makeDirty, notEmptyArray } from './utils';
 
 export interface IArgocdSyncStepConfig extends Record<string, unknown> {
   integration: string;
@@ -48,7 +48,7 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
               resourceNameIn: targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any,
               resourceKind: targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
             },
-          );
+        );
 
         makeDirty(targetStream);
       }

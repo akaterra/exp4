@@ -210,15 +210,20 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @flow
-  *fetchState() {
-    const selectedStreamIds = Object.keys(this.selectedProjectTargetStreamIds);
-
+  *fetchState(streamIds: IProjectTargetStream['id'][] | true) {
     yield this.projectStore.fetchState(
       {
-        [this.target.id]: selectedStreamIds.length ? selectedStreamIds : true,
+        [this.target.id]: streamIds,
       },
-      [ '*' ],
+      [ '*', 'resync' ],
     );
+  }
+
+  @flow
+  *fetchStateForMaybeSelectedStreamIds() {
+    const selectedStreamIds = Object.keys(this.selectedProjectTargetStreamIds);
+
+    yield this.fetchState(selectedStreamIds.length ? selectedStreamIds : true);
   }
 
   @flow
@@ -279,8 +284,8 @@ export class ProjectStore extends BaseStore {
     mode: {
       target?: 'artifact' | 'stream';
     } = {
-      target: 'stream',
-    };
+        target: 'stream',
+      };
   @observable
     project: IProject;
   @observable

@@ -1,5 +1,5 @@
 import { Inject, Service } from 'typedi';
-import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef, Project } from './project';
+import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
 import { StreamState } from './stream';
 import { TargetState } from './target';
 import { AwaitableContainer, iter } from './utils';
@@ -100,6 +100,10 @@ export class ProjectsService extends EntitiesService<Project> {
         const target = project.getTargetByTargetId(tId);
   
         await targetContainer.push(async () => {
+          const context = {
+            ver: Date.now(),
+          };
+
           projectState.setTarget(tId, {
             version: await project.env.versionings.getByTarget(target).getCurrent(target),
           })
@@ -118,7 +122,7 @@ export class ProjectsService extends EntitiesService<Project> {
 
             if (stream) {
               await streamContainer.push(async () => {
-                projectState.setTargetStream(tId, await this.streamGetState(stream, scopes));
+                projectState.setTargetStream(tId, await this.streamGetState(stream, scopes, context));
               });
             }
           }
@@ -170,19 +174,28 @@ export class ProjectsService extends EntitiesService<Project> {
     setTimeout(() => this.runStatesResync(), 30000);
   }
 
-  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>): Promise<StreamState>;
+  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: Record<string, unknown>): Promise<StreamState>;
 
-  streamGetState(projectId: string, targetId: string, streamId: string, scopes?: Record<string, boolean>): Promise<StreamState>;
+  streamGetState(projectId: string, targetId: string, streamId: string, scopes?: Record<string, boolean>, context?: Record<string, unknown>): Promise<StreamState>;
 
-  async streamGetState(mixed: string | IProjectTargetStreamDef, targetId?: string | Record<string, boolean>, streamId?: string, scopes?: Record<string, boolean>) {
+  async streamGetState(
+    mixed: IProjectDef['id'] | IProjectTargetStreamDef,
+    targetId?: IProjectTargetDef['id'] | Record<string, boolean>,
+    streamId?: IProjectTargetStreamDef['id'] | Record<string, unknown>,
+    scopes?: Record<string, boolean>,
+    context?: Record<string, unknown>,
+  ) {
     const project = this.get(typeof mixed === 'string' ? mixed : mixed.ref?.projectId);
     const streamState = project.env.streams.getState(
       typeof mixed === 'string'
-        ? project.getTargetStreamByTargetIdAndStreamId(targetId as string, streamId)
+        ? project.getTargetStreamByTargetIdAndStreamId(targetId as IProjectTargetDef['id'], streamId as IProjectTargetStreamDef['id'])
         : mixed,
       typeof mixed === 'string'
         ? scopes
         : targetId as Record<string, boolean>,
+      typeof mixed === 'string'
+        ? context
+        : streamId as Record<string, unknown>,
     );
 
     return streamState;

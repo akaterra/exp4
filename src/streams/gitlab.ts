@@ -1,10 +1,10 @@
 import { IStreamService } from './stream.service';
-import { IProjectTarget, IProjectTargetDef, IProjectTargetStream } from '../project';
+import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
-import { hasScope } from '../utils';
+import { hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
@@ -197,7 +197,7 @@ export class GitlabStreamService extends EntityService implements IStreamService
         );
       }
 
-      // stream.isDirty = false;
+      state.incVer();
     })().catch((err) => {
       logError(err, 'GitlabStreamService.streamGetState');
     }).finally(() => {
@@ -206,7 +206,7 @@ export class GitlabStreamService extends EntityService implements IStreamService
 
     this.cache.set(cacheKey, state);
 
-    if (stream.isDirty) {
+    if (stream.isDirty || hasStrictScope('resync', scopes)) {
       await detailsPromise;
     }
 

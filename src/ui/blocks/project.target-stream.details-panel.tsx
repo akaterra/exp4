@@ -12,21 +12,30 @@ import { IProjectTargetStream } from '../stores/dto/project';
 
 export const ProjectTargetStreamDetailsModalTitle = observer(({
   // store,
-  // projectTargetStore,
+  projectTargetStore,
   projectTargetStream,
   projectTargetStreamState,
 }: {
   // store: ModalStore;
-  // projectTargetStore?: ProjectTargetStore;
+  projectTargetStore?: ProjectTargetStore;
   projectTargetStream?: IProjectTargetStream;
   projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
-  return <div>
-    <Title>
-      { projectTargetStream?.title ?? projectTargetStream?.id }
-      &nbsp;
-      <span className='font-sml sup'>{ projectTargetStreamState?.version }</span>
-    </Title>
+  return <div className='flex flex-hor'>
+    <div>
+      <Title>
+        { projectTargetStream?.title ?? projectTargetStream?.id }
+        &nbsp;
+        <span className='font-sml sup'>{ projectTargetStreamState?.version }</span>
+      </Title>
+    </div>
+    <Button
+      className='button-sml default transparent w-auto'
+      x={null}
+      onClick={ () => projectTargetStream?.ref?.targetId ? projectTargetStore?.fetchState(
+        [ projectTargetStream?.id ]
+      ) : null }
+    ><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
   </div>
 });
 
@@ -85,7 +94,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           </div>
           {
             lastAction?.steps && Object.keys(lastAction.steps).length
-              ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
+              ? <InfoCollapse label={ projectTargetStreamState?._lastActionLabel } showTitle='Info' hideTitle='Hide'>
                 <ul className='font-sml'>
                   {
                     Object.values(lastAction?.steps).map((step) => <li>

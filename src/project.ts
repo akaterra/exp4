@@ -6,14 +6,12 @@ import { StreamsService } from './streams.service';
 import { IStreamService } from './streams/stream.service';
 import { TargetsService } from './targets.service';
 import { VersioningsService } from './versionings.service';
-import * as _ from 'lodash';
-import Ajv from 'ajv';
 import { ArtifactsService } from './artifacts.service';
 import { ProjectsService } from './projects.service';
 import { Autowired } from './utils';
 import { StreamState } from './stream';
 import { ProjectState } from './project-state';
-import {ValidatorService} from './validator.service';
+import { ValidatorService } from './validator.service';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
@@ -90,7 +88,6 @@ export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
 export interface IProjectTargetStream<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
-  ver?: number;
 
   artifacts?: IProjectArtifact['id'][];
   actions?: Record<string, IProjectFlowActionDef>;
@@ -102,7 +99,6 @@ export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknow
 
 export interface IProjectTarget<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
-  ver?: number;
 
   artifacts?: IProjectArtifact['id'][];
   streams: Record<string, IProjectTargetStream<C>>;
@@ -358,8 +354,6 @@ export class Project implements IProject {
               return acc;
             }, {}),
           versioning: def.versioning,
-
-          ver: 0,
         };
       }
     }

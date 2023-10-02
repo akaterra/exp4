@@ -1,4 +1,4 @@
-import {Log} from '../logger';
+import { Log } from '../logger';
 import { iter, request } from '../utils';
 
 export interface IArgocdServiceSync {
@@ -113,9 +113,9 @@ export class ArgocdService {
       prune: false,
       dryRun: false,
       strategy: {
-          hook: {
-              force: false
-          }
+        hook: {
+          force: false
+        }
       },
       resources,
       syncOptions: null,

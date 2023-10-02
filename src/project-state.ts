@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectDef, IProjectTarget, IProjectTargetDef, IProjectTargetStream, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { ProjectsService } from './projects.service';
 import { StreamState } from './stream';
 import { Autowired } from './utils';

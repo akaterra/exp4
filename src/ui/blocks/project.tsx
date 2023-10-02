@@ -1,16 +1,11 @@
 import * as React from 'react';
-import { SubTitle, Title } from '../atoms/title';
+import { Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
-import { ProjectStore, ProjectTargetStore } from '../stores/project';
+import { ProjectStore } from '../stores/project';
 import { Label } from '../atoms/label';
-import { Checkbox, Input } from '../atoms/input';
-import { Button } from '../atoms/button';
-import { InfoCollapse } from '../atoms/info-collapse';
 import { Tabs } from '../atoms/tabs';
-import { TitledLine, ValueMaybeSuccess } from '../atoms/status-line';
-import * as _ from 'lodash';
-import {ProjectTargets} from './project.target';
-import {ProjectStatistics} from './project.statistics';
+import { ProjectTargets } from './project.target';
+import { ProjectStatistics } from './project.statistics';
 
 export const Project = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {

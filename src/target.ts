@@ -1,4 +1,3 @@
-import { IProjectTarget } from './project';
 
 export class TargetState {
   id: string;

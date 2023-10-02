@@ -8,7 +8,7 @@ export class StubArtifactService extends EntityService implements IArtifactServi
   static readonly type: string = '*';
 
   async run(
-    entity: { artifact: IProjectArtifact, ref: IProjectArtifact['ref'], scope?: Record<string, any> },
+    entity: { artifact: IProjectArtifact, ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
   ): Promise<void> {
 
   }

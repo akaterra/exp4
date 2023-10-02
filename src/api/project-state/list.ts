@@ -4,8 +4,8 @@ import { logger } from '../../logger';
 
 const projectsService = Container.get(ProjectsService);
 
-// /projects/:projectId/streams
-export async function projectStreamList(req, res) {
+// /projects/:projectId/state
+export async function projectStateList(req, res) {
   logger.info({ message: 'projectStreamList', data: req.data });
 
   const targetStreams = req.query.targetId
@@ -20,14 +20,20 @@ export async function projectStreamList(req, res) {
 
         return acc
       }, {})
-      : req.data?.targetId ?? null;
+      : req.body?.targetId ?? null;
   const scopes = req.query?.scopes
     ? req.query.scopes.split(',').reduce((acc, scope) => {
       acc[scope] = true;
 
       return acc
     }, {})
-    : req.body?.scopes ?? null;
+    : Array.isArray(req.body?.scopes)
+      ? req.body.scopes.reduce((acc, scope) => {
+        acc[scope] = true;
+
+        return acc
+      }, {})
+      : req.body?.scopes ?? null;
 
   res.json(await projectsService.getState(req.params.projectId, targetStreams, scopes));
 }

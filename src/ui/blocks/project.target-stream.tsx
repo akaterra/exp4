@@ -1,14 +1,12 @@
 import * as React from 'react';
-import { SubTitle, Title } from '../atoms/title';
+import { SubTitle } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
-import { Checkbox, Input } from '../atoms/input';
+import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
 import { InfoCollapse } from '../atoms/info-collapse';
-import { Tabs } from '../atoms/tabs';
-import { TitledLine, ValueMaybeSuccess } from '../atoms/status-line';
-import * as _ from 'lodash';
+import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
 
 export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
   const [ isShown, setIsShown ] = React.useState(true);
@@ -30,7 +28,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
           </SubTitle>
           <Label>{projectTarget.target?.description ?? 'No description'}</Label>
         </div>
-        <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
+        <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
       </div>
     </div>;
   }
@@ -47,7 +45,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
         </SubTitle>
         <Label>{projectTarget.target?.description ?? 'No description'}</Label>
       </div>
-      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchState() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
+      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     <div>
       <InfoCollapse isDisabled={ !projectTarget.streamsWithStates?.length } isIdle={ true } showTitle='Actions'>
@@ -75,17 +73,11 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
               currentValue={isSelected}
               onChange={() => projectTarget.applyStreamSelection(stream.id)}
             >
-              <div className={ `span ${ streamState._label } overflow` }>
-                { stream.title ?? stream.id }
-                &nbsp;
-                <span className='font-sml sup'>{ streamState?.version }</span>
+              <div className='overflow'>
+                <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
               </div>
             </Checkbox>
-            <Button
-              className={ `button-sml ${streamState._label ?? ''} w-auto` }
-              x={null}
-              onClick={() => projectTarget.applyTargetStreamDetails(stream.id)}
-            >Info</Button>
+            <ProjectTargetStreamInfoButton projectTarget={ projectTarget } streamState={ streamState } />
           </div>;
         })
       }

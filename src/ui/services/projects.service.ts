@@ -33,12 +33,28 @@ export class ProjectsService {
     targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
     scopes?: string[],
   }): Promise<IProjectState> {
-    const res: IProjectState = await this.rest.post(`projects/${projectId}/streams`, filter);
+    const res: IProjectState = await this.rest.post(`projects/${projectId}/state`, filter);
 
     for (const target of Object.values(res.targets)) {
       for (const stream of Object.values(target.streams)) {
         const lastAction = stream?.history?.action?.[0];
         const lastChange = stream?.history?.change?.[0];
+
+        if (lastAction?.status === Status.FAILED) {
+          stream._lastActionLabel = 'failure';
+        } else if (lastAction?.status === Status.PROCESSING) {
+          stream._lastActionLabel = 'warning';
+        } else {
+          stream._lastActionLabel = 'default';
+        }
+
+        if (lastChange?.status === Status.FAILED) {
+          stream._lastChangeLabel = 'failure';
+        } else if (lastChange?.status === Status.PROCESSING) {
+          stream._lastChangeLabel = 'warning';
+        } else {
+          stream._lastChangeLabel = 'default';
+        }
 
         if (lastAction?.status === Status.FAILED || lastChange?.status === Status.FAILED) {
           stream._label = 'failure';

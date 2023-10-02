@@ -1,9 +1,5 @@
-import Container from 'typedi';
-import { AuthStrategiesService } from '../../auth-strategies.service';
 import { logger } from '../../logger';
-import {authLogout as execAuthLogout} from '../../auth.service';
-
-const authStrategiesServiceAuth = Container.get(AuthStrategiesService);
+import { authLogout as execAuthLogout } from '../../auth.service';
 
 // /auth/logout
 export async function authLogout(req, res) {
