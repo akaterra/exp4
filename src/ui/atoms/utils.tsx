@@ -3,6 +3,8 @@ import { Fragment } from 'react';
 import { C } from "./grid";
 import { Label } from "./label";
 
+export const FICTIVE = Symbol('FICTIVE');
+
 export function maybeClassName(base, extended) {
   return extended ? `${base} ${extended}` : base;
 }
@@ -27,11 +29,11 @@ export function maybeLabeledControl(Element, x, label?, error?) {
 
   return x !== null
     ?<C className='children-gap-full' x={ x }>
-      <Label>{ label }</Label>
+      <Label>{ label === FICTIVE ? `\u00A0` : label }</Label>
       { E }
     </C>
     : <Fragment>
-      <Label>{ label }</Label>
+      <Label>{ label === FICTIVE ? `\u00A0` : label }</Label>
       { E }
     </Fragment>;
 }

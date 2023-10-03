@@ -37,7 +37,38 @@ export const Checkbox = ({ children, className = undefined, currentValue = undef
     }
   />{ children }</label>;
 
-  return maybeLabeledControl(Element, null, label, error);
+  return maybeLabeledControl(Element, null, null, error);
+}
+
+export const CheckboxControl = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, key = undefined, label = undefined, x = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
+  if (error) {
+    className = className ? `${className} failure` : 'failure';
+  }
+
+  const [ value, setValue ] = useState(currentValue);
+
+  const Element = <label className='control transparent unbound clear-padding-left flex flex-middle' key={ key }><input
+    className={ className ? `checkbox ${className}` : 'checkbox' }
+    disabled={ disabled }
+    checked={ value }
+    // key={ key }
+    placeholder={ placeholder }
+    style={ style }
+    type='checkbox'
+    onBlur={ !disabled && onBlur ? ((e) => onBlur((e.target as HTMLInputElement).checked)) : undefined }
+    onChange={ !disabled
+      ? (e) => {
+        setValue((e.target as HTMLInputElement).checked);
+
+        if (onChange) {
+          onChange((e.target as HTMLInputElement).checked);
+        }
+      }
+      : undefined
+    }
+  />{ children }</label>;
+
+  return maybeLabeledControl(Element, x, label, error);
 }
 
 export const RadioGroup = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, key = undefined, label = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
@@ -68,7 +99,7 @@ export const RadioGroup = ({ children, className = undefined, currentValue = und
     }
   />{ children }</label>;
 
-  return maybeLabeledControl(Element, null, label, error);
+  return maybeLabeledControl(Element, null, null, error);
 }
 
 export const Input = ({ autoComplete = undefined, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, id = undefined, label = undefined, min = undefined, type = undefined, x = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {

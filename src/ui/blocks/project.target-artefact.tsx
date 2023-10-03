@@ -43,6 +43,8 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
         </SubTitle>
         <Label>{projectTarget.target?.description ?? 'No description'}</Label>
       </div>
+      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.applyArtifactsDownload() }><i className="fa-solid fa-file-arrow-down fa-lg"></i></Button>
+      <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.applyArtifactsExportToClipboard() }><i className="fa-solid fa-copy fa-lg"></i></Button>
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     <div className='paragraph paragraph-lrg'>

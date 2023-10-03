@@ -7,7 +7,7 @@ import { modalStore } from '../blocks/modal';
 import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
-import { processing, splitFilterTokens } from './utils';
+import { processing, saveContent, saveCsv, saveTextAligned, splitFilterTokens } from './utils';
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 import { FormStore } from './form';
@@ -100,6 +100,18 @@ export class ProjectTargetStore extends BaseStore {
       for (const stream of Object.values(this.target.streams)) {
         const streamState = this.projectTargetState?.streams?.[stream.id];
 
+        if (this.projectStore.filterPlaced) {
+          if (this.projectStore.mode?.target === 'artifact') {
+            if (!streamState?.history?.change?.length || !streamState?.history?.artifact?.length) {
+              continue;
+            }
+          } else {
+            if (!streamState?.history?.change?.length) {
+              continue;
+            }
+          }
+        }
+
         if (this.projectStore.filterTargets) {
           let pass = true;
 
@@ -153,6 +165,18 @@ export class ProjectTargetStore extends BaseStore {
 
       for (const stream of Object.values(this.target.streams)) {
         const streamState = this.projectTargetState?.streams?.[stream.id];
+
+        if (this.projectStore.filterPlaced) {
+          if (this.projectStore.mode?.target === 'artifact') {
+            if (!streamState?.history?.change?.length || !streamState?.history?.artifact?.length) {
+              continue;
+            }
+          } else {
+            if (!streamState?.history?.change?.length) {
+              continue;
+            }
+          }
+        }
 
         if (this.projectStore.filterTargets) {
           let pass = true;
@@ -226,9 +250,44 @@ export class ProjectTargetStore extends BaseStore {
     yield this.fetchState(selectedStreamIds.length ? selectedStreamIds : true);
   }
 
-  @flow
-  *applyTargetStreamDetails(streamId: string | null) {
-    yield this.projectStore.applyTargetStreamDetails(this.target?.id, streamId);
+  @flow @processing
+  *applyArtifactsDownload() {
+    yield saveTextAligned(
+      Object.values(this.streamsWithStatesAndArtifacts).reduce((acc, val) => {
+        for (const artifact of val.artifacts) {
+          acc.push({
+            'stream': val.stream.title ?? val.stream.id,
+            'artifact id':  artifact.id,
+            'artifact value': typeof artifact.description === 'string' ? artifact.description : artifact.description?.value,
+          });
+        }
+
+        return acc;
+      }, [] as any[]),
+      'download', 'artifacts',
+    );
+
+    alertsStore.push({ level: 'success', value: 'Downloaded' });
+  }
+
+  @flow @processing
+  *applyArtifactsExportToClipboard() {
+    yield saveTextAligned(
+      Object.values(this.streamsWithStatesAndArtifacts).reduce((acc, val) => {
+        for (const artifact of val.artifacts) {
+          acc.push({
+            'stream': val.stream.title ?? val.stream.id,
+            'artifact id':  artifact.id,
+            'artifact value': typeof artifact.description === 'string' ? artifact.description : artifact.description?.value,
+          });
+        }
+
+        return acc;
+      }, [] as any[]),
+      'clipboard',
+    );
+
+    alertsStore.push({ level: 'success', value: 'Copied' });
   }
 
   @flow
@@ -262,6 +321,11 @@ export class ProjectTargetStore extends BaseStore {
     }
   }
 
+  @flow
+  *applyTargetStreamDetails(streamId: string | null) {
+    yield this.projectStore.applyTargetStreamDetails(this.target?.id, streamId);
+  }
+
   update(state?: Partial<IProjectTargetState>) {
     if (state) {
       this.projectTargetState = { ...this.projectTargetState, ...state };
@@ -279,13 +343,15 @@ export class ProjectFlowActionParamsStore extends FormStore {
 
 export class ProjectStore extends BaseStore {
   @observable
+    filterPlaced: boolean = false;
+  @observable
     filterTargets: string = '';
   @observable
     mode: {
       target?: 'artifact' | 'stream';
     } = {
-        target: 'stream',
-      };
+      target: 'stream',
+    };
   @observable
     project: IProject;
   @observable
@@ -341,10 +407,12 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *applyArtifactCopyToClipboard(artifact: IProjectTargetStreamState['history']['artifact'][0]) {
-    yield navigator.clipboard.writeText(
+    yield saveContent(
       typeof artifact.description === 'string'
         ? artifact.description
-        : artifact.description.value
+        : artifact.description.value,
+      'text',
+      'clipboard',
     );
 
     alertsStore.push({ level: 'success', value: 'Copied' });

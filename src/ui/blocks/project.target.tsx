@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore } from '../stores/project';
-import { Input } from '../atoms/input';
+import { Checkbox, CheckboxControl, Input } from '../atoms/input';
 import { ProjectTargetsStreams } from './project.target-stream';
 import { ProjectTargetsArtifacts } from './project.target-artefact';
 import { Select } from '../atoms/select';
+import {FICTIVE} from '../atoms/utils';
 
 export const ProjectTargets = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
@@ -17,11 +18,17 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
         <Input
           currentValue={ project.filterTargets }
           label='Search'
-          x={ 6 }
           placeholder='Space separated :tag / word'
+          x={ 6 }
           onChange={ (value) => project.filterTargets = value }
         />
-        <div className='c-8' />
+        <CheckboxControl
+          currentValue={ project.filterPlaced }
+          label={ FICTIVE }
+          x={ 4 }
+          onChange={ (value) => project.filterPlaced = value }
+        >Placed</CheckboxControl>
+        <div className='c-4' />
         <Select
           currentValue={ project.mode.target }
           items={ { stream: 'Streams', artifact: 'Artifacts' } }
