@@ -55,5 +55,5 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
       }
     >{ Object.entries<string>(items ?? {}).map(([ optionVal, optionTitle ]) => <option selected={ optionVal === value } value={ optionVal }>{ optionTitle }</option>) }</select>;
 
-  return maybeLabeledControl(control, x, label);
+  return maybeLabeledControl(control, x, label, error);
 }

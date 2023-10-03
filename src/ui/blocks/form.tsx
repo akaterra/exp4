@@ -32,8 +32,8 @@ export const FormInput = observer(({ store, id, ...props }: { store: FormStore, 
 
 export const FormSelect = observer(({ store, id, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
   return <Select
-    { ...props }
-    currentValue={ store[id] }
+    { ...props } currentValue={ store[id] }
+    error={ store.__isError[id] }
     id={ id }
     label={ store.__opts[id]?.title ?? props.label }
     onBlur={ () => store.__validate(id) }
