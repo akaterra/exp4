@@ -6,7 +6,7 @@ import { Label } from '../atoms/label';
 import { Button } from '../atoms/button';
 import { Status } from '../enums/status';
 import { InfoCollapse } from '../atoms/info-collapse';
-import { StatusLine, TitledLine } from '../atoms/status-line';
+import { StatusLine, StatusValue, TitledLine } from '../atoms/status-line';
 import { IProjectTargetStreamState } from '../stores/dto/project-state';
 import { IProjectTargetStream } from '../stores/dto/project';
 
@@ -76,17 +76,16 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       <div>
         {
           lastChange
-            ? <span>In <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
+            ? <span>In <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span> <StatusValue.Subscription isFailed={ isFailed } status={ status } /></span>
             : <span className='span warning'>Not in <span className='bold'>{ projectTargetStore?.target?.title ?? projectTargetStore?.target?.id }</span></span>
         }
       </div>
-      <StatusLine isFailed={ isFailed } status={ status } />
     </div>
     {
       lastAction
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
-            <div className='caption smallest clear-padding-top'>Last action</div>
+            <div className='caption smallest clear-padding-top'>Last action <StatusValue.Subscription status={ lastAction.status } /></div>
             <Label>{ lastAction?.description ?? 'No description' }</Label>
           </div>
           <div>
@@ -131,7 +130,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       lastChange
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
-            <div className='caption smallest clear-padding-top'>Last change</div>
+            <div className='caption smallest clear-padding-top'>Last change <StatusValue.Subscription status={ lastChange.status } /></div>
             <Label>{ lastChange?.description ?? 'No description' }</Label>
           </div>
           <div>
@@ -167,7 +166,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     {
       projectTargetStreamState?.history?.artifact?.length
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
-          <div className='caption smallest clear-padding-top'>Artifacts</div>
+          <div className='caption smallest clear-padding-top'>Artifacts <StatusValue.Subscription status={ projectTargetStreamState._artifactsLabel === 'warning' ? Status.NOT_STABLE : Status.STABLE } /></div>
           {
             projectTargetStreamState?.history?.artifact.map((artifact) => {
               return <TitledLine title={ `${artifact.id}:` }>

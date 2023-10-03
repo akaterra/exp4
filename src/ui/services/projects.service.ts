@@ -67,7 +67,7 @@ export class ProjectsService {
               : false
           })
         ) {
-          stream._label = 'warning';
+          stream._label = stream._artifactsLabel = 'warning';
         } else {
           stream._label = 'default';
         }

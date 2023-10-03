@@ -63,6 +63,7 @@ export interface IProjectTargetStreamState {
 
   ver: number;
 
+  _artifactsLabel: 'default' | 'failure' | 'success' | 'warning';
   _label: 'default' | 'failure' | 'success' | 'warning';
   _lastActionLabel: 'default' | 'failure' | 'success' | 'warning';
   _lastChangeLabel: 'default' | 'failure' | 'success' | 'warning';

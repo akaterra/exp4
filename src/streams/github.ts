@@ -18,6 +18,7 @@ const JOB_CONSLUSION_TO_STATUS_MAP = {
   success: Status.COMPLETED,
 }
 const JOB_STATUS_TO_STATUS_MAP = {
+  completed: Status.SUCCESS,
   in_progress: Status.PROCESSING,
 }
 
@@ -151,7 +152,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
                   description: jobStep.name,
                   link: workflowRunsJobs[0].html_url,
-                  runningTimeSeconds: jobStep.started_at && jobStep.completed_at
+                  runningTimeSeconds: jobStep.started_at
                     ? moment(jobStep.completed_at).diff(jobStep.started_at, 'seconds')
                     : null,
                   status: JOB_CONSLUSION_TO_STATUS_MAP[jobStep.conclusion ?? jobStep.status] ?? Status.UNKNOWN,

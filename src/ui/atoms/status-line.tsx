@@ -27,6 +27,24 @@ export const StatusLine = ({ isFailed = false, status = undefined, title = undef
   </div>;
 };
 
+export const StatusValue = ({ isFailed = false, status = undefined }: any) => {
+  if (typeof status !== 'string') {
+    status = isFailed ? Status.FAILED : Status.SUCCESS;
+  }
+
+  return <span className={
+      status === Status.FAILED
+        ? 'badge failure bold'
+        : status === Status.COMPLETED || status === Status.STABLE || status === Status.SUCCESS ? 'badge success bold' : 'badge warning bold'
+    }>{ status }</span>;
+};
+
+StatusValue.Subscription = ({ isFailed = false, status = undefined }: any) => {
+  return <span className='sup font-sml'>
+    <StatusValue isFailed={ isFailed } status={ status } />
+  </span>
+};
+
 export const Value = ({ children: value }: any) => {
   return value && typeof value === 'object'
     ? <span className={ `span ${value.level ?? 'default'} bold` }>{ value.value }</span>
