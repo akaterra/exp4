@@ -9,6 +9,7 @@ import { InfoCollapse } from '../atoms/info-collapse';
 import { StatusLine, StatusValue, TitledLine } from '../atoms/status-line';
 import { IProjectTargetStreamState } from '../stores/dto/project-state';
 import { IProjectTargetStream } from '../stores/dto/project';
+import {Time} from '../atoms/time';
 
 export const ProjectTargetStreamDetailsModalTitle = observer(({
   // store,
@@ -85,7 +86,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       lastAction
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
-            <div className='caption smallest clear-padding-top'>Last action <StatusValue.Subscription status={ lastAction.status } /></div>
+            <div className='caption smallest clear-pad-top'>Last action <StatusValue.Subscription status={ lastAction.status } /></div>
             <Label>{ lastAction?.description ?? 'No description' }</Label>
           </div>
           <div>
@@ -121,7 +122,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <a className='link' href={ lastAction?.author?.link } target='__blank'>{ lastAction?.author?.name ?? 'unknown' }</a>
           </TitledLine>
           <TitledLine title='At' isShown={ !!lastAction?.time }>
-            { lastAction?.time ? new Date(lastAction?.time).toLocaleString() : null }
+            <Time time={ lastAction?.time } />
           </TitledLine>
         </div>
         : null
@@ -130,7 +131,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       lastChange
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
-            <div className='caption smallest clear-padding-top'>Last change <StatusValue.Subscription status={ lastChange.status } /></div>
+            <div className='caption smallest clear-pad-top'>Last change <StatusValue.Subscription status={ lastChange.status } /></div>
             <Label>{ lastChange?.description ?? 'No description' }</Label>
           </div>
           <div>
@@ -158,7 +159,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
           </TitledLine>
           <TitledLine title='At' isShown={ !!lastChange?.time }>
-            { lastChange?.time ? new Date(lastChange?.time).toLocaleString() : null }
+            <Time time={ lastChange?.time } />
           </TitledLine>
         </div>
         : null
@@ -166,7 +167,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     {
       projectTargetStreamState?.history?.artifact?.length
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
-          <div className='caption smallest clear-padding-top'>Artifacts <StatusValue.Subscription status={ projectTargetStreamState._artifactsLabel === 'warning' ? Status.NOT_STABLE : Status.STABLE } /></div>
+          <div className='caption smallest clear-pad-top'>Artifacts <StatusValue.Subscription status={ projectTargetStreamState._artifactsLabel === 'warning' ? Status.NOT_STABLE : Status.STABLE } /></div>
           {
             projectTargetStreamState?.history?.artifact.map((artifact) => {
               return <TitledLine title={ `${artifact.id}:` }>
@@ -178,15 +179,15 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
         : null
     }
     {
-      projectTargetStore?.actionsForStream(projectTargetStream.id)?.length
+      projectTargetStore?.flowsForStream(projectTargetStream.id)?.length
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
             {
-              projectTargetStore?.actionsForStream(projectTargetStream.id)?.map(({ action, streamIds }, i) => {
+              projectTargetStore?.flowsForStream(projectTargetStream.id)?.map(({ flow, streamIds }, i) => {
                 if (
-                  action.ref.targetId && (
-                    action.ref.targetId !== projectTargetStream.ref.targetId ||
-                    action.ref.streamId !== projectTargetStream.id
+                  flow.ref.targetId && (
+                    flow.ref.targetId !== projectTargetStream.ref.targetId ||
+                    flow.ref.streamId !== projectTargetStream.id
                   )
                 ) {
                   return null;
@@ -199,10 +200,10 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                     x={ null }
                     onClick={ () => {
                       if (projectTargetStreamState?.id) {
-                        projectTargetStore.applyRunAction(projectTargetStreamState.id, action.id, action.ref.flowId);
+                        projectTargetStore.applyRunFlow(projectTargetStreamState.id, flow.id);
                       }
                     } }
-                  >{ action.title ?? action.id }</Button>
+                  >{ flow.title ?? flow.id }</Button>
                 </div>;
               })
             }

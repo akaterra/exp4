@@ -49,95 +49,95 @@ versionings:
       namespace: "current"
       storage: "github"
 
-flows:
-  dev:
-    title: ""
-    targets:
-      - dev
-    actions:
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+# flows:
+#   dev:
+#     title: ""
+#     targets:
+#       - dev
+#     actions:
+#       test:
+#         title: "Run tests"
+#         steps:
+#           - type: "runAction"
+#             title: "Run tests"
+#             config:
+#               name: "test"
 
-  release:
-    title: ""
-    targets:
-      - stg
-    actions:
-      release:
-        title: "Create release"
-        steps:
-          - type: "version:release"
-            title: "Increase minor version"
-            targets:
-              - "stg"
-          - type: "moveFrom"
-            title: "Create release branch"
-            targets:
-              - "dev"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg"
-      mergeToDev:
-        title: "Release to develop"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
-      mergeFromDev:
-        title: "Fetch latest develop"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "dev"
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+#   release:
+#     title: ""
+#     targets:
+#       - stg
+#     actions:
+#       release:
+#         title: "Create release"
+#         steps:
+#           - type: "version:release"
+#             title: "Increase minor version"
+#             targets:
+#               - "stg"
+#           - type: "moveFrom"
+#             title: "Create release branch"
+#             targets:
+#               - "dev"
+#           - type: "streamVersion:override"
+#             title: ""
+#             targets:
+#               - "stg"
+#       mergeToDev:
+#         title: "Release to develop"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "dev"
+#       mergeFromDev:
+#         title: "Fetch latest develop"
+#         steps:
+#           - type: "moveFrom"
+#             title: ""
+#             targets:
+#               - "dev"
+#       test:
+#         title: "Run tests"
+#         steps:
+#           - type: "runAction"
+#             title: "Run tests"
+#             config:
+#               name: "test"
 
-  hotfix:
-    title: ""
-    targets:
-      - stgHotfix
-    actions:
-      release:
-        title: "Release to production"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "production"
-          - type: "version:override"
-            title: ""
-            targets:
-              - "production"
+#   hotfix:
+#     title: ""
+#     targets:
+#       - stgHotfix
+#     actions:
+#       release:
+#         title: "Release to production"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "production"
+#           - type: "version:override"
+#             title: ""
+#             targets:
+#               - "production"
 
-  production:
-    title: ""
-    targets:
-      - production
-    actions:
-      hotfix:
-        title: "Merge to development"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
-          - type: "version:override"
-            title: ""
-            targets:
-              - "dev"
+#   production:
+#     title: ""
+#     targets:
+#       - production
+#     actions:
+#       hotfix:
+#         title: "Merge to development"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "dev"
+#           - type: "version:override"
+#             title: ""
+#             targets:
+#               - "dev"
 
 targets:
   dev:

@@ -1,5 +1,5 @@
 import { Status } from '../enums/status';
-import { IProject, IProjectFlowAction, IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
+import { IProject, IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
 import { IProjectState } from '../stores/dto/project-state';
 import { splitFilterTokens } from '../stores/utils';
 import { RestApiService } from './rest-api.service';
@@ -38,7 +38,7 @@ export class ProjectsService {
     for (const target of Object.values(res.targets)) {
       for (const stream of Object.values(target.streams)) {
         const lastAction = stream?.history?.action?.[0];
-        const lastChange = stream?.history?.change?.[0];
+        const lastChange = stream?.history?.action?.[0];
 
         if (lastAction?.status === Status.FAILED) {
           stream._lastActionLabel = 'failure';
@@ -97,14 +97,13 @@ export class ProjectsService {
     return this.rest.get('statistics').then((res) => res?.projects?.[id] ?? {});
   }
 
-  runAction(
+  runFlow(
     projectId: IProject['id'],
     flowId: IProjectFlow['id'],
-    actionId: IProjectFlowAction['id'],
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
     params?: Record<string, any>,
   ) {
-    return this.rest.post(`projects/${projectId}/flow/${flowId}/action/${actionId}/run`, {
+    return this.rest.post(`projects/${projectId}/flow/${flowId}/run`, {
       targetsStreams,
       params,
     });

@@ -5,7 +5,7 @@ import logo from '../atoms/logo.top.inv.png';
 import landingLogo from '../atoms/logo.inv.png';
 import { SubSubTitle } from '../atoms/title';
 import { Link } from '../atoms/link';
-import { getLandingLogoGradient } from './landing.utils';
+import { getLandingLogoGradient, gradient2 } from './landing.utils';
 import { FormInput, FormSubmit } from './form';
 import { SLOGAN } from '../const';
 
@@ -27,6 +27,16 @@ const style = {
       backgroundColor: '#ff0055',
       color: 'white',
       padding: '100px 0',
+      position: 'relative',
+    } as React.CSSProperties,
+    containerGradient2: {
+      backgroundImage: gradient2,
+
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0,
     } as React.CSSProperties,
     authMethodButton: {
       marginLeft: '10px',
@@ -48,6 +58,9 @@ const style = {
       minWidth: '460px',
       filter: 'drop-shadow(0px 2px 1px rgba(0, 0, 0, .2))',
     },
+    slogan: {
+      textShadow: '0px 2px 1px rgba(0, 0, 0, .2)',
+    },
   },
   layer: {
     position: 'fixed',
@@ -63,7 +76,6 @@ const style = {
     backgroundSize: '2030px 45px',
     height: '45px',
     minHeight: '45px',
-    filter: 'drop-shadow(0px 2px 1px rgba(0, 0, 0, .2))',
   },
 }
 
@@ -86,7 +98,8 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
     return <div style={ style.container }>
       <div className='flex flex-ver flex-middle children-gap' style={ style.landing.container }>
         <div style={ style.landing.logo } />
-        <div className='pad-hor triple'>{ SLOGAN }</div>
+        <div style={ style.landing.slogan } className='pad-hor triple'>{ SLOGAN }</div>
+        <div style={ style.landing.containerGradient2 } />
       </div>
       <div className="container med ltr square pad-hor triple roof">
         {

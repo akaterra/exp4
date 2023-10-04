@@ -3,13 +3,28 @@ import { observer } from 'mobx-react-lite';
 import { ProjectStore } from '../stores/project';
 import { Checkbox, CheckboxControl, Input } from '../atoms/input';
 import { ProjectTargetsStreams } from './project.target-stream';
-import { ProjectTargetsArtifacts } from './project.target-artefact';
+import { ProjectTargetsArtifacts } from './project.target-artifact';
 import { Select } from '../atoms/select';
 import {FICTIVE} from '../atoms/utils';
+import {ProjectTargetsLastActions} from './project.target-last-action';
 
 export const ProjectTargets = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
     return null;
+  }
+
+  let ModeElement;
+
+  switch (project.mode?.target) {
+    case 'artifact':
+      ModeElement = <ProjectTargetsArtifacts project={ project } />;
+      break;
+    case 'lastAction':
+      ModeElement = <ProjectTargetsLastActions project={ project } />;
+      break;
+    case 'stream':
+      ModeElement = <ProjectTargetsStreams project={ project } />;
+      break;
   }
 
   return <div className='row'>
@@ -31,8 +46,8 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
         <div className='c-4' />
         <Select
           currentValue={ project.mode.target }
-          items={ { stream: 'Streams', artifact: 'Artifacts' } }
-          label='Mode'
+          items={ { stream: 'Streams', artifact: 'Artifacts', 'lastAction': 'Actions & changes' } }
+          label='Show'
           x={ 4 }
           onChange={ (value) => {
             console.log({ value });
@@ -42,15 +57,7 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
       </div>
     </div>
     <div className='c18'>
-      {
-        project.mode?.target === 'stream'
-          ? <ProjectTargetsStreams
-            project={ project }
-          />
-          : <ProjectTargetsArtifacts
-            project={ project }
-          />
-      }
+      { ModeElement }
     </div>
   </div>;
 });

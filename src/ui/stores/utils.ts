@@ -67,7 +67,7 @@ export function saveTextAligned(content: Array<Record<string, unknown>>, target:
     )
     .join('\n');
 
-  return saveContent(text, 'text', target, filename);
+  return saveContent(text, 'txt', target, filename);
 }
 
 export async function saveContent(content, contentType, target: 'clipboard' | 'download', filename?) {

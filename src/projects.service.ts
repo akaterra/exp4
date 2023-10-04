@@ -24,36 +24,34 @@ export class ProjectsService extends EntitiesService<Project> {
     return this.entities;
   }
 
-  async flowActionRun(
+  async flowRun(
     projectId: string,
-    flowId: string,
-    actionId: string | string[],
+    flowId: string | string[],
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
     params?: Record<string, any>,
   ) {
     const project = this.get(projectId);
-    const flow = project.getFlowByFlowId(flowId);
 
-    for (const [ , aId ] of iter(actionId)) {
-      project.env.validator.validate(params, aId);
+    for (const [ , fId ] of iter(flowId)) {
+      const flow = project.getFlowByFlowId(fId);
 
-      const action = flow.actions[aId];
+      project.env.validator.validate(params, fId);
 
-      for (const step of action.steps) {
+      for (const step of flow.steps) {
         logger.info({
-          message: 'flowActionStepRun',
+          message: 'flowStepRun',
           ref: step.ref,
           params,
           targetsStreams,
         });
 
         try {
-          await project.env.steps.get(step.type).run(flow, action, step, targetsStreams, params);
+          await project.env.steps.get(step.type).run(flow, step, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${projectId}.errors`, {
             message: err?.message ?? err ?? null,
             time: new Date(),
-            type: 'projectFlowAction:run',
+            type: 'projectFlow:run',
           });
 
           throw err;

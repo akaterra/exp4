@@ -96,13 +96,13 @@ export async function createProject(manifest: IProjectManifest & { env?: Project
 
   if (manifest.flows) {
     for (const [ ,flow ] of Object.entries(manifest.flows)) {
-      for (const [ , defConfig ] of Object.entries(flow.actions)) {
-        defConfig.steps?.forEach((step) => {
+      // for (const [ , defConfig ] of Object.entries(flow.actions)) {
+        flow.steps?.forEach((step) => {
           if (!stepsService.has(step.type)) {
             stepsService.add(stepsService.getInstance(step.type), step.type);
           }
         });
-      }
+      // }
     }
   }
 

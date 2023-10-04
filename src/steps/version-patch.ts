@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired, iter } from '../utils';
@@ -14,12 +14,12 @@ export class VersionPatchStepService extends EntityService implements IStepServi
 
   async run(
     flow: IProjectFlowDef,
-    action: IProjectFlowActionDef,
+    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStepDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
     params?: Record<string, any>,
   ): Promise<void> {
-    const project = this.projectsService.get(action.ref.projectId);
+    const project = this.projectsService.get(flow.ref.projectId);
 
     for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : step.targets)) {
       const target = project.getTargetByTargetId(tId);

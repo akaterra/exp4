@@ -53,8 +53,8 @@ export const Value = ({ children: value }: any) => {
 
 export const ValueMaybeSuccess = ({ value }: any) => {
   return value && typeof value === 'object'
-    ? <span className={ `span ${value.level ?? 'success'} bold` }>{ value.value }</span>
-    : <span className='span success bold'>{ value }</span>;
+    ? <span className={ `span ${value.level ?? 'success'} bold overflow wrap` }>{ value.value }</span>
+    : <span className='span success bold overflow wrap'>{ value }</span>;
 };
 
 function getChildren(children) {

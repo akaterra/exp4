@@ -10,7 +10,7 @@ import { StreamsService } from './streams.service';
 import express from 'express';
 import { projectStateList } from './api/project-state/list';
 import { projectList } from './api/project/list';
-import { projectFlowActionRun } from './api/project-flow/action.run';
+import { projectFlowRun } from './api/project-flow/action.run';
 import { createGeneral } from './general-loader';
 import { AuthStrategiesService } from './auth-strategies.service';
 import { GithubAuthStrategyService } from './auth/github';
@@ -107,7 +107,7 @@ function auth(req, res, next) {
     '/projects/:projectId/state', err(auth), err(projectStateList),
   );
   app.post(
-    '/projects/:projectId/flow/:flowId/action/:actionId/run', err(auth), err(projectFlowActionRun),
+    '/projects/:projectId/flow/:flowId/run', err(auth), err(projectFlowRun),
   );
   app.get(
     '/statistics', err(auth), err(statisticsList),

@@ -47,7 +47,7 @@ export const CheckboxControl = ({ children, className = undefined, currentValue 
 
   const [ value, setValue ] = useState(currentValue);
 
-  const Element = <label className='control transparent unbound clear-padding-left flex flex-middle' key={ key }><input
+  const Element = <label className='control transparent unbound clear-pad-left flex flex-middle' key={ key }><input
     className={ className ? `checkbox ${className}` : 'checkbox' }
     disabled={ disabled }
     checked={ value }

@@ -1,28 +1,28 @@
 import * as React from 'react';
-import { IProjectFlowAction, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { ProjectFlowActionParamsStore } from '../stores/project';
+import { IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
+import { ProjectFlowParamsStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
 import { FormInput, FormSelect } from './form';
 
 export const ProjectRunActionModalTitle = ({
   // store,
-  projectFlowAction,
+  projectFlow,
   // projectFlowActionParamsStore,
   // projectTarget,
   // projectTargetStreams,
 }: {
   // store: ModalStore;
-  projectFlowAction?: IProjectFlowAction;
+  projectFlow?: IProjectFlow;
   // projectFlowActionParamsStore?: ProjectFlowActionParamsStore;
   // projectTarget?: IProjectTarget;
   // projectTargetStreams?: IProjectTargetStream[];
 }) => {
   return <div>
-    <Title>{ projectFlowAction?.title }</Title>
+    <Title>{ projectFlow?.title ?? projectFlow?.id }</Title>
     {
-      projectFlowAction?.description
-        ? <Label>{ projectFlowAction?.description }</Label>
+      projectFlow?.description
+        ? <Label>{ projectFlow?.description }</Label>
         : null
     }
   </div>;
@@ -30,28 +30,28 @@ export const ProjectRunActionModalTitle = ({
 
 export const ProjectRunActionModalContent = ({
   // store,
-  projectFlowAction,
-  projectFlowActionParamsStore,
+  projectFlow,
+  projectFlowParamsStore,
   projectTarget,
   projectTargetStreams,
 }: {
   // store: ModalStore;
-  projectFlowAction?: IProjectFlowAction;
-  projectFlowActionParamsStore?: ProjectFlowActionParamsStore;
+  projectFlow?: IProjectFlow;
+  projectFlowParamsStore?: ProjectFlowParamsStore;
   projectTarget?: IProjectTarget;
   projectTargetStreams?: IProjectTargetStream[];
 }) => {
   let ParamsElements: React.ReactElement[] | null = null;
 
-  if (projectFlowActionParamsStore?.projectFlowAction?.params) {
+  if (projectFlowParamsStore?.projectFlow?.params) {
     ParamsElements = [];
 
-    for (const [ key, param ] of Object.entries(projectFlowActionParamsStore?.projectFlowAction?.params)) {
+    for (const [ key, param ] of Object.entries(projectFlowParamsStore?.projectFlow?.params)) {
       switch (param.type) {
       case 'enum':
         ParamsElements.push(<div>
           <FormSelect
-            store={ projectFlowActionParamsStore }
+            store={ projectFlowParamsStore }
             items={ param.constraints?.enum ?? [] }
             id={ key }
             label={ param.title ?? key }
@@ -64,7 +64,7 @@ export const ProjectRunActionModalContent = ({
       case 'string':
         ParamsElements.push(<div>
           <FormInput
-            store={ projectFlowActionParamsStore }
+            store={ projectFlowParamsStore }
             id={ key }
             label={ param.title ?? key }
             x={ null }
@@ -79,7 +79,7 @@ export const ProjectRunActionModalContent = ({
   return <React.Fragment>
     <div className='flex flex-ver paragraph paragraph children-gap'>
       <div>
-          Are you sure to run action <span className='bold'>"{ projectFlowAction?.title }"</span> for
+          Are you sure to run flow <span className='bold'>"{ projectFlow?.title ?? projectFlow?.id }"</span> for
         <ul>
           {
             projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
@@ -92,21 +92,4 @@ export const ProjectRunActionModalContent = ({
       }
     </div>
   </React.Fragment>
-
-  return <div className='row'>
-    <div className='c18 flex flex-ver children-gap'>
-      <div>
-        Are you sure to run action <span className='bold'>"{ projectFlowAction?.title }"</span> for
-        <ul>
-          {
-            projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
-          }
-        </ul>
-        on <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
-      </div>
-      {
-        ParamsElements
-      }
-    </div>
-  </div>;
 };

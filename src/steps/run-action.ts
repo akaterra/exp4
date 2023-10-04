@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -13,7 +13,7 @@ export class RunActionStepService extends EntityService implements IStepService 
 
   async run(
     flow: IProjectFlowDef,
-    action: IProjectFlowActionDef,
+    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStepDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {

@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -23,11 +23,11 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
 
   async run(
     flow: IProjectFlowDef,
-    action: IProjectFlowActionDef,
+    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStep<IArgocdSyncStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
-    const project = this.projectsService.get(action.ref.projectId);
+    const project = this.projectsService.get(flow.ref.projectId);
 
     for (const tIdOfTarget of notEmptyArray(step.targets, flow.targets)) {
       const target = project.getTargetByTargetId(tIdOfTarget);

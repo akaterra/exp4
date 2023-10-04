@@ -181,221 +181,191 @@ versionings:
       format: "${version.major}.${version.minor} ${version.prerelease}"
 
 flows:
-  dev:
-    title: ""
+  test:
+    title: "Run tests"
     targets:
       - dev
-    actions:
-      test:
+      - stg
+      - stgHotfix
+    steps:
+      - type: "runAction"
         title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+        config:
+          name: "test"
 
   release:
-    title: ""
+    title: "Create release"
     targets:
       - stg
-    actions:
-      release:
-        title: "Create release"
-        steps:
-          - type: "version:release"
-            title: "Increase minor version"
-            targets:
-              - "stg"
-          - type: "moveFrom"
-            title: "Create release branch"
-            targets:
-              - "dev"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg"
-        params:
-          releaseName:
-            title: "Release name"
-            type: "string"
-            constraints:
-              minLength: 1
-              maxLength: 20
-              optional: true
-      finishRelease:
-        title: "Finish release"
-        description: "Move release to production and close release"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "production"
-          - type: "version:override"
-            title: ""
-            targets:
-              - "stg:production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg:production"
-          - type: "detach"
-            title: ""
-            targets:
-              - "stg"
-      mergeToDev:
-        title: "Merge to develop"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
-      mergeFromDev:
-        title: "Merge latest develop"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "dev"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg"
-      mergeFromHotfix:
-        title: "Merge latest hotfix"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "hotfix"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg"
-      mergeFromProduction:
-        title: "Merge latest production"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg"
-      exclude:
-        title: "Exclude"
-        steps:
-          - type: "detach"
-            title: ""
-            targets:
-              - "stg"
-      sync:
-        title: "Sync"
-        steps:
-          - type: "argocd:sync"
-            title: ""
-            config:
-              integration: "argocdStg"
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+    steps:
+      - type: "version:release"
+        title: "Increase minor version"
+        targets:
+          - "stg"
+      - type: "moveFrom"
+        title: "Create release branch"
+        targets:
+          - "dev"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stg"
+    params:
+      releaseName:
+        title: "Release name"
+        type: "string"
+        constraints:
+          minLength: 1
+          maxLength: 20
+          optional: true
+
+  finishRelease:
+    title: "Finish release"
+    description: "Move release to production and close release"
+    targets:
+      - stg
+    steps:
+      - type: "moveTo"
+        title: ""
+        targets:
+          - "production"
+      - type: "version:override"
+        title: ""
+        targets:
+          - "stg:production"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stg:production"
+      - type: "detach"
+        title: ""
+        targets:
+          - "stg"
+
+  mergeToDev:
+    title: "Merge to develop"
+    targets:
+      - stg
+      - stgHotfix
+      - production
+    steps:
+      - type: "moveTo"
+        title: ""
+        targets:
+          - "dev"
+
+  mergeFromDev:
+    title: "Merge latest develop"
+    targets:
+      - stg
+    steps:
+      - type: "moveFrom"
+        title: ""
+        targets:
+          - "dev"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stg"
+
+  mergeFromHotfix:
+    title: "Merge latest hotfix"
+    targets:
+      - stg
+    steps:
+      - type: "moveFrom"
+        title: ""
+        targets:
+          - "hotfix"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stg"
+
+  mergeFromProduction:
+    title: "Merge latest production"
+    targets:
+      - stg
+      - stgHotfix
+    steps:
+      - type: "moveFrom"
+        title: ""
+        targets:
+          - "production"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stg"
+
+  exclude:
+    title: "Exclude"
+    targets:
+      - stg
+      - stgHotfix
+    steps:
+      - type: "detach"
+        title: ""
+        targets:
+          - "stg"
+
+  sync:
+    title: "Sync"
+    targets:
+      - stg
+      - stgHotfix
+    steps:
+      - type: "argocd:sync"
+        title: ""
+        config:
+          integration: "argocdStg"
 
   hotfix:
-    title: ""
+    title: "Create hotfix"
     targets:
       - stgHotfix
-    actions:
-      hotfix:
-        title: "Create hotfix"
-        steps:
-          - type: "version:override"
-            title: ""
-            targets:
-              - "production:stgHotfix"
-          - type: "version:patch"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-      finishHotfix:
-        title: "Finish hotfix"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "production"
-          - type: "version:override"
-            title: ""
-            targets:
-              - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "production"
-          - type: "detach"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "bookmark"
-            title: ""
-            targets:
-              - "production"
-      mergeToQa:
-        title: "Merge to QA"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "stg"
-      mergeFromProduction:
-        title: "Merge latest production"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stgHotfix"
-      exclude:
-        title: "Exclude"
-        steps:
-          - type: "detach"
-            title: ""
-            targets:
-              - "stgHotfix"
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+    steps:
+      - type: "version:override"
+        title: ""
+        targets:
+          - "production:stgHotfix"
+      - type: "version:patch"
+        title: ""
+        targets:
+          - "stgHotfix"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stgHotfix"
+      - type: "moveFrom"
+        title: ""
+        targets:
+          - "production"
 
-  production:
-    title: ""
+  finishHotfix:
+    title: "Finish hotfix"
     targets:
-      - production
-    actions:
-      mergeToDevelop:
-        title: "Merge to develop"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
+      - stgHotfix
+    steps:
+      - type: "moveTo"
+        title: ""
+        targets:
+          - "production"
+      - type: "version:override"
+        title: ""
+        targets:
+          - "production"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "production"
+      - type: "detach"
+        title: ""
+        targets:
+          - "stgHotfix"
+      - type: "bookmark"
+        title: ""
+        targets:
+          - "production"
 
 targets:
   dev:

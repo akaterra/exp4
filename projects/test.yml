@@ -167,217 +167,217 @@ versionings:
       namespace: "current"
       storage: "github"
 
-flows:
-  dev:
-    title: ""
-    targets:
-      - dev
-    actions:
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
-      test2:
-        title: "Run tests 2"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
-        streams:
-          - gp-deliveries-service
+# flows:
+#   dev:
+#     title: ""
+#     targets:
+#       - dev
+#     actions:
+#       test:
+#         title: "Run tests"
+#         steps:
+#           - type: "runAction"
+#             title: "Run tests"
+#             config:
+#               name: "test"
+#       test2:
+#         title: "Run tests 2"
+#         steps:
+#           - type: "runAction"
+#             title: "Run tests"
+#             config:
+#               name: "test"
+#         streams:
+#           - gp-deliveries-service
 
-  release:
-    title: ""
-    targets:
-      - stg
-    actions:
-      release:
-        title: "Create release"
-        steps:
-          - type: "version:release"
-            title: "Increase minor version"
-            targets:
-              - "stg"
-          - type: "moveFrom"
-            title: "Create release branch"
-            targets:
-              - "dev"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg"
-        params:
-          releaseName:
-            title: "Release name"
-            type: "string"
-            constraints:
-              minLength: 1
-              maxLength: 20
-              optional: true
-      finishRelease:
-        title: "Finish release"
-        description: "Move release to production and close release"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "production"
-          - type: "version:override"
-            title: ""
-            targets:
-              - "stg:production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stg:production"
-          - type: "detach"
-            title: ""
-            targets:
-              - "stg"
-          - type: "bookmark"
-            title: ""
-            targets:
-              - "production"
-      mergeToDev:
-        title: "Merge to develop"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
-      mergeFromDev:
-        title: "Merge latest develop"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "dev"
-      exclude:
-        title: "Exclude"
-        steps:
-          - type: "detach"
-            title: ""
-            targets:
-              - "stg"
-          - type: "streamHistory:rollback"
-            title: ""
-            targets:
-              - "stg"
-      sync:
-        title: "Sync"
-        steps:
-          - type: "argocd:sync"
-            title: ""
-            config:
-              integration: "argocdStg"
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+#   release:
+#     title: ""
+#     targets:
+#       - stg
+#     actions:
+#       release:
+#         title: "Create release"
+#         steps:
+#           - type: "version:release"
+#             title: "Increase minor version"
+#             targets:
+#               - "stg"
+#           - type: "moveFrom"
+#             title: "Create release branch"
+#             targets:
+#               - "dev"
+#           - type: "streamVersion:override"
+#             title: ""
+#             targets:
+#               - "stg"
+#         params:
+#           releaseName:
+#             title: "Release name"
+#             type: "string"
+#             constraints:
+#               minLength: 1
+#               maxLength: 20
+#               optional: true
+#       finishRelease:
+#         title: "Finish release"
+#         description: "Move release to production and close release"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "production"
+#           - type: "version:override"
+#             title: ""
+#             targets:
+#               - "stg:production"
+#           - type: "streamVersion:override"
+#             title: ""
+#             targets:
+#               - "stg:production"
+#           - type: "detach"
+#             title: ""
+#             targets:
+#               - "stg"
+#           - type: "bookmark"
+#             title: ""
+#             targets:
+#               - "production"
+#       mergeToDev:
+#         title: "Merge to develop"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "dev"
+#       mergeFromDev:
+#         title: "Merge latest develop"
+#         steps:
+#           - type: "moveFrom"
+#             title: ""
+#             targets:
+#               - "dev"
+#       exclude:
+#         title: "Exclude"
+#         steps:
+#           - type: "detach"
+#             title: ""
+#             targets:
+#               - "stg"
+#           - type: "streamHistory:rollback"
+#             title: ""
+#             targets:
+#               - "stg"
+#       sync:
+#         title: "Sync"
+#         steps:
+#           - type: "argocd:sync"
+#             title: ""
+#             config:
+#               integration: "argocdStg"
+#       test:
+#         title: "Run tests"
+#         steps:
+#           - type: "runAction"
+#             title: "Run tests"
+#             config:
+#               name: "test"
 
-  hotfix:
-    title: ""
-    targets:
-      - stgHotfix
-    actions:
-      hotfix:
-        title: "Create hotfix"
-        steps:
-          - type: "version:override"
-            title: ""
-            targets:
-              - "production:stgHotfix"
-          - type: "version:patch"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-      finishHotfix:
-        title: "Finish hotfix"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "production"
-          - type: "version:override"
-            title: ""
-            targets:
-              - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "production"
-          - type: "detach"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "bookmark"
-            title: ""
-            targets:
-              - "production"
-      mergeToQa:
-        title: "Merge to QA"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "stg"
-      mergeFromProduction:
-        title: "Merge latest production"
-        steps:
-          - type: "moveFrom"
-            title: ""
-            targets:
-              - "production"
-          - type: "streamVersion:override"
-            title: ""
-            targets:
-              - "stgHotfix"
-      exclude:
-        title: "Exclude"
-        steps:
-          - type: "detach"
-            title: ""
-            targets:
-              - "stgHotfix"
-          - type: "streamHistory:rollback"
-            title: ""
-            targets:
-              - "stgHotfix"
-      test:
-        title: "Run tests"
-        steps:
-          - type: "runAction"
-            title: "Run tests"
-            config:
-              name: "test"
+#   hotfix:
+#     title: ""
+#     targets:
+#       - stgHotfix
+#     actions:
+#       hotfix:
+#         title: "Create hotfix"
+#         steps:
+#           - type: "version:override"
+#             title: ""
+#             targets:
+#               - "production:stgHotfix"
+#           - type: "version:patch"
+#             title: ""
+#             targets:
+#               - "stgHotfix"
+#           - type: "streamVersion:override"
+#             title: ""
+#             targets:
+#               - "stgHotfix"
+#           - type: "moveFrom"
+#             title: ""
+#             targets:
+#               - "production"
+#       finishHotfix:
+#         title: "Finish hotfix"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "production"
+#           - type: "version:override"
+#             title: ""
+#             targets:
+#               - "production"
+#           - type: "streamVersion:override"
+#             title: ""
+#             targets:
+#               - "production"
+#           - type: "detach"
+#             title: ""
+#             targets:
+#               - "stgHotfix"
+#           - type: "bookmark"
+#             title: ""
+#             targets:
+#               - "production"
+#       mergeToQa:
+#         title: "Merge to QA"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "stg"
+#       mergeFromProduction:
+#         title: "Merge latest production"
+#         steps:
+#           - type: "moveFrom"
+#             title: ""
+#             targets:
+#               - "production"
+#           - type: "streamVersion:override"
+#             title: ""
+#             targets:
+#               - "stgHotfix"
+#       exclude:
+#         title: "Exclude"
+#         steps:
+#           - type: "detach"
+#             title: ""
+#             targets:
+#               - "stgHotfix"
+#           - type: "streamHistory:rollback"
+#             title: ""
+#             targets:
+#               - "stgHotfix"
+#       test:
+#         title: "Run tests"
+#         steps:
+#           - type: "runAction"
+#             title: "Run tests"
+#             config:
+#               name: "test"
 
-  production:
-    title: ""
-    targets:
-      - production
-    actions:
-      mergeToDevelop:
-        title: "Merge to develop"
-        steps:
-          - type: "moveTo"
-            title: ""
-            targets:
-              - "dev"
+#   production:
+#     title: ""
+#     targets:
+#       - production
+#     actions:
+#       mergeToDevelop:
+#         title: "Merge to develop"
+#         steps:
+#           - type: "moveTo"
+#             title: ""
+#             targets:
+#               - "dev"
 
 targets:
   dev:

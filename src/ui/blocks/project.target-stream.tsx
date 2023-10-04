@@ -15,23 +15,45 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
     return null;
   }
 
-  if (!isShown) {
-    return <div className='children-gap span default'>
-      <div className='flex flex-hor'>
-        <div>
-          <SubTitle>
-            <a className='link document-color' onClick={ () => setIsShown(!isShown) }>
-              { projectTarget.target?.title ?? projectTarget.target?.id }
-            </a>
-            &nbsp;
-            <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
-          </SubTitle>
-          <Label>{projectTarget.target?.description ?? 'No description'}</Label>
-        </div>
-        <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
+  const ContentElement = isShown
+    ? <React.Fragment>
+      <div>
+        <InfoCollapse isDisabled={ !projectTarget.streamsWithStates?.length } isIdle={ true } showTitle='Flows'>
+          {
+            projectTarget.flows.map(({ flow, streamIds }, i) => {
+              return <div key={ i }>
+                <Button
+                  className='button-sml success auto'
+                  disabled={ streamIds ? !streamIds.length : false }
+                  x={ null }
+                  onClick={() => projectTarget.applyRunFlow(null, flow.id)}
+                >{ flow.title ?? flow.id }</Button>
+              </div>;
+            })
+          }
+        </InfoCollapse>
       </div>
-    </div>;
-  }
+      <div className='paragraph paragraph-lrg'>
+        {
+          projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
+            const lastChange = streamState?.history?.change?.[0];
+
+            return <div key={i} className={ lastChange ? '' : 'opacity-med' }>
+              <Checkbox
+                currentValue={isSelected}
+                onChange={() => projectTarget.applyStreamSelection(stream.id)}
+              >
+                <div className='overflow'>
+                  <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
+                </div>
+              </Checkbox>
+              <ProjectTargetStreamInfoButton projectTarget={ projectTarget } streamState={ streamState } />
+            </div>;
+          })
+        }
+      </div>
+    </React.Fragment>
+    : null;
 
   return <div className='children-gap span default'>
     <div className='flex flex-hor'>
@@ -47,41 +69,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
       </div>
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
-    <div>
-      <InfoCollapse isDisabled={ !projectTarget.streamsWithStates?.length } isIdle={ true } showTitle='Actions'>
-        {
-          projectTarget.actions.map(({ action, streamIds }, i) => {
-            return <div key={ i }>
-              <Button
-                className='button-sml success auto'
-                disabled={ streamIds ? !streamIds.length : false }
-                x={ null }
-                onClick={() => projectTarget.applyRunAction(null, action.id)}
-              >{ action.title ?? action.id }</Button>
-            </div>;
-          })
-        }
-      </InfoCollapse>
-    </div>
-    <div className='paragraph paragraph-lrg'>
-      {
-        projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
-          const lastChange = streamState?.history?.change?.[0];
-
-          return <div key={i} className={ lastChange ? '' : 'opacity-med' }>
-            <Checkbox
-              currentValue={isSelected}
-              onChange={() => projectTarget.applyStreamSelection(stream.id)}
-            >
-              <div className='overflow'>
-                <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
-              </div>
-            </Checkbox>
-            <ProjectTargetStreamInfoButton projectTarget={ projectTarget } streamState={ streamState } />
-          </div>;
-        })
-      }
-    </div>
+    { ContentElement }
   </div>;
 });
 

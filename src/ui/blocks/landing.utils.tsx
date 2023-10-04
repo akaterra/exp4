@@ -47,3 +47,5 @@ export function getLandingLogoGradient() {
 
   return `linear-gradient(135deg, ${gradients.join(', ')})`;
 }
+
+export const gradient2 = `linear-gradient(135deg, transparent 0%, transparent 16%, #f9f87140 16%, #f9f87140 18%, transparent 18%, transparent 22%, #f9f87180 22%, #f9f87180 24%, transparent 24%)`;

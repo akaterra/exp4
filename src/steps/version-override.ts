@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionDef, IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -14,14 +14,14 @@ export class VersionOverrideStepService extends EntityService implements IStepSe
 
   async run(
     flow: IProjectFlowDef,
-    action: IProjectFlowActionDef,
+    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStepDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
-    const project = this.projectsService.get(action.ref.projectId);
+    const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds = targetsStreams
       ? Object.keys(targetsStreams)
-      : project.getFlowByFlowId(action.ref.flowId).targets;
+      : project.getFlowByFlowId(flow.ref.flowId).targets;
 
     for (let sIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of step.targets) {

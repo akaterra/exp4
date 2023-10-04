@@ -4,14 +4,13 @@ import { logger } from '../../logger';
 
 const projectsService = Container.get(ProjectsService);
 
-// /projects/:projectId/flow/:flowId/action/:actionId/run
-export async function projectFlowActionRun(req, res) {
+// /projects/:projectId/flow/:flowId/run
+export async function projectFlowRun(req, res) {
   logger.info({ message: 'projectFlowActionRun', data: req.data });
 
-  res.json(await projectsService.flowActionRun(
+  res.json(await projectsService.flowRun(
     req.params.projectId,
-    req.params.flowId,
-    req.params.actionId?.split(','),
+    req.params.flowId.split(','),
     req.body?.targetsStreams,
     req.body?.params,
   ));

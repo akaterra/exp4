@@ -1,5 +1,4 @@
 export interface IProjectRef {
-  actionId?: IProjectFlowAction['id'],
   flowId?: IProjectFlow['id'],
   projectId?: IProject['id'],
   streamId?: IProjectTargetStream['id'],
@@ -34,21 +33,6 @@ export interface IProjectFlowActionParam {
   initialValue: unknown;
 }
 
-export interface IProjectFlowAction {
-  id: string;
-  type: string;
-
-  ref: IProjectRef;
-  
-  title: string;
-  description: string;
-
-  streams?: IProjectTargetStream['id'][];
-  steps: IProjectFlowActionStep[];
-  params?: Record<string, IProjectFlowActionParam>;
-  targets?: IProjectTarget['id'][];
-}
-
 export interface IProjectFlow {
   id: string;
   type: string;
@@ -56,9 +40,10 @@ export interface IProjectFlow {
   ref: IProjectRef;
 
   title: string;
-  desription: string;
+  description: string;
 
-  actions: Record<string, IProjectFlowAction>;
+  params?: Record<string, IProjectFlowActionParam>;
+  steps: IProjectFlowActionStep[];
   targets: string[];
 }
 
@@ -71,7 +56,7 @@ export interface IProjectTargetStream {
   title: string;
   description: string;
 
-  actions: Record<string, IProjectFlowAction>;
+  flows: Record<string, IProjectFlow>;
   tags: string[];
   targets: string[];
 

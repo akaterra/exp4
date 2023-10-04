@@ -27,7 +27,7 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
 }
 
 export interface IProjectRef {
-  actionId?: IProjectFlowActionDef['id'],
+  // actionId?: IProjectFlowActionDef['id'],
   flowId?: IProjectFlowDef['id'],
   projectId?: IProjectDef['id'],
   streamId?: IProjectTargetStreamDef['id'],
@@ -66,21 +66,31 @@ export interface IProjectFlowActionStep<C extends Record<string, unknown>, T ext
 
 export type IProjectFlowActionStepDef = IProjectFlowActionStep<Record<string, unknown>>;
 
-export interface IProjectFlowAction<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<unknown, T> {
-  isDirty?: boolean;
+// export interface IProjectFlowAction<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<unknown, T> {
+//   isDirty?: boolean;
 
-  streams?: IProjectTargetStreamDef['id'][];
-  steps?: IProjectFlowActionStep<C>[];
-  params?: Record<string, IProjectFlowActionParam>;
-  targets?: IProjectTargetDef['id'][];
-}
+//   streams?: IProjectTargetStreamDef['id'][];
+//   steps?: IProjectFlowActionStep<C>[];
+//   params?: Record<string, IProjectFlowActionParam>;
+//   targets?: IProjectTargetDef['id'][];
+// }
 
-export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
+// export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
+
+// export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
+//   isDirty?: boolean;
+
+//   actions: Record<string, IProjectFlowAction<C>>;
+//   targets: IProjectTargetDef['id'][];
+// }
+
+// export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
 export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
 
-  actions: Record<string, IProjectFlowAction<C>>;
+  params?: Record<string, IProjectFlowActionParam>;
+  steps: IProjectFlowActionStep<C>[];
   targets: IProjectTargetDef['id'][];
 }
 
@@ -90,7 +100,7 @@ export interface IProjectTargetStream<C extends Record<string, unknown>, T exten
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
-  actions?: Record<string, IProjectFlowActionDef>;
+  // actions?: Record<string, IProjectFlowActionDef>;
   tags?: string[];
   targets?: IProjectTargetDef['id'][];
 }
@@ -222,41 +232,26 @@ export class Project implements IProject {
           title: def.title,
           description: def.description,
 
+          params: def.params,
+          steps: def.steps.map((stepDef, i) => {
+            const stepId = stepDef.id ?? String(i);
+            this.assertKey(stepId);
+
+            return {
+              id: stepId,
+              type: stepDef.type,
+  
+              ref: { flowId, projectId: this.id, stepId },
+  
+              title: stepDef.title,
+              description: stepDef.description,
+  
+              config: this.getDefinition(stepDef.config),
+              params: stepDef.params,
+              targets: stepDef.targets ?? def.targets ?? [],
+            };
+          }),
           targets: def.targets ?? [],
-          actions: Object
-            .entries(def.actions ?? {})
-            .reduce((acc, [ actionKey, actionDef ]) => {
-              const actionId = actionDef.id ?? actionKey;
-              this.assertKey(actionId);
-
-              if (actionDef.params) {
-                this.env.validator.addSchemaFromDef(actionDef.params, actionId);
-              }
-
-              acc[actionId] = {
-                id: actionId,
-                type: actionDef.type,
-
-                ref: { actionId, flowId, projectId: this.id },
-
-                title: actionDef.title,
-                description: actionDef.description,
-
-                params: actionDef.params,
-                streams: actionDef.streams,
-                steps: actionDef.steps.map((step, i) => ({
-                  id: step.id ?? i,
-                  type: step.type,
-                  ref: { actionId, flowId, projectId: this.id },
-                  config: this.getDefinition(step.config),
-                  description: step.description,
-                  params: actionDef.params,
-                  targets: step.targets ?? actionDef.targets ?? [],
-                })),
-              };
-
-              return acc;
-            }, {}),
         };
       }
     }
@@ -299,57 +294,57 @@ export class Project implements IProject {
                 ver: 0,
               };
 
-              if (streamDef.actions) {
-                Object.entries(streamDef.actions).forEach((action, i) => {
-                  const flowId = `${Date.now()}:${i}:${targetId}:${streamId}`;
+              // if (streamDef.actions) {
+              //   Object.entries(streamDef.actions).forEach((action, i) => {
+              //     const flowId = `${Date.now()}:${i}:${targetId}:${streamId}`;
 
-                  this.flows[flowId] = {
-                    id: flowId,
-                    type: 'flow',
+              //     this.flows[flowId] = {
+              //       id: flowId,
+              //       type: 'flow',
 
-                    ref: { flowId, projectId: this.id, streamId, targetId },
+              //       ref: { flowId, projectId: this.id, streamId, targetId },
 
-                    title: null,
-                    description: null,
+              //       title: null,
+              //       description: null,
 
-                    targets: [ def.id ?? key ],
-                    actions: Object
-                      .entries(streamDef.actions ?? {})
-                      .reduce((acc, [ actionKey, actionDef ]) => {
-                        const actionId = actionDef.id ?? actionKey;
-                        this.assertKey(actionId);
+              //       targets: [ def.id ?? key ],
+              //       actions: Object
+              //         .entries(streamDef.actions ?? {})
+              //         .reduce((acc, [ actionKey, actionDef ]) => {
+              //           const actionId = actionDef.id ?? actionKey;
+              //           this.assertKey(actionId);
 
-                        if (actionDef.params) {
-                          this.env.validator.addSchemaFromDef(actionDef.params, actionId);
-                        }
+              //           if (actionDef.params) {
+              //             this.env.validator.addSchemaFromDef(actionDef.params, actionId);
+              //           }
 
-                        acc[actionId] = {
-                          id: actionId,
-                          type: actionDef.type,
+              //           acc[actionId] = {
+              //             id: actionId,
+              //             type: actionDef.type,
 
-                          ref: { actionId, flowId, projectId: this.id, streamId, targetId },
+              //             ref: { actionId, flowId, projectId: this.id, streamId, targetId },
 
-                          title: actionDef.title,
-                          description: actionDef.description,
+              //             title: actionDef.title,
+              //             description: actionDef.description,
 
-                          params: actionDef.params,
-                          streams: actionDef.streams,
-                          steps: actionDef.steps.map((step, i) => ({
-                            id: step.id ?? i,
-                            type: step.type,
-                            ref: { actionId, flowId, projectId: this.id, streamId, targetId },
-                            config: this.getDefinition(step.config),
-                            description: step.description,
-                            params: actionDef.params,
-                            targets: step.targets ?? actionDef.targets ?? [],
-                          })),
-                        };
+              //             params: actionDef.params,
+              //             streams: actionDef.streams,
+              //             steps: actionDef.steps.map((step, i) => ({
+              //               id: step.id ?? i,
+              //               type: step.type,
+              //               ref: { actionId, flowId, projectId: this.id, streamId, targetId },
+              //               config: this.getDefinition(step.config),
+              //               description: step.description,
+              //               params: actionDef.params,
+              //               targets: step.targets ?? actionDef.targets ?? [],
+              //             })),
+              //           };
           
-                        return acc;
-                      }, {}),
-                  };
-                });
-              }
+              //           return acc;
+              //         }, {}),
+              //     };
+              //   });
+              // }
 
               return acc;
             }, {}),
