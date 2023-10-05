@@ -99,7 +99,7 @@ export async function createProject(manifest: IProjectManifest & { env?: Project
       // for (const [ , defConfig ] of Object.entries(flow.actions)) {
       flow.steps?.forEach((step) => {
         if (!stepsService.has(step.type)) {
-          stepsService.add(stepsService.getInstance(step.type), step.type);
+          stepsService.add(stepsService.getInstance(step.type, step.config), step.type);
         }
       });
       // }

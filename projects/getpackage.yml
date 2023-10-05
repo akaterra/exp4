@@ -108,8 +108,34 @@ definitions:
   none: null
 
 integrations:
-  jenkins:
+  jenkinsdev:
     type: "jenkins"
+    config:
+      jobParams:
+        service: "${stream.id}"
+        environment: "development"
+        branch: "develop"
+  jenkinsstg:
+    type: "jenkins"
+    config:
+      jobParams:
+        service: "${stream.id}"
+        environment: "staging"
+        branch: "${streamState.metadata.branch}"
+  jenkinsstgHotfix:
+    type: "jenkins"
+    config:
+      jobParams:
+        service: "${stream.id}"
+        environment: "sandbox"
+        branch: "${streamState.metadata.branch}"
+  jenkinsproduction:
+    type: "jenkins"
+    config:
+      jobParams:
+        service: "${stream.id}"
+        environment: "production"
+        branch: "master"
   argocdDev:
     type: "argocd"
     config:
@@ -373,15 +399,11 @@ flows:
     title: "Migrate"
     targets:
       - dev
-      - stg
-      - stgHotfix
-      - production
     steps:
       - type: "jenkins:jobRun"
         title: ""
         config:
-          integration: "jenkins"
-          jobName: "migrate"
+          integration: "jenkins${target.id}"
 
 targets:
   dev:
@@ -395,6 +417,10 @@ targets:
           argocdServiceName:
             - "gp-account-info-processor"
             - "gp-account-info-processor-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-alerts-service:
@@ -405,6 +431,10 @@ targets:
           argocdServiceName:
             - "gp-alerts"
             - "gp-alerts-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-analytics-service:
@@ -415,6 +445,10 @@ targets:
           argocdServiceName:
             - "gp-analytics"
             - "gp-analytics-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-autocomplete-service:
@@ -424,6 +458,10 @@ targets:
           integration: "githubDev"
           argocdServiceName:
             - "gp-autocomplete-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-charge-service:
@@ -434,6 +472,10 @@ targets:
           argocdServiceName:
             - "gp-charge"
             - "gp-charge-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-deliveries-crud-service:
@@ -444,6 +486,10 @@ targets:
           argocdServiceName:
             - "gp-deliveries-crud"
             - "gp-deliveries-crud-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-deliveries-service:
@@ -454,6 +500,10 @@ targets:
           argocdServiceName:
             - "gp-deliveries"
             - "gp-deliveries-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-deliveries-history-service:
@@ -465,11 +515,9 @@ targets:
             - "gp-deliveries-history"
             - "gp-deliveries-history-web"
           jenkins:
-            jobName: "migrate"
-            jobParams:
-              service: "gp-deliveries-history-service"
-              environment: "development"
-              branch: "master"
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-events-service:
@@ -480,6 +528,10 @@ targets:
           argocdServiceName:
             - "gp-events"
             - "gp-events-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-frontend-client:
@@ -517,6 +569,10 @@ targets:
           argocdServiceName:
             - "gp-finance"
             - "gp-finance-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-finance-calc:
@@ -527,6 +583,10 @@ targets:
           argocdServiceName:
             - "gp-finance-calc"
             - "gp-finance-calc-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-graphql-gateway:
@@ -537,6 +597,10 @@ targets:
           argocdServiceName:
             - "gp-graphql"
             - "gp-graphql-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-links-service:
@@ -547,6 +611,10 @@ targets:
           argocdServiceName:
             - "gp-links"
             - "gp-links-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-locations-service:
@@ -557,6 +625,10 @@ targets:
           argocdServiceName:
             - "gp-locations"
             - "gp-locations-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-notifications-service:
@@ -567,6 +639,10 @@ targets:
           argocdServiceName:
             - "gp-notifications"
             - "gp-notifications-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-offers-service:
@@ -577,6 +653,10 @@ targets:
           argocdServiceName:
             - "gp-offers"
             - "gp-offers-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-postil-service:
@@ -587,6 +667,10 @@ targets:
           argocdServiceName:
             - "gp-postil"
             - "gp-postil-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-processing-service:
@@ -597,6 +681,10 @@ targets:
           argocdServiceName:
             - "gp-processing"
             - "gp-processing-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-routes-calc-dev:
@@ -607,6 +695,10 @@ targets:
           argocdServiceName:
             - "gp-routes-calc-dev"
             - "gp-routes-calc-dev-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-uam-service:
@@ -617,6 +709,10 @@ targets:
           argocdServiceName:
             - "gp-uam"
             - "gp-uam-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-webhooks-service:
@@ -627,6 +723,10 @@ targets:
           argocdServiceName:
             - "gp-webhooks"
             - "gp-webhooks-web"
+          jenkins:
+            flows:
+              migrate:
+                jobName: "migrate"
         artifacts:
           - "argocdApplicationImageTagDev"
     versioning: null

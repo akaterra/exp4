@@ -3,7 +3,7 @@ import { IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTar
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
-import { Autowired } from '../utils';
+import { Autowired, resolvePlaceholders } from '../utils';
 import { ArgocdIntegrationService } from '../integrations/argocd';
 import { makeDirty, notEmptyArray } from './utils';
 
@@ -28,6 +28,7 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
+    const projectState = await this.projectsService.getState(flow.ref.projectId);
 
     for (const tIdOfTarget of notEmptyArray(step.targets, flow.targets)) {
       const target = project.getTargetByTargetId(tIdOfTarget);
@@ -37,16 +38,32 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
 
       for (const streamId of streamIds) {
         const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
+        const context: Record<string, unknown> = {
+          stream: targetStream,
+          streamState: projectState.targets?.[tIdOfTarget]?.streams?.[streamId],
+          target,
+        };
 
-        await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(step.config?.integration, 'argocd').syncResource(
+        function rep(val) {
+          if (Array.isArray(val)) {
+            return val.map((val) => resolvePlaceholders(val, context));
+          }
+
+          return resolvePlaceholders(val, context);
+        }
+
+        await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(
+          rep(step.config?.integration ?? 'argocd'),
+          'argocd',
+        ).syncResource(
           this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName
             ? {
-              resourceName: this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName as any,
-              resourceKind: this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
+              resourceName: rep(this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName as any),
+              resourceKind: rep(this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'),
             }
             : {
-              resourceNameIn: this.getStreamConfig(targetStream, flow)?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any,
-              resourceKind: this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
+              resourceNameIn: rep(this.getStreamConfig(targetStream, flow)?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any),
+              resourceKind: rep(this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'),
             },
         );
 

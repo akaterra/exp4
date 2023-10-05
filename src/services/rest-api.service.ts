@@ -1,5 +1,7 @@
 import fetch from 'node-fetch-native';
 
+const DEBUG = process.env.DEBUG;
+
 export class RestApiService {
   private format: string;
   private headers: Record<string, string>;
@@ -79,10 +81,17 @@ export class RestApiService {
         data = JSON.stringify(data);
         break;
       }
-console.log(url, { method, body: data, headers });
+
+      if (DEBUG) {
+        console.log(url, { method, body: data, headers });
+      }
+
       request = fetch(url, { method, body: data, headers });
     } else {
-console.log(url, { method, headers });
+      if (DEBUG) {
+        console.log(url, { method, headers });
+      }
+
       request = fetch(url, { method, headers });
     }
     

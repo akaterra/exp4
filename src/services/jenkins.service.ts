@@ -51,8 +51,8 @@ export class JenkinsService {
       Authorization: this.getAuthHeader(),
     }).doRequest(
       params
-        ? this.getUrl(`/job/${name}/api/buildWithParameters`)
-        : this.getUrl(`/job/${name}/api/build/api/json`),
+        ? this.getUrl(`/job/${name}/buildWithParameters`)
+        : this.getUrl(`/job/${name}/build/api/json`),
       'post',
       undefined,
       params,
@@ -73,11 +73,11 @@ export class JenkinsService {
 
   private getUrl(path: string): string {
     if (this.username && this.token) {
-      return `${this.hostUrl.protocol}//${this.hostUrl.host}:${this.hostUrl.port || 80}${path}`;
+      return `${this.hostUrl.protocol}//${this.hostUrl.host}:${this.hostUrl.port}${path}`;
     }
 
     if (this.username && this.password) {
-      return `${this.hostUrl.protocol}//${this.hostUrl.host}:${this.hostUrl.port || 80}${path}`;
+      return `${this.hostUrl.protocol}//${this.hostUrl.host}:${this.hostUrl.port}${path}`;
     }
 
     return `${this.host}${path}`;

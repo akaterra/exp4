@@ -3,7 +3,7 @@ import { IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTar
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
-import { Autowired } from '../utils';
+import { Autowired, resolvePlaceholders } from '../utils';
 import { makeDirty, notEmptyArray } from './utils';
 import { JenkinsIntegrationService } from '../integrations/jenkins';
 import * as _ from 'lodash';
@@ -11,8 +11,8 @@ import * as _ from 'lodash';
 export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
   integration: string;
   jobName?: string;
-  params?: Record<string, unknown>;
-  paramsList?: string[];
+  jobParams?: Record<string, unknown>;
+  jobParamsList?: string[];
 }
 
 @Service()
@@ -33,6 +33,7 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
     params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
+    const projectState = await this.projectsService.getState(flow.ref.projectId);
 
     for (const tIdOfTarget of notEmptyArray(step.targets, flow.targets)) {
       const target = project.getTargetByTargetId(tIdOfTarget);
@@ -46,18 +47,43 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
 
       for (const streamId of streamIds) {
         const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
-        let useParams = params ?? this.getStreamConfig(targetStream, flow)?.jobParams ?? targetStream.config?.jenkinsParams;
+        const context: Record<string, unknown> = {
+          stream: targetStream,
+          streamState: projectState.targets?.[tIdOfTarget]?.streams?.[streamId],
+          target,
+        };
 
-        if (this.config?.params) {
-          useParams = { ...this.config?.params, ...useParams };
+        function rep(val) {
+          if (Array.isArray(val)) {
+            return val.map((val) => resolvePlaceholders(val, context));
+          }
+
+          return resolvePlaceholders(val, context);
         }
 
-        if (this.config?.paramsList?.length) {
-          useParams = _.pick(useParams, this.config.paramsList);
-        }
+        let useParams = params ?? this.getStreamConfig(targetStream, flow)?.jobParams ?? targetStream.config?.jenkinsJobParams;
 
-        await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(step.config?.integration, 'jenkins').runJob(
-          this.getStreamConfig(targetStream, flow)?.jobName ?? targetStream.config?.jenkinsJobName ?? this.config?.jobName,
+        if (this.config?.jobParams) {
+          useParams = { ...this.config?.jobParams, ...useParams };
+        }
+console.log(useParams, this.config);
+        if (this.config?.jobParamsList?.length) {
+          useParams = _.pick(useParams, this.config.jobParamsList);
+        }
+        console.log(useParams);
+
+        if (useParams) {
+          useParams = _.mapValues(useParams, (val) => rep(val));
+        }
+        console.log(useParams);
+
+        context.params = useParams;
+
+        await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(
+          rep(step.config?.integration ?? 'jenkins'),
+          'jenkins',
+        ).runJob(
+          rep(this.getStreamConfig(targetStream, flow)?.jobName ?? targetStream.config?.jenkinsJobName ?? this.config?.jobName),
           useParams,
         );
 
@@ -72,3 +98,4 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
     return stream.config?.jenkins?.flows?.[flow.id] ?? stream.config?.jenkins as any;
   }
 }
+
