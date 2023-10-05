@@ -79,9 +79,10 @@ export class RestApiService {
         data = JSON.stringify(data);
         break;
       }
-
+console.log(url, { method, body: data, headers });
       request = fetch(url, { method, body: data, headers });
     } else {
+console.log(url, { method, headers });
       request = fetch(url, { method, headers });
     }
     

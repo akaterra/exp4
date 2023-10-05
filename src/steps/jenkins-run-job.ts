@@ -10,7 +10,9 @@ import * as _ from 'lodash';
 
 export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
   integration: string;
-  parametersList?: string[];
+  jobName?: string;
+  params?: Record<string, unknown>;
+  paramsList?: string[];
 }
 
 @Service()
@@ -38,16 +40,24 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
         ? Object.keys(target.streams)
         : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
+      if (Object.keys(params).length === 0) {
+        params = null;
+      }
+
       for (const streamId of streamIds) {
         const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
-        let useParams = params ?? targetStream.config?.jenkins?.[flow.id]?.jobParams ?? targetStream.config?.jenkinsParams;
+        let useParams = params ?? this.getStreamConfig(targetStream, flow)?.jobParams ?? targetStream.config?.jenkinsParams;
 
-        if (this.config?.parametersList?.length) {
-          useParams = _.pick(useParams, this.config.parametersList);
+        if (this.config?.params) {
+          useParams = { ...this.config?.params, ...useParams };
+        }
+
+        if (this.config?.paramsList?.length) {
+          useParams = _.pick(useParams, this.config.paramsList);
         }
 
         await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(step.config?.integration, 'jenkins').runJob(
-          targetStream.config?.jenkins?.[flow.id]?.jobName ?? targetStream.config?.jenkinsJobName,
+          this.getStreamConfig(targetStream, flow)?.jobName ?? targetStream.config?.jenkinsJobName ?? this.config?.jobName,
           useParams,
         );
 
@@ -56,5 +66,9 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
 
       makeDirty(target);
     }
+  }
+
+  private getStreamConfig(stream, flow) {
+    return stream.config?.jenkins?.flows?.[flow.id] ?? stream.config?.jenkins as any;
   }
 }

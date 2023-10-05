@@ -39,14 +39,14 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
         const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
 
         await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(step.config?.integration, 'argocd').syncResource(
-          targetStream.config?.argocd?.[flow.id]?.serviceName ?? targetStream.config?.argocdServiceName
+          this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName
             ? {
-              resourceName: targetStream.config?.argocd?.[flow.id]?.serviceName ?? targetStream.config?.argocdServiceName as any,
-              resourceKind: targetStream.config?.argocd?.[flow.id]?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
+              resourceName: this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName as any,
+              resourceKind: this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
             }
             : {
-              resourceNameIn: targetStream.config?.argocd?.[flow.id]?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any,
-              resourceKind: targetStream.config?.argocd?.[flow.id]?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
+              resourceNameIn: this.getStreamConfig(targetStream, flow)?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any,
+              resourceKind: this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
             },
         );
 
@@ -55,5 +55,9 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
 
       makeDirty(target);
     }
+  }
+
+  private getStreamConfig(stream, flow) {
+    return stream.config?.argocd?.flows?.[flow.id] ?? stream.config?.argocd as any;
   }
 }

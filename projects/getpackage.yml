@@ -108,6 +108,8 @@ definitions:
   none: null
 
 integrations:
+  jenkins:
+    type: "jenkins"
   argocdDev:
     type: "argocd"
     config:
@@ -366,6 +368,20 @@ flows:
         title: ""
         targets:
           - "production"
+  
+  migrate:
+    title: "Migrate"
+    targets:
+      - dev
+      - stg
+      - stgHotfix
+      - production
+    steps:
+      - type: "jenkins:jobRun"
+        title: ""
+        config:
+          integration: "jenkins"
+          jobName: "migrate"
 
 targets:
   dev:
@@ -448,6 +464,12 @@ targets:
           argocdServiceName:
             - "gp-deliveries-history"
             - "gp-deliveries-history-web"
+          jenkins:
+            jobName: "migrate"
+            jobParams:
+              service: "gp-deliveries-history-service"
+              environment: "development"
+              branch: "master"
         artifacts:
           - "argocdApplicationImageTagDev"
       gp-events-service:

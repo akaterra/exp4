@@ -7,7 +7,7 @@ import { JenkinsService } from '../services/jenkins.service';
 export interface IJenkinsConfig {
   cacheTtlSec?: number;
 
-  buildName?: string;
+  jobName?: string;
   host?: string;
 
   username?: string;
@@ -37,7 +37,11 @@ export class JenkinsIntegrationService extends EntityService implements IIntegra
   @IncStatistics()
   async getJobHistory(name?) {
     if (!name) {
-      name = this.config?.buildName;
+      name = this.config?.jobName;
+    }
+
+    if (!name) {
+      return null;
     }
 
     if (this.cache.has(name)) {
@@ -53,6 +57,14 @@ export class JenkinsIntegrationService extends EntityService implements IIntegra
 
   @IncStatistics()
   async runJob(name?, params?: Record<string, unknown>) {
-    
+    if (!name) {
+      name = this.config?.jobName;
+    }
+
+    if (!name) {
+      return null;
+    }
+
+    await this.client.runJob(name, params);
   }
 }

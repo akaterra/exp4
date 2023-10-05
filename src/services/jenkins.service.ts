@@ -14,7 +14,9 @@ export class JenkinsService {
   }
 
   async getJobHistory(name: string): Promise<any[]> {
-    const runs = await rest.doRequest(
+    const runs = await rest.withHeaders({
+      Authorization: this.getAuthHeader(),
+    }).doRequest(
       this.getUrl(`/job/${name}/api/json?tree=allBuilds[id,timestamp,result,duration]`),
       'get',
     );
@@ -23,7 +25,9 @@ export class JenkinsService {
       let promises = [];
 
       for (const run of runs) {
-        promises.push(rest.doRequest(
+        promises.push(rest.withHeaders({
+          Authorization: this.getAuthHeader(),
+        }).doRequest(
           this.getUrl(`/job/${name}/${run.id}/api/json`),
           'get',
         ).then((res) => run.details = res));
@@ -43,7 +47,9 @@ export class JenkinsService {
   }
 
   async runJob(name: string, params?: Record<string, unknown>) {
-    await rest.doRequest(
+    await rest.withHeaders({
+      Authorization: this.getAuthHeader(),
+    }).doRequest(
       params
         ? this.getUrl(`/job/${name}/api/buildWithParameters`)
         : this.getUrl(`/job/${name}/api/build/api/json`),
@@ -53,13 +59,25 @@ export class JenkinsService {
     );
   }
 
-  private getUrl(path: string): string {
+  private getAuthHeader(): string {
     if (this.username && this.token) {
-      return `${this.hostUrl.protocol}//${encodeURIComponent(this.username)}:${this.token}@${this.hostUrl.host}:${this.hostUrl.port}${path}`;
+      return `Basic ${btoa(encodeURIComponent(this.username) + ':' + this.token)}`;
     }
 
     if (this.username && this.password) {
-      return `${this.hostUrl.protocol}//${encodeURIComponent(this.username)}:${encodeURIComponent(this.password)}@${this.hostUrl.host}:${this.hostUrl.port}${path}`;
+      return `Basic ${btoa(encodeURIComponent(this.username) + ':' + encodeURIComponent(this.password))}`;
+    }
+
+    return '';
+  }
+
+  private getUrl(path: string): string {
+    if (this.username && this.token) {
+      return `${this.hostUrl.protocol}//${this.hostUrl.host}:${this.hostUrl.port || 80}${path}`;
+    }
+
+    if (this.username && this.password) {
+      return `${this.hostUrl.protocol}//${this.hostUrl.host}:${this.hostUrl.port || 80}${path}`;
     }
 
     return `${this.host}${path}`;

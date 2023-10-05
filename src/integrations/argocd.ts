@@ -40,6 +40,10 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
       name = this.config?.applicationName;
     }
 
+    if (!name) {
+      return;
+    }
+
     if (this.cache.has(name)) {
       return this.cache.get(name);
     }
@@ -59,9 +63,14 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     resourceNameIn: string | string[],
     resourceKind: string
   }, name?) {
-    await this.client.syncResource(
-      name ?? this.config?.applicationName,
-      params,
-    );
+    if (!name) {
+      name = this.config?.applicationName;
+    }
+
+    if (!name) {
+      return;
+    }
+
+    await this.client.syncResource(name, params);
   }
 }
