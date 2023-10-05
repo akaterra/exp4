@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact } from '../project';
-import { StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream';
 import { EntityService } from '../entities.service';
 import * as _ from 'lodash';
 import { iter } from '../utils';
@@ -68,7 +68,7 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
   }
 
   async run(
-    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
+    entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },
     streamState: StreamState,
     params?: Record<string, unknown>,
   ): Promise<void> {

@@ -1,6 +1,6 @@
 import { IStreamService } from './stream.service';
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
-import { StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
@@ -86,7 +86,7 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   @Log('debug')
-  async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>): Promise<StreamState> {
+  async streamGetState(stream: IGithubTargetStream, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState> {
     const cacheKey = `${stream.ref?.projectId}:${stream.ref?.targetId}:${stream.ref?.streamId}`;
     const state: StreamState = await this.cache.get(cacheKey) ?? new StreamState({
       id: stream.id,
@@ -194,18 +194,15 @@ export class GithubStreamService extends EntityService implements IStreamService
       state.version = await versioningService.getCurrentStream(stream);
   
       if (hasScope('artifact', scopes) && stream.artifacts?.length) {
-        await this.getArtifactsService(stream).run(
-          { artifacts: stream.artifacts, ref: stream.ref },
-          state,
-          {
+        if (context) {
+          context.artifact = {
             githubWorkflowId: workflowRuns?.[0]?.id,
             githubWorkflowJobId: workflowRunsJobs?.[0]?.id,
             githubWorkflowRunJobStatus: state.history.action?.[0]?.status,
             ref: stream.ref,
             stream,
-          },
-          scopes,
-        );
+          };
+        }
       }
 
       state.incVer();
@@ -268,10 +265,6 @@ export class GithubStreamService extends EntityService implements IStreamService
       id: config.id,
       type: null,
     };
-  }
-
-  private getArtifactsService(stream: IGithubTargetStream) {
-    return this.projectsService.get(stream.ref.projectId).env.artifacts;
   }
 
   private getIntegrationService(stream: IGithubTargetStream) {

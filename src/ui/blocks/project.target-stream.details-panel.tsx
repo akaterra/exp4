@@ -6,10 +6,10 @@ import { Label } from '../atoms/label';
 import { Button } from '../atoms/button';
 import { Status } from '../enums/status';
 import { InfoCollapse } from '../atoms/info-collapse';
-import { StatusLine, StatusValue, TitledLine } from '../atoms/status-line';
+import { StatusValue, TitledLine } from '../atoms/status-line';
 import { IProjectTargetStreamState } from '../stores/dto/project-state';
 import { IProjectTargetStream } from '../stores/dto/project';
-import {Time} from '../atoms/time';
+import { Time } from '../atoms/time';
 
 export const ProjectTargetStreamDetailsModalTitle = observer(({
   // store,

@@ -1,11 +1,12 @@
 import { Service } from 'typedi';
-import { StreamState } from './stream';
+import { IStreamStateContext, StreamState } from './stream';
 import { IProjectTargetStreamDef } from './project';
 import { AwaitedCache } from './cache';
 import { ProjectsService } from './projects.service';
 import { IStreamService } from './streams/stream.service';
 import { EntitiesServiceWithFactory } from './entities.service';
 import { Autowired } from './utils';
+import { logError } from './logger';
 
 @Service()
 export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
@@ -16,11 +17,34 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     return 'Stream';
   }
 
-  async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: Record<string, unknown>) {
+  async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext) {
+    if (!context) {
+      context = {
+        global: context,
+      };
+    }
+
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
     const entity = stream.isDirty || scopes
       ? await this.get(stream.type).streamGetState(stream, scopes, context)
       : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream, scopes, context);
+
+    if (context.artifact) {
+      try {
+        entity.isSyncing = true;
+
+        await this.getArtifactsService(stream).run(
+          { artifacts: stream.artifacts, ref: stream.ref },
+          entity,
+          context.artifact,
+          scopes,
+        );
+      } catch (err) {
+        logError(err, 'StreamsService.getState', { streamId: stream.id, scopes });
+      } finally {
+        entity.isSyncing = false;
+      }
+    }
 
     if (entity) {
       entity.version = entity.version ?? await this.getVersioningsService(stream).getCurrent(
@@ -33,6 +57,10 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
     this.cache.set(key, entity);
 
     return entity;
+  }
+
+  private getArtifactsService(stream: IProjectTargetStreamDef) {
+    return this.projectsService.get(stream.ref.projectId).env.artifacts;
   }
 
   private getVersioningsService(stream: IProjectTargetStreamDef) {

@@ -26,6 +26,7 @@ export class ArgocdService {
     private host: string = process.env.ARGOCD_HOST,
     private username: string = process.env.ARGOCD_USERNAME,
     private password: string = process.env.ARGOCD_PASSWORD,
+    private token: string = process.env.ARGOCD_TOKEN,
   ) {
   }
 

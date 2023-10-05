@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
-import { StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream';
 import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';
@@ -9,7 +9,7 @@ import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
 
-export type IGithubWorkflowJobLogArtifactConfig = {
+export interface IGithubWorkflowJobLogArtifactConfig {
   integration: IProjectDef['id'];
   cacheTtlSec?: number;
   saveAs?: string;
@@ -27,7 +27,7 @@ export class GithubWorkflowJobLogArtifactService extends EntityService implement
   }
 
   async run(
-    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
+    entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },
     streamState: StreamState,
     params?: Record<string, unknown>,
     scopes?: Record<string, boolean>,

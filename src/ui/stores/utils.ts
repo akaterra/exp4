@@ -72,24 +72,24 @@ export function saveTextAligned(content: Array<Record<string, unknown>>, target:
 
 export async function saveContent(content, contentType, target: 'clipboard' | 'download', filename?) {
   switch (contentType) {
-    case 'json':
-      content = JSON.stringify(content, undefined, 2);
-      break;
+  case 'json':
+    content = JSON.stringify(content, undefined, 2);
+    break;
   }
   
   switch (target) {
-    case 'clipboard':
-      await navigator.clipboard.writeText(content);
+  case 'clipboard':
+    await navigator.clipboard.writeText(content);
 
-      break;
-    case 'download':
-      const downloadEl = document.getElementById('download');
+    break;
+  case 'download':
+    const downloadEl = document.getElementById('download');
 
-      if (downloadEl) {
-        downloadEl.setAttribute('href', `data:text/${contentType};charset=utf-8,` + encodeURIComponent(content));
-        downloadEl.setAttribute('download', `${filename}.${contentType}`);
-        downloadEl.click();
-      }    
+    if (downloadEl) {
+      downloadEl.setAttribute('href', `data:text/${contentType};charset=utf-8,` + encodeURIComponent(content));
+      downloadEl.setAttribute('download', `${filename}.${contentType}`);
+      downloadEl.click();
+    }    
   }
 }
 

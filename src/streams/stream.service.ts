@@ -1,4 +1,4 @@
-import { StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { TargetState } from '../target';
 import { IService } from '../entities.service';
@@ -10,7 +10,7 @@ export interface IStreamService extends IService {
 
   streamDetach(stream: IProjectTargetStreamDef): Promise<StreamState>;
 
-  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: Record<string, unknown>): Promise<StreamState>;
+  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState>;
 
   streamMove(sourceStream: IProjectTargetStreamDef, targetStream: IProjectTargetStreamDef);
 

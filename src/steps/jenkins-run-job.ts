@@ -4,28 +4,31 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { ArgocdIntegrationService } from '../integrations/argocd';
 import { makeDirty, notEmptyArray } from './utils';
+import { JenkinsIntegrationService } from '../integrations/jenkins';
+import * as _ from 'lodash';
 
-export interface IArgocdSyncStepConfig extends Record<string, unknown> {
+export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
   integration: string;
+  parametersList?: string[];
 }
 
 @Service()
-export class ArgocdSyncStepService extends EntityService implements IStepService {
-  static readonly type = 'argocd:sync';
+export class JenkinsJobRunStepService extends EntityService implements IStepService {
+  static readonly type = 'jenkins:jobRun';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(public readonly config?: IArgocdSyncStepConfig) {
+  constructor(public readonly config?: IJenkinsJobRunStepConfig) {
     super();
   }
 
   async run(
     flow: IProjectFlowDef,
     // action: IProjectFlowActionDef,
-    step: IProjectFlowActionStep<IArgocdSyncStepConfig>,
+    step: IProjectFlowActionStep<IJenkinsJobRunStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
+    params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
 
@@ -37,17 +40,15 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
 
       for (const streamId of streamIds) {
         const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
+        let useParams = params ?? targetStream.config?.jenkins?.[flow.id]?.jobParams ?? targetStream.config?.jenkinsParams;
 
-        await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(step.config?.integration, 'argocd').syncResource(
-          targetStream.config?.argocd?.[flow.id]?.serviceName ?? targetStream.config?.argocdServiceName
-            ? {
-              resourceName: targetStream.config?.argocd?.[flow.id]?.serviceName ?? targetStream.config?.argocdServiceName as any,
-              resourceKind: targetStream.config?.argocd?.[flow.id]?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
-            }
-            : {
-              resourceNameIn: targetStream.config?.argocd?.[flow.id]?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any,
-              resourceKind: targetStream.config?.argocd?.[flow.id]?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'
-            },
+        if (this.config?.parametersList?.length) {
+          useParams = _.pick(useParams, this.config.parametersList);
+        }
+
+        await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(step.config?.integration, 'jenkins').runJob(
+          targetStream.config?.jenkins?.[flow.id]?.jobName ?? targetStream.config?.jenkinsJobName,
+          useParams,
         );
 
         makeDirty(targetStream);

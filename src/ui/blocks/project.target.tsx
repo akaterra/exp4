@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore } from '../stores/project';
-import { Checkbox, CheckboxControl, Input } from '../atoms/input';
+import { CheckboxControl, Input } from '../atoms/input';
 import { ProjectTargetsStreams } from './project.target-stream';
 import { ProjectTargetsArtifacts } from './project.target-artifact';
 import { Select } from '../atoms/select';
-import {FICTIVE} from '../atoms/utils';
-import {ProjectTargetsLastActions} from './project.target-last-action';
+import { FICTIVE } from '../atoms/utils';
+import { ProjectTargetsLastActions } from './project.target-last-action';
 
 export const ProjectTargets = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
@@ -16,15 +16,15 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
   let ModeElement;
 
   switch (project.mode?.target) {
-    case 'artifact':
-      ModeElement = <ProjectTargetsArtifacts project={ project } />;
-      break;
-    case 'lastAction':
-      ModeElement = <ProjectTargetsLastActions project={ project } />;
-      break;
-    case 'stream':
-      ModeElement = <ProjectTargetsStreams project={ project } />;
-      break;
+  case 'artifact':
+    ModeElement = <ProjectTargetsArtifacts project={ project } />;
+    break;
+  case 'lastAction':
+    ModeElement = <ProjectTargetsLastActions project={ project } />;
+    break;
+  case 'stream':
+    ModeElement = <ProjectTargetsStreams project={ project } />;
+    break;
   }
 
   return <div className='row'>

@@ -1,5 +1,10 @@
 import { Status } from './enums/status';
 
+export interface IStreamStateContext extends Record<string, unknown> {
+  artifact?: Record<string, unknown>;
+  global?: Record<string, unknown>;
+}
+
 export interface IStreamHistoryStep {
   id: string;
   type: string;

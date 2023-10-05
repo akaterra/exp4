@@ -6,7 +6,7 @@ import { Label } from '../atoms/label';
 import { Button } from '../atoms/button';
 import { ValueMaybeSuccess } from '../atoms/status-line';
 import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
-import {Time} from '../atoms/time';
+import { Time } from '../atoms/time';
 
 export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projectTarget?: ProjectTargetStore, key? }) => {
   const [ isShown, setIsShown ] = React.useState(true);
@@ -24,9 +24,9 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
           hasArtifacts
             ? <div className='table highlighted underlined zebra fine'>
               <div className='row header'>
-                <div className='c-4'>Stream</div>
-                <div className='c-4'>Artifact</div>
-                <div className='c-6'>Artifact value</div>
+                <div className='ccc w20'>Stream</div>
+                <div className='ccc w20'>Artifact</div>
+                <div className='ccc w20'>Artifact value</div>
               </div>
               {
                 projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }) => {
@@ -38,23 +38,20 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
       
                   return artifacts?.map((artifact, j) => {
                     return <div className='row'>
-                      <div className='c18'>
-                        <div className='row flex-middle'>
-                          <div className={ lastChange ? `c-4` : `c-4 opacity-med` }>
-                            {
-                              j === 0
-                                ? <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
-                                : null
-                            }
-                          </div>
-                          <div className={ lastChange ? 'c-4' : 'c-4 opacity-med' }>
+                      <div className={ lastChange ? `ccc w20` : `ccc w20 opacity-med` }>
+                        {
+                          j === 0
+                            ? <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
+                            : null
+                        }
+                      </div>
+                      <div className='ccc w80 flex flex-ver children-gap'>
+                        <div className={ artifact?.time ? 'row' : 'row flex flex-middle' }>
+                          <div className={ lastChange ? 'ccc w25' : 'ccc w25 opacity-med' }>
                             <span className='overflow'>{ artifact.id }</span>
-                            <div className='label'>
-                              <Time time={ artifact.time } />
-                            </div>
                           </div>
-                          <div className={ lastChange ? 'c-6' : 'c-6 opacity-med' }><ValueMaybeSuccess value={ artifact.description } /></div>
-                          <div className='c-4 flex flex-right children-gap-hor'>
+                          <div className={ lastChange ? 'ccc w50' : 'ccc w50 opacity-med' }><ValueMaybeSuccess value={ artifact.description } /></div>
+                          <div className='ccc w25 flex flex-right children-gap-hor'>
                             {
                               j === 0
                                 ? <ProjectTargetStreamInfoButton projectTarget={ projectTarget } streamState={ streamState } />
@@ -67,18 +64,16 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                             ><i className='fa-solid fa-copy' /></Button>
                           </div>
                         </div>
-                      </div>
-                      {
-                        artifact?.time
-                          ? <div className='c18'>
-                            <div className='row'>
-                              <div className='c-4'>
+                        {
+                          artifact?.time
+                            ? <div className='row'>
+                              <div className='ccc w25'>
                                 <div className='label'><Time time={ artifact?.time } /></div>
                               </div>
                             </div>
-                          </div>
-                          : null
-                      }
+                            : null
+                        }
+                      </div>
                     </div>;
                   });
                 })

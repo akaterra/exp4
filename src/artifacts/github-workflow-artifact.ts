@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from './artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
-import { StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream';
 import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';
@@ -10,7 +10,7 @@ import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
 import AdmZip from 'adm-zip';
 
-export type IGithubWorkflowArtifactArtifactConfig = {
+export interface IGithubWorkflowArtifactArtifactConfig {
   integration: IProjectDef['id'];
   cacheTtlSec?: number;
   name: string;
@@ -30,7 +30,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
   }
 
   async run(
-    entity: { ref: IProjectArtifact['ref'], context?: Record<string, unknown> },
+    entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },
     streamState: StreamState,
     params?: Record<string, unknown>,
     scopes?: Record<string, boolean>,

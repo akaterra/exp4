@@ -6,7 +6,7 @@ import { Label } from '../atoms/label';
 import { Button } from '../atoms/button';
 import { ValueMaybeSuccess } from '../atoms/status-line';
 import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
-import {Time} from '../atoms/time';
+import { Time } from '../atoms/time';
 
 export const ProjectTargetLastActions = observer(({ projectTarget, key }: { projectTarget?: ProjectTargetStore, key? }) => {
   const [ isShown, setIsShown ] = React.useState(true);
@@ -24,9 +24,9 @@ export const ProjectTargetLastActions = observer(({ projectTarget, key }: { proj
           hasActionsOrChanges
             ? <div className='table highlighted underlined zebra fine'>
               <div className='row header'>
-                <div className='c-4'>Stream</div>
-                <div className='c-4'>Action</div>
-                <div className='c-4'>Change</div>
+                <div className='ccc w20'>Stream</div>
+                <div className='ccc w20'>Action</div>
+                <div className='ccc w20'>Change</div>
               </div>
               {
                 projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState }) => {
@@ -38,20 +38,20 @@ export const ProjectTargetLastActions = observer(({ projectTarget, key }: { proj
       
                   return actions?.map((action, j) => {
                     return <div className='row'>
-                      <div className='c18'>
-                        <div className='row flex-middle'>
-                          <div className={ lastChange ? `c-4` : `c-4 opacity-med` }>
-                            {
-                              j === 0
-                                ? <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
-                                : null
-                            }
-                          </div>
-                          <div className={ lastChange ? 'c-4 flex flex-ver children-gap' : 'c-4 opacity-med flex flex-ver children-gap' }>
+                      <div className={ lastChange ? `ccc w20` : `ccc w20 opacity-med` }>
+                        {
+                          j === 0
+                            ? <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
+                            : null
+                        }
+                      </div>
+                      <div className='ccc w80 flex flex-ver children-gap'>
+                        <div className='row'>
+                          <div className={ lastChange ? 'ccc w25 flex flex-ver children-gap' : 'ccc w25 opacity-med flex flex-ver children-gap' }>
                             <span className='overflow'>{ action?.description ?? action?.id }</span>
                           </div>
-                          <div className={ lastChange ? 'c-6' : 'c-6 opacity-med' }><ValueMaybeSuccess value={ lastChange?.description } /></div>
-                          <div className='c-4 flex flex-right children-gap-hor'>
+                          <div className={ lastChange ? 'ccc w50' : 'ccc w50 opacity-med' }><ValueMaybeSuccess value={ lastChange?.description } /></div>
+                          <div className='ccc w25 flex flex-right children-gap-hor'>
                             {
                               j === 0
                                 ? <ProjectTargetStreamInfoButton projectTarget={ projectTarget } streamState={ streamState } />
@@ -64,22 +64,19 @@ export const ProjectTargetLastActions = observer(({ projectTarget, key }: { proj
                             ><i className='fa-solid fa-copy' /></Button>
                           </div>
                         </div>
-                      </div>
-                      {
-                        action?.time || lastChange?.time
-                          ? <div className='c18'>
-                            <div className='row'>
-                              <div className='c-4' />
-                              <div className='c-4'>
+                        {
+                          action?.time || lastChange?.time
+                            ? <div className='row'>
+                              <div className='ccc w25'>
                                 <div className='label'><Time time={ action?.time } /></div>
                               </div>
-                              <div className='c-4'>
+                              <div className='ccc w25'>
                                 <div className='label'><Time time={ lastChange?.time } /></div>
                               </div>
                             </div>
-                          </div>
-                          : null
-                      }
+                            : null
+                        }
+                      </div>
                     </div>;
                   });
                 })

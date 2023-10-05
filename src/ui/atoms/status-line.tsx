@@ -33,10 +33,10 @@ export const StatusValue = ({ isFailed = false, status = undefined }: any) => {
   }
 
   return <span className={
-      status === Status.FAILED
-        ? 'badge failure bold'
-        : status === Status.COMPLETED || status === Status.STABLE || status === Status.SUCCESS ? 'badge success bold' : 'badge warning bold'
-    }>{ status }</span>;
+    status === Status.FAILED
+      ? 'badge failure bold'
+      : status === Status.COMPLETED || status === Status.STABLE || status === Status.SUCCESS ? 'badge success bold' : 'badge warning bold'
+  }>{ status }</span>;
 };
 
 StatusValue.Subscription = ({ isFailed = false, status = undefined }: any) => {

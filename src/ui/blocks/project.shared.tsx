@@ -10,7 +10,7 @@ export const ProjectTargetStreamInfoButton = ({ projectTarget, streamState }: { 
   >Info</Button>;
 };
 
-export const ProjectTargetStreamTitle = ({ projectTarget, stream, streamState }: { projectTarget?: ProjectTargetStore, stream, streamState }) => {
+export const ProjectTargetStreamTitle = ({ stream, streamState }: { projectTarget?: ProjectTargetStore, stream, streamState }) => {
   return <span className={ `span ${streamState._label} overflow` }>
     { stream.title ?? stream.id }
     &nbsp;

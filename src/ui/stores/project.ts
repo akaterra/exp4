@@ -7,7 +7,7 @@ import { modalStore } from '../blocks/modal';
 import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
-import { processing, saveContent, saveCsv, saveTextAligned, splitFilterTokens } from './utils';
+import { processing, saveContent, saveTextAligned, splitFilterTokens } from './utils';
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 import { FormStore } from './form';
@@ -400,8 +400,8 @@ export class ProjectStore extends BaseStore {
     mode: {
       target?: 'artifact' | 'lastAction' | 'stream';
     } = {
-      target: 'stream',
-    };
+        target: 'stream',
+      };
   @observable
     project: IProject;
   @observable
