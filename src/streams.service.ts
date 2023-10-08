@@ -18,13 +18,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
   }
 
   async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext) {
-    if (!context) {
-      context = {
-        global: context,
-      };
-    }
-
-    context = { ...context };
+    context = context ? { ...context } : {};
 
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
     const entity = stream.isDirty || scopes

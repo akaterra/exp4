@@ -98,7 +98,11 @@ export class RestApiService {
     return request.then((res: Response) => {
       let tempRes: any = res;
 
-      switch (res.headers.get('content-type') ?? format) {
+      if (DEBUG) {
+        console.log(url, { contentType: res.headers.get('content-type'), format, headers: res.headers });
+      }
+
+      switch ((res.headers.get('content-type') ?? format).split(';')?.[0]) {
       case 'application/json':
       case 'json':
         tempRes = res.json();

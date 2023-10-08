@@ -214,9 +214,9 @@ export class GithubStreamService extends EntityService implements IStreamService
 
     this.cache.set(cacheKey, state);
 
-    if (stream.isDirty || hasStrictScope('resync', scopes)) {
-      await detailsPromise;
-    }
+    // if (stream.isDirty || hasStrictScope('resync', scopes)) {
+    await detailsPromise;
+    // }
 
     return state;
   }
