@@ -395,15 +395,31 @@ flows:
         targets:
           - "production"
   
-  migrate:
+  migrateDev:
     title: "Migrate"
     targets:
       - dev
     steps:
       - type: "jenkins:jobRun"
         title: ""
+        targets:
+          - dev
         config:
           integration: "jenkins${target.id}"
+          jobName: "migrate"
+
+  migrateStg:
+    title: "Migrate"
+    targets:
+      - stg
+    steps:
+      - type: "jenkins:jobRun"
+        title: ""
+        targets:
+          - stg
+        config:
+          integration: "jenkins${target.id}"
+          jobName: "migrate"
 
 targets:
   dev:

@@ -24,6 +24,8 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
       };
     }
 
+    context = { ...context };
+
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
     const entity = stream.isDirty || scopes
       ? await this.get(stream.type).streamGetState(stream, scopes, context)

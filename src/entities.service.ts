@@ -22,12 +22,27 @@ export class EntityService {
   title: string;
   description: string;
 
+  private _context: Record<string, unknown>;
+
   get assertType() {
     return (this.constructor as any).assertType ?? (this.constructor as any).type;
   }
 
+  get context() {
+    const context = this._context;
+    this._context = null;
+
+    return context;
+  }
+
   get type() {
     return (this.constructor as any).type;
+  }
+
+  withContext(context) {
+    this._context = context;
+
+    return this;
   }
 }
 

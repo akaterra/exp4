@@ -3,11 +3,15 @@ import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { AwaitedCache } from '../cache';
 import { JenkinsService } from '../services/jenkins.service';
+import {resolvePlaceholders} from '../utils';
+import * as _ from 'lodash';
+import {Log} from '../logger';
 
 export interface IJenkinsConfig {
   cacheTtlSec?: number;
 
   jobName?: string;
+  jobParams?: Record<string, unknown>;
   host?: string;
 
   username?: string;
@@ -34,7 +38,7 @@ export class JenkinsIntegrationService extends EntityService implements IIntegra
     );
   }
 
-  @IncStatistics()
+  @Log('debug') @IncStatistics()
   async getJobHistory(name?) {
     if (!name) {
       name = this.config?.jobName;
@@ -55,7 +59,7 @@ export class JenkinsIntegrationService extends EntityService implements IIntegra
     return res;
   }
 
-  @IncStatistics()
+  @Log('debug') @IncStatistics()
   async runJob(name?, params?: Record<string, unknown>) {
     if (!name) {
       name = this.config?.jobName;
@@ -65,6 +69,26 @@ export class JenkinsIntegrationService extends EntityService implements IIntegra
       return null;
     }
 
-    await this.client.runJob(name, params);
+    const context = this.context;
+
+    function rep(val) {
+      if (Array.isArray(val)) {
+        return val.map((val) => resolvePlaceholders(val, context));
+      }
+
+      return resolvePlaceholders(val, context);
+    }
+
+    params = { ...this.config?.jobParams, ...params };
+
+    if (!Object.keys(params).length) {
+      params = null;
+    }
+
+    if (params) {
+      params = _.mapValues(params, rep);
+    }
+
+    await this.client.runJob(resolvePlaceholders(name, context), params);
   }
 }

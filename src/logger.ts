@@ -35,15 +35,19 @@ export function Log(level: string = logger.level) {
 
     descriptor.value = function (...args) {
       if (isLevelEnabled) {
-        const argsLog: Record<string, any> = {
-          message: fnName,
-        };
+        if (paramTypes?.length) {
+          const argsLog: Record<string, any> = {
+            message: fnName,
+          };
 
-        paramTypes.forEach((p, i) => {
-          argsLog[p] = args[i];
-        });
+          paramTypes.forEach((p, i) => {
+            argsLog[p] = args[i];
+          });
 
-        logger.log(level, argsLog);
+          logger.log(level, argsLog);
+        } else {
+          logger.log(level, args);
+        }
       }
 
       try {

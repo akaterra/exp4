@@ -7,6 +7,7 @@ import { Autowired, resolvePlaceholders } from '../utils';
 import { makeDirty, notEmptyArray } from './utils';
 import { JenkinsIntegrationService } from '../integrations/jenkins';
 import * as _ from 'lodash';
+import {Log} from '../logger';
 
 export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
   integration: string;
@@ -25,6 +26,7 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
     super();
   }
 
+  @Log('debug')
   async run(
     flow: IProjectFlowDef,
     // action: IProjectFlowActionDef,
@@ -61,30 +63,28 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
           return resolvePlaceholders(val, context);
         }
 
-        let useParams = params ?? this.getStreamConfig(targetStream, flow)?.jobParams ?? targetStream.config?.jenkinsJobParams;
+        if (!params) {
+          params = this.getStreamConfig(targetStream, flow)?.jobParams ?? targetStream.config?.jenkinsJobParams;
+        }
 
         if (this.config?.jobParams) {
-          useParams = { ...this.config?.jobParams, ...useParams };
+          params = { ...this.config?.jobParams, ...params };
         }
-console.log(useParams, this.config);
+
         if (this.config?.jobParamsList?.length) {
-          useParams = _.pick(useParams, this.config.jobParamsList);
+          params = _.pick(params, this.config.jobParamsList);
         }
-        console.log(useParams);
 
-        if (useParams) {
-          useParams = _.mapValues(useParams, (val) => rep(val));
+        if (params) {
+          params = _.mapValues(params, (val) => rep(val));
         }
-        console.log(useParams);
-
-        context.params = useParams;
 
         await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(
           rep(step.config?.integration ?? 'jenkins'),
           'jenkins',
-        ).runJob(
-          rep(this.getStreamConfig(targetStream, flow)?.jobName ?? targetStream.config?.jenkinsJobName ?? this.config?.jobName),
-          useParams,
+        ).withContext(context).runJob(
+          this.getStreamConfig(targetStream, flow)?.jobName ?? targetStream.config?.jenkinsJobName ?? this.config?.jobName,
+          params,
         );
 
         makeDirty(targetStream);

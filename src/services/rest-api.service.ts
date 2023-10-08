@@ -98,13 +98,24 @@ export class RestApiService {
     return request.then((res: Response) => {
       let tempRes: any = res;
 
-      switch (format) {
+      switch (res.headers.get('content-type') ?? format) {
+      case 'application/json':
       case 'json':
         tempRes = res.json();
         break;
+      case 'application/xml':
       case 'text':
+      case 'text/csv':
+      case 'text/plain':
+      case 'text/xml':
         tempRes = res.text();
         break;
+      case 'application/x-www-form-urlencoded':
+      case 'form':
+        tempRes = res.formData();
+        break;
+      default:
+        tempRes = null;
       }
 
       if (res.status >= 200 && res.status <= 299) {

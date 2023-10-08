@@ -35,6 +35,10 @@ export class ProjectsService extends EntitiesService<Project> {
     for (const [ , fId ] of iter(flowId)) {
       const flow = project.getFlowByFlowId(fId);
 
+      if (!flow) {
+        continue;
+      }
+
       project.env.validator.validate(params, fId);
 
       for (const step of flow.steps) {

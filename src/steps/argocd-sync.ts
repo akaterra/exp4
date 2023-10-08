@@ -6,6 +6,7 @@ import { EntityService } from '../entities.service';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ArgocdIntegrationService } from '../integrations/argocd';
 import { makeDirty, notEmptyArray } from './utils';
+import {Log} from '../logger';
 
 export interface IArgocdSyncStepConfig extends Record<string, unknown> {
   integration: string;
@@ -21,6 +22,7 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
     super();
   }
 
+  @Log('debug')
   async run(
     flow: IProjectFlowDef,
     // action: IProjectFlowActionDef,
@@ -55,15 +57,15 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
         await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(
           rep(step.config?.integration ?? 'argocd'),
           'argocd',
-        ).syncResource(
+        ).withContext(context).syncResource(
           this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName
             ? {
-              resourceName: rep(this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName as any),
-              resourceKind: rep(this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'),
+              resourceName: this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName as any,
+              resourceKind: this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet',
             }
             : {
-              resourceNameIn: rep(this.getStreamConfig(targetStream, flow)?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any),
-              resourceKind: rep(this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet'),
+              resourceNameIn: this.getStreamConfig(targetStream, flow)?.serviceNameIn ?? targetStream.config?.argocdServiceNameIn as any ?? targetStream.id as any,
+              resourceKind: this.getStreamConfig(targetStream, flow)?.serviceKind ?? targetStream.config?.argocdServiceKind as any ?? 'StatefulSet',
             },
         );
 

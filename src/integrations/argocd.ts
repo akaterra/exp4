@@ -3,6 +3,9 @@ import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { ArgocdService } from '../services/argocd.service';
 import { AwaitedCache } from '../cache';
+import {resolvePlaceholders} from '../utils';
+import * as _ from 'lodash';
+import {Log} from '../logger';
 
 export interface IArgocdConfig {
   applicationName?: string;
@@ -34,7 +37,7 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     );
   }
 
-  @IncStatistics()
+  @Log('debug') @IncStatistics()
   async getApplication(name?) {
     if (!name) {
       name = this.config?.applicationName;
@@ -55,7 +58,7 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     return res;
   }
 
-  @IncStatistics()
+  @Log('debug') @IncStatistics()
   async syncResource(params: {
     resourceName: string | string[],
     resourceKind: string
@@ -71,6 +74,20 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
       return;
     }
 
-    await this.client.syncResource(name, params);
+    const context = this.context;
+
+    function rep(val) {
+      if (Array.isArray(val)) {
+        return val.map((val) => resolvePlaceholders(val, context));
+      }
+
+      return resolvePlaceholders(val, context);
+    }
+
+    if (params) {
+      params = _.mapValues(params, rep);
+    }
+
+    await this.client.syncResource(rep(name), params);
   }
 }

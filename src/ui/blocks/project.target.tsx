@@ -29,7 +29,7 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
 
   return <div className='row'>
     <div className='c18 -s-'>
-      <div className='row'>
+      <div className='row flex flex-end'>
         <Input
           currentValue={ project.filterTargets }
           label='Search'

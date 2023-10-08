@@ -47,7 +47,7 @@ export class JenkinsService {
   }
 
   async runJob(name: string, params?: Record<string, unknown>) {
-    await rest.withHeaders({
+    await rest.withFormat('text').withHeaders({
       Authorization: this.getAuthHeader(),
     }).doRequest(
       params
