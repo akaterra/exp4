@@ -81,7 +81,7 @@ export const ProjectTargetsStreams = observer(({ project }: { project?: ProjectS
   return <div className='row'>
     {
       Object.values(project.projectTargetsStores).map((projectTargetStore) => {
-        return <div className='ccc -s- w25'>
+        return <div className='ccc w25 c-9-s-'>
           <div className='panel default shadow shadow-low unbound'>
             <ProjectTargetStreams projectTarget={projectTargetStore} />
           </div>

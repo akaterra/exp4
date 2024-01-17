@@ -44,11 +44,43 @@ function auth(req, res, next) {
 
     const storage = storages.getInstance(storageSymbol.type);
     const manifests = await storage.manifestsLoad([ './projects' ]);
-    const projectIds = process.env.PROJECT_IDS?.split(',') ?? null;
+    const projectsMap: any = {};
+
+    if (process.env.PROJECT_IDS) {
+      for (const projectId of process.env.PROJECT_IDS?.split(',')) {
+        const projectTargets = projectId.split(':');
+
+        projectsMap[projectTargets[0]] = {};
+
+        if (projectTargets.length > 1) {
+          for (const projectTarget of projectTargets.slice(1)) {
+            const projectTargetStreams = projectTarget.split('+');
+
+            if (projectTargetStreams.length > 1) {
+              projectsMap[projectTargets[0]][projectTargetStreams[0]] = {};
+
+              for (const projectTargetStream of projectTargetStreams.slice(1)) {
+                projectsMap[projectTargets[0]][projectTargetStreams[0]][projectTargetStream] = true;
+              }
+            } else {
+              projectsMap[projectTargets[0]][projectTargetStreams[0]] = true;
+            }
+          }
+        }
+      }
+    }
+
+    const projectIds: string[] = Object.keys(projectsMap).length > 0 ? Object.keys(projectsMap) : null;
 
     for (const manifest of manifests) {
       await createGeneral(manifest as IGeneralManifest, true);
-      const project = await createProject(manifest as IProjectManifest, true);
+      const project = await createProject(
+        manifest as IProjectManifest,
+        true,
+        projectsMap[manifest.id] && Object.keys(projectsMap[manifest.id]).length
+          ? projectsMap[manifest.id]
+          : null,
+      );
 
       if (project) {
         if (!projectIds || projectIds.includes(project.id)) {

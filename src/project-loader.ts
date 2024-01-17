@@ -11,7 +11,11 @@ import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from './const';
 import { ValidatorService } from './validator.service';
 
-export async function createProject(manifest: IProjectManifest & { env?: Project['env'] }, notThrow?: boolean): Promise<Project> {
+export async function createProject(
+  manifest: IProjectManifest & { env?: Project['env'] },
+  notThrow?: boolean,
+  targets?: Record<string, boolean | Record<string, boolean>>,
+): Promise<Project> {
   if (manifest?.type !== MANIFEST_PROJECT_TYPE) {
     if (notThrow) {
       return null;
@@ -107,18 +111,30 @@ export async function createProject(manifest: IProjectManifest & { env?: Project
   }
 
   if (manifest.targets) {
-    for (const [ ,target ] of Object.entries(manifest.targets)) {
-      for (const [ , defConfig ] of Object.entries(target.streams)) {
-        defConfig.artifacts?.forEach((artifact) => {
+    for (const [ targetDefId, targetDefConfig ] of Object.entries(manifest.targets)) {
+      if (targets && !targets[targetDefId]) {
+        delete manifest.targets[targetDefId];
+
+        continue;
+      }
+
+      for (const [ streamDefId, streamDefConfig ] of Object.entries(targetDefConfig.streams)) {
+        if (targets && targets[targetDefId] !== true && !targets[targetDefId]?.[streamDefId]) {
+          delete targetDefConfig.streams?.[streamDefId];
+
+          continue;
+        }  
+
+        streamDefConfig.artifacts?.forEach((artifact) => {
           artifactsService.get(artifact);
         });
 
-        if (!streamsService.has(defConfig.type)) {
-          streamsService.add(streamsService.getInstance(defConfig.type, defConfig.config), defConfig.type);
+        if (!streamsService.has(streamDefConfig.type)) {
+          streamsService.add(streamsService.getInstance(streamDefConfig.type, streamDefConfig.config), streamDefConfig.type);
         }
       }
 
-      manifest.env.versionings.get(target.versioning);
+      manifest.env.versionings.get(targetDefConfig.versioning);
     }
   }
 

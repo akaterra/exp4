@@ -34,21 +34,21 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
           currentValue={ project.filterTargets }
           label='Search'
           placeholder='Space separated :tag / word'
-          x={ 6 }
+          x={ 'c-6 c-9-s-' }
           onChange={ (value) => project.filterTargets = value }
         />
         <CheckboxControl
           currentValue={ project.filterPlaced }
           label={ FICTIVE }
-          x={ 4 }
+          x={ 'c-4 c-9-s-' }
           onChange={ (value) => project.filterPlaced = value }
         >Placed</CheckboxControl>
-        <div className='c-4' />
+        <div className='c-4 show-med show-lrg' />
         <Select
           currentValue={ project.mode.target }
           items={ { stream: 'Streams', artifact: 'Artifacts', 'lastAction': 'Actions & changes' } }
           label='Show'
-          x={ 4 }
+          x={ 'c-4 c-9-s-' }
           onChange={ (value) => {
             console.log({ value });
             project.mode.target = value;

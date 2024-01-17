@@ -611,8 +611,8 @@ targets:
         config:
           integration: "githubDev"
           argocdServiceName:
-            - "gp-graphql"
-            - "gp-graphql-web"
+            - "gp-graphql-gateway"
+            - "gp-graphql-gateway-web"
           jenkins:
             flows:
               migrate:
