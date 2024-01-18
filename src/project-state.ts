@@ -3,20 +3,30 @@ import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './proje
 import { ProjectsService } from './projects.service';
 import { StreamState } from './stream';
 import { Autowired } from './utils';
+import {TargetState} from './target';
 
 @Service()
 export class ProjectState {
+  syncQueue: [ IProjectTargetDef['id'], IProjectTargetStreamDef['id'][], Record<string, boolean>? ][] = [];
   updatedAt: Date = null;
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
+  get isSyncing(): boolean {
+    for (const target of Object.values(this.targets)) {
+      for (const stream of Object.values(target.streams)) {
+        if (stream.isSyncing) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   constructor(
     public id: IProjectDef['id'] = null,
-    public targets: Record<string, {
-      id: IProjectTargetDef['id'];
-      streams: Record<string, StreamState>;
-      version: string;
-    }> = {},
+    public targets: Record<IProjectTargetDef['id'], TargetState> = {},
   ) {
   }
 
@@ -46,39 +56,51 @@ export class ProjectState {
     return ids;
   }
 
-  setTarget(targetId: IProjectTargetDef['id'], config: {
-    streams?: Record<string, StreamState>,
-    version?: string,
-  }) {
+  setTarget(targetId: IProjectTargetDef['id'], target: Partial<TargetState>) {
     const oldTarget = this.targets[targetId];
-    this.targets[targetId] = {
-      id: targetId,
-      streams: config.streams ?? oldTarget?.streams ?? {},
-      version: config.version ?? oldTarget?.version ?? null,
-    };
-    this.updatedAt = new Date();
+
+    if (oldTarget) {
+      for (const key of Object.keys(target)) {
+        oldTarget[key] = target[key];
+      }
+    } else {
+      this.targets[targetId] = new TargetState(target);
+    }
 
     return this;
   }
 
   setTargetStream(targetId: IProjectTargetDef['id'], stream: Partial<StreamState>) {
-    if (!this.targets[targetId]) {
-      this.setTarget(targetId, {});
-    }
+    const oldTargetStream = this.ensureTarget(targetId).streams[stream.id];
 
-    const oldStream = this.targets[targetId].streams[stream.id];
-
-    if (oldStream) {
-      for (const key of Object.keys(oldStream)) {
-        if (!stream.hasOwnProperty(key)) {
-          stream[key] = oldStream[key];
-        }
+    if (oldTargetStream) {
+      for (const key of Object.keys(stream)) {
+        oldTargetStream[key] = stream[key];
       }
+    } else {
+      this.targets[targetId].streams[stream.id] = new StreamState(stream);
     }
-
-    this.targets[targetId].streams[stream.id] = stream as StreamState;
 
     return this;
+  }
+
+  addTargetSync(targetId: IProjectTargetDef['id'], streamIds?: IProjectTargetStreamDef['id'][], scopes?) {
+    const project = this.projectsService.get(this.id);
+    const projectTarget = project.targets[targetId];
+
+    if (!streamIds) {
+      streamIds = Object.keys(projectTarget.streams);
+    }
+
+    this.syncQueue.push([ targetId, streamIds, scopes ]);
+
+    for (const streamId of streamIds) {
+      this.ensureTargetStream(targetId, streamId).isSyncing = true;
+    }
+  }
+
+  popTargetSync(count: number = 1) {
+    return this.syncQueue.splice(0, count);
   }
 
   toJSON() {
@@ -87,5 +109,21 @@ export class ProjectState {
       targets: this.targets,
       updatedAt: this.updatedAt,
     };
+  }
+
+  private ensureTarget(targetId): TargetState {
+    if (!this.targets[targetId]) {
+      this.setTarget(targetId, {});
+    }
+
+    return this.targets[targetId];
+  }
+
+  private ensureTargetStream(targetId, streamId): StreamState {
+    if (!this.ensureTarget(targetId).streams[targetId]) {
+      this.setTargetStream(targetId, { id: streamId });
+    }
+
+    return this.targets[targetId].streams[streamId];
   }
 }

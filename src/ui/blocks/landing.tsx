@@ -110,21 +110,21 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
                 <FormInput className='transparent'
                   store={ store.authPasswordStore }
                   id='username'
-                  x={ 4 } autoComplete='username' label='Username'
+                  x={ 'ccc c12-s- c-6-m- c-4-l-' } autoComplete='username' label='Username'
                 />
               </div>
               <div className='row flex flex-center'>
                 <FormInput className='transparent'
                   store={ store.authPasswordStore }
                   id='password'
-                  x={ 4 } autoComplete='password' label='Password' type='password'
+                  x={ 'ccc c12-s- c-6-m- c-4-l-' } autoComplete='password' label='Password' type='password'
                 />
               </div>
               <div className='row flex flex-center'>
                 <FormSubmit
                   store={ store.authPasswordStore }
                   onClick={ () => store.authorizeByUsernamePassword(authMethodPassword.id) }
-                  x={ 4 }
+                  x={ 'ccc c12-s- c-6-m- c-4-l-' }
                 >Login</FormSubmit>
               </div>
             </form>

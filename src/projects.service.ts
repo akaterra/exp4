@@ -73,16 +73,13 @@ export class ProjectsService extends EntitiesService<Project> {
     scopes?: Record<string, boolean>,
   ): Promise<ProjectState> {
     const project = this.get(projectId);
-    const projectState = await this.statesCache.get(projectId) ?? new ProjectState(projectId);
+    const projectState = await this.statesCache.get(projectId) ??
+      await this.statesCache.set(projectId, new ProjectState(projectId));
 
     if (!scopes) {
       const replaceDirtyTargetIds = projectState.getDirtyTargetIds();
 
-      if (!replaceDirtyTargetIds.length) {
-        if (this.statesCache.has(projectId)) {
-          return this.statesCache.get(projectId);
-        }
-      } else {
+      if (replaceDirtyTargetIds.length) {
         if (!targetStreams) {
           targetStreams = {};
         }
@@ -93,50 +90,101 @@ export class ProjectsService extends EntitiesService<Project> {
           }
         }
       }
+
+      if (!targetStreams) {
+        return projectState;
+      }
     }
 
-    return this.statesCache.set(projectId, (async () => {
-      const targetContainer = new AwaitableContainer(1);
-  
-      for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
-        const target = project.getTargetByTargetId(tId);
-  
-        await targetContainer.push(async () => {
-          const context = {
-            ver: Date.now(),
-          };
+    const isSyncing = projectState.isSyncing;
 
-          projectState.setTarget(tId, {
-            version: await project.env.versionings.getByTarget(target).getCurrent(target),
-          })
-  
-          const streamContainer = new AwaitableContainer(1);
-          const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
-            ? targetStreams[tId] === true
-              ? Object.keys(target.streams)
-              : targetStreams[tId] as IProjectTargetStreamDef['id'][]
-            : scopes
-              ? Object.keys(target.streams)
-              : projectState.getDirtyTargetStreamIds(tId);
+    for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
+      const target = project.getTargetByTargetId(tId);
+      const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
+        ? targetStreams[tId] === true
+          ? Object.keys(target.streams)
+          : targetStreams[tId] as IProjectTargetStreamDef['id'][]
+        : scopes
+          ? Object.keys(target.streams)
+          : projectState.getDirtyTargetStreamIds(tId);
 
-          for (const sId of streamIds) {
-            const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
+      projectState.addTargetSync(tId, streamIds, scopes);
+    }
 
-            if (stream) {
-              await streamContainer.push(async () => {
-                projectState.setTargetStream(tId, await this.streamGetState(stream, scopes, context));
-              });
+    if (!isSyncing) {
+      (async () => {
+        const context = {
+          ver: Date.now(),
+        };
+        const streamContainer = new AwaitableContainer(1);
+
+        let syncEntries;
+
+        do {
+          syncEntries = projectState.popTargetSync(100);
+
+          for (const [ tId, streamIds, scopes ] of syncEntries) {
+            for (const sId of streamIds) {
+              const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
+
+              if (stream) {
+                await streamContainer.push(async () => {
+                  projectState.setTargetStream(tId, await this.streamGetState(stream, scopes, context));
+                });
+              }
             }
           }
 
           await streamContainer.wait();
-        });
-      }
+        } while (syncEntries.length);
+      })();
+    }
+
+    return projectState;
+
+    // return this.statesCache.set(projectId, (async () => {
+    //   const targetContainer = new AwaitableContainer(1);
   
-      await targetContainer.wait();
+    //   for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
+    //     const target = project.getTargetByTargetId(tId);
   
-      return projectState;
-    })(), 3600, true);
+    //     await targetContainer.push(async () => {
+    //       const context = {
+    //         ver: Date.now(),
+    //       };
+
+    //       projectState.setTarget(tId, {
+    //         isSyncing: true,
+    //         version: await project.env.versionings.getByTarget(target).getCurrent(target),
+    //       })
+  
+    //       const streamContainer = new AwaitableContainer(1);
+    //       const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
+    //         ? targetStreams[tId] === true
+    //           ? Object.keys(target.streams)
+    //           : targetStreams[tId] as IProjectTargetStreamDef['id'][]
+    //         : scopes
+    //           ? Object.keys(target.streams)
+    //           : projectState.getDirtyTargetStreamIds(tId);
+
+    //       for (const sId of streamIds) {
+    //         const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
+
+    //         if (stream) {
+    //           await streamContainer.push(async () => {
+    //             projectState.setTargetStream(tId, await this.streamGetState(stream, scopes, context));
+    //           });
+    //         }
+    //       }
+
+    //       await streamContainer.wait();
+    //     });
+    //   }
+  
+    //   await targetContainer.wait();
+  
+    //   return projectState;
+    // })(), 3600, true);
   }
 
   async runStatesResync() {

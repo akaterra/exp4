@@ -71,12 +71,13 @@ export class StreamState<
 
   ver: number = 0;
 
-  constructor(props) {
+  constructor(props: Partial<StreamState>) {
     Reflect.setPrototypeOf(props, StreamState.prototype);
 
+    props.isSyncing = props.isSyncing ?? false;
     props.ver = props.ver ?? 0;
 
-    return props as unknown as StreamState<Metadata, HistoryActionMetadata, HistoryChangeMetadata>;
+    return props as StreamState<Metadata, HistoryActionMetadata, HistoryChangeMetadata>;
   }
 
   incVer() {
