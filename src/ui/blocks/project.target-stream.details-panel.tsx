@@ -22,12 +22,28 @@ export const ProjectTargetStreamDetailsModalTitle = observer(({
   projectTargetStream?: IProjectTargetStream;
   projectTargetStreamState?: IProjectTargetStreamState;
 }) => {
+  const store = projectTargetStream
+    ? projectTargetStore?.projectTargetState?.streams?.[projectTargetStream?.id]
+    : null;
+
+  if (store && store?.ver !== projectTargetStreamState?.ver) {
+    projectTargetStreamState = store;
+  }
+
   return <div className='flex flex-hor'>
     <div>
       <Title>
         { projectTargetStream?.title ?? projectTargetStream?.id }
         &nbsp;
-        <span className='font-sml sup'>{ projectTargetStreamState?.version }</span>
+        <span className='font-sml sup'>{ store?.version }</span>
+        {
+          store?.isSyncing
+            ? <React.Fragment>
+              &nbsp;
+              <span className='span default font-sml sup'><i className='fa-solid fa-hourglass-start' /></span>
+            </React.Fragment>
+            : null
+        }
       </Title>
     </div>
     <Button

@@ -13,7 +13,7 @@ export interface IStreamHistoryStep {
 
 export interface IProjectTargetStreamState {
   id: IProjectTargetStream['id'];
-  type: IProjectTargetStream['id'];
+  type: IProjectTargetStream['type'];
 
   ref: IProjectTargetStream['ref'];
 
@@ -57,6 +57,7 @@ export interface IProjectTargetStreamState {
       time: string;
     }[];
   };
+  isSyncing: boolean;
   link: string;
   metadata: Record<string, unknown>;
   version: string;
@@ -72,6 +73,11 @@ export interface IProjectTargetStreamState {
 
 export type IProjectTargetState = {
   id: IProjectTarget['id'];
+  type: IProjectTarget['type'];
+
+  ref: IProjectTarget['ref'];
+
+  isSyncing: boolean;
   streams: Record<string, IProjectTargetStreamState>;
   version: string;
 };

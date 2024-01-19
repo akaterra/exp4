@@ -113,7 +113,7 @@ export class ProjectState {
 
   private ensureTarget(targetId): TargetState {
     if (!this.targets[targetId]) {
-      this.setTarget(targetId, {});
+      this.setTarget(targetId, { id: targetId });
     }
 
     return this.targets[targetId];
