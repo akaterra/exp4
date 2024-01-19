@@ -48,9 +48,9 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                       <div className='ccc w80 flex flex-ver children-gap'>
                         <div className={ artifact?.time ? 'row' : 'row flex flex-middle' }>
                           <div className={ lastChange ? 'ccc w25' : 'ccc w25 opacity-med' }>
-                            <span className='overflow'>{ artifact.id }</span>
+                            <span className='overflow'>{ artifact?.id }</span>
                           </div>
-                          <div className={ lastChange ? 'ccc w50' : 'ccc w50 opacity-med' }><ValueMaybeSuccess value={ artifact.description } /></div>
+                          <div className={ lastChange ? 'ccc w50' : 'ccc w50 opacity-med' }><ValueMaybeSuccess value={ artifact?.description } /></div>
                           <div className='ccc w25 flex flex-right children-gap-hor'>
                             {
                               j === 0

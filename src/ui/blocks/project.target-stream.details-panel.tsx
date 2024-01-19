@@ -88,7 +88,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
   return <React.Fragment>
     <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
       <div>
-        <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type }</a>
+        <a className='link' href={ projectTargetStreamState?.link } target='__blank'>{ projectTargetStreamState?.type ?? 'unknown' }</a>
       </div>
       <div>
         {
@@ -106,7 +106,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <Label>{ lastAction?.description ?? 'No description' }</Label>
           </div>
           <div>
-            <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type }</a>
+            <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type ?? 'unknown' }</a>
           </div>
           {
             lastAction?.steps && Object.keys(lastAction.steps).length
@@ -151,7 +151,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
             <Label>{ lastChange?.description ?? 'No description' }</Label>
           </div>
           <div>
-            <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type }</a>
+            <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type ?? 'unknown' }</a>
           </div>
           {
             lastChange?.steps && Object.keys(lastChange.steps).length

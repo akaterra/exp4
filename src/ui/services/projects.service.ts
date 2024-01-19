@@ -74,7 +74,7 @@ export class ProjectsService {
 
         const search = stream._search = new Set<string>();
 
-        for (const artifact of stream.history.artifact ?? []) {
+        for (const artifact of stream.history?.artifact ?? []) {
           artifact._search = new Set<string>();
 
           for (const token of splitFilterTokens(artifact.id)) {
