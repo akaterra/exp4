@@ -16,7 +16,7 @@ export class TargetsService {
 
   async getState(target: IProjectTargetDef) {
     const key = `${target.ref.projectId}:${target.id}`;
-    const entity = await this.cache.get(key) ?? { id: target.id, type: null };
+    const entity = await this.cache.get(key) ?? new TargetState({ id: target.id, type: null });
 
     if (entity) {
       entity.version = await this.getVersioningsService(target).getCurrent(

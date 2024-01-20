@@ -5,14 +5,16 @@ export class TargetState {
   id: string;
   type: string;
 
-  isSyncing?: boolean;
   streams?: Record<IProjectTargetStreamDef['id'], StreamState>;
   version?: string;
+
+  get isSyncing(): boolean {
+    return Object.values(this.streams).some((stream) => stream.isSyncing);
+  }
 
   constructor(props: Partial<TargetState>) {
     Reflect.setPrototypeOf(props, TargetState.prototype);
 
-    props.isSyncing = props.isSyncing ?? false;
     props.streams = props.streams ?? {};
 
     return props as TargetState;

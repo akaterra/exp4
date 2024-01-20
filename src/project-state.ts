@@ -13,15 +13,7 @@ export class ProjectState {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   get isSyncing(): boolean {
-    for (const target of Object.values(this.targets)) {
-      for (const stream of Object.values(target.streams)) {
-        if (stream.isSyncing) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return Object.values(this.targets).some((target) => target.isSyncing);
   }
 
   constructor(

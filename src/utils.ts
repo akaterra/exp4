@@ -83,13 +83,16 @@ export class AwaitableContainer {
     while ((bucket.awaitablesNextId ?? 0) < bucket.awaitables.length) {
       for (let i = bucket.awaitablesNextId ?? 0, l = bucket.awaitables.length; i < l; i += this.max) {
         let promises = null;
+        let j = -1;
 
         for (const awaitable of bucket.awaitables.slice(i, i + this.max)) {
-          if (bucket.awaitables[i] === null) {
+          j += 1;
+
+          if (awaitable === null) {
             continue;
           }
 
-          bucket.awaitables[i] = null;
+          bucket.awaitables[i + j] = null;
 
           if (!promises) {
             promises = [];

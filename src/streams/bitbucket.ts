@@ -254,10 +254,10 @@ export class BitbucketStreamService extends EntityService implements IStreamServ
 
   @Log('debug')
   async targetGetState(config: IProjectTargetDef): Promise<TargetState> {
-    return {
+    return new TargetState({
       id: config.id,
       type: null,
-    };
+    });
   }
 
   private getArtifactsService(stream: IBitbucketTargetStream) {

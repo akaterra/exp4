@@ -116,7 +116,7 @@ export class ProjectsService extends EntitiesService<Project> {
         const context = {
           ver: Date.now(),
         };
-        const streamContainer = new AwaitableContainer(1);
+        const streamContainer = new AwaitableContainer(2);
 
         let syncEntries;
 
@@ -141,50 +141,6 @@ export class ProjectsService extends EntitiesService<Project> {
     }
 
     return projectState;
-
-    // return this.statesCache.set(projectId, (async () => {
-    //   const targetContainer = new AwaitableContainer(1);
-  
-    //   for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
-    //     const target = project.getTargetByTargetId(tId);
-  
-    //     await targetContainer.push(async () => {
-    //       const context = {
-    //         ver: Date.now(),
-    //       };
-
-    //       projectState.setTarget(tId, {
-    //         isSyncing: true,
-    //         version: await project.env.versionings.getByTarget(target).getCurrent(target),
-    //       })
-  
-    //       const streamContainer = new AwaitableContainer(1);
-    //       const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
-    //         ? targetStreams[tId] === true
-    //           ? Object.keys(target.streams)
-    //           : targetStreams[tId] as IProjectTargetStreamDef['id'][]
-    //         : scopes
-    //           ? Object.keys(target.streams)
-    //           : projectState.getDirtyTargetStreamIds(tId);
-
-    //       for (const sId of streamIds) {
-    //         const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
-
-    //         if (stream) {
-    //           await streamContainer.push(async () => {
-    //             projectState.setTargetStream(tId, await this.streamGetState(stream, scopes, context));
-    //           });
-    //         }
-    //       }
-
-    //       await streamContainer.wait();
-    //     });
-    //   }
-  
-    //   await targetContainer.wait();
-  
-    //   return projectState;
-    // })(), 3600, true);
   }
 
   async runStatesResync() {

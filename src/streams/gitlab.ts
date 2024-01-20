@@ -253,10 +253,10 @@ export class GitlabStreamService extends EntityService implements IStreamService
 
   @Log('debug')
   async targetGetState(config: IProjectTargetDef): Promise<TargetState> {
-    return {
+    return new TargetState({
       id: config.id,
       type: null,
-    };
+    });
   }
 
   private getArtifactsService(stream: IGitlabTargetStream) {

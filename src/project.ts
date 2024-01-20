@@ -66,26 +66,6 @@ export interface IProjectFlowActionStep<C extends Record<string, unknown>, T ext
 
 export type IProjectFlowActionStepDef = IProjectFlowActionStep<Record<string, unknown>>;
 
-// export interface IProjectFlowAction<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<unknown, T> {
-//   isDirty?: boolean;
-
-//   streams?: IProjectTargetStreamDef['id'][];
-//   steps?: IProjectFlowActionStep<C>[];
-//   params?: Record<string, IProjectFlowActionParam>;
-//   targets?: IProjectTargetDef['id'][];
-// }
-
-// export type IProjectFlowActionDef = IProjectFlowAction<Record<string, unknown>>;
-
-// export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
-//   isDirty?: boolean;
-
-//   actions: Record<string, IProjectFlowAction<C>>;
-//   targets: IProjectTargetDef['id'][];
-// }
-
-// export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
-
 export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
 
