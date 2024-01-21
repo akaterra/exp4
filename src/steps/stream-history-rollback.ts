@@ -4,7 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { makeDirty } from './utils';
+import { makeDirty, notEmptyArray } from './utils';
 
 @Service()
 export class StreamHistoryRollbackStepService extends EntityService implements IStepService {
@@ -19,6 +19,9 @@ export class StreamHistoryRollbackStepService extends EntityService implements I
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
+    const sourceTargetIds: IProjectTargetDef['id'][] = targetsStreams
+      ? Object.keys(targetsStreams)
+      : notEmptyArray(step.targets, project.getFlowByFlowId(flow.ref.flowId).targets);
 
     for (const tIdOfTarget of step.targets) {
       const target = project.getTargetByTargetId(tIdOfTarget);

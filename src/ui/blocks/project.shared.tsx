@@ -19,7 +19,7 @@ export const ProjectTargetStreamTitle = ({ stream, streamState }: { projectTarge
       streamState.isSyncing
         ? <React.Fragment>
           &nbsp;
-          <span className='span default font-sml sup'><i className='fa-solid fa-hourglass-start' /></span>
+          <span className='span default font-sml sup'><i className='smaller fa-solid fa-hourglass-start' /></span>
         </React.Fragment>
         : null
     }

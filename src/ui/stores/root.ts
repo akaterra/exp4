@@ -44,7 +44,7 @@ export class RootStore {
         this.projectsStore.fetch();
         this.statisticsStore.fetch();
       }
-    }.bind(this), 30000);
+    }.bind(this), 10000);
   }
 
   setRouter(router: Router) {

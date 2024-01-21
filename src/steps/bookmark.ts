@@ -4,7 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { makeDirty } from './utils';
+import { makeDirty, notEmptyArray } from './utils';
 
 @Service()
 export class BookmarkStepService extends EntityService implements IStepService {
@@ -21,30 +21,27 @@ export class BookmarkStepService extends EntityService implements IStepService {
     const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = targetsStreams
       ? Object.keys(targetsStreams)
-      : project.getFlowByFlowId(flow.ref.flowId).targets;
+      : notEmptyArray(step.targets, project.getFlowByFlowId(flow.ref.flowId).targets);
 
-    for (const tIdOfSource of sourceTargetIds) {
-      for (const tIdOfTarget of step.targets) {
-        const source = project.getTargetByTargetId(tIdOfSource);
-        const target = project.getTargetByTargetId(tIdOfTarget);
-        const streamIds = targetsStreams?.[tIdOfSource] === true
-          ? Object.keys(target.streams)
-          : targetsStreams?.[tIdOfSource] as string[] ?? Object.keys(target.streams);
+    for (const tIdOfTarget of sourceTargetIds) {
+      const target = project.getTargetByTargetId(tIdOfTarget);
+      const streamIds = targetsStreams?.[tIdOfTarget] === true
+        ? Object.keys(target.streams)
+        : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
-        for (const streamId of streamIds) {
-          const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId, true);
+      for (const streamId of streamIds) {
+        const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId, true);
 
-          if (targetStream) {
-            await project.getEnvStreamByTargetStream(targetStream).streamBookmark(
-              targetStream,
-            );
+        if (targetStream) {
+          await project.getEnvStreamByTargetStream(targetStream).streamBookmark(
+            targetStream,
+          );
 
-            makeDirty(targetStream);
-          }
+          makeDirty(targetStream);
         }
-
-        makeDirty(source, target);
       }
+
+      makeDirty(target);
     }
   }
 }

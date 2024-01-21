@@ -30,7 +30,7 @@ export class ProjectsService {
   }
 
   async listState(projectId: IProject['id'], filter?: {
-    targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
+    targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'] | IProjectTargetStream['id'][] | boolean>,
     scopes?: string[],
   }): Promise<IProjectState> {
     const res: IProjectState = await this.rest.post(`projects/${projectId}/state`, filter);

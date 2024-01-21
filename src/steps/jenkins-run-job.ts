@@ -36,8 +36,11 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const projectState = await this.projectsService.getState(flow.ref.projectId);
+    const sourceTargetIds = targetsStreams
+      ? Object.keys(targetsStreams)
+      : notEmptyArray(step.targets, project.getFlowByFlowId(flow.ref.flowId).targets);
 
-    for (const tIdOfTarget of notEmptyArray(step.targets, flow.targets)) {
+    for (const tIdOfTarget of sourceTargetIds) {
       const target = project.getTargetByTargetId(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)

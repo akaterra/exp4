@@ -61,7 +61,7 @@ export class GithubStreamService extends EntityService implements IStreamService
     const integration = this.getIntegrationService(stream);
 
     await integration.tagCreate(
-      source?.history?.change?.[0]?.id,
+      source.history.change[0].id,
       source.version,
       null,
       stream?.config?.repo ?? stream?.id,

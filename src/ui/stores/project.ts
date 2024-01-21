@@ -244,7 +244,7 @@ export class ProjectTargetStore extends BaseStore {
   }
 
   @flow
-  *fetchState(streamIds: IProjectTargetStream['id'][] | true) {
+  *fetchState(streamIds: IProjectTargetStream['id'] | IProjectTargetStream['id'][] | true) {
     yield this.projectStore.fetchState(
       {
         [this.target.id]: streamIds,
@@ -436,7 +436,7 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *fetchState(
-    targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'][] | boolean>,
+    targetId?: IProjectTarget['id'][] | Record<IProjectTarget['id'], IProjectTargetStream['id'] | IProjectTargetStream['id'][] | boolean>,
     scopes?: string[],
   ) {
     const res: IProjectState = yield this.projectsStore.service.listState(

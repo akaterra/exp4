@@ -85,8 +85,12 @@ export class ProjectsService extends EntitiesService<Project> {
         }
 
         for (const tId of replaceDirtyTargetIds) {
+          const replaceDirtyTargetStreamIds = projectState.getDirtyTargetStreamIds(tId);
+
           if (!targetStreams[tId]) {
-            targetStreams[tId] = true;
+            targetStreams[tId] = replaceDirtyTargetStreamIds;
+          } else if (Array.isArray(targetStreams[tId])) {
+            targetStreams[tId] = [ ...new Set((targetStreams[tId] as string[]).concat(replaceDirtyTargetStreamIds)) ];
           }
         }
       }
