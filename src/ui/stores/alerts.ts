@@ -4,6 +4,7 @@ import { BaseStore } from './base-store';
 
 export class AlertsStore extends BaseStore {
   @observable alerts: {
+    id?: unknown;
     message: React.Component | React.FunctionComponent | { level: string, value: string } | string;
     timestamp: number;
   }[] = [];
@@ -34,11 +35,18 @@ export class AlertsStore extends BaseStore {
   }
 
   dispose(): void {
+    this.alerts = [];
+
     clearInterval(this.cleanAlertsTimer);
   }
 
-  push(message: React.Component | React.FunctionComponent | { level: string, value: string } | string) {
+  push(message: React.Component | React.FunctionComponent | { level: string, value: string } | string, id?: unknown) {
+    if (id && this.alerts.some((alert) => alert.id === id)) {
+      return;
+    }
+
     this.alerts.push({
+      id,
       message,
       timestamp: Date.now(),
     });

@@ -128,6 +128,8 @@ export class ProjectsService extends EntitiesService<Project> {
           syncEntries = projectState.popTargetSync(100);
 
           for (const [ tId, streamIds, scopes ] of syncEntries) {
+            projectState.setTarget(tId, await this.targetGetState(projectId, tId));
+
             for (const sId of streamIds) {
               const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
 

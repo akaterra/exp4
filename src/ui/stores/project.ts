@@ -32,22 +32,6 @@ export class ProjectTargetStore extends BaseStore {
           flow,
           streamIds: null,
         });
-
-        // for (const action of Object.values(flow.actions)) {
-        //   if (action.streams && Object.keys(this.selectedProjectTargetStreamIds).length) {
-        //     flows.push({
-        //       flow: action,
-        //       streamIds: action.streams.filter((actionStreamId) => this.selectedProjectTargetStreamIds[actionStreamId]),
-        //     });
-
-        //     continue;
-        //   }
-
-        //   flows.push({
-        //     flow: action,
-        //     streamIds: action.streams ?? null,
-        //   });
-        // }
       }
 
       return flows;
@@ -70,22 +54,6 @@ export class ProjectTargetStore extends BaseStore {
           flow,
           streamIds: [ streamId ],
         });
-
-        // for (const action of Object.values(flow.actions)) {
-        //   if (action.streams) {
-        //     flows.push({
-        //       flow: action,
-        //       streamIds: action.streams.filter((actionStreamId) => actionStreamId === streamId),
-        //     });
-
-        //     continue;
-        //   }
-
-        //   flows.push({
-        //     flow: action,
-        //     streamIds: action.streams ?? null,
-        //   });
-        // }
       }
 
       return flows;
@@ -340,7 +308,7 @@ export class ProjectTargetStore extends BaseStore {
     alertsStore.push({ level: 'success', value: 'Copied' });
   }
 
-  @flow
+  @flow @processing
   *applyRunFlow(streamId: IProjectTargetStream['id'] | null, flowId: IProjectFlow['id']) {
     let selectedStreamIds: string[];
 

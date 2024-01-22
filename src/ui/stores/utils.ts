@@ -115,9 +115,9 @@ export function processing(target, prop, descriptor) {
         }
       }
     } catch (e) {
-      if (isProcessingCount <= 1) {
-        alertsStore.push(e?.message ?? e);
-      }
+      // if (isProcessingCount <= 1) {
+        alertsStore.push(e?.message ?? e, e?.id ?? e);
+      // }
 
       throw e;
     } finally {

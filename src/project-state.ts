@@ -56,7 +56,9 @@ export class ProjectState {
         oldTarget[key] = target[key];
       }
     } else {
-      this.targets[targetId] = new TargetState(target);
+      this.targets[targetId] = target instanceof TargetState
+        ? target
+        : new TargetState(target);
     }
 
     return this;
@@ -70,7 +72,9 @@ export class ProjectState {
         oldTargetStream[key] = stream[key];
       }
     } else {
-      this.targets[targetId].streams[stream.id] = new StreamState(stream);
+      this.targets[targetId].streams[stream.id] = stream instanceof StreamState
+        ? stream
+        : new StreamState(stream);
     }
 
     return this;
