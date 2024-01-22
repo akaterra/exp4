@@ -24,7 +24,7 @@ export class TargetsService {
       );
     }
 
-    this.cache.set(key, entity, 60);
+    this.cache.set(key, entity);
 
     return entity;
   }
