@@ -52,7 +52,14 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async userGet(id: string): Promise<IUser> {
+  async userGet(filter: Record<string, unknown>): Promise<IUser> {
+    const qb = (await this.getTableUsers()).qb;
+
+    return (await qb.where(filter).first()) ?? null;
+  }
+
+  @Log('debug')
+  async userGetById(id: string): Promise<IUser> {
     const qb = (await this.getTableUsers()).qb;
 
     return (await qb.where({ key: id }).first()) ?? null;

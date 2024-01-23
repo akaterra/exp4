@@ -43,8 +43,6 @@ export class PublicRestApiService {
       }
 
       return res.json().then((res) => Promise.reject(res));
-    }).catch((err) => {
-      Promise.reject(err);
     });
   }
 

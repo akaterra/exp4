@@ -154,18 +154,25 @@ export class ProjectsService extends EntitiesService<Project> {
     let resynced;
 
     for (const project of Object.values(this.entities)) {
-      if (
-        project.resync?.intervalSeconds &&
-        now.diff(project.resync?.at ?? '1970-01-01', 'seconds') < project.resync?.intervalSeconds
-      ) {
+      const secondsLeftToResync = project.resync?.intervalSeconds
+        ? project.resync?.intervalSeconds - now.diff(project.resync?.at ?? '1970-01-01', 'seconds')
+        : 0;
+
+      logger.info({
+        message: 'ProjectsService.runStatesResync',
+        projectId: project.id,
+        secondsLeftToResync: secondsLeftToResync > 0 ? secondsLeftToResync : 0,
+      })
+
+      if (secondsLeftToResync > 0) {
         continue;
       }
 
       try {
-        await this.getState(project.id, null, { '*': true });
-
         project.resync.at = now.toDate();
         resynced = true;
+
+        await this.getState(project.id, null, { '*': true });
 
         this.statisticsService.inc(`projects.${project.id}.statesResyncCount`);
         this.statisticsService.set(`projects.${project.id}.statesResyncAt`, now.toDate());

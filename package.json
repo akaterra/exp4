@@ -4,7 +4,8 @@
     "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/typescript/bin/tsc && node ./dist/src/index.js\"",
     "dev:fe": "npx webpack serve",
     "doc": "npx docsify serve docs",
-    "lint": "npx eslint ./src/* --ext=.tsx,.ts --fix"
+    "lint": "npx eslint ./src/* --ext=.tsx,.ts --fix",
+    "test": "npx jest"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -45,6 +46,7 @@
     "yaml": "^2.3.1"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.11",
     "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "copy-webpack-plugin": "^10.2.4",
@@ -66,8 +68,9 @@
     "react-dom": "^18.2.0",
     "style-loader": "^3.3.1",
     "theme-ui": "^0.16.1",
+    "ts-jest": "^29.1.2",
     "ts-loader": "9.2.6",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6",
     "url-loader": "^4.1.1",
     "webpack": "5.69.0",

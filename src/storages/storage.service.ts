@@ -6,7 +6,9 @@ import { IUser } from '../user';
 export interface IStorageService extends IService {
   manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>>;
 
-  userGet(id: string, type: string): Promise<IUser>;
+  userGet(filter: Record<string, unknown>): Promise<IUser>;
+
+  userGetById(id: string, type: string): Promise<IUser>;
 
   userSet(id: string, type: string, data: Record<string, unknown>): Promise<void>;
 

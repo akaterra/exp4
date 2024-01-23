@@ -14,7 +14,6 @@ export class StreamHistoryRollbackStepService extends EntityService implements I
 
   async run(
     flow: IProjectFlowDef,
-    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStepDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {

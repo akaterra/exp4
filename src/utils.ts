@@ -148,7 +148,7 @@ export function loadModules(path, symbolPostfix?) {
 
   return Promise.all(
     files
-      .filter((file) => !file.isDirectory() && file.name.slice(-3) === '.js')
+      .filter((file) => !file.isDirectory() && file.name.slice(-3) === '.js' && file.name.slice(-8) !== '.spec.js')
       .map((file) => import(`${path}/${file.name}`))
   ).then((modules) => {
     return modules

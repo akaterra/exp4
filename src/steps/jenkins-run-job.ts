@@ -29,7 +29,6 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
   @Log('debug')
   async run(
     flow: IProjectFlowDef,
-    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStep<IJenkinsJobRunStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
     params?: Record<string, any>,

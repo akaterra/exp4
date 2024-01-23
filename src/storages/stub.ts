@@ -21,6 +21,11 @@ export class StubStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
+  async userGetById(): Promise<IUser> {
+    return null;
+  }
+
+  @Log('debug')
   async userSet(): Promise<void> {
 
   }

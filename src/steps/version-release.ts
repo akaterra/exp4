@@ -14,7 +14,6 @@ export class VersionReleaseStepService extends EntityService implements IStepSer
 
   async run(
     flow: IProjectFlowDef,
-    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStepDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
     params?: Record<string, any>,

@@ -13,7 +13,6 @@ export class RunActionStepService extends EntityService implements IStepService 
 
   async run(
     flow: IProjectFlowDef,
-    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStepDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {

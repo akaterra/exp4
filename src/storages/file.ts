@@ -88,13 +88,22 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async userGet(id: string): Promise<IUser> {
+  async userGet(filter: Record<string, unknown>): Promise<IUser> {
+    return Object.values(await this.getJson('users') ?? {}).find((entity) => {
+      return Object.entries(filter).every(([ key, val ]) => {
+        return val === entity[key];
+      });
+    }) ?? null;
+  }
+
+  @Log('debug')
+  async userGetById(id: string): Promise<IUser> {
     return (await this.getJson('users'))?.[id] ?? null;
   }
 
   @Log('debug')
   async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
-    const user = await this.userGet(id) ?? {};
+    const user = await this.userGetById(id) ?? {};
     user[id] = { ...data, id, type };
     
     await this.putJson('users', user);
@@ -251,11 +260,11 @@ export class FileStorageService extends EntityService implements IStorageService
     return path.resolve(this.config?.dir ?? './projects', `${file}.json`);
   }
 
-  protected getJson(file: string): Promise<any> {
+  protected getJson<T = unknown>(file: string): Promise<T> {
     return fs.readFile(this.getJsonPath(file), 'utf8').then(JSON.parse).catch(() => null);
   }
 
-  protected putJson(file: string, json: any): Promise<any> {
+  protected putJson(file: string, json: any): Promise<unknown> {
     return fs.writeFile(this.getJsonPath(file), JSON.stringify(json), 'utf8');
   }
 }

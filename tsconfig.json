@@ -14,7 +14,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowJs": true,
-    "types": ["reflect-metadata", "node"],
+    "types": ["reflect-metadata", "node", "jest"],
     "useDefineForClassFields": false,
     "jsx": "react-jsx"
   },

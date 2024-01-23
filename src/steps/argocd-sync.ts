@@ -25,7 +25,6 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
   @Log('debug')
   async run(
     flow: IProjectFlowDef,
-    // action: IProjectFlowActionDef,
     step: IProjectFlowActionStep<IArgocdSyncStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {

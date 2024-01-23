@@ -75,14 +75,27 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
     }));
 
     app.post(path + '/acs', err(async (req, res) => {
-      const authData = await this.client.assert(req.body);
-      const user = {
-        id: String(authData.id),
+      const saml2AuthData = await this.client.assert(req.body);
+      const saml2User = {
+        id: String(saml2AuthData.id),
         type: this.type,
 
         // name: authData.name,
-        email: authData.email,
+        email: saml2AuthData.email,
       }
+
+      const user = this.config?.storage
+        ? await this.storage.userGetById(String(saml2User.id), this.type)
+          ?? (saml2User.email && await this.storage.userGet({ email: saml2User.email, type: this.type }))
+          ?? null
+        : saml2User;
+
+      if (this.config?.storage && !user) {
+        res.status(401);
+  
+        throw new Error('User not found');
+      }
+
       const ott = generateOneTimeToken(user);
 
       res.redirect(`${this.config?.urls?.callbackUrl ?? `${process.env.DOMAIN || 'http://localhost:9002'}/auth/${this.id}/callback`}?code=${ott}`);

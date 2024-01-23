@@ -84,7 +84,7 @@ export class ProjectTargetStore extends BaseStore {
               continue;
             }
           } else {
-            if (!streamState?.history?.action?.length) {
+            if (!streamState?.history?.action?.length && !streamState?.history?.change?.length) {
               continue;
             }
           }
@@ -150,7 +150,7 @@ export class ProjectTargetStore extends BaseStore {
               continue;
             }
           } else {
-            if (!streamState?.history?.action?.length) {
+            if (!streamState?.history?.action?.length && !streamState?.history?.change?.length) {
               continue;
             }
           }

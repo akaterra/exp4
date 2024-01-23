@@ -97,12 +97,23 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
         githubAuth.access_token,
       );
 
-      const user = await this.storage.userGet(String(githubUser.id), this.type);
+      const user = this.config?.storage
+        ? await this.storage.userGetById(String(githubUser.id), this.type)
+          ?? (githubUser.email && await this.storage.userGet({ email: githubUser.email, type: this.type }))
+          ?? (githubUser.login && await this.storage.userGet({ login: githubUser.login, type: this.type }))
+          ?? null
+        : {
+          id: String(githubUser.id),
+          type: this.type,
+  
+          // name: authData.name,
+          email: githubUser.email,
+        };
 
-      if (!user) {
+      if (this.config?.storage && !user) {
         res.status(401);
 
-        throw new Error('Unauthorized');
+        throw new Error('User not found');
       }
 
       execAuthSendData(req, res, prepareAuthData(user));

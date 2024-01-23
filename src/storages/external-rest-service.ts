@@ -40,7 +40,12 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async userGet(id: string, type: string): Promise<IUser> {
+  async userGet(filter: Record<string, unknown>): Promise<IUser> {
+    return request(this.getUrl('user'), filter);
+  }
+
+  @Log('debug')
+  async userGetById(id: string, type: string): Promise<IUser> {
     return request(this.getUrl('user'), { id, type });
   }
 

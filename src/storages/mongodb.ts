@@ -46,7 +46,14 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   }
 
   @Log('debug')
-  async userGet(id: string): Promise<IUser> {
+  async userGet(filter: Record<string, unknown>): Promise<IUser> {
+    const collection = await this.getCollectionUsers();
+
+    return (await collection.findOne(filter)).toObject() ?? null;
+  }
+
+  @Log('debug')
+  async userGetById(id: string): Promise<IUser> {
     const collection = await this.getCollectionUsers();
 
     return (await collection.findOne({ key: id })).toObject() ?? null;
