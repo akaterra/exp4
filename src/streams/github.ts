@@ -4,12 +4,13 @@ import { IStreamStateContext, StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
-import { hasScope, hasStrictScope } from '../utils';
+import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
 import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
 import moment from 'moment-timezone';
+import {ProjectsService} from '../projects.service';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
@@ -37,6 +38,8 @@ export type IGithubStream = StreamState<{
 @Service()
 export class GithubStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'github';
+
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   protected cache = new AwaitedCache<StreamState>();
 

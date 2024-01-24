@@ -110,7 +110,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
+  async varGetTarget<D>(target: Pick<IProjectTargetDef, 'id'>, key: string | string[], def: D = null): Promise<D> {
     const intKey = FileStorageService.getKeyOfType(key, target.id, 'target');
     const cacheKey = `${intKey}:target`;
     
@@ -122,7 +122,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
+  async varSetTarget<D>(target: Pick<IProjectTargetDef, 'id'>, key: string | string[], val: D = null): Promise<void> {
     const intKey = FileStorageService.getKeyOfType(key, target.id, 'target');
 
     await this.putJson(intKey, val);
@@ -132,7 +132,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async varAddTarget<D>(
-    target: IProjectTargetDef,
+    target: Pick<IProjectTargetDef, 'id'>,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
@@ -168,7 +168,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varIncTarget(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
+  async varIncTarget(target: Pick<IProjectTargetDef, 'id'>, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetTarget(target, key, '0'));
 
     await this.varSetTarget(target, key, typeof intVal === 'number' ? intVal + add : add);
@@ -176,7 +176,7 @@ export class FileStorageService extends EntityService implements IStorageService
     return intVal;
   }
 
-  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
+  async varGetStream<D>(stream: Pick<IProjectTargetStreamDef, 'id'>, key: string | string[], def: D = null): Promise<D> {
     const intKey = FileStorageService.getKeyOfType(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
@@ -188,7 +188,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
+  async varSetStream<D>(stream: Pick<IProjectTargetStreamDef, 'id'>, key: string | string[], val: D = null): Promise<void> {
     const intKey = FileStorageService.getKeyOfType(key, stream.id);
 
     await this.putJson(intKey, val);
@@ -198,7 +198,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async varAddStream<D>(
-    stream: IProjectTargetStreamDef,
+    stream: Pick<IProjectTargetStreamDef, 'id'>,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
@@ -234,7 +234,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number> {
+  async varIncStream(stream: Pick<IProjectTargetStreamDef, 'id'>, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetStream(stream, key, '0'));
 
     await this.varSetStream(stream, key, typeof intVal === 'number' ? intVal + add : add);

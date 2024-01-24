@@ -4,11 +4,12 @@ import { StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
-import { hasScope, hasStrictScope } from '../utils';
+import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
 import { BitbucketIntegrationService } from '../integrations/bitbucket';
+import {ProjectsService} from '../projects.service';
 
 // const JOB_CONSLUSION_TO_STATUS_MAP = {
 //   failure: Status.FAILED,
@@ -34,6 +35,8 @@ export type IBitbucketStream = StreamState<{
 @Service()
 export class BitbucketStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'bitbucket';
+
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   protected cache = new AwaitedCache<StreamState>();
 

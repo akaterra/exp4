@@ -4,10 +4,11 @@ import { StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
-import { hasScope, hasStrictScope } from '../utils';
+import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitIntegrationService } from '../integrations/git';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
+import {ProjectsService} from '../projects.service';
 
 export type IGitTargetStream = IProjectTargetStream<{
   integration?: string;
@@ -22,6 +23,8 @@ export type IGitStream = StreamState<{
 @Service()
 export class GitStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'git';
+
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   protected cache = new AwaitedCache<StreamState>();
 

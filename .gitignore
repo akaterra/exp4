@@ -7,4 +7,6 @@ dist/*
 node_modules/
 saml2/*
 !saml2/.gitignore
+tests/*
+!tests/.gitignore
 .env.local

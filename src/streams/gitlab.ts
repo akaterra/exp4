@@ -4,10 +4,11 @@ import { StreamState } from '../stream';
 import { Service } from 'typedi';
 import { TargetState } from '../target';
 import { EntityService } from '../entities.service';
-import { hasScope, hasStrictScope } from '../utils';
+import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
+import {ProjectsService} from '../projects.service';
 
 // const JOB_CONSLUSION_TO_STATUS_MAP = {
 //   failure: Status.FAILED,
@@ -33,6 +34,8 @@ export type IGitlabStream = StreamState<{
 @Service()
 export class GitlabStreamService extends EntityService implements IStreamService {
   static readonly type: string = 'gitlab';
+
+  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   protected cache = new AwaitedCache<StreamState>();
 

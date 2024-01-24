@@ -15,8 +15,6 @@ export class EntityService {
   static readonly assertType: string = null;
   static readonly type: string = 'unknown';
 
-  @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
-
   id: string;
 
   title: string;
