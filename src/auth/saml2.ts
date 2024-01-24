@@ -85,7 +85,7 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
       }
 
       const user = this.config?.storage
-        ? await this.storage.userGetById(String(saml2User.id), this.type)
+        ? await this.storage.userGetByKeyAndType(String(saml2User.id), this.type)
           ?? (saml2User.email && await this.storage.userGet({ email: saml2User.email, type: this.type }))
           ?? null
         : saml2User;

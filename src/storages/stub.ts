@@ -21,12 +21,12 @@ export class StubStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async userGetById(): Promise<IUser> {
+  async userGetByKeyAndType(): Promise<IUser> {
     return null;
   }
 
   @Log('debug')
-  async userSet(): Promise<void> {
+  async userSetByKeyAndType(): Promise<void> {
 
   }
 
@@ -67,5 +67,9 @@ export class StubStorageService extends EntityService implements IStorageService
   @Log('debug')
   async varIncStream(): Promise<number> {
     return null;
+  }
+
+  async truncateAll(): Promise<void> {
+
   }
 }

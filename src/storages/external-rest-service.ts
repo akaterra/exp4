@@ -45,13 +45,13 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   @Log('debug')
-  async userGetById(id: string, type: string): Promise<IUser> {
-    return request(this.getUrl('user'), { id, type });
+  async userGetByKeyAndType(key: string, type: string): Promise<IUser> {
+    return request(this.getUrl('user'), { key, type });
   }
 
   @Log('debug')
-  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
-    await request(this.getUrl('user'), { ...data, id, type }, 'post');
+  async userSetByKeyAndType(key: string, type: string, data: Record<string, unknown>): Promise<void> {
+    await request(this.getUrl('user'), { ...data, key, type }, 'post');
   }
 
   @Log('debug')
@@ -209,6 +209,12 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     await this.varSetStream(stream, key, typeof intVal === 'number' ? intVal + add : add);
 
     return intVal;
+  }
+
+  async truncateAll(): Promise<void> {
+    await rest.withHeaders(this.config?.headers).delete(
+      this.getUrl('all'),
+    );
   }
 
   protected static getKey(key: string | string[]): string {

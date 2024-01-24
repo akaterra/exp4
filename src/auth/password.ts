@@ -56,7 +56,7 @@ export class PasswordAuthStrategyService extends EntityService implements IAuthS
     }));
 
     app.post(path + '/callback', err(async (req, res) => {
-      const user = await this.storage.userGetById(String(req.body.username), this.type);
+      const user = await this.storage.userGetByKeyAndType(String(req.body.username), this.type);
 
       if (!user || !await this.comparePassword(req.body.password, user.password)) {
         res.status(401);

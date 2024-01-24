@@ -48,31 +48,29 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   @Log('debug')
   async userGet(filter: Record<string, unknown>): Promise<IUser> {
     const collection = await this.getCollectionUsers();
+    const doc = await collection.findOne(filter);
 
-    return (await collection.findOne(filter)).toObject() ?? null;
+    return doc?.toObject ? doc.toObject() : (doc ?? null);
   }
 
   @Log('debug')
-  async userGetById(id: string): Promise<IUser> {
+  async userGetByKeyAndType(key: string, type: string): Promise<IUser> {
     const collection = await this.getCollectionUsers();
+    const doc = await collection.findOne({ key, type });
 
-    return (await collection.findOne({ key: id })).toObject() ?? null;
+    return doc?.toObject ? doc.toObject() : (doc ?? null);
   }
 
   @Log('debug')
-  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+  async userSetByKeyAndType(key: string, type: string, data: Record<string, unknown>): Promise<void> {
     const collection = await this.getCollectionUsers();
 
-    await collection.updateOne({
-      key: id,
-    }, {
+    await collection.updateOne({ key, type }, {
       $set: {
         ...data,
-        key: id,
+        type,
       },
-    }, {
-      upsert: true,
-    });
+    }, { upsert: true });
   }
 
   @Log('debug')
@@ -214,6 +212,11 @@ export class MongodbStorageService extends EntityService implements IStorageServ
     return intVal;
   }
 
+  async truncateAll(): Promise<void> {
+    await (await this.getCollectionUsers()).deleteMany();
+    await (await this.getCollectionVars()).deleteMany();
+  }
+
   protected static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
@@ -240,7 +243,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   protected async getCollectionUsers() {
     await this.getClient();
 
-    return this.db.collection(this.config?.collectionVarsName ?? 'storageUsers');
+    return this.db.collection(this.config?.collectionUsersName ?? 'storageUsers');
   }
 
   protected async getCollectionVars() {
@@ -256,7 +259,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
     const db = client.db();
 
     if (initCollection) {
-      await db.collection(this.config?.collectionVarsName ?? 'storage').createIndex({
+      await db.collection(this.config?.collectionVarsName ?? 'storageVars').createIndex({
         key: 1,
         type: 1,
       }, {

@@ -59,14 +59,14 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async userGetById(id: string): Promise<IUser> {
+  async userGetByKeyAndType(key: string, type: string): Promise<IUser> {
     const qb = (await this.getTableUsers()).qb;
 
-    return (await qb.where({ key: id }).first()) ?? null;
+    return (await qb.where({ key, type }).first()) ?? null;
   }
 
   @Log('debug')
-  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
+  async userSetByKeyAndType(key: string, type: string, data: Record<string, unknown>): Promise<void> {
     const qb = (await this.getTableUsers()).qb;
 
     await qb.insert({
@@ -75,7 +75,8 @@ export class SqlStorageService extends EntityService implements IStorageService 
           ? JSON.stringify(val)
           : val;
       }),
-      key: id,
+      key,
+      type,
     })
       .onConflict([ 'key', 'type' ])
       .merge(Object.keys(data));
@@ -224,6 +225,11 @@ export class SqlStorageService extends EntityService implements IStorageService 
     return intVal;
   }
 
+  async truncateAll(): Promise<void> {
+    await (await this.getTableUsers()).qb.delete();
+    await (await this.getTableVars()).qb.delete();
+  }
+
   protected static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
@@ -259,9 +265,12 @@ export class SqlStorageService extends EntityService implements IStorageService 
       if (!await client.schema.hasTable(this.config?.tableNameUsers ?? 'storageUsers')) {
         await client.schema.createTableIfNotExists(this.config?.tableNameUsers ?? 'storageUsers', (table) => {
           table.string('key', 100).notNullable();
+          table.string('type', 100).notNullable();
+          table.string('ownerKey', 50);
           table.string('name', 50).notNullable();
           table.string('email', 50);
-          table.unique([ 'key' ]);
+          table.jsonb('permissions').defaultTo('{}');
+          table.unique([ 'key', 'type' ]);
         });
       }
 

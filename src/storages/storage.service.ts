@@ -8,9 +8,9 @@ export interface IStorageService extends IService {
 
   userGet(filter: Record<string, unknown>): Promise<IUser>;
 
-  userGetById(id: string, type: string): Promise<IUser>;
+  userGetByKeyAndType(id: string, type: string): Promise<IUser>;
 
-  userSet(id: string, type: string, data: Record<string, unknown>): Promise<void>;
+  userSetByKeyAndType(id: string, type: string, data: Record<string, unknown>): Promise<void>;
 
   varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
 
@@ -39,4 +39,6 @@ export interface IStorageService extends IService {
   ): Promise<D>;
 
   varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number>;
+
+  truncateAll(): Promise<void>;
 }

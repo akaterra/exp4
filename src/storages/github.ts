@@ -39,7 +39,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async userGetById(id: string): Promise<IUser> {
+  async userGetByKeyAndType(id: string): Promise<IUser> {
     const member = (await this.integration.orgMembersList()).find((member) => String(member.id) === id);
 
     if (member) {
@@ -60,7 +60,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async userSet(): Promise<void> {
+  async userSetByKeyAndType(): Promise<void> {
     throw new Error('Not supported');
   }
 
@@ -229,6 +229,10 @@ export class GithubStorageService extends EntityService implements IStorageServi
     await this.varSetStream(stream, key, typeof intVal === 'number' ? intVal + add : add);
 
     return intVal;
+  }
+
+  async truncateAll(): Promise<void> {
+    throw 'Not supported';
   }
 
   protected static getKey(key: string | string[]): string {

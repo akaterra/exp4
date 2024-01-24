@@ -5,7 +5,7 @@ import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '..
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import fs, { readFile, readdir } from 'node:fs/promises';
+import fs, { readFile, readdir, stat, unlink } from 'node:fs/promises';
 import path from 'path';
 import { IGeneralManifest } from '../general';
 import { lstat } from 'node:fs/promises';
@@ -97,14 +97,14 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async userGetById(id: string): Promise<IUser> {
-    return (await this.getJson('users'))?.[id] ?? null;
+  async userGetByKeyAndType(key: string, type: string): Promise<IUser> {
+    return (await this.getJson('users'))?.[`${key}:${type}`] ?? null;
   }
 
   @Log('debug')
-  async userSet(id: string, type: string, data: Record<string, unknown>): Promise<void> {
-    const user = await this.userGetById(id) ?? {};
-    user[id] = { ...data, id, type };
+  async userSetByKeyAndType(key: string, type: string, data: Record<string, unknown>): Promise<void> {
+    const user = await this.userGetByKeyAndType(key, type) ?? {};
+    user[`${key}:${type}`] = { ...data, key, type };
     
     await this.putJson('users', user);
   }
@@ -242,6 +242,18 @@ export class FileStorageService extends EntityService implements IStorageService
     return intVal;
   }
 
+  async truncateAll() {
+    const dir = this.getDir();
+
+    for (const file of await readdir(dir)) {
+      const name = `${dir}/${file}`;
+
+      if (!(await stat(name)).isDirectory() && file !== '.gitignore') {
+        await unlink(name);
+      }
+    }
+  }
+
   protected static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
@@ -257,7 +269,7 @@ export class FileStorageService extends EntityService implements IStorageService
   protected getJsonPath(file: string): string {
     file = encodeURI(file).replace(/\//g, '__');
 
-    return path.resolve(this.config?.dir ?? './projects', `${file}.json`);
+    return path.resolve(this.getDir(), `${file}.json`);
   }
 
   protected getJson<T = unknown>(file: string): Promise<T> {
@@ -266,5 +278,9 @@ export class FileStorageService extends EntityService implements IStorageService
 
   protected putJson(file: string, json: any): Promise<unknown> {
     return fs.writeFile(this.getJsonPath(file), JSON.stringify(json), 'utf8');
+  }
+
+  protected getDir() {
+    return this.config?.dir ?? './projects';
   }
 }

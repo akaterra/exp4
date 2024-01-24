@@ -98,7 +98,7 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
       );
 
       const user = this.config?.storage
-        ? await this.storage.userGetById(String(githubUser.id), this.type)
+        ? await this.storage.userGetByKeyAndType(String(githubUser.id), this.type)
           ?? (githubUser.email && await this.storage.userGet({ email: githubUser.email, type: this.type }))
           ?? (githubUser.login && await this.storage.userGet({ login: githubUser.login, type: this.type }))
           ?? null
