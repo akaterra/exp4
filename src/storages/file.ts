@@ -171,7 +171,7 @@ export class FileStorageService extends EntityService implements IStorageService
   async varIncTarget(target: Pick<IProjectTargetDef, 'id'>, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetTarget(target, key, '0'));
 
-    await this.varSetTarget(target, key, typeof intVal === 'number' ? intVal + add : add);
+    await this.varSetTarget(target, key, !isNaN(intVal) ? intVal + add : add);
 
     return intVal;
   }
@@ -237,7 +237,7 @@ export class FileStorageService extends EntityService implements IStorageService
   async varIncStream(stream: Pick<IProjectTargetStreamDef, 'id'>, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetStream(stream, key, '0'));
 
-    await this.varSetStream(stream, key, typeof intVal === 'number' ? intVal + add : add);
+    await this.varSetStream(stream, key, !isNaN(intVal) ? intVal + add : add);
 
     return intVal;
   }

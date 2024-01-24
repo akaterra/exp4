@@ -158,6 +158,20 @@ describe('File storage', function() {
     }
   });
 
+  it('should increment target var taking non-numeric looking value as 0 and get same target var', async () => {
+    const targetId = `target:${Date.now()}:${Math.random()}`;
+
+    for (const [ Class, config ] of storages) {
+      const storage = new Class(config);
+
+      await storage.varSetTarget({ id: targetId }, 'test', 'abc');
+      await storage.varIncTarget({ id: targetId }, 'test', 2);
+      await storage.varIncTarget({ id: targetId }, 'test', -3);
+
+      expect(await storage.varGetTarget({ id: targetId }, 'test')).toBe(-1);
+    }
+  });
+
   it('should set stream var and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
 
@@ -224,6 +238,20 @@ describe('File storage', function() {
 
       expect(await storage.varGetStream({ id: streamId }, 'test')).toBe(2);
 
+      await storage.varIncStream({ id: streamId }, 'test', -3);
+
+      expect(await storage.varGetStream({ id: streamId }, 'test')).toBe(-1);
+    }
+  });
+
+  it('should increment stream var taking non-numeric looking value as 0 and get same stream var', async () => {
+    const streamId = `stream:${Date.now()}:${Math.random()}`;
+
+    for (const [ Class, config ] of storages) {
+      const storage = new Class(config);
+
+      await storage.varSetStream({ id: streamId }, 'test', 'abc');
+      await storage.varIncStream({ id: streamId }, 'test', 2);
       await storage.varIncStream({ id: streamId }, 'test', -3);
 
       expect(await storage.varGetStream({ id: streamId }, 'test')).toBe(-1);
