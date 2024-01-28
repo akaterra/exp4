@@ -18,7 +18,7 @@ describe('File storage', function() {
     [ SqlStorageService, { uri: 'postgres://postgres:postgres@127.0.0.1:5432/sourceFlowTests' } ],
     [
       ExternalRestServiceStorageService,
-      null,
+      { noCache: true },
       (data?: any[]) => {
         let moduleData: any[] = data ?? [];
         let calls: any[] = [];
@@ -72,7 +72,7 @@ describe('File storage', function() {
     Container.set(RestApiService, RestApiService);
   });
 
-  it.only('should set users with same key but different types and get valid user by key and type', async () => {
+  it('should set users with same key but different types and get valid user by key and type', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
     const callsData = {
       [ String(ExternalRestServiceStorageService) ]: [
@@ -118,7 +118,7 @@ describe('File storage', function() {
         type: 'test2',
       });
 
-      if (init && callsAssertions[Class]) {
+      if (calls && callsAssertions[Class]) {
         expect(calls).toMatchObject(callsAssertions[Class]);
       }
     }
@@ -126,8 +126,26 @@ describe('File storage', function() {
 
   it('should set user and not get another user by key and type', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name' } ] ],
+        [ 'get', [ 'http://localhost:7000/user', { key: userId + 'nonExisting', type: 'test' } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.userSetByKeyAndType(userId, 'test', {
@@ -135,13 +153,35 @@ describe('File storage', function() {
       });
 
       expect(await storage.userGetByKeyAndType(userId + 'nonExisting', 'test')).toBeNull();
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should set user and get same user by filter', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        { key: userId, name: userId + 'name', type: 'test' },
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name' } ] ],
+        [ 'get', [ 'http://localhost:7000/user', { key: userId, type: 'test' } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.userSetByKeyAndType(userId, 'test', {
@@ -153,13 +193,35 @@ describe('File storage', function() {
         name: userId + 'name',
         type: 'test',
       });
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should set user and not get another user by filter', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name' } ] ],
+        [ 'get', [ 'http://localhost:7000/user', { key: userId + 'nonExisting', type: 'test' } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.userSetByKeyAndType(userId, 'test', {
@@ -167,13 +229,39 @@ describe('File storage', function() {
       });
 
       expect(await storage.userGet({ key: userId + 'nonExisting', type: 'test' })).toBeNull();
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should set target vars with same key and different types and get valid target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+        { name: targetId + 'name' },
+        { name: targetId + 'name2' },
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name' }, { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name2' }, { id: 'sf__test2__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test2__target__' + targetId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varSetTarget({ id: targetId }, 'test', {
@@ -189,13 +277,35 @@ describe('File storage', function() {
       expect(await storage.varGetTarget({ id: targetId }, 'test2')).toMatchObject({
         name: targetId + 'name2',
       });
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should set target var and not get another target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name' }, { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__testnonexisting__target__' + targetId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varSetTarget({ id: targetId }, 'test', {
@@ -203,13 +313,43 @@ describe('File storage', function() {
       });
 
       expect(await storage.varGetTarget({ id: targetId }, 'testNonExisting')).toBeNull();
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should push to target var and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+        [ { name: targetId + 'name' } ],
+        [ { name: targetId + 'name' } ],
+        null,
+        [ { name: targetId + 'name' }, { name: targetId + 'namename' } ],
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', [ { name: targetId + 'name' } ], { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', [ { name: targetId + 'name' }, { name: targetId + 'namename' } ], { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varAddTarget({ id: targetId }, 'test', {
@@ -229,13 +369,43 @@ describe('File storage', function() {
       }, {
         name: targetId + 'namename',
       } ]);
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should increment target var and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+        2,
+        2,
+        null,
+        -1,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', 2, { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', -1, { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varIncTarget({ id: targetId }, 'test', 2);
@@ -245,13 +415,43 @@ describe('File storage', function() {
       await storage.varIncTarget({ id: targetId }, 'test', -3);
 
       expect(await storage.varGetTarget({ id: targetId }, 'test')).toBe(-1);
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should increment target var taking non-numeric looking value as 0 and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        'abc',
+        null,
+        2,
+        null,
+        -1,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/var', 'abc', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', 2, { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+        [ 'post', [ 'http://localhost:7000/var', -1, { id: 'sf__test__target__' + targetId } ] ],
+        [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varSetTarget({ id: targetId }, 'test', 'abc');
@@ -259,13 +459,39 @@ describe('File storage', function() {
       await storage.varIncTarget({ id: targetId }, 'test', -3);
 
       expect(await storage.varGetTarget({ id: targetId }, 'test')).toBe(-1);
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should set streams var with same keys and different types and get valid stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+        { name: streamId + 'name' },
+        { name: streamId + 'name2' },
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name' }, { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name2' }, { id: 'sf__test2__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test2__stream__' + streamId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varSetStream({ id: streamId }, 'test', {
@@ -281,13 +507,35 @@ describe('File storage', function() {
       expect(await storage.varGetStream({ id: streamId }, 'test2')).toMatchObject({
         name: streamId + 'name2',
       });
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should set stream var and not get another stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name' }, { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__testnonexisting__stream__' + streamId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varSetStream({ id: streamId }, 'test', {
@@ -295,13 +543,43 @@ describe('File storage', function() {
       });
 
       expect(await storage.varGetStream({ id: streamId }, 'testNonExisting')).toBeNull();
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should push to stream var and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+        [ { name: streamId + 'name' } ],
+        [ { name: streamId + 'name' } ],
+        null,
+        [ { name: streamId + 'name' }, { name: streamId + 'namename' } ],
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', [ { name: streamId + 'name' } ], { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', [ { name: streamId + 'name' }, { name: streamId + 'namename' } ], { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varAddStream({ id: streamId }, 'test', {
@@ -321,13 +599,43 @@ describe('File storage', function() {
       }, {
         name: streamId + 'namename',
       } ]);
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should increment stream var and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        null,
+        2,
+        2,
+        null,
+        -1,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', 2, { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', -1, { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varIncStream({ id: streamId }, 'test', 2);
@@ -337,13 +645,43 @@ describe('File storage', function() {
       await storage.varIncStream({ id: streamId }, 'test', -3);
 
       expect(await storage.varGetStream({ id: streamId }, 'test')).toBe(-1);
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 
   it('should increment stream var taking non-numeric looking value as 0 and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
+    const callsData = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        null,
+        'abc',
+        null,
+        2,
+        null,
+        -1,
+      ],
+    };
+    const callsAssertions = {
+      [ String(ExternalRestServiceStorageService) ]: [
+        [ 'post', [ 'http://localhost:7000/var/stream', 'abc', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', 2, { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'post', [ 'http://localhost:7000/var/stream', -1, { id: 'sf__test__stream__' + streamId } ] ],
+        [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
+      ],
+    };
 
-    for (const [ Class, config ] of storages) {
+    for (const [ Class, config, init ] of storages) {
+      let calls;
+
+      if (init) {
+        calls = init(callsData[Class]).calls;
+      }
+
       const storage = new Class(config);
 
       await storage.varSetStream({ id: streamId }, 'test', 'abc');
@@ -351,6 +689,10 @@ describe('File storage', function() {
       await storage.varIncStream({ id: streamId }, 'test', -3);
 
       expect(await storage.varGetStream({ id: streamId }, 'test')).toBe(-1);
+
+      if (calls && callsAssertions[Class]) {
+        expect(calls).toMatchObject(callsAssertions[Class]);
+      }
     }
   });
 });

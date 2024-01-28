@@ -19,6 +19,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   constructor(protected config?: {
     baseUrl: string;
     headers: Record<string, string>;
+    noCache: boolean;
   }) {
     super();
 
@@ -66,7 +67,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = ExternalRestServiceStorageService.getKeyOfType(key, target.id, 'target');
     
-    if (this.cache.has(intKey)) {
+    if (!this.config?.noCache && this.cache.has(intKey)) {
       return this.cache.get(intKey);
     }
 
@@ -145,7 +146,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
     const intKey = ExternalRestServiceStorageService.getKeyOfType(key, stream.id);
 
-    if (this.cache.has(intKey)) {
+    if (!this.config?.noCache && this.cache.has(intKey)) {
       return this.cache.get(intKey);
     }
 
