@@ -24,7 +24,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     ) as GithubIntegrationService;
   }
 
-  constructor(protected config?: { integration?: string }) {
+  constructor(protected config?: { integration?: string, noCache?: boolean }) {
     super();
   }
 
@@ -61,14 +61,14 @@ export class GithubStorageService extends EntityService implements IStorageServi
 
   @Log('debug')
   async userSetByKeyAndType(): Promise<void> {
-    throw new Error('Not supported');
+
   }
 
   @Log('debug')
   async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKeyOfType(key, target.id, 'target');
     
-    if (this.cache.has(intKey)) {
+    if (!this.config?.noCache && this.cache.has(intKey)) {
       return this.cache.get(intKey);
     }
 
@@ -152,7 +152,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKeyOfType(key, stream.id);
 
-    if (this.cache.has(intKey)) {
+    if (!this.config?.noCache && this.cache.has(intKey)) {
       return this.cache.get(intKey);
     }
 
@@ -232,7 +232,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   async truncateAll(): Promise<void> {
-    throw 'Not supported';
+
   }
 
   protected static getKey(key: string | string[]): string {

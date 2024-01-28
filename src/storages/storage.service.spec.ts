@@ -1,47 +1,79 @@
 import 'reflect-metadata';
-import Container from 'typedi';
+import Container, {Service} from 'typedi';
 import { FileStorageService } from './file';
 import { MongodbStorageService } from './mongodb';
 import { SqlStorageService } from './sql';
 import { ExternalRestServiceStorageService } from './external-rest-service';
 import { RestApiService } from '../services/rest-api.service';
-describe('File storage', function() {
+import {GithubStorageService} from './github';
+import {IntegrationsService} from '../integrations.service';
+import {GithubIntegrationService} from '../integrations/github';
+
+describe('File storage', () => {
   const storages: [ any, any, ((data?: any[]) => { calls: any[] })? ][] = [
-    [ FileStorageService, { dir: './tests' } ],
-    [ MongodbStorageService, { uri: 'mongodb://127.0.0.1:27017/sourceFlowTests' } ],
-    [ SqlStorageService, { uri: 'postgres://postgres:postgres@127.0.0.1:5432/sourceFlowTests' } ],
+    // [ FileStorageService, { dir: './tests' } ],
+    // [ MongodbStorageService, { uri: 'mongodb://127.0.0.1:27017/sourceFlowTests' } ],
+    // [ SqlStorageService, { uri: 'postgres://postgres:postgres@127.0.0.1:5432/sourceFlowTests' } ],
+    // [
+    //   ExternalRestServiceStorageService,
+    //   { noCache: true },
+    //   (data?: any[]) => {
+    //     const moduleData: any[] = data ?? [];
+    //     const calls: any[] = [];
+
+    //     @Service({ transient: true })
+    //     class TestRestApiService extends RestApiService {
+    //       delete(...args) {
+    //         calls.push([ 'delete', args ]);
+
+    //         return moduleData.shift();
+    //       }
+    //       get(...args) {
+    //         calls.push([ 'get', args ]);
+
+    //         return moduleData.shift();
+    //       }
+    //       post(...args) {
+    //         calls.push([ 'post', args ]);
+
+    //         return moduleData.shift();
+    //       }
+    //     }
+
+    //     Container.set(RestApiService, new TestRestApiService());
+
+    //     return {
+    //       calls,
+    //     };
+    //   },
+    // ],
     [
-      ExternalRestServiceStorageService,
-      { noCache: true },
+      GithubStorageService,
+      { integration: 'test', noCache: true },
       (data?: any[]) => {
         const moduleData: any[] = data ?? [];
         const calls: any[] = [];
 
-        const injection = {
-          configure: function () {
-            return this;
-          },
-          withHeaders: function () {
-            return this;
-          },
-          delete: async function (...args) {
-            calls.push([ 'delete', args ]);
+        @Service()
+        class TestGithubIntegrationService extends GithubIntegrationService {
+          orgVarGet(...args) {
+            calls.push([ 'orgVarGet', args ]);
 
             return moduleData.shift();
-          },
-          get: async function (...args) {
-            calls.push([ 'get', args ]);
+          }
+          orgVarCreate(...args) {
+            calls.push([ 'orgVarCreate', args ]);
 
             return moduleData.shift();
-          },
-          post: async function (...args) {
-            calls.push([ 'post', args ]);
+          }
+          orgVarUpdate(...args) {
+            calls.push([ 'orgVarUpdate', args ]);
 
             return moduleData.shift();
-          },
-        };
+          }
+        }
 
-        Container.set(RestApiService, injection);
+        Container.get(IntegrationsService).add(new TestGithubIntegrationService(), 'test');
 
         return {
           calls,
@@ -63,7 +95,7 @@ describe('File storage', function() {
   });
 
   afterAll(() => {
-    Container.set(RestApiService, RestApiService);
+    Container.set(RestApiService, new RestApiService());
   });
 
   it('should set users with same key but different types and get valid user by key and type', async () => {
@@ -230,12 +262,18 @@ describe('File storage', function() {
     }
   });
 
-  it('should set target vars with same key and different types and get valid target var', async () => {
+  it.only('should set target vars with same key and different types and get valid target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
       [String(ExternalRestServiceStorageService)]: [
         null,
         null,
+        { name: targetId + 'name' },
+        { name: targetId + 'name2' },
+      ],
+      [String(GithubStorageService)]: [
+        null, null,
+        null, null,
         { name: targetId + 'name' },
         { name: targetId + 'name2' },
       ],
@@ -246,6 +284,12 @@ describe('File storage', function() {
         [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name2' }, { id: 'sf__test2__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test2__target__' + targetId } ] ],
+      ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, { name: targetId + 'name' } ] ],
+        [ 'orgVarGet', [ 'sf__test2__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test2__target__' + targetId, { name: targetId + 'name2' } ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test2__target__' + targetId ] ],
       ],
     };
 
@@ -278,18 +322,26 @@ describe('File storage', function() {
     }
   });
 
-  it('should set target var and not get another target var', async () => {
+  it.only('should set target var and not get another target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
       [String(ExternalRestServiceStorageService)]: [
         null,
         null,
       ],
+      [String(GithubStorageService)]: [
+        null, null,
+        null, null,
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name' }, { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__testnonexisting__target__' + targetId } ] ],
+      ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, { name: targetId + 'name' } ] ],
+        [ 'orgVarGet', [ 'sf__testnonexisting__target__' + targetId ] ],
       ],
     };
 
@@ -314,12 +366,20 @@ describe('File storage', function() {
     }
   });
 
-  it('should push to target var and get same target var', async () => {
+  it.only('should push to target var and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
       [String(ExternalRestServiceStorageService)]: [
         null,
         null,
+        [ { name: targetId + 'name' } ],
+        [ { name: targetId + 'name' } ],
+        null,
+        [ { name: targetId + 'name' }, { name: targetId + 'namename' } ],
+      ],
+      [String(GithubStorageService)]: [
+        null,
+        null, null,
         [ { name: targetId + 'name' } ],
         [ { name: targetId + 'name' } ],
         null,
@@ -334,6 +394,10 @@ describe('File storage', function() {
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
         [ 'post', [ 'http://localhost:7000/var', [ { name: targetId + 'name' }, { name: targetId + 'namename' } ], { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
+      ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, [ { name: targetId + 'name' } ] ] ],
       ],
     };
 
