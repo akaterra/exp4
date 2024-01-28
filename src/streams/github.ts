@@ -10,7 +10,7 @@ import { Status } from '../enums/status';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
 import moment from 'moment-timezone';
-import {ProjectsService} from '../projects.service';
+import { ProjectsService } from '../projects.service';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,

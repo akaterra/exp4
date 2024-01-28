@@ -11,7 +11,7 @@ export class StubStorageService extends EntityService implements IStorageService
   static readonly type: string = 'stub';
 
   @Log('debug')
-  async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
+  async manifestsLoad(): Promise<Array<IGeneralManifest | IProjectManifest>> {
     return [];
   }
 

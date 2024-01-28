@@ -3,9 +3,9 @@ import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { AwaitedCache } from '../cache';
 import { JenkinsService } from '../services/jenkins.service';
-import {resolvePlaceholders} from '../utils';
+import { resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 export interface IJenkinsConfig {
   cacheTtlSec?: number;

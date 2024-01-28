@@ -8,7 +8,7 @@ import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitIntegrationService } from '../integrations/git';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
-import {ProjectsService} from '../projects.service';
+import { ProjectsService } from '../projects.service';
 
 export type IGitTargetStream = IProjectTargetStream<{
   integration?: string;

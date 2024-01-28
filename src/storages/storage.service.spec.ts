@@ -1,16 +1,10 @@
 import 'reflect-metadata';
 import Container from 'typedi';
-import {FileStorageService} from './file';
-import {readdirSync, statSync, unlinkSync} from 'fs';
-import {MongodbStorageService} from './mongodb';
-import {SqlStorageService} from './sql';
-import {ExternalRestServiceStorageService} from './external-rest-service';
-import express from 'express';
-import {RestApiService} from '../services/rest-api.service';
-import {StoragesService} from '../storages.service';
-
-const dir = './tests';
-
+import { FileStorageService } from './file';
+import { MongodbStorageService } from './mongodb';
+import { SqlStorageService } from './sql';
+import { ExternalRestServiceStorageService } from './external-rest-service';
+import { RestApiService } from '../services/rest-api.service';
 describe('File storage', function() {
   const storages: [ any, any, ((data?: any[]) => { calls: any[] })? ][] = [
     [ FileStorageService, { dir: './tests' } ],
@@ -20,8 +14,8 @@ describe('File storage', function() {
       ExternalRestServiceStorageService,
       { noCache: true },
       (data?: any[]) => {
-        let moduleData: any[] = data ?? [];
-        let calls: any[] = [];
+        const moduleData: any[] = data ?? [];
+        const calls: any[] = [];
 
         const injection = {
           configure: function () {
@@ -75,7 +69,7 @@ describe('File storage', function() {
   it('should set users with same key but different types and get valid user by key and type', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         { key: userId, name: userId + 'name', type: 'test' },
@@ -83,7 +77,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name', type: 'test' } ] ],
         [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name2', type: 'test2' } ] ],
         [ 'get', [ 'http://localhost:7000/user', { key: userId, type: 'test' } ] ],
@@ -127,13 +121,13 @@ describe('File storage', function() {
   it('should set user and not get another user by key and type', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name' } ] ],
         [ 'get', [ 'http://localhost:7000/user', { key: userId + 'nonExisting', type: 'test' } ] ],
       ],
@@ -163,13 +157,13 @@ describe('File storage', function() {
   it('should set user and get same user by filter', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         { key: userId, name: userId + 'name', type: 'test' },
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name' } ] ],
         [ 'get', [ 'http://localhost:7000/user', { key: userId, type: 'test' } ] ],
       ],
@@ -203,13 +197,13 @@ describe('File storage', function() {
   it('should set user and not get another user by filter', async () => {
     const userId = `user:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/user', { key: userId, name: userId + 'name' } ] ],
         [ 'get', [ 'http://localhost:7000/user', { key: userId + 'nonExisting', type: 'test' } ] ],
       ],
@@ -239,7 +233,7 @@ describe('File storage', function() {
   it('should set target vars with same key and different types and get valid target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         { name: targetId + 'name' },
@@ -247,7 +241,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name' }, { id: 'sf__test__target__' + targetId } ] ],
         [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name2' }, { id: 'sf__test2__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
@@ -287,13 +281,13 @@ describe('File storage', function() {
   it('should set target var and not get another target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var', { name: targetId + 'name' }, { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__testnonexisting__target__' + targetId } ] ],
       ],
@@ -323,7 +317,7 @@ describe('File storage', function() {
   it('should push to target var and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         [ { name: targetId + 'name' } ],
@@ -333,7 +327,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
         [ 'post', [ 'http://localhost:7000/var', [ { name: targetId + 'name' } ], { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
@@ -379,7 +373,7 @@ describe('File storage', function() {
   it('should increment target var and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         2,
@@ -389,7 +383,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
         [ 'post', [ 'http://localhost:7000/var', 2, { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
@@ -425,7 +419,7 @@ describe('File storage', function() {
   it('should increment target var taking non-numeric looking value as 0 and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         'abc',
         null,
@@ -435,7 +429,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var', 'abc', { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
         [ 'post', [ 'http://localhost:7000/var', 2, { id: 'sf__test__target__' + targetId } ] ],
@@ -469,7 +463,7 @@ describe('File storage', function() {
   it('should set streams var with same keys and different types and get valid stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         { name: streamId + 'name' },
@@ -477,7 +471,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name' }, { id: 'sf__test__stream__' + streamId } ] ],
         [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name2' }, { id: 'sf__test2__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
@@ -517,13 +511,13 @@ describe('File storage', function() {
   it('should set stream var and not get another stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name' }, { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__testnonexisting__stream__' + streamId } ] ],
       ],
@@ -553,7 +547,7 @@ describe('File storage', function() {
   it('should push to stream var and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         [ { name: streamId + 'name' } ],
@@ -563,7 +557,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
         [ 'post', [ 'http://localhost:7000/var/stream', [ { name: streamId + 'name' } ], { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
@@ -609,7 +603,7 @@ describe('File storage', function() {
   it('should increment stream var and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         null,
         2,
@@ -619,7 +613,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
         [ 'post', [ 'http://localhost:7000/var/stream', 2, { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
@@ -655,7 +649,7 @@ describe('File storage', function() {
   it('should increment stream var taking non-numeric looking value as 0 and get same stream var', async () => {
     const streamId = `stream:${Date.now()}:${Math.random()}`;
     const callsData = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         null,
         'abc',
         null,
@@ -665,7 +659,7 @@ describe('File storage', function() {
       ],
     };
     const callsAssertions = {
-      [ String(ExternalRestServiceStorageService) ]: [
+      [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var/stream', 'abc', { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
         [ 'post', [ 'http://localhost:7000/var/stream', 2, { id: 'sf__test__stream__' + streamId } ] ],

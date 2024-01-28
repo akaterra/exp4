@@ -1,4 +1,4 @@
-import Container, { Service } from 'typedi';
+import { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
@@ -6,7 +6,7 @@ import { EntityService } from '../entities.service';
 import { Autowired, iter } from '../utils';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import { RestApiService, rest } from '../services/rest-api.service';
+import { RestApiService } from '../services/rest-api.service';
 import { IGeneralManifest } from '../general';
 
 @Service()

@@ -6,7 +6,7 @@ import { EntityService } from '../entities.service';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ArgocdIntegrationService } from '../integrations/argocd';
 import { makeDirty, notEmptyArray } from './utils';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 export interface IArgocdSyncStepConfig extends Record<string, unknown> {
   integration: string;

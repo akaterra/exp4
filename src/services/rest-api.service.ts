@@ -1,5 +1,5 @@
 import fetch from 'node-fetch-native';
-import {Service} from 'typedi';
+import { Service } from 'typedi';
 
 const DEBUG = process.env.DEBUG;
 

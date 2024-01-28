@@ -22,7 +22,7 @@ export class StreamHistoryRollbackStepService extends EntityService implements I
       ? Object.keys(targetsStreams)
       : notEmptyArray(step.targets, project.getFlowByFlowId(flow.ref.flowId).targets);
 
-    for (const tIdOfTarget of step.targets) {
+    for (const tIdOfTarget of sourceTargetIds) {
       const target = project.getTargetByTargetId(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)

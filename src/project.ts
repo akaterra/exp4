@@ -373,8 +373,8 @@ export class Project implements IProject {
   }
 
   getTargetStreamByTargetIdAndStreamId<S extends IProjectTargetStreamDef = IProjectTargetStreamDef>(
-    targetId: string,
-    streamId: string,
+    targetId: IProjectTargetDef['id'],
+    streamId: IProjectTargetStreamDef['id'],
     unsafe?: boolean,
   ): S {
     const stream = this.getTargetByTargetId(targetId).streams[streamId] as S;

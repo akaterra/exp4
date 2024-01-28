@@ -1,5 +1,3 @@
-import { ProjectsService } from "./projects.service";
-import { Autowired } from "./utils";
 
 export interface IService {
   id: string;

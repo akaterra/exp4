@@ -8,7 +8,7 @@ import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
-import {ProjectsService} from '../projects.service';
+import { ProjectsService } from '../projects.service';
 
 // const JOB_CONSLUSION_TO_STATUS_MAP = {
 //   failure: Status.FAILED,

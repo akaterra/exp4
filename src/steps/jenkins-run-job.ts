@@ -7,7 +7,7 @@ import { Autowired, resolvePlaceholders } from '../utils';
 import { makeDirty, notEmptyArray } from './utils';
 import { JenkinsIntegrationService } from '../integrations/jenkins';
 import * as _ from 'lodash';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
   integration: string;

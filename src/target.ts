@@ -1,5 +1,5 @@
-import {IProjectTargetStreamDef} from './project';
-import {StreamState} from './stream';
+import { IProjectTargetStreamDef } from './project';
+import { StreamState } from './stream';
 
 export class TargetState {
   id: string;

@@ -3,9 +3,9 @@ import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { ArgocdService } from '../services/argocd.service';
 import { AwaitedCache } from '../cache';
-import {resolvePlaceholders} from '../utils';
+import { resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
-import {Log} from '../logger';
+import { Log } from '../logger';
 
 export interface IArgocdConfig {
   applicationName?: string;

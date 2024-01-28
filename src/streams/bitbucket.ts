@@ -9,7 +9,7 @@ import { GitlabIntegrationService } from '../integrations/gitlab';
 import { AwaitedCache } from '../cache';
 import { Log, logError } from '../logger';
 import { BitbucketIntegrationService } from '../integrations/bitbucket';
-import {ProjectsService} from '../projects.service';
+import { ProjectsService } from '../projects.service';
 
 // const JOB_CONSLUSION_TO_STATUS_MAP = {
 //   failure: Status.FAILED,

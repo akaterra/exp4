@@ -29,7 +29,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {
+  async manifestsLoad(): Promise<Array<IGeneralManifest | IProjectManifest>> {
     return [];
   }
 
