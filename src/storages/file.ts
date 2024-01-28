@@ -103,10 +103,10 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async userSetByKeyAndType(key: string, type: string, data: Record<string, unknown>): Promise<void> {
-    const user = await this.userGetByKeyAndType(key, type) ?? {};
-    user[`${key}:${type}`] = { ...data, key, type };
+    const users = await this.getJson('users') ?? {};
+    users[`${key}:${type}`] = { ...users[`${key}:${type}`], ...data, key, type };
     
-    await this.putJson('users', user);
+    await this.putJson('users', users);
   }
 
   @Log('debug')

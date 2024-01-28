@@ -148,13 +148,13 @@ export class GithubStreamService extends EntityService implements IStreamService
             link: w.html_url ?? null,
             metadata: {},
             steps: workflowRunsJobs?.[0]
-              ? workflowRunsJobs[0].steps.reduce((acc, jobStep) => {
+              ? workflowRunsJobs[0].steps.reduce((acc, jobStep, index) => {
                 acc[jobStep.number] = {
                   id: String(jobStep.number),
                   type: 'github:workflow:job',
 
                   description: jobStep.name,
-                  link: workflowRunsJobs[0].html_url,
+                  link: workflowRunsJobs[0].html_url ? `${workflowRunsJobs[0].html_url}#step:${index + 1}:1` : null,
                   runningTimeSeconds: jobStep.started_at
                     ? moment(jobStep.completed_at).diff(jobStep.started_at, 'seconds')
                     : null,

@@ -1,18 +1,30 @@
 import fetch from 'node-fetch-native';
+import {Service} from 'typedi';
 
 const DEBUG = process.env.DEBUG;
 
+@Service({ transient: true })
 export class RestApiService {
   private format: string;
   private headers: Record<string, string>;
-  private query: Record<string, { toString }>;
-
-  constructor(private opts?: {
+  private opts: {
     domain?: string;
     path?: string;
     headers?: Record<string, string>;
     format?: 'json' | 'raw' | 'text';
-  }) {
+  };
+  private query: Record<string, { toString }>;
+
+  constructor(opts?: RestApiService['opts']) {
+    if (opts) {
+      this.configure(opts);
+    }
+  }
+
+  configure(opts?: RestApiService['opts']) {
+    this.opts = opts;
+
+    return this;
   }
 
   withFormat(format: string) {

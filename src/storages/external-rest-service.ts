@@ -1,12 +1,12 @@
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { IStorageService } from './storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
-import { iter, request } from '../utils';
+import { Autowired, iter } from '../utils';
 import { IUser } from '../user';
 import { Log } from '../logger';
-import { rest } from '../services/rest-api.service';
+import { RestApiService, rest } from '../services/rest-api.service';
 import { IGeneralManifest } from '../general';
 
 @Service()
@@ -14,12 +14,20 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   static readonly type: string = 'externalRestService';
 
   protected cache = new AwaitedCache();
+  @Autowired() protected restApiService: RestApiService;
 
   constructor(protected config?: {
     baseUrl: string;
     headers: Record<string, string>;
   }) {
     super();
+
+    this.restApiService.configure({
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
   @Log('debug')
@@ -28,7 +36,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
 
     for (const [ ,maybeSource ] of iter(source)) {
       if (maybeSource.startsWith('http://') || maybeSource.startsWith('https://')) {
-        const content = await request(this.getUrl('manifests'));
+        const content = await this.restApiService.get(this.getUrl('manifests'));
 
         if (content && Array.isArray(content)) {
           manifests.push(...manifests);
@@ -41,17 +49,17 @@ export class ExternalRestServiceStorageService extends EntityService implements 
 
   @Log('debug')
   async userGet(filter: Record<string, unknown>): Promise<IUser> {
-    return request(this.getUrl('user'), filter);
+    return this.restApiService.get(this.getUrl('user'), filter);
   }
 
   @Log('debug')
   async userGetByKeyAndType(key: string, type: string): Promise<IUser> {
-    return request(this.getUrl('user'), { key, type });
+    return this.restApiService.get(this.getUrl('user'), { key, type });
   }
 
   @Log('debug')
   async userSetByKeyAndType(key: string, type: string, data: Record<string, unknown>): Promise<void> {
-    await request(this.getUrl('user'), { ...data, key, type }, 'post');
+    await this.restApiService.post(this.getUrl('user'), { ...data, key, type });
   }
 
   @Log('debug')
@@ -62,7 +70,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
       return this.cache.get(intKey);
     }
 
-    const val = await rest.withHeaders(this.config?.headers).get(
+    const val = await this.restApiService.get(
       this.getUrl('var'),
       { id: intKey },
     );
@@ -78,7 +86,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   async varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = ExternalRestServiceStorageService.getKeyOfType(key, target.id, 'target');
 
-    await rest.withHeaders(this.config?.headers).post(
+    await this.restApiService.post(
       this.getUrl('var'),
       val,
       { id: intKey },
@@ -141,7 +149,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
       return this.cache.get(intKey);
     }
 
-    const val = await rest.withHeaders(this.config?.headers).get(
+    const val = await this.restApiService.get(
       this.getUrl('var/stream'),
       { id: intKey },
     );
@@ -156,7 +164,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
     const intKey = ExternalRestServiceStorageService.getKeyOfType(key, stream.id);
 
-    await rest.withHeaders(this.config?.headers).post(
+    await this.restApiService.post(
       this.getUrl('var/stream'),
       val,
       { id: intKey },
@@ -212,7 +220,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   async truncateAll(): Promise<void> {
-    await rest.withHeaders(this.config?.headers).delete(
+    await this.restApiService.delete(
       this.getUrl('all'),
     );
   }
