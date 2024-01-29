@@ -253,7 +253,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
 
   protected static tryParseComplex(val) {
     try {
-      return JSON.parse(val);
+      return typeof val === 'string' ? JSON.parse(val) : val;
     } catch (err) {
       return undefined;
     }

@@ -11,42 +11,42 @@ import {GithubIntegrationService} from '../integrations/github';
 
 describe('File storage', () => {
   const storages: [ any, any, ((data?: any[]) => { calls: any[] })? ][] = [
-    // [ FileStorageService, { dir: './tests' } ],
-    // [ MongodbStorageService, { uri: 'mongodb://127.0.0.1:27017/sourceFlowTests' } ],
-    // [ SqlStorageService, { uri: 'postgres://postgres:postgres@127.0.0.1:5432/sourceFlowTests' } ],
-    // [
-    //   ExternalRestServiceStorageService,
-    //   { noCache: true },
-    //   (data?: any[]) => {
-    //     const moduleData: any[] = data ?? [];
-    //     const calls: any[] = [];
+    [ FileStorageService, { dir: './tests' } ],
+    [ MongodbStorageService, { uri: 'mongodb://127.0.0.1:27017/sourceFlowTests' } ],
+    [ SqlStorageService, { uri: 'postgres://postgres:postgres@127.0.0.1:5432/sourceFlowTests' } ],
+    [
+      ExternalRestServiceStorageService,
+      { noCache: true },
+      (data?: any[]) => {
+        const moduleData: any[] = data ?? [];
+        const calls: any[] = [];
 
-    //     @Service({ transient: true })
-    //     class TestRestApiService extends RestApiService {
-    //       delete(...args) {
-    //         calls.push([ 'delete', args ]);
+        @Service({ transient: true })
+        class TestRestApiService extends RestApiService {
+          delete(...args) {
+            calls.push([ 'delete', args ]);
 
-    //         return moduleData.shift();
-    //       }
-    //       get(...args) {
-    //         calls.push([ 'get', args ]);
+            return moduleData.shift();
+          }
+          get(...args) {
+            calls.push([ 'get', args ]);
 
-    //         return moduleData.shift();
-    //       }
-    //       post(...args) {
-    //         calls.push([ 'post', args ]);
+            return moduleData.shift();
+          }
+          post(...args) {
+            calls.push([ 'post', args ]);
 
-    //         return moduleData.shift();
-    //       }
-    //     }
+            return moduleData.shift();
+          }
+        }
 
-    //     Container.set(RestApiService, new TestRestApiService());
+        Container.set(RestApiService, new TestRestApiService());
 
-    //     return {
-    //       calls,
-    //     };
-    //   },
-    // ],
+        return {
+          calls,
+        };
+      },
+    ],
     [
       GithubStorageService,
       { integration: 'test', noCache: true },
@@ -121,6 +121,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -169,6 +173,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -205,6 +213,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -245,6 +257,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -262,7 +278,7 @@ describe('File storage', () => {
     }
   });
 
-  it.only('should set target vars with same key and different types and get valid target var', async () => {
+  it('should set target vars with same key and different types and get valid target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
       [String(ExternalRestServiceStorageService)]: [
@@ -297,6 +313,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -322,7 +342,7 @@ describe('File storage', () => {
     }
   });
 
-  it.only('should set target var and not get another target var', async () => {
+  it('should set target var and not get another target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
       [String(ExternalRestServiceStorageService)]: [
@@ -331,7 +351,7 @@ describe('File storage', () => {
       ],
       [String(GithubStorageService)]: [
         null, null,
-        null, null,
+        null,
       ],
     };
     const callsAssertions = {
@@ -349,6 +369,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -366,7 +390,7 @@ describe('File storage', () => {
     }
   });
 
-  it.only('should push to target var and get same target var', async () => {
+  it('should push to target var and get same target var', async () => {
     const targetId = `target:${Date.now()}:${Math.random()}`;
     const callsData = {
       [String(ExternalRestServiceStorageService)]: [
@@ -380,10 +404,10 @@ describe('File storage', () => {
       [String(GithubStorageService)]: [
         null,
         null, null,
+        JSON.stringify([ { name: targetId + 'name' } ]),
         [ { name: targetId + 'name' } ],
-        [ { name: targetId + 'name' } ],
-        null,
-        [ { name: targetId + 'name' }, { name: targetId + 'namename' } ],
+        [ { name: targetId + 'name' } ], null,
+        JSON.stringify([ { name: targetId + 'name' }, { name: targetId + 'namename' } ]),
       ],
     };
     const callsAssertions = {
@@ -397,7 +421,11 @@ describe('File storage', () => {
       ],
       [String(GithubStorageService)]: [
         [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
-        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, [ { name: targetId + 'name' } ] ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, JSON.stringify([ { name: targetId + 'name' } ]) ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarUpdate', [ 'sf__test__target__' + targetId, JSON.stringify([ { name: targetId + 'name' }, { name: targetId + 'namename' } ]) ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
       ],
     };
 
@@ -405,6 +433,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -414,7 +446,7 @@ describe('File storage', () => {
         name: targetId + 'name',
       });
 
-      expect(await storage.varGetTarget({ id: targetId }, 'test')).toMatchObject([ {
+      expect(await storage.varGetTarget({ id: targetId }, 'test', undefined, true)).toMatchObject([ {
         name: targetId + 'name',
       } ]);
 
@@ -422,7 +454,7 @@ describe('File storage', () => {
         name: targetId + 'namename',
       });
 
-      expect(await storage.varGetTarget({ id: targetId }, 'test')).toMatchObject([ {
+      expect(await storage.varGetTarget({ id: targetId }, 'test', undefined, true)).toMatchObject([ {
         name: targetId + 'name',
       }, {
         name: targetId + 'namename',
@@ -445,6 +477,14 @@ describe('File storage', () => {
         null,
         -1,
       ],
+      [String(GithubStorageService)]: [
+        null,
+        null, null,
+        2,
+        2,
+        2, null,
+        -1,
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
@@ -455,12 +495,24 @@ describe('File storage', () => {
         [ 'post', [ 'http://localhost:7000/var', -1, { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
       ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, 2 ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarUpdate', [ 'sf__test__target__' + targetId, -1 ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+      ],
     };
 
     for (const [ Class, config, init ] of storages) {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -468,11 +520,11 @@ describe('File storage', () => {
 
       await storage.varIncTarget({ id: targetId }, 'test', 2);
 
-      expect(await storage.varGetTarget({ id: targetId }, 'test')).toBe(2);
+      expect(await storage.varGetTarget({ id: targetId }, 'test', undefined, true)).toBe(2);
 
       await storage.varIncTarget({ id: targetId }, 'test', -3);
 
-      expect(await storage.varGetTarget({ id: targetId }, 'test')).toBe(-1);
+      expect(await storage.varGetTarget({ id: targetId }, 'test', undefined, true)).toBe(-1);
 
       if (calls && callsAssertions[Class]) {
         expect(calls).toMatchObject(callsAssertions[Class]);
@@ -491,6 +543,14 @@ describe('File storage', () => {
         null,
         -1,
       ],
+      [String(GithubStorageService)]: [
+        null, null,
+        'abc',
+        'abc', null,
+        2,
+        2, null,
+        -1,
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
@@ -501,12 +561,24 @@ describe('File storage', () => {
         [ 'post', [ 'http://localhost:7000/var', -1, { id: 'sf__test__target__' + targetId } ] ],
         [ 'get', [ 'http://localhost:7000/var', { id: 'sf__test__target__' + targetId } ] ],
       ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarCreate', [ 'sf__test__target__' + targetId, 'abc' ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarUpdate', [ 'sf__test__target__' + targetId, 2 ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ], [ 'orgVarUpdate', [ 'sf__test__target__' + targetId, -1 ] ],
+        [ 'orgVarGet', [ 'sf__test__target__' + targetId ] ],
+      ],
     };
 
     for (const [ Class, config, init ] of storages) {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -533,6 +605,12 @@ describe('File storage', () => {
         { name: streamId + 'name' },
         { name: streamId + 'name2' },
       ],
+      [String(GithubStorageService)]: [
+        null, null,
+        null, null,
+        { name: streamId + 'name' },
+        { name: streamId + 'name2' },
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
@@ -541,12 +619,22 @@ describe('File storage', () => {
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test2__stream__' + streamId } ] ],
       ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarCreate', [ 'sf__test__stream__' + streamId, { name: streamId + 'name' } ] ],
+        [ 'orgVarGet', [ 'sf__test2__stream__' + streamId ] ], [ 'orgVarCreate', [ 'sf__test2__stream__' + streamId, { name: streamId + 'name2' } ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test2__stream__' + streamId ] ],
+      ],
     };
 
     for (const [ Class, config, init ] of storages) {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -579,11 +667,19 @@ describe('File storage', () => {
         null,
         null,
       ],
+      [String(GithubStorageService)]: [
+        null, null,
+        null,
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
         [ 'post', [ 'http://localhost:7000/var/stream', { name: streamId + 'name' }, { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__testnonexisting__stream__' + streamId } ] ],
+      ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarCreate', [ 'sf__test__stream__' + streamId, { name: streamId + 'name' } ] ],
+        [ 'orgVarGet', [ 'sf__testnonexisting__stream__' + streamId ] ],
       ],
     };
 
@@ -591,6 +687,10 @@ describe('File storage', () => {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -619,6 +719,14 @@ describe('File storage', () => {
         null,
         [ { name: streamId + 'name' }, { name: streamId + 'namename' } ],
       ],
+      [String(GithubStorageService)]: [
+        null,
+        null, null,
+        JSON.stringify([ { name: streamId + 'name' } ]),
+        [ { name: streamId + 'name' } ],
+        [ { name: streamId + 'name' } ], null,
+        JSON.stringify([ { name: streamId + 'name' }, { name: streamId + 'namename' } ]),
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
@@ -629,12 +737,24 @@ describe('File storage', () => {
         [ 'post', [ 'http://localhost:7000/var/stream', [ { name: streamId + 'name' }, { name: streamId + 'namename' } ], { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
       ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarCreate', [ 'sf__test__stream__' + streamId, JSON.stringify([ { name: streamId + 'name' } ]) ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarUpdate', [ 'sf__test__stream__' + streamId, JSON.stringify([ { name: streamId + 'name' }, { name: streamId + 'namename' } ]) ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+      ],
     };
 
     for (const [ Class, config, init ] of storages) {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -644,7 +764,7 @@ describe('File storage', () => {
         name: streamId + 'name',
       });
 
-      expect(await storage.varGetStream({ id: streamId }, 'test')).toMatchObject([ {
+      expect(await storage.varGetStream({ id: streamId }, 'test', undefined, true)).toMatchObject([ {
         name: streamId + 'name',
       } ]);
 
@@ -652,7 +772,7 @@ describe('File storage', () => {
         name: streamId + 'namename',
       });
 
-      expect(await storage.varGetStream({ id: streamId }, 'test')).toMatchObject([ {
+      expect(await storage.varGetStream({ id: streamId }, 'test', undefined, true)).toMatchObject([ {
         name: streamId + 'name',
       }, {
         name: streamId + 'namename',
@@ -675,6 +795,14 @@ describe('File storage', () => {
         null,
         -1,
       ],
+      [String(GithubStorageService)]: [
+        null,
+        null, null,
+        2,
+        2,
+        2, null,
+        -1,
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
@@ -685,12 +813,24 @@ describe('File storage', () => {
         [ 'post', [ 'http://localhost:7000/var/stream', -1, { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
       ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarCreate', [ 'sf__test__stream__' + streamId, 2 ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarUpdate', [ 'sf__test__stream__' + streamId, -1 ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+      ],
     };
 
     for (const [ Class, config, init ] of storages) {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
@@ -721,6 +861,14 @@ describe('File storage', () => {
         null,
         -1,
       ],
+      [String(GithubStorageService)]: [
+        null, null,
+        'abc',
+        'abc', null,
+        2,
+        2, null,
+        -1,
+      ],
     };
     const callsAssertions = {
       [String(ExternalRestServiceStorageService)]: [
@@ -731,12 +879,24 @@ describe('File storage', () => {
         [ 'post', [ 'http://localhost:7000/var/stream', -1, { id: 'sf__test__stream__' + streamId } ] ],
         [ 'get', [ 'http://localhost:7000/var/stream', { id: 'sf__test__stream__' + streamId } ] ],
       ],
+      [String(GithubStorageService)]: [
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarCreate', [ 'sf__test__stream__' + streamId, 'abc' ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarUpdate', [ 'sf__test__stream__' + streamId, 2 ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ], [ 'orgVarUpdate', [ 'sf__test__stream__' + streamId, -1 ] ],
+        [ 'orgVarGet', [ 'sf__test__stream__' + streamId ] ],
+      ],
     };
 
     for (const [ Class, config, init ] of storages) {
       let calls;
 
       if (init) {
+        if (!callsData[Class]) {
+          continue;
+        }
+
         calls = init(callsData[Class]).calls;
       }
 
