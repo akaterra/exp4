@@ -13,9 +13,10 @@ export class FormStore {
       maxLength?: number;
       minLength?: number;
       optional?: boolean;
+      value?: string;
     };
     title?: string;
-    type?: 'boolean' | 'enum' | 'number' | 'string';
+    type?: 'boolean' | 'enum' | 'number' | 'string' | 'value';
     initialValue?: unknown;
   }>) {
     this.__clear();
@@ -125,6 +126,12 @@ export class FormStore {
             err = `Must have at least ${c.minLength} ${c.minLength === 1 ? 'symbol' : 'symbols'}`;
           }
         }
+
+        if (!err && typeof c?.value === 'string') {
+          if (val !== c.value) {
+            err = `Must have "${c.value}" value`;
+          }
+        }
       }
     }
 
@@ -141,9 +148,11 @@ export class FormStore {
     }
   }
 
-  __validateAll(onlyCheck?) {
+  __validateAll(onlyCheck?): boolean {
     for (const key of Object.keys(this.__opts)) {
       this.__validate(key, undefined, onlyCheck);
     }
+
+    return this.__isValid;
   }
 }

@@ -483,7 +483,7 @@ export class ProjectStore extends BaseStore {
           .values(this.getTargetByTargetId(targetId).streams)
           .filter((stream) => selectedStreamIds.includes(stream.id)),
       },
-      onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.__isValid : true,
+      onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.__validateAll() : true,
       title: ProjectRunActionModalTitle,
       withClose: true,
     });

@@ -62,6 +62,7 @@ export const ProjectRunActionModalContent = ({
         break;
 
       case 'string':
+      case 'value':
         ParamsElements.push(<div>
           <FormInput
             store={ projectFlowParamsStore }

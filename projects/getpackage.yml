@@ -420,6 +420,28 @@ flows:
         config:
           integration: "jenkins${target.id}"
           jobName: "migrate"
+  
+  deployToProd:
+    title: "Deploy"
+    description: "Dangerous! Production! Think well before."
+    targets:
+      - production
+    steps:
+      - type: "runAction"
+        title: "Run tests"
+        config:
+          name: "test"
+    params:
+      confirmation:
+        title: "Select \"Do it\" option to continue"
+        type: "enum"
+        constraints:
+          enum:
+            - I'm still not sure
+            - Thinking...
+            - Do it
+          value: "Do it"
+        initialValue: "I'm still not sure"
 
 targets:
   dev:

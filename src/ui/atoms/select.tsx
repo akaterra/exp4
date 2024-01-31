@@ -11,7 +11,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
   const control = Array.isArray(items)
     ? <select
       autoComplete={ autoComplete }
-      className={ disabled ? `control ${decoration ?? ''} disabled` : `control ${decoration ?? ''}` }
+      className={ className ? `control ${className}` : 'control' }
       disabled={ disabled }
       key={ id }
       onBlur={

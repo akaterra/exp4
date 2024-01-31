@@ -142,14 +142,14 @@ export class Project implements IProject {
   description: string;
 
   env: {
-    artifacts: ArtifactsService;
-    steps: StepsService;
-    integrations: IntegrationsService;
-    storages: StoragesService;
-    streams: StreamsService;
-    targets: TargetsService;
-    validator: ValidatorService;
-    versionings: VersioningsService;
+    artifacts?: ArtifactsService;
+    steps?: StepsService;
+    integrations?: IntegrationsService;
+    storages?: StoragesService;
+    streams?: StreamsService;
+    targets?: TargetsService;
+    validator?: ValidatorService;
+    versionings?: VersioningsService;
   };
 
   info?: IProject['info'];

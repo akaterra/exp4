@@ -17,7 +17,7 @@ export interface IProjectFlowActionStep {
 }
 
 export interface IProjectFlowActionParam {
-  type: 'boolean' | 'enum' | 'number' | 'string';
+  type: 'boolean' | 'enum' | 'number' | 'string' | 'value';
 
   title?: string;
   description?: string;

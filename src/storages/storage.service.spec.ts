@@ -9,7 +9,7 @@ import {GithubStorageService} from './github';
 import {IntegrationsService} from '../integrations.service';
 import {GithubIntegrationService} from '../integrations/github';
 
-describe('File storage', () => {
+describe('Storage', () => {
   const storages: [ any, any, ((data?: any[]) => { calls: any[] })? ][] = [
     [ FileStorageService, { dir: './tests' } ],
     [ MongodbStorageService, { uri: 'mongodb://127.0.0.1:27017/sourceFlowTests' } ],

@@ -26,7 +26,7 @@ const JOB_STATUS_TO_STATUS_MAP = {
 export type IGithubTargetStream = IProjectTargetStream<{
   integration?: string;
   org: string;
-  repo: string;
+  repo?: string;
   branch: string;
 }, 'github'>;
 
