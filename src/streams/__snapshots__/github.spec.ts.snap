@@ -1,0 +1,386 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Github stream should bookmark 1`] = `
+[
+  {
+    "args": {
+      "*": [],
+      "scopes": {
+        "change": true,
+      },
+      "streamId": undefined,
+      "targetId": undefined,
+    },
+    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
+    "result": {
+      "history": {
+        "change": [
+          {
+            "id": "changeId",
+          },
+        ],
+      },
+      "version": "version",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "commitMessage": null,
+      "lightweight": false,
+      "org": null,
+      "repo": "repo",
+      "sha": "changeId",
+      "tag": "version",
+    },
+    "name": "TestGithubIntegrationService.tagCreate",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestGithubIntegrationService.tagCreate",
+    "result": undefined,
+  },
+]
+`;
+
+exports[`Github stream should bookmark with stream id as repo 1`] = `
+[
+  {
+    "args": {
+      "*": [],
+      "scopes": {
+        "change": true,
+      },
+      "streamId": undefined,
+      "targetId": undefined,
+    },
+    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
+    "result": {
+      "history": {
+        "change": [
+          {
+            "id": "changeId",
+          },
+        ],
+      },
+      "version": "version",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "commitMessage": null,
+      "lightweight": false,
+      "org": null,
+      "repo": "test",
+      "sha": "changeId",
+      "tag": "version",
+    },
+    "name": "TestGithubIntegrationService.tagCreate",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestGithubIntegrationService.tagCreate",
+    "result": undefined,
+  },
+]
+`;
+
+exports[`Github stream should detach 1`] = `
+[
+  {
+    "args": {
+      "*": [],
+      "assertType": "github",
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+          "repo": "repo",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": {
+      "$$data": "TestGithubIntegrationService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "assertType": "github",
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+          "repo": "repo",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": {
+      "$$data": "TestGithubIntegrationService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+          "repo": "repo",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getTargetByTargetStream",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getTargetByTargetStream",
+    "result": {
+      "id": "testTarget",
+      "type": "test",
+      "versioning": "test",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestProject.getEnvVersioningByTarget",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getEnvVersioningByTarget",
+    "result": {
+      "$$data": "TestVersioningService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [
+        "branch",
+      ],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestVersioningService.getCurrent",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestVersioningService.getCurrent",
+    "result": "testBranch",
+  },
+  {
+    "args": {
+      "*": [],
+      "branch": "testBranch",
+      "repo": "repo",
+    },
+    "name": "TestGithubIntegrationService.branchDelete",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestGithubIntegrationService.branchDelete",
+    "result": undefined,
+  },
+]
+`;
+
+exports[`Github stream should detach with stream id as repo 1`] = `
+[
+  {
+    "args": {
+      "*": [],
+      "assertType": "github",
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": {
+      "$$data": "TestGithubIntegrationService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "assertType": "github",
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": {
+      "$$data": "TestGithubIntegrationService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getTargetByTargetStream",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getTargetByTargetStream",
+    "result": {
+      "id": "testTarget",
+      "type": "test",
+      "versioning": "test",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestProject.getEnvVersioningByTarget",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestProject.getEnvVersioningByTarget",
+    "result": {
+      "$$data": "TestVersioningService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [
+        "branch",
+      ],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestVersioningService.getCurrent",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestVersioningService.getCurrent",
+    "result": "testBranch",
+  },
+  {
+    "args": {
+      "*": [],
+      "branch": "testBranch",
+      "repo": "test",
+    },
+    "name": "TestGithubIntegrationService.branchDelete",
+    "result": undefined,
+  },
+  {
+    "args": undefined,
+    "name": "TestGithubIntegrationService.branchDelete",
+    "result": undefined,
+  },
+]
+`;

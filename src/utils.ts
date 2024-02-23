@@ -4,6 +4,8 @@ import fs from 'fs';
 import { logError } from './logger';
 import { rest } from './services/rest-api.service';
 
+export const IS_TEST = process.env.NODE_ENV === 'test';
+
 export class AwaitableContainer {
   private buckets = new Map<string, {
     awaitables: [

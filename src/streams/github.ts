@@ -82,7 +82,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
     await integration.branchDelete(
       branchName,
-      stream.id,
+      stream?.config?.repo ?? stream.id,
     );
 
     return null;
@@ -278,7 +278,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
   private async getBranch(stream: IGithubTargetStream) {
     const project = this.projectsService.get(stream.ref.projectId);
-    const integration = project.getEnvIntegraionByTargetStream<GithubIntegrationService>(stream);
+    const integration = project.getEnvIntegraionByTargetStream<GithubIntegrationService>(stream, this.type);
     const target = project.getTargetByTargetStream(stream);
     const branch = await project.getEnvVersioningByTarget(target)
       .getCurrent(target, stream.config?.branch ?? integration.config?.branch);

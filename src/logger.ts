@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from 'winston';
+import {IS_TEST} from './utils';
 
 export const logger = createLogger({
   level: 'debug',
@@ -28,6 +29,10 @@ function argNames(fn) {
 
 export function Log(level: string = logger.level) {
   return (target, propertyName, descriptor) => {
+    if (IS_TEST) {
+      return;
+    }
+
     const paramTypes = argNames(descriptor.value);
     const fn = descriptor.value;
     const fnName = target ? `${target.constructor.name}.${propertyName}` : propertyName;

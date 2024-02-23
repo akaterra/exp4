@@ -96,13 +96,51 @@ artifacts:
             valuePath: "status"
         to: "link"
         type: "argocd:syncStatus"
+  argocdApplicationImageTagDeployment:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplication
+    config:
+      "ArgoCD Image tag":
+        source: "argocdApplication.status.summary.images"
+        filter:
+          "...":
+            contains:
+              param: "ref.streamId"
+        pattern: "\\:([\\w\\-\\.]+)$"
+        keys:
+          - 1
+        to: null
+        type: "dockerImage"
+      "ArgoCD Deploy status":
+        source: "argocdApplication.status.resources"
+        filter:
+          name:
+            in:
+              coalesce:
+                - param: "stream.config.argocdServiceName"
+                - param: "ref.streamId"
+          kind:
+            eq: "Deployment"
+        pattern: null
+        keys:
+          - valueMapping:
+              OutOfSync:
+                level: warning
+                value: "out of sync"
+              Synced:
+                level: success
+                value: "synced"
+            valuePath: "status"
+        to: "link"
+        type: "argocd:syncStatus"
   githubActionArtifact:
     type: "github:workflowArtifact"
     config:
       integration: "githubStg"
       name: "imagetag"
       file: "imagetag.txt"
-      saveAs: "GitHub Action Image tag"
+      saveAs: "Build Image tag"
 
 definitions:
   none: null
@@ -731,8 +769,9 @@ targets:
         config:
           integration: "githubDev"
           argocdServiceName:
-            - "gp-routes-calc-dev"
-            - "gp-routes-calc-dev-web"
+            - "gp-routes-calc"
+            - "gp-routes-calc-web"
+          argocdServiceKind: "Deployment"
           jenkins:
             flows:
               migrate:
@@ -930,13 +969,14 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-routes-calc-dev:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubStg"
         artifacts:
-          - "argocdApplicationImageTag"
+          - "argocdApplicationImageTagDeployment"
       gp-uam-service:
         use: "targets.dev.streams.%"
         config:
