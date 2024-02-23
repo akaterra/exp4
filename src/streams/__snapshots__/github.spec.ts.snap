@@ -12,10 +12,8 @@ exports[`Github stream should bookmark 1`] = `
       "targetId": undefined,
     },
     "name": "TestProject.getStreamStateByTargetIdAndStreamId",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getStreamStateByTargetIdAndStreamId",
     "result": {
       "history": {
@@ -39,12 +37,9 @@ exports[`Github stream should bookmark 1`] = `
       "tag": "version",
     },
     "name": "TestGithubIntegrationService.tagCreate",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestGithubIntegrationService.tagCreate",
-    "result": undefined,
   },
 ]
 `;
@@ -61,10 +56,8 @@ exports[`Github stream should bookmark with stream id as repo 1`] = `
       "targetId": undefined,
     },
     "name": "TestProject.getStreamStateByTargetIdAndStreamId",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getStreamStateByTargetIdAndStreamId",
     "result": {
       "history": {
@@ -88,12 +81,9 @@ exports[`Github stream should bookmark with stream id as repo 1`] = `
       "tag": "version",
     },
     "name": "TestGithubIntegrationService.tagCreate",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestGithubIntegrationService.tagCreate",
-    "result": undefined,
   },
 ]
 `;
@@ -119,10 +109,8 @@ exports[`Github stream should detach 1`] = `
       },
     },
     "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getEnvIntegraionByTargetStream",
     "result": {
       "$$data": "TestGithubIntegrationService",
@@ -148,10 +136,8 @@ exports[`Github stream should detach 1`] = `
       },
     },
     "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getEnvIntegraionByTargetStream",
     "result": {
       "$$data": "TestGithubIntegrationService",
@@ -176,10 +162,8 @@ exports[`Github stream should detach 1`] = `
       },
     },
     "name": "TestProject.getTargetByTargetStream",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getTargetByTargetStream",
     "result": {
       "id": "testTarget",
@@ -197,10 +181,8 @@ exports[`Github stream should detach 1`] = `
       },
     },
     "name": "TestProject.getEnvVersioningByTarget",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getEnvVersioningByTarget",
     "result": {
       "$$data": "TestVersioningService",
@@ -219,10 +201,8 @@ exports[`Github stream should detach 1`] = `
       },
     },
     "name": "TestVersioningService.getCurrent",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestVersioningService.getCurrent",
     "result": "testBranch",
   },
@@ -233,12 +213,9 @@ exports[`Github stream should detach 1`] = `
       "repo": "repo",
     },
     "name": "TestGithubIntegrationService.branchDelete",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestGithubIntegrationService.branchDelete",
-    "result": undefined,
   },
 ]
 `;
@@ -263,10 +240,8 @@ exports[`Github stream should detach with stream id as repo 1`] = `
       },
     },
     "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getEnvIntegraionByTargetStream",
     "result": {
       "$$data": "TestGithubIntegrationService",
@@ -291,10 +266,8 @@ exports[`Github stream should detach with stream id as repo 1`] = `
       },
     },
     "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getEnvIntegraionByTargetStream",
     "result": {
       "$$data": "TestGithubIntegrationService",
@@ -318,10 +291,8 @@ exports[`Github stream should detach with stream id as repo 1`] = `
       },
     },
     "name": "TestProject.getTargetByTargetStream",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getTargetByTargetStream",
     "result": {
       "id": "testTarget",
@@ -339,10 +310,8 @@ exports[`Github stream should detach with stream id as repo 1`] = `
       },
     },
     "name": "TestProject.getEnvVersioningByTarget",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestProject.getEnvVersioningByTarget",
     "result": {
       "$$data": "TestVersioningService",
@@ -361,10 +330,8 @@ exports[`Github stream should detach with stream id as repo 1`] = `
       },
     },
     "name": "TestVersioningService.getCurrent",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestVersioningService.getCurrent",
     "result": "testBranch",
   },
@@ -375,12 +342,327 @@ exports[`Github stream should detach with stream id as repo 1`] = `
       "repo": "test",
     },
     "name": "TestGithubIntegrationService.branchDelete",
-    "result": undefined,
   },
   {
-    "args": undefined,
     "name": "TestGithubIntegrationService.branchDelete",
-    "result": undefined,
+  },
+]
+`;
+
+exports[`Github stream should get state 1`] = `
+[
+  {
+    "args": {
+      "*": [],
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "GithubStreamService.streamGetState",
+  },
+  {
+    "args": {
+      "*": [],
+      "assertType": "github",
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+  },
+  {
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": {
+      "$$data": "TestGithubIntegrationService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "assertType": "github",
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+  },
+  {
+    "name": "TestProject.getEnvIntegraionByTargetStream",
+    "result": {
+      "$$data": "TestGithubIntegrationService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getTargetByTargetStream",
+  },
+  {
+    "name": "TestProject.getTargetByTargetStream",
+    "result": {
+      "id": "testTarget",
+      "type": "test",
+      "versioning": "test",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestProject.getEnvVersioningByTarget",
+  },
+  {
+    "name": "TestProject.getEnvVersioningByTarget",
+    "result": {
+      "$$data": "TestVersioningService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [
+        "branch",
+      ],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestVersioningService.getCurrent",
+  },
+  {
+    "name": "TestVersioningService.getCurrent",
+    "result": "testBranch",
+  },
+  {
+    "args": {
+      "*": [],
+      "branch": "testBranch",
+      "repo": "test",
+    },
+    "name": "TestGithubIntegrationService.branchGet",
+  },
+  {
+    "name": "TestGithubIntegrationService.branchGet",
+    "result": {
+      "_links": {
+        "html": "branchLink",
+      },
+      "commit": {
+        "commit": {
+          "author": {
+            "html_url": "commitAuthorLink",
+            "name": "commitAuthorName",
+          },
+          "committer": {
+            "date": "2020-01-01",
+          },
+          "message": "commitMessage",
+        },
+        "html_url": "commitLink",
+        "sha": "commitSha",
+      },
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "stream": {
+        "config": {
+          "branch": "branch",
+          "integration": "test",
+          "org": "org",
+        },
+        "id": "test",
+        "ref": {
+          "projectId": "test",
+        },
+        "type": "github",
+      },
+    },
+    "name": "TestProject.getTargetByTargetStream",
+  },
+  {
+    "name": "TestProject.getTargetByTargetStream",
+    "result": {
+      "id": "testTarget",
+      "type": "test",
+      "versioning": "test",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "target": {
+        "id": "testTarget",
+        "type": "test",
+        "versioning": "test",
+      },
+    },
+    "name": "TestProject.getEnvVersioningByTarget",
+  },
+  {
+    "name": "TestProject.getEnvVersioningByTarget",
+    "result": {
+      "$$data": "TestVersioningService",
+      "$$type": "instanceOf",
+    },
+  },
+  {
+    "args": {
+      "*": [],
+      "branch": "testBranch",
+      "org": "org",
+      "repo": "test",
+    },
+    "name": "TestGithubIntegrationService.workflowRunsGet",
+  },
+  {
+    "name": "TestGithubIntegrationService.workflowRunsGet",
+    "result": [
+      {
+        "actor": {
+          "html_url": "workflowActorLink",
+          "name": "workflowActorName",
+        },
+        "id": "workflowId",
+      },
+    ],
+  },
+  {
+    "args": {
+      "*": [],
+      "org": "org",
+      "repo": "test",
+      "runId": "workflowId",
+    },
+    "name": "TestGithubIntegrationService.workflowJobsGet",
+  },
+  {
+    "name": "TestGithubIntegrationService.workflowJobsGet",
+    "result": [
+      {
+        "html_url": "workflowJobLink",
+        "steps": [
+          {
+            "completed_at": "2020-01-02",
+            "conclusion": "success",
+            "name": "workflowJobName",
+            "number": 1,
+            "started_at": "2020-01-01",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    "name": "GithubStreamService.streamGetState",
+    "result": {
+      "history": {
+        "action": [
+          {
+            "author": {
+              "link": "workflowActorLink",
+              "name": "workflowActorName",
+            },
+            "description": undefined,
+            "id": "workflowId",
+            "link": null,
+            "metadata": {},
+            "status": null,
+            "steps": {
+              "1": {
+                "description": "workflowJobName",
+                "id": "1",
+                "link": "workflowJobLink#step:1:1",
+                "runningTimeSeconds": 86400,
+                "status": "completed",
+                "type": "github:workflow:job",
+              },
+            },
+            "time": null,
+            "type": "github:workflow",
+          },
+        ],
+        "artifact": [],
+        "change": [
+          {
+            "author": {
+              "link": "commitAuthorLink",
+              "name": "commitAuthorName",
+            },
+            "description": "commitMessage",
+            "id": "commitSha",
+            "link": "commitLink",
+            "metadata": {},
+            "status": null,
+            "steps": null,
+            "time": {},
+            "type": "github:commit",
+          },
+        ],
+      },
+      "id": "test",
+      "isSyncing": false,
+      "link": "branchLink",
+      "metadata": {
+        "branch": "testBranch",
+        "org": "org",
+      },
+      "projectId": "test",
+      "targetId": undefined,
+      "type": "github",
+      "ver": 1,
+      "version": null,
+    },
   },
 ]
 `;

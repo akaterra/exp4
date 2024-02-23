@@ -35,7 +35,7 @@ describe('Github stream', () => {
   }
 
   function snapshot() {
-    return observer
+    const snapshot = observer
       .filter()
         .notPromiseResult()
       .snapshot()
@@ -43,6 +43,16 @@ describe('Github stream', () => {
         .addInstanceOfProcessor(TestVersioningService)
         .includeName()
         .serialize();
+    
+    for (const item of snapshot) {
+      for (const key of Object.keys(item)) {
+        if (item[key] === undefined) {
+          delete item[key];
+        }
+      }
+    }
+
+    return snapshot;
   }
 
   beforeAll(() => {
@@ -194,6 +204,80 @@ describe('Github stream', () => {
     });
 
     await stream.streamDetach({
+      id: 'test',
+      type: 'github',
+
+      ref: {
+        projectId: 'test',
+      },
+
+      config: {
+        integration: 'test',
+        org: 'org',
+        // repo: 'repo',
+        branch: 'branch',
+      },
+    });
+
+    expect(snapshot()).toMatchSnapshot();
+  });
+
+  it('should get state', async () => {
+    const stream = new GithubStreamService();
+
+    observer.override(TestGithubIntegrationService, {
+      branchGet: {
+        commit: {
+          sha: 'commitSha',
+          commit: {
+            author: {
+              name: 'commitAuthorName',
+              html_url: 'commitAuthorLink',
+            },
+            committer: {
+              date: '2020-01-01',
+            },
+            message: 'commitMessage',
+          },
+          html_url: 'commitLink',
+        },
+        _links: {
+          html: 'branchLink',
+        },
+      },
+      workflowRunsGet: [ {
+        id: 'workflowId',
+        actor: { name: 'workflowActorName', html_url: 'workflowActorLink' }
+      } ],
+      workflowJobsGet: [ {
+        html_url: 'workflowJobLink',
+        steps: [ {
+          name: 'workflowJobName',
+          number: 1,
+          conclusion: 'success',
+          started_at: '2020-01-01',
+          completed_at: '2020-01-02',
+        } ],
+      } ],
+    });
+    observer.override(TestProject, {
+      getEnvIntegraionByTargetStream: Initial,
+      getEnvVersioningByTarget: Initial,
+      getTargetByTargetStream: {
+        id: 'testTarget',
+        type: 'test',
+
+        versioning: 'test',
+      },
+    });
+    observer.override(TestVersioningService, {
+      getCurrent: Promise.resolve('testBranch'),
+    });
+    observer.override(GithubStreamService, {
+      streamGetState: Initial,
+    });
+
+    await stream.streamGetState({
       id: 'test',
       type: 'github',
 

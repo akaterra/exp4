@@ -67,7 +67,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       source.history.change[0].id,
       source.version,
       null,
-      stream?.config?.repo ?? stream?.id,
+      this.getRepoRef(stream),
       null,
       false,
     );
@@ -82,7 +82,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
     await integration.branchDelete(
       branchName,
-      stream?.config?.repo ?? stream.id,
+      this.getRepoRef(stream),
     );
 
     return null;
@@ -114,15 +114,22 @@ export class GithubStreamService extends EntityService implements IStreamService
 
       const integration = this.getIntegrationService(stream);
       const branchName = await this.getBranch(stream);
-      const branch = hasScope('change', scopes) ? await integration.branchGet(branchName, stream.id) : null;
-      const versioningService = await this.projectsService
-        .get(stream.ref.projectId)
-        .getEnvVersioningByTargetId(stream.ref.targetId);
-      const workflowRuns = hasScope('action', scopes) && branch
-        ? await integration.workflowRunsGet(stream.config.branch ?? branchName, stream.id)
+      const repo = this.getRepoRef(stream);
+      const branch = hasScope('change', scopes)
+        ? await integration.branchGet(branchName, repo)
         : null;
-      const workflowRunsJobs = hasScope('action', scopes) && workflowRuns?.[0] && (hasStrictScope('*', scopes) || hasStrictScope('action', scopes) || workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id))
-        ? await integration.workflowJobsGet(workflowRuns[0].id, stream.id, stream.config.org)
+      const versioningService = this.getVersioningService(stream);
+      const workflowRuns = hasScope('action', scopes) && branch
+        ? await integration.workflowRunsGet(branchName, repo, stream.config?.org)
+        : null;
+      const workflowRunsJobs = hasScope('action', scopes) &&
+          workflowRuns?.[0] &&
+          (
+            hasStrictScope('*', scopes) ||
+            hasStrictScope('action', scopes) ||
+            workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id)
+          )
+        ? await integration.workflowJobsGet(workflowRuns[0].id, repo, stream.config?.org)
         : null;
 
       const metadata = {
@@ -276,13 +283,28 @@ export class GithubStreamService extends EntityService implements IStreamService
       .getEnvIntegraionByTargetStream<GithubIntegrationService>(stream, this.type);
   }
 
+  private getVersioningService(stream: IGithubTargetStream, target?: IProjectTargetDef) {
+    const project = this.projectsService.get(stream.ref.projectId);
+
+    if (!target) {
+      target = project.getTargetByTargetStream(stream);
+    }
+
+    return project.getEnvVersioningByTarget(target);
+  }
+
+
   private async getBranch(stream: IGithubTargetStream) {
     const project = this.projectsService.get(stream.ref.projectId);
     const integration = project.getEnvIntegraionByTargetStream<GithubIntegrationService>(stream, this.type);
     const target = project.getTargetByTargetStream(stream);
-    const branch = await project.getEnvVersioningByTarget(target)
+    const branch = await this.getVersioningService(stream, target)
       .getCurrent(target, stream.config?.branch ?? integration.config?.branch);
 
     return branch ?? integration?.config?.branch;
+  }
+
+  private getRepoRef(stream: IGithubTargetStream): string {
+    return stream.config?.repo ?? stream.id;
   }
 }
