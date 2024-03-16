@@ -1,668 +1,658 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Github stream should bookmark 1`] = `
-[
-  {
-    "args": {
-      "*": [],
-      "scopes": {
-        "change": true,
-      },
-      "streamId": undefined,
-      "targetId": undefined,
-    },
-    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
-  },
-  {
-    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
-    "result": {
-      "history": {
-        "change": [
-          {
-            "id": "changeId",
-          },
-        ],
-      },
-      "version": "version",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "commitMessage": null,
-      "lightweight": false,
-      "org": null,
-      "repo": "repo",
-      "sha": "changeId",
-      "tag": "version",
-    },
-    "name": "TestGithubIntegrationService.tagCreate",
-  },
-  {
-    "name": "TestGithubIntegrationService.tagCreate",
-  },
-]
+"
+--> TestProject.getStreamStateByTargetIdAndStreamId --> {
+        * = []
+        targetId = undefined
+        streamId = undefined
+        scopes = {
+            change = true
+        }
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestProject.getStreamStateByTargetIdAndStreamId <-- {
+        history = {
+            change = [
+                {
+                    id = "changeId"
+                }
+            ]
+        }
+        version = "version"
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestGithubIntegrationService.tagCreate --> {
+        * = []
+        sha = "changeId"
+        tag = "version"
+        commitMessage = null
+        repo = "repo"
+        org = null
+        lightweight = false
+    }
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestGithubIntegrationService.tagCreate <-- undefined
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+"
 `;
 
 exports[`Github stream should bookmark with stream id as repo 1`] = `
-[
-  {
-    "args": {
-      "*": [],
-      "scopes": {
-        "change": true,
-      },
-      "streamId": undefined,
-      "targetId": undefined,
-    },
-    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
-  },
-  {
-    "name": "TestProject.getStreamStateByTargetIdAndStreamId",
-    "result": {
-      "history": {
-        "change": [
-          {
-            "id": "changeId",
-          },
-        ],
-      },
-      "version": "version",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "commitMessage": null,
-      "lightweight": false,
-      "org": null,
-      "repo": "test",
-      "sha": "changeId",
-      "tag": "version",
-    },
-    "name": "TestGithubIntegrationService.tagCreate",
-  },
-  {
-    "name": "TestGithubIntegrationService.tagCreate",
-  },
-]
+"
+--> TestProject.getStreamStateByTargetIdAndStreamId --> {
+        * = []
+        targetId = undefined
+        streamId = undefined
+        scopes = {
+            change = true
+        }
+    }
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:49:14
+
+<-- TestProject.getStreamStateByTargetIdAndStreamId <-- {
+        history = {
+            change = [
+                {
+                    id = "changeId"
+                }
+            ]
+        }
+        version = "version"
+    }
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:49:14
+
+--> TestGithubIntegrationService.tagCreate --> {
+        * = []
+        sha = "changeId"
+        tag = "version"
+        commitMessage = null
+        repo = "test"
+        org = null
+        lightweight = false
+    }
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:54:27
+
+<-- TestGithubIntegrationService.tagCreate <-- undefined
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:54:27
+"
 `;
 
 exports[`Github stream should detach 1`] = `
-[
-  {
-    "args": {
-      "*": [],
-      "assertType": "github",
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-          "repo": "repo",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-  },
-  {
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": {
-      "$$data": "TestGithubIntegrationService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "assertType": "github",
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-          "repo": "repo",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-  },
-  {
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": {
-      "$$data": "TestGithubIntegrationService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-          "repo": "repo",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getTargetByTargetStream",
-  },
-  {
-    "name": "TestProject.getTargetByTargetStream",
-    "result": {
-      "id": "testTarget",
-      "type": "test",
-      "versioning": "test",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestProject.getEnvVersioningByTarget",
-  },
-  {
-    "name": "TestProject.getEnvVersioningByTarget",
-    "result": {
-      "$$data": "TestVersioningService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [
-        "branch",
-      ],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestVersioningService.getCurrent",
-  },
-  {
-    "name": "TestVersioningService.getCurrent",
-    "result": "testBranch",
-  },
-  {
-    "args": {
-      "*": [],
-      "branch": "testBranch",
-      "repo": "repo",
-    },
-    "name": "TestGithubIntegrationService.branchDelete",
-  },
-  {
-    "name": "TestGithubIntegrationService.branchDelete",
-  },
-]
+"
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                repo = "repo"
+                branch = "branch"
+            }
+        }
+        assertType = "github"
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- {
+        [[ Data ]] = "TestGithubIntegrationService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                repo = "repo"
+                branch = "branch"
+            }
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- {
+        [[ Data ]] = "TestGithubIntegrationService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                repo = "repo"
+                branch = "branch"
+            }
+        }
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestProject.getEnvVersioningByTarget <-- {
+        [[ Data ]] = "TestVersioningService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestVersioningService.getCurrent --> {
+        * = [
+            "branch"
+        ]
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = TestVersioningService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestVersioningService.getCurrent <-- "testBranch"
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:226:14
+
+--> TestGithubIntegrationService.branchDelete --> {
+        * = []
+        branch = "testBranch"
+        repo = "repo"
+    }
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestGithubIntegrationService.branchDelete <-- undefined
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+"
 `;
 
 exports[`Github stream should detach with stream id as repo 1`] = `
-[
-  {
-    "args": {
-      "*": [],
-      "assertType": "github",
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-  },
-  {
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": {
-      "$$data": "TestGithubIntegrationService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "assertType": "github",
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-  },
-  {
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": {
-      "$$data": "TestGithubIntegrationService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getTargetByTargetStream",
-  },
-  {
-    "name": "TestProject.getTargetByTargetStream",
-    "result": {
-      "id": "testTarget",
-      "type": "test",
-      "versioning": "test",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestProject.getEnvVersioningByTarget",
-  },
-  {
-    "name": "TestProject.getEnvVersioningByTarget",
-    "result": {
-      "$$data": "TestVersioningService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [
-        "branch",
-      ],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestVersioningService.getCurrent",
-  },
-  {
-    "name": "TestVersioningService.getCurrent",
-    "result": "testBranch",
-  },
-  {
-    "args": {
-      "*": [],
-      "branch": "testBranch",
-      "repo": "test",
-    },
-    "name": "TestGithubIntegrationService.branchDelete",
-  },
-  {
-    "name": "TestGithubIntegrationService.branchDelete",
-  },
-]
+"
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- {
+        [[ Data ]] = "TestGithubIntegrationService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- {
+        [[ Data ]] = "TestGithubIntegrationService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+
+<-- TestProject.getEnvVersioningByTarget <-- {
+        [[ Data ]] = "TestVersioningService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+
+--> TestVersioningService.getCurrent --> {
+        * = [
+            "branch"
+        ]
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:226:14
+
+<-- TestVersioningService.getCurrent <-- "testBranch"
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:59:39
+
+--> TestGithubIntegrationService.branchDelete --> {
+        * = []
+        branch = "testBranch"
+        repo = "test"
+    }
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:60:27
+
+<-- TestGithubIntegrationService.branchDelete <-- undefined
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:60:27
+"
 `;
 
 exports[`Github stream should get state 1`] = `
-[
-  {
-    "args": {
-      "*": [],
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "GithubStreamService.streamGetState",
-  },
-  {
-    "args": {
-      "*": [],
-      "assertType": "github",
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-  },
-  {
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": {
-      "$$data": "TestGithubIntegrationService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "assertType": "github",
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-  },
-  {
-    "name": "TestProject.getEnvIntegraionByTargetStream",
-    "result": {
-      "$$data": "TestGithubIntegrationService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getTargetByTargetStream",
-  },
-  {
-    "name": "TestProject.getTargetByTargetStream",
-    "result": {
-      "id": "testTarget",
-      "type": "test",
-      "versioning": "test",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestProject.getEnvVersioningByTarget",
-  },
-  {
-    "name": "TestProject.getEnvVersioningByTarget",
-    "result": {
-      "$$data": "TestVersioningService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [
-        "branch",
-      ],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestVersioningService.getCurrent",
-  },
-  {
-    "name": "TestVersioningService.getCurrent",
-    "result": "testBranch",
-  },
-  {
-    "args": {
-      "*": [],
-      "branch": "testBranch",
-      "repo": "test",
-    },
-    "name": "TestGithubIntegrationService.branchGet",
-  },
-  {
-    "name": "TestGithubIntegrationService.branchGet",
-    "result": {
-      "_links": {
-        "html": "branchLink",
-      },
-      "commit": {
-        "commit": {
-          "author": {
-            "html_url": "commitAuthorLink",
-            "name": "commitAuthorName",
-          },
-          "committer": {
-            "date": "2020-01-01",
-          },
-          "message": "commitMessage",
-        },
-        "html_url": "commitLink",
-        "sha": "commitSha",
-      },
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "stream": {
-        "config": {
-          "branch": "branch",
-          "integration": "test",
-          "org": "org",
-        },
-        "id": "test",
-        "ref": {
-          "projectId": "test",
-        },
-        "type": "github",
-      },
-    },
-    "name": "TestProject.getTargetByTargetStream",
-  },
-  {
-    "name": "TestProject.getTargetByTargetStream",
-    "result": {
-      "id": "testTarget",
-      "type": "test",
-      "versioning": "test",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "target": {
-        "id": "testTarget",
-        "type": "test",
-        "versioning": "test",
-      },
-    },
-    "name": "TestProject.getEnvVersioningByTarget",
-  },
-  {
-    "name": "TestProject.getEnvVersioningByTarget",
-    "result": {
-      "$$data": "TestVersioningService",
-      "$$type": "instanceOf",
-    },
-  },
-  {
-    "args": {
-      "*": [],
-      "branch": "testBranch",
-      "org": "org",
-      "repo": "test",
-    },
-    "name": "TestGithubIntegrationService.workflowRunsGet",
-  },
-  {
-    "name": "TestGithubIntegrationService.workflowRunsGet",
-    "result": [
-      {
-        "actor": {
-          "html_url": "workflowActorLink",
-          "name": "workflowActorName",
-        },
-        "id": "workflowId",
-      },
-    ],
-  },
-  {
-    "args": {
-      "*": [],
-      "org": "org",
-      "repo": "test",
-      "runId": "workflowId",
-    },
-    "name": "TestGithubIntegrationService.workflowJobsGet",
-  },
-  {
-    "name": "TestGithubIntegrationService.workflowJobsGet",
-    "result": [
-      {
-        "html_url": "workflowJobLink",
-        "steps": [
-          {
-            "completed_at": "2020-01-02",
-            "conclusion": "success",
-            "name": "workflowJobName",
-            "number": 1,
-            "started_at": "2020-01-01",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    "name": "GithubStreamService.streamGetState",
-    "result": {
-      "history": {
-        "action": [
-          {
-            "author": {
-              "link": "workflowActorLink",
-              "name": "workflowActorName",
-            },
-            "description": undefined,
-            "id": "workflowId",
-            "link": null,
-            "metadata": {},
-            "status": null,
-            "steps": {
-              "1": {
-                "description": "workflowJobName",
-                "id": "1",
-                "link": "workflowJobLink#step:1:1",
-                "runningTimeSeconds": 86400,
-                "status": "completed",
-                "type": "github:workflow:job",
-              },
-            },
-            "time": null,
-            "type": "github:workflow",
-          },
-        ],
-        "artifact": [],
-        "change": [
-          {
-            "author": {
-              "link": "commitAuthorLink",
-              "name": "commitAuthorName",
-            },
-            "description": "commitMessage",
-            "id": "commitSha",
-            "link": "commitLink",
-            "metadata": {},
-            "status": null,
-            "steps": null,
-            "time": {},
-            "type": "github:commit",
-          },
-        ],
-      },
-      "id": "test",
-      "isSyncing": false,
-      "link": "branchLink",
-      "metadata": {
-        "branch": "testBranch",
-        "org": "org",
-      },
-      "projectId": "test",
-      "targetId": undefined,
-      "type": "github",
-      "ver": 1,
-      "version": null,
-    },
-  },
-]
+"
+--> GithubStreamService.streamGetState --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+        scopes = {
+            * = true
+        }
+        context = {
+            artifact = {
+                githubWorkflowId = "workflowId"
+                githubWorkflowJobId = "workflowJobId"
+                githubWorkflowRunJobStatus = "success"
+                ref = {
+                    projectId = "test"
+                }
+                stream = {
+                    id = "test"
+                    type = "github"
+                    ref = {
+                        projectId = "test"
+                    }
+                    config = {
+                        integration = "test"
+                        org = "org"
+                        branch = "branch"
+                    }
+                    artifacts = [
+                        "test"
+                    ]
+                }
+            }
+        }
+    }
+    caller = GithubStreamService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- {
+        [[ Data ]] = "TestGithubIntegrationService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- {
+        [[ Data ]] = "TestGithubIntegrationService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+
+<-- TestProject.getEnvVersioningByTarget <-- {
+        [[ Data ]] = "TestVersioningService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+
+--> TestVersioningService.getCurrent --> {
+        * = [
+            "branch"
+        ]
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:226:14
+
+<-- TestVersioningService.getCurrent <-- "testBranch"
+    caller = ? : ./src/streams/github.ts:83:43
+
+--> TestGithubIntegrationService.branchGet --> {
+        * = []
+        branch = "testBranch"
+        repo = "test"
+    }
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestGithubIntegrationService.branchGet <-- {
+        commit = {
+            sha = "commitSha"
+            commit = {
+                author = {
+                    name = "commitAuthorName"
+                    html_url = "commitAuthorLink"
+                }
+                committer = {
+                    date = "2020-01-01"
+                }
+                message = "commitMessage"
+            }
+            html_url = "commitLink"
+        }
+        _links = {
+            html = "branchLink"
+        }
+    }
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:217:30
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:217:30
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+
+<-- TestProject.getEnvVersioningByTarget <-- {
+        [[ Data ]] = "TestVersioningService"
+        [[ Type ]] = "instanceOf"
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+
+--> TestGithubIntegrationService.workflowRunsGet --> {
+        * = []
+        branch = "testBranch"
+        repo = "test"
+        org = "org"
+    }
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestGithubIntegrationService.workflowRunsGet <-- [
+        {
+            id = "workflowId"
+            actor = {
+                name = "workflowActorName"
+                html_url = "workflowActorLink"
+            }
+            status = "success"
+        }
+    ]
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+--> TestGithubIntegrationService.workflowJobsGet --> {
+        * = []
+        runId = "workflowId"
+        repo = "test"
+        org = "org"
+    }
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- TestGithubIntegrationService.workflowJobsGet <-- [
+        {
+            id = "workflowJobId"
+            html_url = "workflowJobLink"
+            steps = [
+                {
+                    name = "workflowJobName"
+                    number = 1
+                    conclusion = "success"
+                    started_at = "2020-01-01"
+                    completed_at = "2020-01-02"
+                }
+            ]
+        }
+    ]
+    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+
+<-- GithubStreamService.streamGetState <-- [[ StreamState : {
+        id = "test"
+        type = "github"
+        projectId = "test"
+        targetId = undefined
+        history = {
+            action = [
+                {
+                    id = "workflowId"
+                    type = "github:workflow"
+                    author = {
+                        name = "workflowActorName"
+                        link = "workflowActorLink"
+                    }
+                    description = undefined
+                    link = null
+                    metadata = {}
+                    steps = {
+                        1 = {
+                            id = "1"
+                            type = "github:workflow:job"
+                            description = "workflowJobName"
+                            link = "workflowJobLink#step:1:1"
+                            runningTimeSeconds = 86400
+                            status = "completed"
+                        }
+                    }
+                    status = "success"
+                    time = null
+                }
+            ]
+            artifact = []
+            change = [
+                {
+                    id = "commitSha"
+                    type = "github:commit"
+                    author = {
+                        name = "commitAuthorName"
+                        link = "commitAuthorLink"
+                    }
+                    description = "commitMessage"
+                    link = "commitLink"
+                    metadata = {}
+                    status = null
+                    steps = null
+                    time = [[ Date : 2020-01-01T00:00:00.000Z ]]
+                }
+            ]
+        }
+        isSyncing = false
+        link = "branchLink"
+        metadata = {
+            org = "org"
+            branch = "testBranch"
+        }
+        version = null
+        ver = 1
+    } ]]
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:243:22
+"
 `;

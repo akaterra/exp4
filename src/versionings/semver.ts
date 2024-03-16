@@ -65,19 +65,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = await this.getCurrent(target, false);
     const storage = this.getStorage(target);
 
-    if (version) {
-      if (params?.releaseName) {
-        version = semver.inc(version, 'prepatch', params?.releaseName, false);
-      } else { 
-        version = semver.inc(version, 'patch');
-      }
-    } else {
-      if (params?.releaseName) {
-        version = `0.1.0-${params?.releaseName}`;
-      } else {
-        version = '0.1.0';
-      }
-    }
+    version = incVersion(version, params?.releaseName, 'patch');
 
     await this.setTargetVersionHistory(target, storage, version);
     await this.setTargetVersion(target, storage, version);
@@ -90,19 +78,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = await this.getCurrent(target, false);
     const storage = this.getStorage(target);
 
-    if (version) {
-      if (params?.releaseName) {
-        version = semver.inc(version, 'preminor', params?.releaseName, false);
-      } else {  
-        version = semver.inc(version, 'minor');
-      }
-    } else {
-      if (params?.releaseName) {
-        version = `0.1.0-${params?.releaseName}`;
-      } else {
-        version = '0.1.0';
-      }
-    }
+    version = incVersion(version, params?.releaseName, 'minor');
 
     await this.setTargetVersionHistory(target, storage, version);
     await this.setTargetVersion(target, storage, version);
@@ -180,23 +156,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = await this.getCurrentStream(stream, false);
     const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
-    if (version) {
-      if (params?.releaseName) {
-        version = semver.inc(version, 'prepatch', params?.releaseName, false);
-      } else { 
-        version = semver.inc(version, 'patch');
-      }
-    } else {
-      if (params?.releaseName) {
-        version = `0.1.0-${params?.releaseName}`;
-      } else {
-        version = '0.1.0';
-      }
-    }
-
-    if (params?.releaseName) {
-      version = semver.inc(version, 'prerelease', params?.releaseName, false);
-    }
+    version = incVersion(version, params?.releaseName, 'patch');
 
     await this.setStreamVersionHistory(stream, storage, version);
     await this.setStreamVersion(stream, storage, version);
@@ -209,23 +169,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     let version = await this.getCurrentStream(stream, false);
     const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
 
-    if (version) {
-      if (params?.releaseName) {
-        version = semver.inc(version, 'preminor', params?.releaseName, false);
-      } else {  
-        version = semver.inc(version, 'minor');
-      }
-    } else {
-      if (params?.releaseName) {
-        version = `0.1.0-${params?.releaseName}`;
-      } else {
-        version = '0.1.0';
-      }
-    }
-
-    if (params?.releaseName) {
-      version = semver.inc(version, 'prerelease', params?.releaseName, false);
-    }
+    version = incVersion(version, params?.releaseName, 'minor');
 
     await this.setStreamVersionHistory(stream, storage, version);
     await this.setStreamVersion(stream, storage, version);
@@ -336,4 +280,33 @@ export class SemverVersioningService extends EntityService implements IVersionin
       20,
     );
   }
+}
+
+function incVersion(version, release, releaseType: 'major' | 'minor' | 'patch') {
+  if (!version) {
+    return release ? `0.1.0-${release}` : '0.1.0';
+  }
+
+  let major = semver.major(version);
+  let minor = semver.minor(version);
+  let patch = semver.patch(version);
+  let prerelease = release || (releaseType === 'patch' ? semver.prerelease(version) : '');
+
+  let newVersion = `${major}.${minor}.${patch}`;
+
+  switch (releaseType) {
+    case 'major':
+      newVersion = semver.inc(newVersion, 'major');
+      break;
+    case 'minor':
+      newVersion = semver.inc(newVersion, 'minor');
+      break;
+    case 'patch':
+      newVersion = semver.inc(newVersion, 'patch');
+      break;
+    default:
+      newVersion = 0 as never;
+  }
+
+  return prerelease ? `${newVersion}-${prerelease}` : newVersion;
 }

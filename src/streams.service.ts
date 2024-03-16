@@ -36,7 +36,7 @@ export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
           scopes,
         );
       } catch (err) {
-        logError(err, 'StreamsService.getState', { streamId: stream.id, scopes });
+        logError(err, 'StreamsService.getState', { ref: stream.ref, scopes });
       } finally {
         entity.isSyncing = false;
       }

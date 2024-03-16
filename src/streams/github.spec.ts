@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'source-map-support/register';
 import {IVersioningService} from '../versionings/versioning.service';
 import {IProjectTargetDef, IProjectTargetStreamDef, Project} from '../project';
 import {ProjectsService} from '../projects.service';
@@ -9,10 +10,10 @@ import {IntegrationsService} from '../integrations.service';
 import {GithubIntegrationService} from '../integrations/github';
 import {StubVersioningService} from '../versionings/stub';
 import {VersioningsService} from '../versionings.service';
-import { Initial, Observer } from '@akaterra.co/unitsnap';
+import { Observe, Observer, SnapshotStorageFormat } from '@akaterra.co/unitsnap';
 
 describe('Github stream', () => {
-  const observer = new Observer();
+  const observer = Observer();
 
   class TestGithubIntegrationService extends GithubIntegrationService {
     id = 'test';
@@ -41,16 +42,9 @@ describe('Github stream', () => {
       .snapshot()
         .addInstanceOfProcessor(TestGithubIntegrationService)
         .addInstanceOfProcessor(TestVersioningService)
+        .includeCaller()
         .includeName()
-        .serialize();
-    
-    for (const item of snapshot) {
-      for (const key of Object.keys(item)) {
-        if (item[key] === undefined) {
-          delete item[key];
-        }
-      }
-    }
+        .serialize(SnapshotStorageFormat.COMPACT);
 
     return snapshot;
   }
@@ -80,7 +74,7 @@ describe('Github stream', () => {
     const stream = new GithubStreamService();
 
     observer.override(TestGithubIntegrationService, {
-      tagCreate: Function,
+      tagCreate: undefined,
     });
     observer.override(TestProject, {
       getStreamStateByTargetIdAndStreamId: {
@@ -114,7 +108,7 @@ describe('Github stream', () => {
     const stream = new GithubStreamService();
 
     observer.override(TestGithubIntegrationService, {
-      tagCreate: Function,
+      tagCreate: undefined,
     });
     observer.override(TestProject, {
       getStreamStateByTargetIdAndStreamId: {
@@ -148,11 +142,11 @@ describe('Github stream', () => {
     const stream = new GithubStreamService();
 
     observer.override(TestGithubIntegrationService, {
-      branchDelete: Function,
+      branchDelete: undefined,
     });
     observer.override(TestProject, {
-      getEnvIntegraionByTargetStream: Initial,
-      getEnvVersioningByTarget: Initial,
+      getEnvIntegraionByTargetStream: Observe,
+      getEnvVersioningByTarget: Observe,
       getTargetByTargetStream: {
         id: 'testTarget',
         type: 'test',
@@ -187,11 +181,11 @@ describe('Github stream', () => {
     const stream = new GithubStreamService();
 
     observer.override(TestGithubIntegrationService, {
-      branchDelete: Function,
+      branchDelete: undefined,
     });
     observer.override(TestProject, {
-      getEnvIntegraionByTargetStream: Initial,
-      getEnvVersioningByTarget: Initial,
+      getEnvIntegraionByTargetStream: Observe,
+      getEnvVersioningByTarget: Observe,
       getTargetByTargetStream: {
         id: 'testTarget',
         type: 'test',
@@ -247,9 +241,11 @@ describe('Github stream', () => {
       },
       workflowRunsGet: [ {
         id: 'workflowId',
-        actor: { name: 'workflowActorName', html_url: 'workflowActorLink' }
+        actor: { name: 'workflowActorName', html_url: 'workflowActorLink' },
+        status: 'success',
       } ],
       workflowJobsGet: [ {
+        id: 'workflowJobId',
         html_url: 'workflowJobLink',
         steps: [ {
           name: 'workflowJobName',
@@ -261,8 +257,8 @@ describe('Github stream', () => {
       } ],
     });
     observer.override(TestProject, {
-      getEnvIntegraionByTargetStream: Initial,
-      getEnvVersioningByTarget: Initial,
+      getEnvIntegraionByTargetStream: Observe,
+      getEnvVersioningByTarget: Observe,
       getTargetByTargetStream: {
         id: 'testTarget',
         type: 'test',
@@ -274,7 +270,7 @@ describe('Github stream', () => {
       getCurrent: Promise.resolve('testBranch'),
     });
     observer.override(GithubStreamService, {
-      streamGetState: Initial,
+      streamGetState: Observe,
     });
 
     await stream.streamGetState({
@@ -291,7 +287,9 @@ describe('Github stream', () => {
         // repo: 'repo',
         branch: 'branch',
       },
-    });
+
+      artifacts: [ 'test' ],
+    }, { '*': true }, {});
 
     expect(snapshot()).toMatchSnapshot();
   });

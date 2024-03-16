@@ -948,6 +948,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-offers-service:
         use: "targets.dev.streams.%"
         config:

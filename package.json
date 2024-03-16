@@ -5,7 +5,7 @@
     "dev:fe": "npx webpack serve",
     "doc": "npx docsify serve docs",
     "lint": "npx eslint ./src/* --ext=.tsx,.ts --fix",
-    "test": "npx jest"
+    "test": "npx jest --no-cache"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -46,7 +46,7 @@
     "yaml": "^2.3.1"
   },
   "devDependencies": {
-    "@akaterra.co/unitsnap": "^1.5.4",
+    "@akaterra.co/unitsnap": "file:../unitsnap.js",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
