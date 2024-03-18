@@ -61,6 +61,7 @@ export interface IProjectFlowActionStep<C extends Record<string, unknown>, T ext
   isDirty?: boolean;
 
   params?: Record<string, IProjectFlowActionParam>;
+  bypassErrorCodes?: string[];
   targets?: IProjectTargetDef['id'][];
 }
 
@@ -227,6 +228,7 @@ export class Project implements IProject {
               description: stepDef.description,
   
               config: this.getDefinition(stepDef.config),
+              bypassErrorCodes: stepDef.bypassErrorCodes,
               params: stepDef.params,
               targets: stepDef.targets ?? def.targets ?? [],
             };

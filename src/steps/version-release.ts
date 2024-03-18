@@ -4,7 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired, iter } from '../utils';
 import { EntityService } from '../entities.service';
-import { makeDirty } from './utils';
+import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
 
 @Service()
 export class VersionReleaseStepService extends EntityService implements IStepService {
@@ -19,9 +19,13 @@ export class VersionReleaseStepService extends EntityService implements IStepSer
     params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
+    const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
+      step.targets,
+      getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
+    );
 
-    for (const [ ,tId ] of iter(targetsStreams ? Object.keys(targetsStreams) : step.targets)) {
-      const target = project.getTargetByTargetId(tId);
+    for (const tIdOfTarget of sourceTargetIds) {
+      const target = project.getTargetByTargetId(tIdOfTarget);
 
       await project.getEnvVersioningByTarget(target).release(target, params);
 

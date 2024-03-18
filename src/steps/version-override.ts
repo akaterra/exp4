@@ -4,7 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { makeDirty } from './utils';
+import { getPossibleTargetIds, makeDirty } from './utils';
 
 @Service()
 export class VersionOverrideStepService extends EntityService implements IStepService {
@@ -18,9 +18,7 @@ export class VersionOverrideStepService extends EntityService implements IStepSe
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const sourceTargetIds = targetsStreams
-      ? Object.keys(targetsStreams)
-      : project.getFlowByFlowId(flow.ref.flowId).targets;
+    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets);
 
     for (let sIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of step.targets) {

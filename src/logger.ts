@@ -1,5 +1,5 @@
 import { createLogger, format, transports } from 'winston';
-import {IS_TEST} from './utils';
+import { IS_TEST } from './utils';
 
 export const logger = createLogger({
   level: 'debug',

@@ -4,7 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired, resolvePlaceholders } from '../utils';
-import { makeDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
 import { JenkinsIntegrationService } from '../integrations/jenkins';
 import * as _ from 'lodash';
 import { Log } from '../logger';
@@ -35,9 +35,10 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const projectState = await this.projectsService.getState(flow.ref.projectId);
-    const sourceTargetIds = targetsStreams
-      ? Object.keys(targetsStreams)
-      : notEmptyArray(step.targets, project.getFlowByFlowId(flow.ref.flowId).targets);
+    const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
+      step.targets,
+      getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
+    );
 
     for (const tIdOfTarget of sourceTargetIds) {
       const target = project.getTargetByTargetId(tIdOfTarget);

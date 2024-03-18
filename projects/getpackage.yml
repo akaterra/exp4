@@ -285,9 +285,9 @@ flows:
           maxLength: 20
           optional: true
 
-  finishRelease:
-    title: "Finish release"
-    description: "Move release to production and close release"
+  requestReleaseApproval:
+    title: "Request release approval"
+    description: "Requests release candidate approval"
     targets:
       - stg
     steps:
@@ -295,6 +295,23 @@ flows:
         title: ""
         targets:
           - "production"
+        config:
+          strategy: "request"
+
+  approveRelease:
+    title: "Approve release"
+    description: "Approves release candidate"
+    targets:
+      - production
+    steps:
+      - type: "move"
+        title: ""
+        targets:
+          - "stg:production"
+        bypassErrorCodes:
+          - "stream:request:notFound"
+        config:
+          strategy: "approve"
       - type: "version:override"
         title: ""
         targets:
@@ -818,6 +835,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-alerts-service:
         use: "targets.dev.streams.%"
         config:
@@ -825,6 +843,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-analytics-service:
         use: "targets.dev.%-1.%"
         config:
@@ -832,6 +851,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-autocomplete-service:
         use: "targets.dev.%-1.%"
         config:
@@ -839,6 +859,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-charge-service:
         use: "targets.dev.streams.%"
         config:
@@ -846,6 +867,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-deliveries-crud-service:
         use: "targets.dev.streams.%"
         config:
@@ -869,6 +891,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-events-service:
         use: "targets.dev.streams.%"
         config:
@@ -876,6 +899,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-frontend-client:
         use: "targets.dev.streams.%"
         config:
@@ -913,6 +937,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-finance-calc:
         use: "targets.dev.streams.%"
         config:
@@ -920,6 +945,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-graphql-gateway:
         use: "targets.dev.streams.%"
         config:
@@ -927,6 +953,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-links-service:
         use: "targets.dev.streams.%"
         config:
@@ -934,6 +961,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-locations-service:
         use: "targets.dev.streams.%"
         config:
@@ -941,6 +969,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-notifications-service:
         use: "targets.dev.streams.%"
         config:
@@ -956,6 +985,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-postil-service:
         use: "targets.dev.streams.%"
         config:
@@ -963,6 +993,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-processing-service:
         use: "targets.dev.streams.%"
         config:
@@ -978,6 +1009,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTagDeployment"
+          - "githubActionArtifact"
       gp-uam-service:
         use: "targets.dev.streams.%"
         config:
@@ -985,6 +1017,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
       gp-webhooks-service:
         use: "targets.dev.streams.%"
         config:
@@ -992,6 +1025,7 @@ targets:
           integration: "githubStg"
         artifacts:
           - "argocdApplicationImageTag"
+          - "githubActionArtifact"
     versioning: "release"
 
   stgHotfix:

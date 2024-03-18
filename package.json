@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "scripts": {
-    "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"node ./node_modules/typescript/bin/tsc && node ./dist/src/index.js\"",
+    "dev:be": "node ./node_modules/nodemon/bin/nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --ignore \"src/ui\" --exec \"rm -rf ./dist && node ./node_modules/typescript/bin/tsc && node ./dist/src/index.js\"",
     "dev:fe": "npx webpack serve",
     "doc": "npx docsify serve docs",
     "lint": "npx eslint ./src/* --ext=.tsx,.ts --fix",

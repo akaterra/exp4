@@ -40,7 +40,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
 
   @Log('debug')
   async userGetByKeyAndType(id: string): Promise<IUser> {
-    const member = (await this.integration.orgMembersList()).find((member) => String(member.id) === id);
+    const member = (await this.integration.orgMemberList()).find((member) => String(member.id) === id);
 
     if (member) {
       const user = await this.integration.userGet(member.login);

@@ -4,6 +4,7 @@ import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import fetch from 'node-fetch-native';
 import { Log } from '../logger';
+import { createError } from '../error';
 
 export interface IGithubConfig {
   branch?: string;
@@ -115,9 +116,48 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   @IncStatistics() @Log('debug')
-  async orgMembersList(org?) {
+  async orgMemberList(org?) {
     return (await this.client.orgs.listMembers({
       org: this.org(org), per_page: 100,
+    })).data;
+  }
+
+  @IncStatistics() @Log('debug')
+  async pullRequestCreate(base, head, title?, body?, draft?, repo?, org?) {
+    return (await this.client.pulls.create({
+      owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), title, body, draft,
+    }).catch((err) => {
+      // if (err?.status === 422) {
+      //   return { data: undefined };
+      // }
+
+      return Promise.reject(err);
+    })).data;
+  }
+
+  @IncStatistics() @Log('debug')
+  async pullRequestList(base, head, repo?, org?) {
+    return (await this.client.pulls.list({
+      owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), sort: 'created', state: 'open',
+    }).catch((err) => {
+      // if (err?.status === 422) {
+      //   return { data: undefined };
+      // }
+
+      return Promise.reject(err);
+    })).data;
+  }
+
+  @IncStatistics() @Log('debug')
+  async pullRequestMerge(pullNumber, repo?, org?) {
+    return (await this.client.pulls.merge({
+      owner: this.org(org), repo: this.repo(repo), pull_number: pullNumber,
+    }).catch((err) => {
+      if (err?.status === 404) {
+        return Promise.reject(createError(err, 'stream:request:notFound'));
+      }
+
+      return Promise.reject(err);
     })).data;
   }
 
@@ -197,7 +237,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   @IncStatistics() @Log('debug')
-  async workflowRunsGet(branch?, repo?, org?) {
+  async workflowRunList(branch?, repo?, org?) {
     return (await this.client.actions.listWorkflowRunsForRepo({
       owner: this.org(org), repo: this.repo(repo), branch: this.branch(branch), per_page: 1,
     }).catch((err) => {
@@ -210,7 +250,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   @IncStatistics() @Log('debug')
-  async workflowArtifactsGet(runId, repo?, org?) {
+  async workflowArtifactList(runId, repo?, org?) {
     return (await this.client.actions.listWorkflowRunArtifacts({
       owner: this.org(org), repo: this.repo(repo), run_id: runId,
     }).catch((err) => {
@@ -230,7 +270,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
   }
 
   @IncStatistics() @Log('debug')
-  async workflowJobsGet(runId, repo?, org?) {
+  async workflowJobList(runId, repo?, org?) {
     return (await this.client.actions.listJobsForWorkflowRun({
       owner: this.org(org), repo: this.repo(repo), run_id: runId, filter: 'latest',
     }).catch((err) => {

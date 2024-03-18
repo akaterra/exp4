@@ -2,6 +2,16 @@ import { IStreamStateContext, StreamState } from '../stream';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { TargetState } from '../target';
 import { IService } from '../entities.service';
+import { Identifier } from '../types';
+
+export enum StreamServiceStreamMoveOptsStrategy {
+  APPROVE = 'approve',
+  REQUEST = 'request',
+}
+
+export interface IStreamServiceStreamMoveOpts {
+  strategy?: StreamServiceStreamMoveOptsStrategy;
+}
 
 export interface IStreamService extends IService {
   actionRun(id: string);
@@ -12,7 +22,7 @@ export interface IStreamService extends IService {
 
   streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState>;
 
-  streamMove(sourceStream: IProjectTargetStreamDef, targetStream: IProjectTargetStreamDef);
+  streamMove(sourceStream: IProjectTargetStreamDef, targetStream: IProjectTargetStreamDef, opts?: IStreamServiceStreamMoveOpts);
 
   targetGetState(target: IProjectTargetDef, scopes?: Record<string, boolean>): Promise<TargetState>;
 }

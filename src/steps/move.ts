@@ -4,7 +4,8 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { makeDirty } from './utils';
+import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
+import { StreamServiceStreamMoveOptsStrategy } from '../streams/stream.service';
 
 @Service()
 export class MoveStepService extends EntityService implements IStepService {
@@ -20,9 +21,7 @@ export class MoveStepService extends EntityService implements IStepService {
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const sourceTargetIds = targetsStreams
-      ? Object.keys(targetsStreams)
-      : project.getFlowByFlowId(flow.ref.flowId).targets;
+    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets);
 
     for (let tIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of step.targets) {
@@ -45,7 +44,13 @@ export class MoveStepService extends EntityService implements IStepService {
 
           if (sourceStream && targetStream) {
             await project.getEnvStreamByTargetStream(targetStream)
-              .streamMove(targetStream, sourceStream);
+              .streamMove(
+                targetStream,
+                sourceStream,
+                {
+                  strategy: step.config?.strategy as StreamServiceStreamMoveOptsStrategy,
+                },
+              );
 
             makeDirty(sourceStream, targetStream);
           }

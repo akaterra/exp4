@@ -1,4 +1,4 @@
-import { IStreamService } from './stream.service';
+import { IStreamService, IStreamServiceStreamMoveOpts, StreamServiceStreamMoveOptsStrategy } from './stream.service';
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { IStreamStateContext, StreamState } from '../stream';
 import { Service } from 'typedi';
@@ -29,11 +29,6 @@ export type IGithubTargetStream = IProjectTargetStream<{
   repo?: string;
   branch: string;
 }, 'github'>;
-
-export type IGithubStream = StreamState<{
-  sha: string;
-  branch: string;
-}>;
 
 @Service()
 export class GithubStreamService extends EntityService implements IStreamService {
@@ -120,7 +115,7 @@ export class GithubStreamService extends EntityService implements IStreamService
         : null;
       const versioningService = this.getVersioningService(stream);
       const workflowRuns = hasScope('action', scopes) && branch
-        ? await integration.workflowRunsGet(branchName, repo, stream.config?.org)
+        ? await integration.workflowRunList(branchName, repo, stream.config?.org)
         : null;
       const workflowRunsJobs = hasScope('action', scopes) &&
           workflowRuns?.[0] &&
@@ -129,7 +124,7 @@ export class GithubStreamService extends EntityService implements IStreamService
             hasStrictScope('action', scopes) ||
             workflowRuns?.[0]?.id !== parseInt(state.history?.action?.[0]?.id)
           )
-        ? await integration.workflowJobsGet(workflowRuns[0].id, repo, stream.config?.org)
+        ? await integration.workflowJobList(workflowRuns[0].id, repo, stream.config?.org)
         : null;
 
       const metadata = {
@@ -232,16 +227,16 @@ export class GithubStreamService extends EntityService implements IStreamService
   }
 
   @Log('debug')
-  async streamMove(sourceStream: IGithubTargetStream, targetStream: IGithubTargetStream) {
+  async streamMove(sourceStream: IGithubTargetStream, targetStream: IGithubTargetStream, opts?: IStreamServiceStreamMoveOpts) {
     const project = this.projectsService.get(sourceStream.ref?.projectId);
 
     project.env.streams.assertTypes(sourceStream.type, targetStream.type);
 
-    const source = await this.projectsService
+    const sourceState = await this.projectsService
       .get(sourceStream.ref?.projectId)
       .getStreamStateByTargetIdAndStreamId(sourceStream.ref?.targetId, sourceStream.ref?.streamId, { change: true });
 
-    if (!source?.history?.change?.[0]?.id) {
+    if (!sourceState?.history?.change?.[0]?.id) {
       return;
     }
 
@@ -256,16 +251,32 @@ export class GithubStreamService extends EntityService implements IStreamService
     )) {
       await targetIntegration.referenceCreate(
         targetBranchName,
-        source.history.change[0]?.id,
+        sourceState.history.change[0]?.id,
         targetStream.id,
       );
     } else {
-      await targetIntegration.merge(
-        targetBranchName,
-        sourceBranchName,
-        `Release ${source.version}`,
-        targetStream.id,
-      );
+      if (opts?.strategy === StreamServiceStreamMoveOptsStrategy.REQUEST) {
+        await targetIntegration.pullRequestCreate(
+          targetBranchName,
+          sourceBranchName,
+          `Release ${sourceState.version}`,
+          undefined,
+          undefined,
+          targetStream.id,
+        );
+      } else if (opts?.strategy === StreamServiceStreamMoveOptsStrategy.APPROVE) {
+        await targetIntegration.pullRequestMerge(
+          (await targetIntegration.pullRequestList(sourceBranchName, targetBranchName, targetStream.id))?.[0]?.number ?? -99,
+          targetStream.id,
+        );
+      } else {
+        await targetIntegration.merge(
+          targetBranchName,
+          sourceBranchName,
+          `Release ${sourceState.version}`,
+          targetStream.id,
+        );
+      }
     }
   }
 

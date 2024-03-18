@@ -58,7 +58,15 @@ export class ProjectsService extends EntitiesService<Project> {
             type: 'projectFlow:run',
           });
 
-          throw err;
+          if (
+            !step.bypassErrorCodes ||
+            (
+              !step.bypassErrorCodes.includes(err?.cause) &&
+              !step.bypassErrorCodes.includes('*')
+            )
+          ) {
+            throw err;
+          }
         }
       }
     }

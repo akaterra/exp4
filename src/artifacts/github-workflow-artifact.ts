@@ -48,7 +48,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
       : this.cache.get(params.githubWorkflowId as string);
 
     if (!artifact) {
-      artifact = await this.getIntegration(entity.ref).workflowArtifactsGet(
+      artifact = await this.getIntegration(entity.ref).workflowArtifactList(
         params?.githubWorkflowId,
         entity.ref?.streamId,
       );
