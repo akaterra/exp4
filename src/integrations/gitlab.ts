@@ -4,6 +4,7 @@ import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Log, logErrorWarn } from '../logger';
+import {maybeReplaceEnvVars} from './utils';
 
 export interface IGitlabConfig {
   branch?: string;
@@ -24,8 +25,8 @@ export class GitlabIntegrationService extends EntityService implements IIntegrat
     super();
 
     this.client = new Gitlab({
-      host: this.config?.host ?? process.env.GITLAB_HOST,
-      token: this.config?.token ?? process.env.GITLAB_TOKEN,
+      host: maybeReplaceEnvVars(this.config?.host) ?? process.env.GITLAB_HOST,
+      token: maybeReplaceEnvVars(this.config?.token) ?? process.env.GITLAB_TOKEN,
     });
   }
 

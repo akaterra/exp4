@@ -21,39 +21,29 @@ artifacts:
     dependsOn:
       - argocdApplicationDev
     config:
-      "ArgoCD Image tag":
-        source: "argocdApplication.status.summary.images"
-        filter:
-          "...":
-            contains:
-              param: "ref.streamId"
-        pattern: "\\:([\\w\\-\\.]+)$"
-        keys:
-          - 1
-        to: null
-        type: "dockerImage"
-      "ArgoCD Deploy status":
-        source: "argocdApplication.status.resources"
-        filter:
-          name:
-            in:
-              coalesce:
-                - param: "stream.config.argocdServiceName"
-                - param: "ref.streamId"
-          kind:
-            eq: "StatefulSet"
-        pattern: null
-        keys:
-          - valueMapping:
-              OutOfSync:
-                level: warning
-                value: "out of sync"
-              Synced:
-                level: success
-                value: "synced"
-            valuePath: "status"
-        to: "link"
-        type: "argocd:syncStatus"
+      use: "artifacts.argocdApplicationImageTag.config"
+  argocdApplicationImageTagDeploymentDev:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplicationDev
+    config:
+      use: "artifacts.argocdApplicationImageTagDeployment.config"
+  argocdApplicationSandbox:
+    type: "argocd:application"
+    config:
+      integration: "argocdSandbox"
+  argocdApplicationImageTagSandbox:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplicationSandbox
+    config:
+      use: "artifacts.argocdApplicationImageTag.config"
+  argocdApplicationImageTagDeploymentSandbox:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplicationSandbox
+    config:
+      use: "artifacts.argocdApplicationImageTagDeployment.config"
   argocdApplication:
     type: "argocd:application"
     config:
@@ -182,6 +172,22 @@ integrations:
     type: "argocd"
     config:
       applicationName: "stg"
+  argocdSandbox:
+    type: "argocd"
+    config:
+      applicationName: "sandbox"
+      host: "${ARGOCD_PROD_HOST}"
+      port: "${ARGOCD_PROD_PORT}"
+      username: "${ARGOCD_PROD_USERNAME}"
+      password: "${ARGOCD_PROD_PASSWORD}"
+  argocdProd:
+    type: "argocd"
+    config:
+      applicationName: "production"
+      host: "${ARGOCD_PROD_HOST}"
+      port: "${ARGOCD_PROD_PORT}"
+      username: "${ARGOCD_PROD_USERNAME}"
+      password: "${ARGOCD_PROD_PASSWORD}"
   github:
     type: "github"
     config:
@@ -259,7 +265,7 @@ flows:
         config:
           name: "test"
 
-  release:
+  createRelease:
     title: "Create release"
     targets:
       - stg
@@ -285,9 +291,8 @@ flows:
           maxLength: 20
           optional: true
 
-  requestReleaseApproval:
-    title: "Request release approval"
-    description: "Requests release candidate approval"
+  publishReleaseCandidate:
+    title: "Publish release candidate"
     targets:
       - stg
     steps:
@@ -297,19 +302,36 @@ flows:
           - "production"
         config:
           strategy: "request"
-
-  approveRelease:
-    title: "Approve release"
-    description: "Approves release candidate"
-    targets:
-      - production
-    steps:
       - type: "move"
         title: ""
         targets:
           - "stg:production"
-        bypassErrorCodes:
-          - "stream:request:notFound"
+        config:
+          strategy: "approve"
+      - type: "version:override"
+        title: ""
+        targets:
+          - "stg:production"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stg:production"
+
+  finishRelease:
+    title: "Finish release"
+    targets:
+      - stg
+    steps:
+      - type: "moveTo"
+        title: ""
+        targets:
+          - "production"
+        config:
+          strategy: "request"
+      - type: "move"
+        title: ""
+        targets:
+          - "stg:production"
         config:
           strategy: "approve"
       - type: "version:override"
@@ -359,7 +381,7 @@ flows:
       - type: "moveFrom"
         title: ""
         targets:
-          - "hotfix"
+          - "stgHotfix"
       - type: "streamVersion:override"
         title: ""
         targets:
@@ -388,21 +410,38 @@ flows:
     steps:
       - type: "detach"
         title: ""
-        targets:
-          - "stg"
 
   sync:
     title: "Sync"
     targets:
       - stg
-      - stgHotfix
     steps:
       - type: "argocd:sync"
         title: ""
         config:
           integration: "argocdStg"
 
-  hotfix:
+  syncSandbox:
+    title: "Sync"
+    targets:
+      - stgHotfix
+    steps:
+      - type: "argocd:sync"
+        title: ""
+        config:
+          integration: "argocdSandbox"
+
+  syncProd:
+    title: "Sync"
+    targets:
+      - production
+    steps:
+      - type: "argocd:sync"
+        title: ""
+        config:
+          integration: "argocdProd"
+
+  createHotfix:
     title: "Create hotfix"
     targets:
       - stgHotfix
@@ -424,6 +463,32 @@ flows:
         targets:
           - "production"
 
+  publishHotfixCandidate:
+    title: "Publish hotfix candidate"
+    targets:
+      - stgHotfix
+    steps:
+      - type: "moveTo"
+        title: ""
+        targets:
+          - "production"
+        config:
+          strategy: "request"
+      - type: "move"
+        title: ""
+        targets:
+          - "stgHotfix:production"
+        config:
+          strategy: "approve"
+      - type: "version:override"
+        title: ""
+        targets:
+          - "stgHotfix:production"
+      - type: "streamVersion:override"
+        title: ""
+        targets:
+          - "stgHotfix:production"
+
   finishHotfix:
     title: "Finish hotfix"
     targets:
@@ -433,6 +498,14 @@ flows:
         title: ""
         targets:
           - "production"
+        config:
+          strategy: "request"
+      - type: "move"
+        title: ""
+        targets:
+          - "stgHotfix:production"
+        config:
+          strategy: "approve"
       - type: "version:override"
         title: ""
         targets:
@@ -440,7 +513,7 @@ flows:
       - type: "streamVersion:override"
         title: ""
         targets:
-          - "production"
+          - "stgHotfix:production"
       - type: "detach"
         title: ""
         targets:
@@ -462,6 +535,18 @@ flows:
         config:
           integration: "jenkins${target.id}"
           jobName: "migrate"
+
+  buildProd:
+    title: "Build"
+    targets:
+      - stgHotfix
+      - production
+    steps:
+      - type: "jenkins:jobRun"
+        title: ""
+        config:
+          integration: "jenkins${target.id}"
+          jobName: "build_image"
 
   migrateStg:
     title: "Migrate"
@@ -1061,21 +1146,25 @@ targets:
         config:
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-deliveries-service:
         use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-deliveries-history-service:
         use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-events-service:
         use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-frontend-client:
         use: "targets.dev.streams.%"
         config:
@@ -1105,11 +1194,13 @@ targets:
         config:
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-finance-calc:
         use: "targets.dev.streams.%"
         config:
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-graphql-gateway:
         use: "targets.dev.streams.%"
         config:
@@ -1146,6 +1237,7 @@ targets:
           integration: "githubHotfix"
           argocdServiceName: "gp-processing-web"
         artifacts:
+          - "argocdApplicationImageTagSandbox"
       gp-routes-calc-dev:
         use: "targets.dev.streams.%"
         config:

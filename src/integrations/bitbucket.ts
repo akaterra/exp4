@@ -3,6 +3,7 @@ import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Log, logErrorWarn } from '../logger';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface IBitbucketConfig {
   authMethod?: 'password' | 'token';
@@ -26,9 +27,9 @@ export class BitbucketIntegrationService extends EntityService implements IInteg
     super();
 
     const isAuthMethodPassword = !config?.authMethod || config?.authMethod === 'password';
-    const password = config?.username ?? process.env.BITBUCKET_PASSWORD;
-    const token = config?.token ?? process.env.BITBUCKET_TOKEN;
-    const username = config?.username ?? process.env.BITBUCKET_USERNAME;
+    const password = maybeReplaceEnvVars(config?.username) ?? process.env.BITBUCKET_PASSWORD;
+    const token = maybeReplaceEnvVars(config?.token) ?? process.env.BITBUCKET_TOKEN;
+    const username = maybeReplaceEnvVars(config?.username) ?? process.env.BITBUCKET_USERNAME;
 
     this.client = password && username && isAuthMethodPassword
       ? new Bitbucket({ auth: { password, username } })

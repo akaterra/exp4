@@ -23,7 +23,7 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
   isSyncing?: boolean;
   ref?: IProjectRef;
 
-  config?: C & Record<string, unknown>;
+  config?: C & Record<string, any>;
 }
 
 export interface IProjectRef {
@@ -200,8 +200,8 @@ export class Project implements IProject {
     }
 
     if (config.flows) {
-      for (const [ key, def ] of Object.entries(config.flows)) {
-        const flowId = def.id ?? key;
+      for (const [ flowKey, flowDef ] of Object.entries(config.flows)) {
+        const flowId = flowDef.id ?? flowKey;
         this.assertKey(flowId);
 
         this.flows[flowId] = {
@@ -210,11 +210,11 @@ export class Project implements IProject {
 
           ref: { flowId, projectId: this.id },
 
-          title: def.title,
-          description: def.description,
+          title: flowDef.title,
+          description: flowDef.description,
 
-          params: def.params,
-          steps: def.steps.map((stepDef, i) => {
+          params: flowDef.params,
+          steps: flowDef.steps.map((stepDef, i) => {
             const stepId = stepDef.id ?? String(i);
             this.assertKey(stepId);
 
@@ -230,17 +230,17 @@ export class Project implements IProject {
               config: this.getDefinition(stepDef.config),
               bypassErrorCodes: stepDef.bypassErrorCodes,
               params: stepDef.params,
-              targets: stepDef.targets ?? def.targets ?? [],
+              targets: stepDef.targets ?? [],
             };
           }),
-          targets: def.targets ?? [],
+          targets: flowDef.targets ?? [],
         };
       }
     }
 
     if (config.targets) {
-      for (const [ key, def ] of Object.entries(config.targets)) {
-        const targetId = def.id ?? key;
+      for (const [ targetKey, targetDef ] of Object.entries(config.targets)) {
+        const targetId = targetDef.id ?? targetKey;
         this.assertKey(targetId);
 
         this.targets[targetId] = {
@@ -249,12 +249,12 @@ export class Project implements IProject {
 
           ref: { projectId: this.id },
 
-          title: def.title,
-          description: def.description,
+          title: targetDef.title,
+          description: targetDef.description,
 
-          artifacts: def.artifacts,
+          artifacts: targetDef.artifacts,
           streams: Object
-            .entries(def.streams ?? {})
+            .entries(targetDef.streams ?? {})
             .reduce((acc, [ streamKey, streamDef ]) => {
               const streamId = streamDef.id ?? streamKey;
               this.assertKey(streamId);
@@ -330,7 +330,7 @@ export class Project implements IProject {
 
               return acc;
             }, {}),
-          versioning: def.versioning,
+          versioning: targetDef.versioning,
         };
       }
     }

@@ -31,7 +31,7 @@ export const Modal = ({
   onSelect?: (action?: string) => void,
 }) => {
   return <div className="modal">
-    <div className="modal-content f10 f14-s- back-light shadow shadow-high pad-hor triple flex">
+    <div className="modal-content f10 f14-s- bg-light shadow shadow-high pad-hor triple flex">
       <div className='w00 paragraph paragraph-lrg'>
         <div className='c18'>
           <div>

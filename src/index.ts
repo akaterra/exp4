@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import 'source-map-support/register';
+// import 'source-map-support/register';
 import 'universal-dotenv/register';
 import cors from 'cors';
 import { createProject } from './project-loader';
@@ -26,7 +26,8 @@ import { IProjectManifest } from './project';
 import cookieParser from 'cookie-parser';
 import { authLogout } from './api/auth/logout';
 
-process.on('uncaughtException', function() {
+process.on('uncaughtException', (err) => {
+  logError(err, 'uncaughtException');
 });
 
 function auth(req, res, next) {

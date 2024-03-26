@@ -36,7 +36,7 @@ export const Statistics = observer(({ statisticsStore }: { statisticsStore?: Sta
                 <div className='list-item bold'>{ key }</div>
                 {
                   Object.entries(val).map(([ key, val ]) => {
-                    return <div className='list-subitem'>
+                    return <div className='list-item sub'>
                       <TitledLine title={ `${_.startCase(key)}:` }>{ val }</TitledLine>
                     </div>;
                   })

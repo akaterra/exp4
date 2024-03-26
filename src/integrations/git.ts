@@ -3,6 +3,7 @@ import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Log, logErrorWarn } from '../logger';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface IGitConfig {
   binary?: string;
@@ -22,8 +23,8 @@ export class GitIntegrationService extends EntityService implements IIntegration
     super();
 
     this.client = simpleGit({
-      baseDir: this.config?.dir ?? process.cwd(),
-      binary: this.config?.binary ?? 'git',
+      baseDir: maybeReplaceEnvVars(this.config?.dir) ?? process.cwd(),
+      binary: maybeReplaceEnvVars(this.config?.binary) ?? 'git',
       maxConcurrentProcesses: this.config?.maxConcurrentProcesses ?? 6,
       trimmed: this.config?.trimmed ?? false,
     });

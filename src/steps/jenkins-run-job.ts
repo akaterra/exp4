@@ -66,12 +66,12 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
           return resolvePlaceholders(val, context);
         }
 
-        if (!params) {
-          params = this.getStreamConfig(targetStream, flow)?.jobParams ?? targetStream.config?.jenkinsJobParams;
-        }
-
-        if (this.config?.jobParams) {
-          params = { ...this.config?.jobParams, ...params };
+        params = {
+          ...this.config?.jobParams,
+          ...step.config?.jobParams,
+          ...targetStream.config?.jenkins?.jobParams,
+          ...this.getStreamConfig(targetStream, flow)?.jobParams,
+          ...params,
         }
 
         if (this.config?.jobParamsList?.length) {
@@ -86,7 +86,10 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
           rep(step.config?.integration ?? 'jenkins'),
           'jenkins',
         ).withContext(context).runJob(
-          this.getStreamConfig(targetStream, flow)?.jobName ?? targetStream.config?.jenkinsJobName ?? this.config?.jobName,
+          this.getStreamConfig(targetStream, flow)?.jobName ??
+            targetStream.config?.jenkins?.jobName ??
+            step.config?.jobName ??
+            this.config?.jobName,
           params,
         );
 
@@ -101,4 +104,3 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
     return stream.config?.jenkins?.flows?.[flow.id] ?? stream.config?.jenkins as any;
   }
 }
-

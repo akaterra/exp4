@@ -3,6 +3,7 @@ import { C } from "./grid";
 import { Fragment, useEffect, useState } from 'react';
 import { Row } from './row';
 import { NavLink } from './link';
+import {Button} from './button';
 
 export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false, onlyChild = false, selectedIndex = 0, tabs, tabsDecoration = undefined, onSelect = undefined }: any) => {
   const tabIndex = typeof selectedIndex === 'number'
@@ -24,6 +25,8 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
               <div className='tabs-bar'>
                 {
                   tabs.map((tab, i) => {
+                    const isSelected = i.toString() === String(currentSelectedIndex);
+
                     if (tab && typeof tab === 'object') {
                       let Component: any;
                       let props;
@@ -36,7 +39,7 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
                       }
 
                       if (Component) {
-                        return <Component className={ i.toString() === String(currentSelectedIndex) ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
+                        return <Component className={ isSelected ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
                           setCurrentSelectedIndex(i);
       
                           if (onSelect) {

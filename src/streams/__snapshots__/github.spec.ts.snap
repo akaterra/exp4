@@ -10,7 +10,7 @@ exports[`Github stream should bookmark 1`] = `
             change = true
         }
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:53:8
 
 <-- TestProject.getStreamStateByTargetIdAndStreamId <-- {
         history = {
@@ -22,7 +22,7 @@ exports[`Github stream should bookmark 1`] = `
         }
         version = "version"
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:53:8
 
 --> TestGithubIntegrationService.tagCreate --> {
         * = []
@@ -33,10 +33,10 @@ exports[`Github stream should bookmark 1`] = `
         org = null
         lightweight = false
     }
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23
 
 <-- TestGithubIntegrationService.tagCreate <-- undefined
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23
 "
 `;
 
@@ -50,7 +50,7 @@ exports[`Github stream should bookmark with stream id as repo 1`] = `
             change = true
         }
     }
-    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:49:14
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:53:8
 
 <-- TestProject.getStreamStateByTargetIdAndStreamId <-- {
         history = {
@@ -62,7 +62,7 @@ exports[`Github stream should bookmark with stream id as repo 1`] = `
         }
         version = "version"
     }
-    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:49:14
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:53:8
 
 --> TestGithubIntegrationService.tagCreate --> {
         * = []
@@ -73,10 +73,10 @@ exports[`Github stream should bookmark with stream id as repo 1`] = `
         org = null
         lightweight = false
     }
-    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:54:27
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23
 
 <-- TestGithubIntegrationService.tagCreate <-- undefined
-    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:54:27
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23
 "
 `;
 
@@ -99,13 +99,13 @@ exports[`Github stream should detach 1`] = `
         }
         assertType = "github"
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- {
         [[ Data ]] = "TestGithubIntegrationService"
         [[ Type ]] = "instanceOf"
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -124,13 +124,13 @@ exports[`Github stream should detach 1`] = `
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- {
         [[ Data ]] = "TestGithubIntegrationService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
 
 --> TestProject.getTargetByTargetStream --> {
         * = []
@@ -148,14 +148,14 @@ exports[`Github stream should detach 1`] = `
             }
         }
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
 
 <-- TestProject.getTargetByTargetStream <-- {
         id = "testTarget"
         type = "test"
         versioning = "test"
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
 
 --> TestProject.getEnvVersioningByTarget --> {
         * = []
@@ -165,13 +165,13 @@ exports[`Github stream should detach 1`] = `
             versioning = "test"
         }
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 <-- TestProject.getEnvVersioningByTarget <-- {
         [[ Data ]] = "TestVersioningService"
         [[ Type ]] = "instanceOf"
     }
-    caller = TestProject.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 --> TestVersioningService.getCurrent --> {
         * = [
@@ -183,20 +183,20 @@ exports[`Github stream should detach 1`] = `
             versioning = "test"
         }
     }
-    caller = TestVersioningService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
 
 <-- TestVersioningService.getCurrent <-- "testBranch"
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:226:14
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
 
 --> TestGithubIntegrationService.branchDelete --> {
         * = []
         branch = "testBranch"
         repo = "repo"
     }
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:78:23
 
 <-- TestGithubIntegrationService.branchDelete <-- undefined
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:78:23
 "
 `;
 
@@ -218,13 +218,13 @@ exports[`Github stream should detach with stream id as repo 1`] = `
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- {
         [[ Data ]] = "TestGithubIntegrationService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -242,13 +242,13 @@ exports[`Github stream should detach with stream id as repo 1`] = `
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- {
         [[ Data ]] = "TestGithubIntegrationService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
 
 --> TestProject.getTargetByTargetStream --> {
         * = []
@@ -265,14 +265,14 @@ exports[`Github stream should detach with stream id as repo 1`] = `
             }
         }
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
 
 <-- TestProject.getTargetByTargetStream <-- {
         id = "testTarget"
         type = "test"
         versioning = "test"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
 
 --> TestProject.getEnvVersioningByTarget --> {
         * = []
@@ -282,13 +282,13 @@ exports[`Github stream should detach with stream id as repo 1`] = `
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 <-- TestProject.getEnvVersioningByTarget <-- {
         [[ Data ]] = "TestVersioningService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 --> TestVersioningService.getCurrent --> {
         * = [
@@ -300,20 +300,20 @@ exports[`Github stream should detach with stream id as repo 1`] = `
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:226:14
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
 
 <-- TestVersioningService.getCurrent <-- "testBranch"
-    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:59:39
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
 
 --> TestGithubIntegrationService.branchDelete --> {
         * = []
         branch = "testBranch"
         repo = "test"
     }
-    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:60:27
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:78:23
 
 <-- TestGithubIntegrationService.branchDelete <-- undefined
-    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:60:27
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:78:23
 "
 `;
 
@@ -341,9 +341,9 @@ exports[`Github stream should get state 1`] = `
         }
         context = {
             artifact = {
-                githubWorkflowId = "workflowId"
-                githubWorkflowJobId = "workflowJobId"
-                githubWorkflowRunJobStatus = "success"
+                githubWorkflowId = undefined
+                githubWorkflowJobId = undefined
+                githubWorkflowRunJobStatus = undefined
                 ref = {
                     projectId = "test"
                 }
@@ -365,7 +365,7 @@ exports[`Github stream should get state 1`] = `
             }
         }
     }
-    caller = GithubStreamService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:276:18
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -386,13 +386,13 @@ exports[`Github stream should get state 1`] = `
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- {
         [[ Data ]] = "TestGithubIntegrationService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:212:14
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -413,13 +413,13 @@ exports[`Github stream should get state 1`] = `
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- {
         [[ Data ]] = "TestGithubIntegrationService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:223:37
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
 
 --> TestProject.getTargetByTargetStream --> {
         * = []
@@ -439,14 +439,14 @@ exports[`Github stream should get state 1`] = `
             ]
         }
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
 
 <-- TestProject.getTargetByTargetStream <-- {
         id = "testTarget"
         type = "test"
         versioning = "test"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:224:32
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
 
 --> TestProject.getEnvVersioningByTarget --> {
         * = []
@@ -456,13 +456,13 @@ exports[`Github stream should get state 1`] = `
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 <-- TestProject.getEnvVersioningByTarget <-- {
         [[ Data ]] = "TestVersioningService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 --> TestVersioningService.getCurrent --> {
         * = [
@@ -474,17 +474,17 @@ exports[`Github stream should get state 1`] = `
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:226:14
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
 
 <-- TestVersioningService.getCurrent <-- "testBranch"
-    caller = ? : ./src/streams/github.ts:83:43
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
 
 --> TestGithubIntegrationService.branchGet --> {
         * = []
         branch = "testBranch"
         repo = "test"
     }
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = <anonymous> : ./src/streams/github.ts:114:29
 
 <-- TestGithubIntegrationService.branchGet <-- {
         commit = {
@@ -505,7 +505,7 @@ exports[`Github stream should get state 1`] = `
             html = "branchLink"
         }
     }
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = <anonymous> : ./src/streams/github.ts:114:29
 
 --> TestProject.getTargetByTargetStream --> {
         * = []
@@ -525,14 +525,14 @@ exports[`Github stream should get state 1`] = `
             ]
         }
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:217:30
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:301:24
 
 <-- TestProject.getTargetByTargetStream <-- {
         id = "testTarget"
         type = "test"
         versioning = "test"
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:217:30
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:301:24
 
 --> TestProject.getEnvVersioningByTarget --> {
         * = []
@@ -542,58 +542,13 @@ exports[`Github stream should get state 1`] = `
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 <-- TestProject.getEnvVersioningByTarget <-- {
         [[ Data ]] = "TestVersioningService"
         [[ Type ]] = "instanceOf"
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:219:24
-
---> TestGithubIntegrationService.workflowRunsGet --> {
-        * = []
-        branch = "testBranch"
-        repo = "test"
-        org = "org"
-    }
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
-
-<-- TestGithubIntegrationService.workflowRunsGet <-- [
-        {
-            id = "workflowId"
-            actor = {
-                name = "workflowActorName"
-                html_url = "workflowActorLink"
-            }
-            status = "success"
-        }
-    ]
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
-
---> TestGithubIntegrationService.workflowJobsGet --> {
-        * = []
-        runId = "workflowId"
-        repo = "test"
-        org = "org"
-    }
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
-
-<-- TestGithubIntegrationService.workflowJobsGet <-- [
-        {
-            id = "workflowJobId"
-            html_url = "workflowJobLink"
-            steps = [
-                {
-                    name = "workflowJobName"
-                    number = 1
-                    conclusion = "success"
-                    started_at = "2020-01-01"
-                    completed_at = "2020-01-02"
-                }
-            ]
-        }
-    ]
-    caller = TestGithubIntegrationService.<anonymous> : /Users/Nikolay.klyuchev/dev/unitsnap.js/src/spy.ts:505:22
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
 <-- GithubStreamService.streamGetState <-- [[ StreamState : {
         id = "test"
@@ -601,31 +556,7 @@ exports[`Github stream should get state 1`] = `
         projectId = "test"
         targetId = undefined
         history = {
-            action = [
-                {
-                    id = "workflowId"
-                    type = "github:workflow"
-                    author = {
-                        name = "workflowActorName"
-                        link = "workflowActorLink"
-                    }
-                    description = undefined
-                    link = null
-                    metadata = {}
-                    steps = {
-                        1 = {
-                            id = "1"
-                            type = "github:workflow:job"
-                            description = "workflowJobName"
-                            link = "workflowJobLink#step:1:1"
-                            runningTimeSeconds = 86400
-                            status = "completed"
-                        }
-                    }
-                    status = "success"
-                    time = null
-                }
-            ]
+            action = []
             artifact = []
             change = [
                 {
@@ -653,6 +584,6 @@ exports[`Github stream should get state 1`] = `
         version = null
         ver = 1
     } ]]
-    caller = Object.<anonymous> : ./src/streams/github.spec.ts:243:22
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:276:18
 "
 `;

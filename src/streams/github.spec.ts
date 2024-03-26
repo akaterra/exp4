@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import 'source-map-support/register';
+// import 'source-map-support/register';
 import {IVersioningService} from '../versionings/versioning.service';
 import {IProjectTargetDef, IProjectTargetStreamDef, Project} from '../project';
 import {ProjectsService} from '../projects.service';

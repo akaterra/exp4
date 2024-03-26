@@ -6,6 +6,7 @@ import { AwaitedCache } from '../cache';
 import { resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
 import { Log } from '../logger';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface IArgocdConfig {
   applicationName?: string;
@@ -30,10 +31,10 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     super();
 
     this.client = new ArgocdService(
-      config?.host,
-      config?.username,
-      config?.password,
-      config?.token,
+      maybeReplaceEnvVars(config?.host),
+      maybeReplaceEnvVars(config?.username),
+      maybeReplaceEnvVars(config?.password),
+      maybeReplaceEnvVars(config?.token),
     );
   }
 

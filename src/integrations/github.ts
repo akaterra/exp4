@@ -5,6 +5,7 @@ import { EntityService } from '../entities.service';
 import fetch from 'node-fetch-native';
 import { Log } from '../logger';
 import { createError } from '../error';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface IGithubConfig {
   branch?: string;
@@ -24,7 +25,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     super();
 
     this.client = new Octokit({
-      auth: config?.token ?? process.env.GITHUB_TOKEN,
+      auth: maybeReplaceEnvVars(config?.token) ?? process.env.GITHUB_TOKEN,
       request: {
         fetch,
       },

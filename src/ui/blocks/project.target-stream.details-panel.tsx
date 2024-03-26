@@ -102,7 +102,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       lastAction
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
-            <div className='caption smallest clear-pad-top'>Last action <StatusValue.Subscription status={ lastAction.status } /></div>
+            <div className='caption smallest clear-pt'>Last action <StatusValue.Subscription status={ lastAction.status } /></div>
             <Label>{ lastAction?.description ?? 'No description' }</Label>
           </div>
           <div>
@@ -147,7 +147,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
       lastChange
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div>
-            <div className='caption smallest clear-pad-top'>Last change <StatusValue.Subscription status={ lastChange.status } /></div>
+            <div className='caption smallest clear-pt'>Last change <StatusValue.Subscription status={ lastChange.status } /></div>
             <Label>{ lastChange?.description ?? 'No description' }</Label>
           </div>
           <div>
@@ -183,7 +183,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
     {
       projectTargetStreamState?.history?.artifact?.length
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
-          <div className='caption smallest clear-pad-top'>Artifacts <StatusValue.Subscription status={ projectTargetStreamState._artifactsLabel === 'warning' ? Status.NOT_STABLE : Status.STABLE } /></div>
+          <div className='caption smallest clear-pt'>Artifacts <StatusValue.Subscription status={ projectTargetStreamState._artifactsLabel === 'warning' ? Status.NOT_STABLE : Status.STABLE } /></div>
           {
             projectTargetStreamState?.history?.artifact.map((artifact) => {
               return <TitledLine title={ `${artifact.id}:` }>
@@ -209,18 +209,17 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                   return null;
                 }
 
-                return <div key={ i }>
-                  <Button
-                    className='button-sml success w-auto'
-                    disabled={ streamIds ? !streamIds.length : false }
-                    x={ null }
-                    onClick={ () => {
-                      if (projectTargetStreamState?.id) {
-                        projectTargetStore.applyRunFlow(projectTargetStreamState.id, flow.id);
-                      }
-                    } }
-                  >{ flow.title ?? flow.id }</Button>
-                </div>;
+                return <Button
+                  className='button-sml success w-auto'
+                  disabled={ streamIds ? !streamIds.length : false }
+                  x={ 'w50' }
+                  key={ i }
+                  onClick={ () => {
+                    if (projectTargetStreamState?.id) {
+                      projectTargetStore.applyRunFlow(projectTargetStreamState.id, flow.id);
+                    }
+                  } }
+                >{ flow.title ?? flow.id }</Button>;
               })
             }
           </div>

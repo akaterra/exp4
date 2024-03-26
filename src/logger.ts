@@ -10,6 +10,7 @@ export const logger = createLogger({
 });
 
 export function logError(err, message = 'error', extra?: Record<string, any>) {
+  console.error(err)
   logger.error({ message, error: err?.error ?? err?.message ?? err, stack: err?.stack, ...extra });
 }
 

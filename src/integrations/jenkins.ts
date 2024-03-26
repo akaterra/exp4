@@ -6,6 +6,7 @@ import { JenkinsService } from '../services/jenkins.service';
 import { resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
 import { Log } from '../logger';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface IJenkinsConfig {
   cacheTtlSec?: number;
@@ -31,10 +32,10 @@ export class JenkinsIntegrationService extends EntityService implements IIntegra
     super();
 
     this.client = new JenkinsService(
-      config?.host,
-      config?.username,
-      config?.password,
-      config?.token,
+      maybeReplaceEnvVars(config?.host),
+      maybeReplaceEnvVars(config?.username),
+      maybeReplaceEnvVars(config?.password),
+      maybeReplaceEnvVars(config?.token),
     );
   }
 

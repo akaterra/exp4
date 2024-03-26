@@ -246,15 +246,22 @@ export async function request(url, data?, method?, authorization?) {
   );
 }
 
-export function resolvePlaceholders(template, params) {
-  return template.replace(/\$\{([\w\|\.]+)\}/g, (all, p1) => {
-    const keys = p1.split('|');
+export function resolvePlaceholders(template, params, returnNullOnEmpty = true) {
+  if (typeof template !== 'string') {
+    return template;
+  }
+
+  const val = template.replace(/\$\{([\w\|\.]+)\}/g, (all, rep) => {
+    const keys = rep.split('|');
 
     if (keys.length < 2) {
-      return _.get(params, p1, '');
+      return _.get(params, rep, '');
     }
 
     for (let i = 0, l = keys.length; i < l; i += 1) {
+      // last key is default val
+      // keys = ["a", "b", "c"]
+      // if "a" and "b" are not defined in params then return value is "c" (not from params)
       if (i === l - 1) {
         return keys[i];
       }
@@ -270,4 +277,10 @@ export function resolvePlaceholders(template, params) {
       }
     }
   });
+
+  if (!val && returnNullOnEmpty) {
+    return null;
+  }
+
+  return val;
 }
