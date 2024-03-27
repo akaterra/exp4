@@ -239,12 +239,12 @@ describe('Github stream', () => {
           html: 'branchLink',
         },
       },
-      workflowRunsGet: [ {
+      workflowRunList: [ {
         id: 'workflowId',
         actor: { name: 'workflowActorName', html_url: 'workflowActorLink' },
         status: 'success',
       } ],
-      workflowJobsGet: [ {
+      workflowJobList: [ {
         id: 'workflowJobId',
         html_url: 'workflowJobLink',
         steps: [ {

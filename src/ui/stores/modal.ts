@@ -33,15 +33,23 @@ export class ModalStore {
   };
   private onSelectPromiseResolve: ((action?: string) => void) | undefined;
 
-  constructor() {
+  constructor(private onShow?: (isShown?: boolean) => void) {
     makeObservable(this);
   }
 
   close() {
+    if (this.onShow) {
+      this.onShow(false);
+    }
+
     this.select(CLOSE);
   }
 
   hide() {
+    if (this.onShow) {
+      this.onShow(false);
+    }
+
     this.select(undefined);
   }
 
@@ -92,6 +100,10 @@ export class ModalStore {
   }
 
   show(opts: ModalStore['opts']) {
+    if (this.onShow) {
+      this.onShow(true);
+    }
+
     if (!opts.buttons) {
       opts.buttons = {
         cancel: { action: 'cancel', title: 'Cancel' },

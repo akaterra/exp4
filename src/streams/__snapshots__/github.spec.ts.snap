@@ -341,9 +341,9 @@ exports[`Github stream should get state 1`] = `
         }
         context = {
             artifact = {
-                githubWorkflowId = undefined
-                githubWorkflowJobId = undefined
-                githubWorkflowRunJobStatus = undefined
+                githubWorkflowId = "workflowId"
+                githubWorkflowJobId = "workflowJobId"
+                githubWorkflowRunJobStatus = "success"
                 ref = {
                     projectId = "test"
                 }
@@ -365,7 +365,7 @@ exports[`Github stream should get state 1`] = `
             }
         }
     }
-    caller = Object.<anonymous> : ./src/streams/github.spec.ts:276:18
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:277:18
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -550,13 +550,82 @@ exports[`Github stream should get state 1`] = `
     }
     caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
 
+--> TestGithubIntegrationService.workflowRunList --> {
+        * = []
+        branch = "testBranch"
+        repo = "test"
+        org = "org"
+    }
+    caller = <anonymous> : ./src/streams/github.ts:118:29
+
+<-- TestGithubIntegrationService.workflowRunList <-- [
+        {
+            id = "workflowId"
+            actor = {
+                name = "workflowActorName"
+                html_url = "workflowActorLink"
+            }
+            status = "success"
+        }
+    ]
+    caller = <anonymous> : ./src/streams/github.ts:118:29
+
+--> TestGithubIntegrationService.workflowJobList --> {
+        * = []
+        runId = "workflowId"
+        repo = "test"
+        org = "org"
+    }
+    caller = <anonymous> : ./src/streams/github.ts:127:29
+
+<-- TestGithubIntegrationService.workflowJobList <-- [
+        {
+            id = "workflowJobId"
+            html_url = "workflowJobLink"
+            steps = [
+                {
+                    name = "workflowJobName"
+                    number = 1
+                    conclusion = "success"
+                    started_at = "2020-01-01"
+                    completed_at = "2020-01-02"
+                }
+            ]
+        }
+    ]
+    caller = <anonymous> : ./src/streams/github.ts:127:29
+
 <-- GithubStreamService.streamGetState <-- [[ StreamState : {
         id = "test"
         type = "github"
         projectId = "test"
         targetId = undefined
         history = {
-            action = []
+            action = [
+                {
+                    id = "workflowId"
+                    type = "github:workflow"
+                    author = {
+                        name = "workflowActorName"
+                        link = "workflowActorLink"
+                    }
+                    description = undefined
+                    link = null
+                    metadata = {}
+                    steps = {
+                        1 = {
+                            id = "1"
+                            type = "github:workflow:job"
+                            description = "workflowJobName"
+                            link = "workflowJobLink#step:1:1"
+                            runningTimeSeconds = 86400
+                            status = "completed"
+                        }
+                    }
+                    status = "success"
+                    time = null
+                }
+            ]
             artifact = []
             change = [
                 {
@@ -584,6 +653,6 @@ exports[`Github stream should get state 1`] = `
         version = null
         ver = 1
     } ]]
-    caller = Object.<anonymous> : ./src/streams/github.spec.ts:276:18
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:277:18
 "
 `;

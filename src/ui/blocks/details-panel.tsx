@@ -3,7 +3,23 @@ import { observer } from "mobx-react-lite";
 import { ModalStore } from "../stores/modal";
 import { DetailsPanel as DetailsPanelAtom } from "../atoms/details-panel";
 
-export const detailsPanelStore = new ModalStore();
+export const detailsPanelStore = new ModalStore((isShown) => {
+  const el = document.getElementById('mini');
+
+  if (el) {
+    const padding = (window.innerWidth - document.body.clientWidth) + 'px';
+
+    if (isShown) {
+      el.className = el.className.replace(' scroll-y', '');
+      el.className += ' no-scroll';
+      el.style.paddingRight = padding;
+    } else {
+      el.className = el.className.replace(' no-scroll', '');
+      el.className += ' scroll-y';
+      el.style.paddingRight = '0';
+    }
+  }
+});
 
 export const DetailsPanel = observer(({ store }: { store?: ModalStore }) => {
   if (!store?.optsState) {

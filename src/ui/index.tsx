@@ -44,13 +44,13 @@ let router;
 export const App = () => {
   return <React.Fragment>
     <Landing store={ rootStore } />
-    <div className="container med ltr square">
+    <div className="container med square">
       <GlobalAlerts />
       <GlobalDetailsPanel />
       <GlobalModal />
     </div>
     <div className='paragraph paragraph-lrg'>
-      <div className="container med ltr square pad-hor triple">
+      <div className="container med square pad-hor triple">
         <div className='row'>
           <RouterProvider router={ router } />
         </div>

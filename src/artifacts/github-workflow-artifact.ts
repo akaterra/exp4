@@ -9,6 +9,7 @@ import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
 import AdmZip from 'adm-zip';
+import { Log } from '../logger';
 
 export interface IGithubWorkflowArtifactArtifactConfig {
   integration: IProjectDef['id'];
@@ -29,6 +30,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
     super();
   }
 
+  // @Log('debug')
   async run(
     entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },
     streamState: StreamState,
@@ -39,7 +41,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
       return;
     }
 
-    if (![ Status.FAILED, Status.COMPLETED ].includes(params?.githubWorkflowRunJobStatus as Status)) {
+    if (![ Status.COMPLETED, Status.FAILED, Status.SUCCESS ].includes(params?.githubWorkflowRunJobStatus as Status)) {
       return;
     }
 

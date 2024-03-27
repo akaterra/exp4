@@ -128,9 +128,9 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     return (await this.client.pulls.create({
       owner: this.org(org), repo: this.repo(repo), base, head: this.branch(head), title, body, draft,
     }).catch((err) => {
-      // if (err?.status === 422) {
-      //   return { data: undefined };
-      // }
+      if (err?.status === 422) {
+        return { data: undefined };
+      }
 
       return Promise.reject(err);
     })).data;
@@ -151,7 +151,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
 
   @IncStatistics() @Log('debug')
   async pullRequestMerge(pullNumber, repo?, org?) {
-    return (await this.client.pulls.merge({
+    return pullNumber === -99 ? null : (await this.client.pulls.merge({
       owner: this.org(org), repo: this.repo(repo), pull_number: pullNumber,
     }).catch((err) => {
       if (err?.status === 404) {
