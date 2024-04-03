@@ -287,25 +287,25 @@ function incVersion(version, release, releaseType: 'major' | 'minor' | 'patch') 
     return release ? `0.1.0-${release}` : '0.1.0';
   }
 
-  let major = semver.major(version);
-  let minor = semver.minor(version);
-  let patch = semver.patch(version);
-  let prerelease = release || (releaseType === 'patch' ? semver.prerelease(version) : '');
+  const major = semver.major(version);
+  const minor = semver.minor(version);
+  const patch = semver.patch(version);
+  const prerelease = release || (releaseType === 'patch' ? semver.prerelease(version) : '');
 
   let newVersion = `${major}.${minor}.${patch}`;
 
   switch (releaseType) {
-    case 'major':
-      newVersion = semver.inc(newVersion, 'major');
-      break;
-    case 'minor':
-      newVersion = semver.inc(newVersion, 'minor');
-      break;
-    case 'patch':
-      newVersion = semver.inc(newVersion, 'patch');
-      break;
-    default:
-      newVersion = 0 as never;
+  case 'major':
+    newVersion = semver.inc(newVersion, 'major');
+    break;
+  case 'minor':
+    newVersion = semver.inc(newVersion, 'minor');
+    break;
+  case 'patch':
+    newVersion = semver.inc(newVersion, 'patch');
+    break;
+  default:
+    newVersion = 0 as never;
   }
 
   return prerelease ? `${newVersion}-${prerelease}` : newVersion;

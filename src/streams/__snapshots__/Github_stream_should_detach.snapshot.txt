@@ -1,0 +1,107 @@
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                repo = "repo"
+                branch = "branch"
+            }
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- [[ Pass instanceOf : TestGithubIntegrationService ]]
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                repo = "repo"
+                branch = "branch"
+            }
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- [[ Pass instanceOf : TestGithubIntegrationService ]]
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                repo = "repo"
+                branch = "branch"
+            }
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+
+<-- TestProject.getEnvVersioningByTarget <-- [[ Pass instanceOf : TestVersioningService ]]
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+
+--> TestVersioningService.getCurrent --> {
+        * = [
+            "branch"
+        ]
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
+
+<-- TestVersioningService.getCurrent <-- "testBranch"
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
+
+--> TestGithubIntegrationService.branchDelete --> {
+        * = []
+        branch = "testBranch"
+        repo = "repo"
+    }
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:78:23
+
+<-- TestGithubIntegrationService.branchDelete <-- undefined
+    caller = GithubStreamService.streamDetach : ./src/streams/github.ts:78:23

@@ -28,20 +28,36 @@ artifacts:
       - argocdApplicationDev
     config:
       use: "artifacts.argocdApplicationImageTagDeployment.config"
-  argocdApplicationSandbox:
+  argocdApplicationQaHotfix:
     type: "argocd:application"
     config:
-      integration: "argocdSandbox"
-  argocdApplicationImageTagSandbox:
+      integration: "argocdQaHotfix"
+  argocdApplicationImageTagQaHotfix:
     type: "fetchBy"
     dependsOn:
-      - argocdApplicationSandbox
+      - argocdApplicationQaHotfix
     config:
       use: "artifacts.argocdApplicationImageTag.config"
-  argocdApplicationImageTagDeploymentSandbox:
+  argocdApplicationImageTagDeploymentQaHotfix:
     type: "fetchBy"
     dependsOn:
-      - argocdApplicationSandbox
+      - argocdApplicationQaHotfix
+    config:
+      use: "artifacts.argocdApplicationImageTagDeployment.config"
+  argocdApplicationProduction:
+    type: "argocd:application"
+    config:
+      integration: "argocdProduction"
+  argocdApplicationImageTagProduction:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplicationProduction
+    config:
+      use: "artifacts.argocdApplicationImageTag.config"
+  argocdApplicationImageTagDeploymentProduction:
+    type: "fetchBy"
+    dependsOn:
+      - argocdApplicationProduction
     config:
       use: "artifacts.argocdApplicationImageTagDeployment.config"
   argocdApplication:
@@ -172,7 +188,7 @@ integrations:
     type: "argocd"
     config:
       applicationName: "stg"
-  argocdSandbox:
+  argocdQaHotfix:
     type: "argocd"
     config:
       applicationName: "sandbox"
@@ -180,10 +196,10 @@ integrations:
       port: "${ARGOCD_PROD_PORT}"
       username: "${ARGOCD_PROD_USERNAME}"
       password: "${ARGOCD_PROD_PASSWORD}"
-  argocdProd:
+  argocdProduction:
     type: "argocd"
     config:
-      applicationName: "production"
+      applicationName: "sandbox"
       host: "${ARGOCD_PROD_HOST}"
       port: "${ARGOCD_PROD_PORT}"
       username: "${ARGOCD_PROD_USERNAME}"
@@ -429,7 +445,7 @@ flows:
       - type: "argocd:sync"
         title: ""
         config:
-          integration: "argocdSandbox"
+          integration: "argocdQaHotfix"
 
   syncProd:
     title: "Sync"
@@ -1118,24 +1134,28 @@ targets:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-alerts-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-analytics-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-autocomplete-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-charge-service:
         use: "targets.dev.streams.%"
         config:
@@ -1148,28 +1168,28 @@ targets:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-deliveries-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-deliveries-history-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-events-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-frontend-client:
         use: "targets.dev.streams.%"
         config:
@@ -1179,6 +1199,7 @@ targets:
           - fe
           - op
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-fe-sender:
         use: "targets.dev.streams.%"
         config:
@@ -1197,63 +1218,70 @@ targets:
           - fe
           - tracker
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-finance-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-finance-calc:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-graphql-gateway:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-links-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-locations-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-notifications-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-offers-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-postil-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-processing-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
-          - "argocdApplicationImageTagSandbox"
+          - "argocdApplicationImageTagQaHotfix"
       gp-routes-calc-dev:
         use: "targets.dev.streams.%"
         config:
@@ -1263,18 +1291,21 @@ targets:
             jobParams:
               service: "gp-routes-calc"
         artifacts:
+          - "argocdApplicationImageTagDeploymentQaHotfix"
       gp-uam-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
       gp-webhooks-service:
         use: "targets.dev.streams.%"
         config:
           use: "targets.dev.streams.%-1.%"
           integration: "githubHotfix"
         artifacts:
+          - "argocdApplicationImageTagQaHotfix"
     versioning: "hotfix"
 
   production:

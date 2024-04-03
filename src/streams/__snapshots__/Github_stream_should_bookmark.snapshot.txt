@@ -1,0 +1,36 @@
+
+--> TestProject.getStreamStateByTargetIdAndStreamId --> {
+        * = []
+        targetId = undefined
+        streamId = undefined
+        scopes = {
+            change = true
+        }
+    }
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:53:8
+
+<-- TestProject.getStreamStateByTargetIdAndStreamId <-- {
+        history = {
+            change = [
+                {
+                    id = "changeId"
+                }
+            ]
+        }
+        version = "version"
+    }
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:53:8
+
+--> TestGithubIntegrationService.tagCreate --> {
+        * = []
+        sha = "changeId"
+        tag = "version"
+        commitMessage = null
+        repo = "repo"
+        org = null
+        lightweight = false
+    }
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23
+
+<-- TestGithubIntegrationService.tagCreate <-- undefined
+    caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23

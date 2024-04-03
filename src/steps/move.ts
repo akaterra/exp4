@@ -4,7 +4,7 @@ import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds, makeDirty } from './utils';
 import { StreamServiceStreamMoveOptsStrategy } from '../streams/stream.service';
 
 @Service()

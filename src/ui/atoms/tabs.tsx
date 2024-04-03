@@ -3,7 +3,6 @@ import { C } from "./grid";
 import { Fragment, useEffect, useState } from 'react';
 import { Row } from './row';
 import { NavLink } from './link';
-import {Button} from './button';
 
 export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false, onlyChild = false, selectedIndex = 0, tabs, tabsDecoration = undefined, onSelect = undefined }: any) => {
   const tabIndex = typeof selectedIndex === 'number'

@@ -1,6 +1,6 @@
 import { alertsStore } from '../blocks/alerts';
 
-let isProcessingCount = 0;
+// let isProcessingCount = 0;
 
 export function saveJson(content: Array<Record<string, unknown>>, target: 'clipboard' | 'download', filename?) {
   return saveContent(content, 'json', target, filename);
@@ -98,7 +98,7 @@ export function processing(target, prop, descriptor) {
 
   descriptor.value = async function *(...args) {
     this.isProcessing = true;
-    isProcessingCount += 1;
+    // isProcessingCount += 1;
 
     try {
       const generatorState = fn.call(this, ...args);
@@ -122,7 +122,7 @@ export function processing(target, prop, descriptor) {
       throw e;
     } finally {
       this.isProcessing = false;
-      isProcessingCount -= 1;
+      // isProcessingCount -= 1;
     }
   }
 

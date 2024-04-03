@@ -9,7 +9,6 @@ import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
 import AdmZip from 'adm-zip';
-import { Log } from '../logger';
 
 export interface IGithubWorkflowArtifactArtifactConfig {
   integration: IProjectDef['id'];

@@ -1,13 +1,13 @@
 import 'reflect-metadata';
-import Container, {Service} from 'typedi';
+import Container, { Service } from 'typedi';
 import { FileStorageService } from './file';
 import { MongodbStorageService } from './mongodb';
 import { SqlStorageService } from './sql';
 import { ExternalRestServiceStorageService } from './external-rest-service';
 import { RestApiService } from '../services/rest-api.service';
-import {GithubStorageService} from './github';
-import {IntegrationsService} from '../integrations.service';
-import {GithubIntegrationService} from '../integrations/github';
+import { GithubStorageService } from './github';
+import { IntegrationsService } from '../integrations.service';
+import { GithubIntegrationService } from '../integrations/github';
 
 describe('Storage', () => {
   const storages: [ any, any, ((data?: any[]) => { calls: any[] })? ][] = [

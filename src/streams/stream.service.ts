@@ -2,7 +2,6 @@ import { IStreamStateContext, StreamState } from '../stream';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { TargetState } from '../target';
 import { IService } from '../entities.service';
-import { Identifier } from '../types';
 
 export enum StreamServiceStreamMoveOptsStrategy {
   APPROVE = 'approve',

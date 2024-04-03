@@ -1,5 +1,5 @@
 export function createError(mixed, cause?) {
-  let err = new Error();
+  const err = new Error();
 
   if (mixed instanceof Error) {
     err.message = mixed.message;

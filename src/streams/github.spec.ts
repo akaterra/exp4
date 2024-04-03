@@ -1,19 +1,21 @@
 import 'reflect-metadata';
 // import 'source-map-support/register';
-import {IVersioningService} from '../versionings/versioning.service';
-import {IProjectTargetDef, IProjectTargetStreamDef, Project} from '../project';
-import {ProjectsService} from '../projects.service';
-import {GithubStreamService} from './github';
-import {StreamsService} from '../streams.service';
+import { Observe, Observer, SnapshotStorageFormat, extendJest } from '@akaterra.co/unitsnap';
+import { Project } from '../project';
+import { ProjectsService } from '../projects.service';
+import { GithubStreamService } from './github';
+import { StreamsService } from '../streams.service';
 import Container from 'typedi';
-import {IntegrationsService} from '../integrations.service';
-import {GithubIntegrationService} from '../integrations/github';
-import {StubVersioningService} from '../versionings/stub';
-import {VersioningsService} from '../versionings.service';
-import { Observe, Observer, SnapshotStorageFormat } from '@akaterra.co/unitsnap';
+import { IntegrationsService } from '../integrations.service';
+import { GithubIntegrationService } from '../integrations/github';
+import { StubVersioningService } from '../versionings/stub';
+import { VersioningsService } from '../versionings.service';
+
+extendJest(SnapshotStorageFormat.COMPACT);
 
 describe('Github stream', () => {
   const observer = Observer();
+  observer.env.snapshot.setFsProvider(__dirname + '/__snapshots__');
 
   class TestGithubIntegrationService extends GithubIntegrationService {
     id = 'test';
@@ -38,13 +40,12 @@ describe('Github stream', () => {
   function snapshot() {
     const snapshot = observer
       .filter()
-        .notPromiseResult()
+      .notPromiseResult()
       .snapshot()
-        .addInstanceOfProcessor(TestGithubIntegrationService)
-        .addInstanceOfProcessor(TestVersioningService)
-        .includeCaller()
-        .includeName()
-        .serialize(SnapshotStorageFormat.COMPACT);
+      .addInstanceOfProcessor(TestGithubIntegrationService)
+      .addInstanceOfProcessor(TestVersioningService)
+      .includeCaller()
+      .includeName();
 
     return snapshot;
   }
@@ -85,6 +86,8 @@ describe('Github stream', () => {
       },
     });
 
+    // run
+
     await stream.streamBookmark({
       id: 'test',
       type: 'github',
@@ -118,6 +121,8 @@ describe('Github stream', () => {
         version: 'version',
       },
     });
+
+    // run
 
     await stream.streamBookmark({
       id: 'test',
@@ -158,6 +163,8 @@ describe('Github stream', () => {
       getCurrent: Promise.resolve('testBranch'),
     });
 
+    // run
+
     await stream.streamDetach({
       id: 'test',
       type: 'github',
@@ -196,6 +203,8 @@ describe('Github stream', () => {
     observer.override(TestVersioningService, {
       getCurrent: Promise.resolve('testBranch'),
     });
+
+    // run
 
     await stream.streamDetach({
       id: 'test',
@@ -273,6 +282,8 @@ describe('Github stream', () => {
       streamGetState: Observe,
     });
 
+    // run
+
     await stream.streamGetState({
       id: 'test',
       type: 'github',
@@ -290,6 +301,44 @@ describe('Github stream', () => {
 
       artifacts: [ 'test' ],
     }, { '*': true }, {});
+
+    expect(snapshot()).toMatchSnapshot();
+  });
+
+  it('should move stream using general strategy', async () => {
+    const stream = new GithubStreamService();
+
+    // run
+
+    await stream.streamMove({
+      id: 'from',
+      type: 'github',
+
+      ref: {
+        projectId: 'test',
+      },
+
+      config: {
+        integration: 'test',
+        org: 'org',
+        // repo: 'repo',
+        branch: 'branch',
+      },
+    }, {
+      id: 'to',
+      type: 'github',
+
+      ref: {
+        projectId: 'test',
+      },
+
+      config: {
+        integration: 'test',
+        org: 'org',
+        // repo: 'repo',
+        branch: 'branch',
+      },
+    });
 
     expect(snapshot()).toMatchSnapshot();
   });

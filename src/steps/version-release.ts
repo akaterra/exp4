@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IStepService } from './step.service';
 import { ProjectsService } from '../projects.service';
-import { Autowired, iter } from '../utils';
+import { Autowired } from '../utils';
 import { EntityService } from '../entities.service';
 import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
 

@@ -8,7 +8,6 @@ import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
 import { Status } from '../enums/status';
-import { Log } from '../logger';
 
 export interface IGithubWorkflowJobLogArtifactConfig {
   integration: IProjectDef['id'];
@@ -45,7 +44,7 @@ export class GithubWorkflowJobLogArtifactService extends EntityService implement
     let artifact = hasScope('artifact', scopes)
       ? null
       : this.cache.get(params.githubWorkflowJobId as string);
-      console.log(params);
+    console.log(params);
 
     if (!artifact) {
       artifact = await this.getIntegration(entity.ref).workflowJobLogGet(

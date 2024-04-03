@@ -4,7 +4,7 @@ import { IIntegrationService, IncStatistics } from './integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Log, logErrorWarn } from '../logger';
-import {maybeReplaceEnvVars} from './utils';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface IGitlabConfig {
   branch?: string;

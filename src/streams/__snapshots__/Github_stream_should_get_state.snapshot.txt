@@ -1,0 +1,324 @@
+
+--> GithubStreamService.streamGetState --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+        scopes = {
+            * = true
+        }
+        context = {
+            artifact = {
+                githubWorkflowId = "workflowId"
+                githubWorkflowJobId = "workflowJobId"
+                githubWorkflowRunJobStatus = "success"
+                ref = {
+                    projectId = "test"
+                }
+                stream = {
+                    id = "test"
+                    type = "github"
+                    ref = {
+                        projectId = "test"
+                    }
+                    config = {
+                        integration = "test"
+                        org = "org"
+                        branch = "branch"
+                    }
+                    artifacts = [
+                        "test"
+                    ]
+                }
+            }
+        }
+    }
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:278:18
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- [[ Pass instanceOf : TestGithubIntegrationService ]]
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
+
+--> TestProject.getEnvIntegraionByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+        assertType = "github"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
+
+<-- TestProject.getEnvIntegraionByTargetStream <-- [[ Pass instanceOf : TestGithubIntegrationService ]]
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:33
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:311:28
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+
+<-- TestProject.getEnvVersioningByTarget <-- [[ Pass instanceOf : TestVersioningService ]]
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+
+--> TestVersioningService.getCurrent --> {
+        * = [
+            "branch"
+        ]
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
+
+<-- TestVersioningService.getCurrent <-- "testBranch"
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:8
+
+--> TestGithubIntegrationService.branchGet --> {
+        * = []
+        branch = "testBranch"
+        repo = "test"
+    }
+    caller = <anonymous> : ./src/streams/github.ts:114:29
+
+<-- TestGithubIntegrationService.branchGet <-- {
+        commit = {
+            sha = "commitSha"
+            commit = {
+                author = {
+                    name = "commitAuthorName"
+                    html_url = "commitAuthorLink"
+                }
+                committer = {
+                    date = "2020-01-01"
+                }
+                message = "commitMessage"
+            }
+            html_url = "commitLink"
+        }
+        _links = {
+            html = "branchLink"
+        }
+    }
+    caller = <anonymous> : ./src/streams/github.ts:114:29
+
+--> TestProject.getTargetByTargetStream --> {
+        * = []
+        stream = {
+            id = "test"
+            type = "github"
+            ref = {
+                projectId = "test"
+            }
+            config = {
+                integration = "test"
+                org = "org"
+                branch = "branch"
+            }
+            artifacts = [
+                "test"
+            ]
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:301:24
+
+<-- TestProject.getTargetByTargetStream <-- {
+        id = "testTarget"
+        type = "test"
+        versioning = "test"
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:301:24
+
+--> TestProject.getEnvVersioningByTarget --> {
+        * = []
+        target = {
+            id = "testTarget"
+            type = "test"
+            versioning = "test"
+        }
+    }
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+
+<-- TestProject.getEnvVersioningByTarget <-- [[ Pass instanceOf : TestVersioningService ]]
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+
+--> TestGithubIntegrationService.workflowRunList --> {
+        * = []
+        branch = "testBranch"
+        repo = "test"
+        org = "org"
+    }
+    caller = <anonymous> : ./src/streams/github.ts:118:29
+
+<-- TestGithubIntegrationService.workflowRunList <-- [
+        {
+            id = "workflowId"
+            actor = {
+                name = "workflowActorName"
+                html_url = "workflowActorLink"
+            }
+            status = "success"
+        }
+    ]
+    caller = <anonymous> : ./src/streams/github.ts:118:29
+
+--> TestGithubIntegrationService.workflowJobList --> {
+        * = []
+        runId = "workflowId"
+        repo = "test"
+        org = "org"
+    }
+    caller = <anonymous> : ./src/streams/github.ts:127:29
+
+<-- TestGithubIntegrationService.workflowJobList <-- [
+        {
+            id = "workflowJobId"
+            html_url = "workflowJobLink"
+            steps = [
+                {
+                    name = "workflowJobName"
+                    number = 1
+                    conclusion = "success"
+                    started_at = "2020-01-01"
+                    completed_at = "2020-01-02"
+                }
+            ]
+        }
+    ]
+    caller = <anonymous> : ./src/streams/github.ts:127:29
+
+<-- GithubStreamService.streamGetState <-- [[ StreamState : {
+        id = "test"
+        type = "github"
+        projectId = "test"
+        targetId = undefined
+        history = {
+            action = [
+                {
+                    id = "workflowId"
+                    type = "github:workflow"
+                    author = {
+                        name = "workflowActorName"
+                        link = "workflowActorLink"
+                    }
+                    description = undefined
+                    link = null
+                    metadata = {}
+                    steps = {
+                        1 = {
+                            id = "1"
+                            type = "github:workflow:job"
+                            description = "workflowJobName"
+                            link = "workflowJobLink#step:1:1"
+                            runningTimeSeconds = 86400
+                            status = "completed"
+                        }
+                    }
+                    status = "success"
+                    time = null
+                }
+            ]
+            artifact = []
+            change = [
+                {
+                    id = "commitSha"
+                    type = "github:commit"
+                    author = {
+                        name = "commitAuthorName"
+                        link = "commitAuthorLink"
+                    }
+                    description = "commitMessage"
+                    link = "commitLink"
+                    metadata = {}
+                    status = null
+                    steps = null
+                    time = [[ Date : 2020-01-01T00:00:00.000Z ]]
+                }
+            ]
+        }
+        isSyncing = false
+        link = "branchLink"
+        metadata = {
+            org = "org"
+            branch = "testBranch"
+        }
+        version = null
+        ver = 1
+    } ]]
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:278:18
