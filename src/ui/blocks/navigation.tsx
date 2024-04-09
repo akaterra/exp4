@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import { SubTitle } from '../atoms/title';
 import { NavLink } from '../atoms/link';
 import { ProjectsStore } from '../stores/projects';
@@ -30,9 +30,17 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
       <div className='list'>
         {
           projects.projectsList.map((e, i) => {
-            return <div className='list-item bold' key={ i }><NavLink activeClassName="link active" href={ `/projects/${e.id}` } className='link'>
-              { e.title ?? e.id }
-            </NavLink></div>
+            return <Fragment>
+              <div className='list-item bold' key={ i }>
+                <NavLink activeClassName='link active' href={ `/projects/${e.id}` } className='link'>{ e.title ?? e.id }</NavLink>
+              </div>
+              <div className='list-item sub bold' key={ i }>
+                <NavLink activeClassName='link active' href={ `/projects/${e.id}/targets` } className='link'>Targets</NavLink>
+              </div>
+              <div className='list-item sub bold' key={ i }>
+                <NavLink activeClassName='link active' href={ `/projects/${e.id}/statistics` } className='link'>Statistics</NavLink>
+              </div>
+            </Fragment>;
           })
         }
       </div>

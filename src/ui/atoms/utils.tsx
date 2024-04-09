@@ -29,11 +29,11 @@ export function maybeLabeledControl(Element, x, label?, error?) {
 
   return x !== null
     ?<C className='children-gap-full' x={ x }>
-      <Label>{ label === FICTIVE ? '' : label }</Label>
+      <Label error={ error }>{ label === FICTIVE ? '' : label }</Label>
       { E }
     </C>
     : <Fragment>
-      <Label>{ label === FICTIVE ? '' : label }</Label>
+      <Label error={ error }>{ label === FICTIVE ? '' : label }</Label>
       { E }
     </Fragment>;
 }

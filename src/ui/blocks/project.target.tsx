@@ -29,6 +29,7 @@ export const ProjectTargets = observer(({ project }: { project?: ProjectStore })
 
   return <div className='row'>
     <div className='c18 -s-'>
+      <div className='caption caption-sml'>Targets</div>
       <div className='row flex flex-end'>
         <Input
           currentValue={ project.filterTargets }

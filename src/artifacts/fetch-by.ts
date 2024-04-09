@@ -344,6 +344,10 @@ export class FetchByArtifactService extends EntityService implements IArtifactSe
 }
 
 function checkContains(condition, val) {
+  if (Array.isArray(condition)) {
+    return condition.some((condition) => checkContains(condition, val));
+  }
+
   if (Array.isArray(val)) {
     for (const item of val) {
       if (item?.includes(condition)) {
@@ -359,9 +363,13 @@ function checkContains(condition, val) {
 
 
 function checkEq(condition, val) {
+  if (Array.isArray(condition)) {
+    return condition.some((condition) => checkEq(condition, val));
+  }
+
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (item === val) {
+      if (condition === item) {
         return true;
       }
     }
@@ -373,9 +381,13 @@ function checkEq(condition, val) {
 }
 
 function checkGte(condition, val) {
+  if (Array.isArray(condition)) {
+    return condition.some((condition) => checkGte(condition, val));
+  }
+
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (item <= val) {
+      if (condition <= val) {
         return true;
       }
     }
@@ -387,6 +399,10 @@ function checkGte(condition, val) {
 }
 
 function checkIn(condition, val) {
+  if (Array.isArray(val)) {
+    return val.some((condition) => checkIn(condition, val));
+  }
+
   if (Array.isArray(val)) {
     for (const item of val) {
       if (condition?.includes(item)) {
@@ -401,9 +417,13 @@ function checkIn(condition, val) {
 }
 
 function checkLte(condition, val) {
+  if (Array.isArray(condition)) {
+    return condition.some((condition) => checkLte(condition, val));
+  }
+
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (item >= val) {
+      if (condition >= val) {
         return true;
       }
     }

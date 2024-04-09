@@ -11,7 +11,7 @@ export const ProjectStatistics = observer(({ project }: { project?: ProjectStore
   }
 
   return <div className='paragraph children-gap'>
-    <SubTitle>General</SubTitle>
+    <div className='caption caption-sml'>Statistics</div>
     <div className='list'>
       {
         Object.entries(project?.projectStatistics).map(([ key, val ]) => {

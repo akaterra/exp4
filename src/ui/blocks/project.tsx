@@ -17,6 +17,7 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
     <Label>{project.project?.description ?? 'No description'}</Label>
     <div className='paragraph'>
       <Tabs
+        onlyChild={ true }
         selectedIndex={ project.selectedTab }
         tabs={ [
           { id: 'targets', type: 'link', href: `/projects/${project.project.id}/targets`, title: 'Targets' },

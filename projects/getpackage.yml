@@ -74,7 +74,9 @@ artifacts:
         filter:
           "...":
             contains:
-              param: "ref.streamId"
+              coalesce:
+                - param: "stream.config.argocdServiceName"
+                - param: "ref.streamId"
         pattern: "\\:([\\w\\-\\.]+)$"
         keys:
           - 1
@@ -112,7 +114,9 @@ artifacts:
         filter:
           "...":
             contains:
-              param: "ref.streamId"
+              coalesce:
+                - param: "stream.config.argocdServiceName"
+                - param: "ref.streamId"
         pattern: "\\:([\\w\\-\\.]+)$"
         keys:
           - 1
@@ -522,14 +526,14 @@ flows:
           - "stgHotfix:production"
         config:
           strategy: "approve"
-      - type: "version:override"
-        title: ""
-        targets:
-          - "production"
-      - type: "streamVersion:override"
-        title: ""
-        targets:
-          - "stgHotfix:production"
+      # - type: "version:override"
+      #   title: ""
+      #   targets:
+      #     - "production"
+      # - type: "streamVersion:override"
+      #   title: ""
+      #   targets:
+      #     - "stgHotfix:production"
       - type: "detach"
         title: ""
         targets:

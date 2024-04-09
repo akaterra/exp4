@@ -12,8 +12,8 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
   const child = Array.isArray(children) ? children[currentSelectedIndex] : children;
 
   useEffect(() => {
-    setCurrentSelectedIndex(currentSelectedIndex);
-  }, [ currentSelectedIndex ?? 0 ]);
+    setCurrentSelectedIndex(tabIndex);
+  }, [ tabIndex ]);
 
   return <Fragment>
     {
