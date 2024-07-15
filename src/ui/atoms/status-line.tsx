@@ -34,8 +34,8 @@ export const StatusValue = ({ isFailed = false, status = undefined }: any) => {
 
   return <span className={
     status === Status.FAILED
-      ? 'badge failure bold'
-      : status === Status.COMPLETED || status === Status.STABLE || status === Status.SUCCESS ? 'badge success bold' : 'badge warning bold'
+      ? 'badge failure bold upper'
+      : status === Status.COMPLETED || status === Status.STABLE || status === Status.SUCCESS ? 'badge success bold upper' : 'badge warning bold upper'
   }>{ status }</span>;
 };
 

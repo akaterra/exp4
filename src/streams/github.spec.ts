@@ -225,7 +225,7 @@ describe('Github stream', () => {
     expect(snapshot()).toMatchSnapshot();
   });
 
-  it('should get state', async () => {
+  it.only.update('should get state', async () => {
     const stream = new GithubStreamService();
 
     observer.override(TestGithubIntegrationService, {

@@ -167,6 +167,7 @@ export class GithubIntegrationService extends EntityService implements IIntegrat
     return (await this.client.git.createRef({
       owner: this.org(org), repo: this.repo(repo), ref: `refs/${ refType ?? 'heads' }/${refName}`, sha,
     }).catch((err) => {
+      console.error(err);
       if (err?.status === 422) {
         return { data: undefined };
       }

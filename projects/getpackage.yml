@@ -203,7 +203,7 @@ integrations:
   argocdProduction:
     type: "argocd"
     config:
-      applicationName: "sandbox"
+      applicationName: "production"
       host: "${ARGOCD_PROD_HOST}"
       port: "${ARGOCD_PROD_PORT}"
       username: "${ARGOCD_PROD_USERNAME}"
@@ -362,6 +362,10 @@ flows:
         title: ""
         targets:
           - "stg:production"
+      - type: "bookmark"
+        title: ""
+        targets:
+          - "production"
       - type: "detach"
         title: ""
         targets:
@@ -459,7 +463,7 @@ flows:
       - type: "argocd:sync"
         title: ""
         config:
-          integration: "argocdProd"
+          integration: "argocdProduction"
 
   createHotfix:
     title: "Create hotfix"
@@ -500,14 +504,14 @@ flows:
           - "stgHotfix:production"
         config:
           strategy: "approve"
-      - type: "version:override"
-        title: ""
-        targets:
-          - "stgHotfix:production"
-      - type: "streamVersion:override"
-        title: ""
-        targets:
-          - "stgHotfix:production"
+      # - type: "version:override"
+      #   title: ""
+      #   targets:
+      #     - "stgHotfix:production"
+      # - type: "streamVersion:override"
+      #   title: ""
+      #   targets:
+      #     - "stgHotfix:production"
 
   finishHotfix:
     title: "Finish hotfix"
@@ -865,6 +869,7 @@ targets:
           argocdServiceName:
             - "gp-postil"
             - "gp-postil-web"
+          argocdServiceKind: "Deployment"
           jenkins:
             flows:
               migrate:
@@ -1444,6 +1449,7 @@ targets:
           use: "targets.dev.streams.%-1.%"
           integration: "githubMaster"
         artifacts:
+          - argocdApplicationImageTagDeploymentProduction
       gp-processing-service:
         use: "targets.dev.streams.%"
         config:

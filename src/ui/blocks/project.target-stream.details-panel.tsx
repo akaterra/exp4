@@ -108,6 +108,12 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           <div>
             <a className='link' href={ lastAction?.link } target='__blank'>{ lastAction?.type ?? 'unknown' }</a>
           </div>
+          <TitledLine title='Author:'>
+            <a className='link' href={ lastAction?.author?.link } target='__blank'>{ lastAction?.author?.name ?? 'unknown' }</a>
+          </TitledLine>
+          <TitledLine title='At' isShown={ !!lastAction?.time }>
+            <Time time={ lastAction?.time } />
+          </TitledLine>
           {
             lastAction?.steps && Object.keys(lastAction.steps).length
               ? <InfoCollapse label={ projectTargetStreamState?._lastActionLabel } showTitle='Info' hideTitle='Hide'>
@@ -134,12 +140,6 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
               </InfoCollapse>
               : null
           }
-          <TitledLine title='Author:'>
-            <a className='link' href={ lastAction?.author?.link } target='__blank'>{ lastAction?.author?.name ?? 'unknown' }</a>
-          </TitledLine>
-          <TitledLine title='At' isShown={ !!lastAction?.time }>
-            <Time time={ lastAction?.time } />
-          </TitledLine>
         </div>
         : null
     }
@@ -153,6 +153,12 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           <div>
             <a className='link' href={ lastChange?.link } target='__blank'>{ lastChange?.type ?? 'unknown' }</a>
           </div>
+          <TitledLine title='Author:'>
+            <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
+          </TitledLine>
+          <TitledLine title='At' isShown={ !!lastChange?.time }>
+            <Time time={ lastChange?.time } />
+          </TitledLine>
           {
             lastChange?.steps && Object.keys(lastChange.steps).length
               ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
@@ -171,12 +177,6 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
               </InfoCollapse>
               : null
           }
-          <TitledLine title='Author:'>
-            <a className='link' href={ lastChange?.author?.link } target='__blank'>{ lastChange?.author?.name ?? 'unknown' }</a>
-          </TitledLine>
-          <TitledLine title='At' isShown={ !!lastChange?.time }>
-            <Time time={ lastChange?.time } />
-          </TitledLine>
         </div>
         : null
     }

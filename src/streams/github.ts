@@ -64,7 +64,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       null,
       this.getRepoRef(stream),
       null,
-      false,
+      true,
     );
 
     return null;
@@ -197,7 +197,7 @@ export class GithubStreamService extends EntityService implements IStreamService
       state.link = branch ? branch._links.html ?? null : state?.link ?? null;
       state.metadata = metadata;
       state.version = await versioningService.getCurrentStream(stream);
-  
+
       if (hasScope('artifact', scopes) && stream.artifacts?.length) {
         if (context) {
           context.artifact = {
@@ -304,13 +304,14 @@ export class GithubStreamService extends EntityService implements IStreamService
     return project.getEnvVersioningByTarget(target);
   }
 
-
   private async getBranch(stream: IGithubTargetStream) {
     const project = this.projectsService.get(stream.ref.projectId);
     const integration = project.getEnvIntegraionByTargetStream<GithubIntegrationService>(stream, this.type);
     const target = project.getTargetByTargetStream(stream);
-    const branch = await this.getVersioningService(stream, target)
-      .getCurrent(target, stream.config?.branch ?? integration.config?.branch);
+    const versioningService = this.getVersioningService(stream, target);
+    const branch =
+      await versioningService.getCurrentStream(stream, stream.config?.branch ?? integration.config?.branch) ||
+      await versioningService.getCurrent(target, stream.config?.branch ?? integration.config?.branch);
 
     return branch ?? integration?.config?.branch;
   }

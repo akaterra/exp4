@@ -122,10 +122,10 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   @Log('debug')
-  async getCurrentStream(target: IProjectTargetStreamDef, format?: false | string): Promise<string> {
-    const version = await this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId)).varGetStream(
-      target,
-      [ 'version', target.ref.projectId, this.config?.namespace ?? target.ref.targetId ],
+  async getCurrentStream(stream: IProjectTargetStreamDef, format?: false | string): Promise<string> {
+    const version = await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId)).varGetStream(
+      stream,
+      [ 'version', stream.ref.projectId, this.config?.namespace ?? stream.ref.targetId ],
       null,
     );
 
@@ -237,7 +237,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     const parsedVersion = semver.parse(version);
 
     return parsedVersion
-      ? resolvePlaceholders(format, { version: parsedVersion })
+      ? resolvePlaceholders(format, { version: parsedVersion })?.trim()
       : version;
   }
 

@@ -45,7 +45,7 @@
             }
         }
     }
-    caller = Object.<anonymous> : ./src/streams/github.spec.ts:278:18
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:287:18
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -321,4 +321,4 @@
         version = null
         ver = 1
     } ]]
-    caller = Object.<anonymous> : ./src/streams/github.spec.ts:278:18
+    caller = Object.<anonymous> : ./src/streams/github.spec.ts:287:18
