@@ -5,7 +5,7 @@ import { ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Button } from '../atoms/button';
 import { Status } from '../enums/status';
-import { InfoCollapse } from '../atoms/info-collapse';
+import { InfoCollapsable } from '../atoms/info-collapse';
 import { StatusValue, TitledLine } from '../atoms/status-line';
 import { IProjectTargetStreamState } from '../stores/dto/project-state';
 import { IProjectTargetStream } from '../stores/dto/project';
@@ -116,7 +116,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           </TitledLine>
           {
             lastAction?.steps && Object.keys(lastAction.steps).length
-              ? <InfoCollapse label={ projectTargetStreamState?._lastActionLabel } showTitle='Info' hideTitle='Hide'>
+              ? <InfoCollapsable label={ projectTargetStreamState?._lastActionLabel } showTitle='Info' hideTitle='Hide'>
                 <ul className='font-sml'>
                   {
                     Object.values(lastAction?.steps).map((step) => <li>
@@ -137,7 +137,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                       </a>
                     </li>) }
                 </ul>
-              </InfoCollapse>
+              </InfoCollapsable>
               : null
           }
         </div>
@@ -161,7 +161,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
           </TitledLine>
           {
             lastChange?.steps && Object.keys(lastChange.steps).length
-              ? <InfoCollapse isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
+              ? <InfoCollapsable isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
                 <ul className='font-sml'>
                   {
                     Object.values(lastChange?.steps).map((step) => <li>
@@ -174,7 +174,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
                       </a>
                     </li>) }
                 </ul>
-              </InfoCollapse>
+              </InfoCollapsable>
               : null
           }
         </div>

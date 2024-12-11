@@ -8,49 +8,49 @@ import { ValueMaybeSuccess } from '../atoms/status-line';
 import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
 import { Time } from '../atoms/time';
 
-export const ProjectTargetLastActions = observer(({ projectTarget, key }: { projectTarget?: ProjectTargetStore, key? }) => {
+export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projectTarget?: ProjectTargetStore, key? }) => {
   const [ isShown, setIsShown ] = React.useState(true);
 
   if (!projectTarget?.target?.id) {
     return null;
   }
 
-  const hasActionsOrChanges = projectTarget.streamsWithStatesAndArtifacts?.some((streamState) => streamState.streamState?.history?.action?.length || streamState.streamState?.history?.change?.length);
+  const hasArtifacts = projectTarget.streamsWithStatesAndArtifacts?.some((streamState) => streamState.artifacts?.length);
 
   const ContentElement = isShown
     ? <React.Fragment>
       <div className='paragraph paragraph-lrg'>
         {
-          hasActionsOrChanges
-            ? <div className='table highlighted underlined zebra fine'>
-              <div className='row header'>
-                <div className='ccc w20'>Stream</div>
-                <div className='ccc w20'>Action</div>
-                <div className='ccc w20'>Change</div>
-              </div>
+          hasArtifacts
+            ? <table className='table highlighted underlined zebra fine'><tbody>
+              <tr className='header'>
+                <th className='w20'>Stream</th>
+                <th className='w20'>Artifact</th>
+                <th className='w20'>Artifact value</th>
+              </tr>
               {
-                projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState }) => {
-                  const actions = streamState?.history?.action?.length
-                    ? [ streamState?.history?.action[0] ]
-                    : [ null ]
+                projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }) => {
+                  if (!artifacts?.length) {
+                    return null;
+                  }
 
                   const lastChange = streamState.history?.change[0];
       
-                  return actions?.map((action, j) => {
-                    return <div className='row'>
-                      <div className={ lastChange ? `ccc w20` : `ccc w20 opacity-med` }>
+                  return artifacts?.map((artifact, j) => {
+                    return <tr>
+                      <td className={ lastChange ? `w20` : `w20 opacity-med` }>
                         {
                           j === 0
                             ? <ProjectTargetStreamTitle projectTarget={ projectTarget } stream={ stream } streamState={ streamState } />
                             : null
                         }
-                      </div>
-                      <div className='ccc w80 flex flex-ver children-gap'>
-                        <div className='row'>
-                          <div className={ lastChange ? 'ccc w25 flex flex-ver children-gap' : 'ccc w25 opacity-med flex flex-ver children-gap' }>
-                            <span className='overflow'>{ action?.description ?? action?.id }</span>
+                      </td>
+                      <td className='w80 flex children-gap'>
+                        <div className={ artifact?.time ? 'row' : 'row flex flex-middle' }>
+                          <div className={ lastChange ? 'ccc w25' : 'ccc w25 opacity-med' }>
+                            <span className='overflow'>{ artifact?.id }</span>
                           </div>
-                          <div className={ lastChange ? 'ccc w50' : 'ccc w50 opacity-med' }><ValueMaybeSuccess value={ lastChange?.description } /></div>
+                          <div className={ lastChange ? 'ccc w50' : 'ccc w50 opacity-med' }><ValueMaybeSuccess value={ artifact?.description } /></div>
                           <div className='ccc w25 flex flex-right children-gap-hor'>
                             {
                               j === 0
@@ -60,29 +60,26 @@ export const ProjectTargetLastActions = observer(({ projectTarget, key }: { proj
                             <Button
                               className={ 'button-sml success w-auto' }
                               x={ null }
-                              // onClick={ () => projectTarget.projectStore.applyArtifactCopyToClipboard(change) }
+                              onClick={ () => projectTarget.projectStore.applyArtifactCopyToClipboard(artifact) }
                             ><i className='fa-solid fa-copy' /></Button>
                           </div>
                         </div>
                         {
-                          action?.time || lastChange?.time
+                          artifact?.time
                             ? <div className='row'>
                               <div className='ccc w25'>
-                                <div className='label'><Time time={ action?.time } /></div>
-                              </div>
-                              <div className='ccc w25'>
-                                <div className='label'><Time time={ lastChange?.time } /></div>
+                                <div className='label'><Time time={ artifact?.time } /></div>
                               </div>
                             </div>
                             : null
                         }
-                      </div>
-                    </div>;
+                      </td>
+                    </tr>;
                   });
                 })
               }
-            </div>
-            : <Label>No actions or changes available</Label>
+            </tbody></table>
+            : <Label>No artifacts available</Label>
         }
       </div>
     </React.Fragment>
@@ -100,15 +97,15 @@ export const ProjectTargetLastActions = observer(({ projectTarget, key }: { proj
         </SubTitle>
         <Label>{projectTarget.target?.description ?? 'No description'}</Label>
       </div>
-      <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasActionsOrChanges } x={null} onClick={ () => projectTarget.applyActionsAndChangesDownload() }><i className="fa-solid fa-file-arrow-down fa-lg"></i></Button>
-      <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasActionsOrChanges } x={null} onClick={ () => projectTarget.applyActionsAndChangesExportToClipboard() }><i className="fa-solid fa-copy fa-lg"></i></Button>
+      <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasArtifacts } x={null} onClick={ () => projectTarget.applyArtifactsDownload() }><i className="fa-solid fa-file-arrow-down fa-lg"></i></Button>
+      <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasArtifacts } x={null} onClick={ () => projectTarget.applyArtifactsExportToClipboard() }><i className="fa-solid fa-copy fa-lg"></i></Button>
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     { ContentElement }
   </div>;
 });
 
-export const ProjectTargetsLastActions = observer(({ project }: { project?: ProjectStore }) => {
+export const ProjectTargetsArtifacts = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {
     return null;
   }
@@ -118,7 +115,7 @@ export const ProjectTargetsLastActions = observer(({ project }: { project?: Proj
       Object.values(project.projectTargetsStores).map((projectTargetStore, i) => {
         return <div className='ccc -s- w00' key={ i }>
           <div className='panel default shadow shadow-low unbound'>
-            <ProjectTargetLastActions projectTarget={ projectTargetStore } key={ 'a' + i } />
+            <ProjectTargetArtifacts projectTarget={ projectTargetStore } key={ 'a' + i } />
           </div>
         </div>;
       })

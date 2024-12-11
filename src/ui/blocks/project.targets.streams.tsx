@@ -5,7 +5,7 @@ import { ProjectStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
-import { InfoCollapse } from '../atoms/info-collapse';
+import { InfoCollapsable } from '../atoms/info-collapse';
 import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
 
 export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
@@ -18,7 +18,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
   const ContentElement = isShown
     ? <React.Fragment>
       <div>
-        <InfoCollapse isDisabled={ !projectTarget.streamsWithStates?.length } isIdle={ true } showTitle='Flows'>
+        <InfoCollapsable isDisabled={ !projectTarget.streamsWithStates?.length } isIdle={ true } showTitle='Flows'>
           {
             projectTarget.flows.map(({ flow, streamIds }, i) => {
               return <div key={ i }>
@@ -31,7 +31,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
               </div>;
             })
           }
-        </InfoCollapse>
+        </InfoCollapsable>
       </div>
       <div className='paragraph paragraph-lrg'>
         {

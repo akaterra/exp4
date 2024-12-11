@@ -6,7 +6,7 @@ import { BaseStore } from './base-store';
 import { modalStore } from '../blocks/modal';
 import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
-import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target-stream.details-panel';
+import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target.stream.details-panel';
 import { processing, saveContent, saveTextAligned, splitFilterTokens } from './utils';
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
@@ -79,7 +79,7 @@ export class ProjectTargetStore extends BaseStore {
         const streamState = this.projectTargetState?.streams?.[stream.id];
 
         if (this.projectStore.filterPlaced) {
-          if (this.projectStore.mode?.target === 'artifact') {
+          if (this.projectStore.mode?.target === ProjectStoreMode.ARTIFACTS) {
             if (!streamState?.history?.action?.length || !streamState?.history?.artifact?.length) {
               continue;
             }
@@ -145,7 +145,7 @@ export class ProjectTargetStore extends BaseStore {
         const streamState = this.projectTargetState?.streams?.[stream.id];
 
         if (this.projectStore.filterPlaced) {
-          if (this.projectStore.mode?.target === 'artifact') {
+          if (this.projectStore.mode?.target === ProjectStoreMode.ARTIFACTS) {
             if (!streamState?.history?.action?.length || !streamState?.history?.artifact?.length) {
               continue;
             }
@@ -359,6 +359,12 @@ export class ProjectFlowParamsStore extends FormStore {
   }
 }
 
+export enum ProjectStoreMode {
+  ACTIONS_AND_CHANGES = 'actionsAndChanges',
+  ARTIFACTS = 'artifacts',
+  STREAMS = 'streams',
+}
+
 export class ProjectStore extends BaseStore {
   @observable
     filterPlaced: boolean = false;
@@ -366,10 +372,10 @@ export class ProjectStore extends BaseStore {
     filterTargets: string = '';
   @observable
     mode: {
-      target?: 'artifact' | 'lastAction' | 'stream';
+      target?: ProjectStoreMode;
     } = {
-        target: 'stream',
-      };
+      target: ProjectStoreMode.STREAMS,
+    };
   @observable
     project: IProject;
   @observable
