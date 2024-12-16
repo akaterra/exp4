@@ -19,12 +19,12 @@ export const Alerts = observer(({ store }: { store: AlertsStore }) => {
     <div className='row clear'>
       <div className='paragraph paragraph-lrg' style={ { alignItems: 'end' } }>
         {
-          store.alerts.map((alert, i) => {
+          store.alerts.map((alert) => {
             const level = alert.message?.level ?? 'failure';
             const message = alert.message?.value ?? alert.message;
 
-            return <div className='f-4 f-8-m- f14-s-' key={ i }>
-              <div className={ `alert ${level} unbound shadow shadow-sml flex flex-hor flex-middle` }>
+            return <div className={ `f-4 f-8-m- f14-s- ${alert.isShowing ? 'ef-show' : 'ef-hide'}` } key={ alert.id } onAnimationEnd={ () => store.onTransitionEnd(alert) }>
+              <div className={ `alert ${level} unbound shadow shadow-sml flex flex-hor flex-middle ef-fade` }>
                 <div className='row flex-hor flex-middle'>
                   <div className='ccc'>{ message }</div>
                   <Button className={ `button-sml ${level} no-margin` } x='ccc w-auto' onClick={ () => store.close(alert) }>✖</Button>

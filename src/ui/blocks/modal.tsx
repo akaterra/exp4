@@ -20,8 +20,10 @@ export const Modal = observer(({ store }: { store?: ModalStore }) => {
   return <ModalAtom
     buttons={ store?.optsState?.buttons }
     title={ TitleComponent ? <TitleComponent { ...store.optsState?.props } store={ store } /> : undefined }
+    isShowing={ store?.isShowing }
     onClose={ store?.optsState?.onClose }
     onSelect={ store?.optsState?.onSelect }
+    onTransitionEnd={ store?.onTransitionEnd.bind(store) }
   >
     {
       ContentComponent && <ContentComponent { ...store.optsState?.props } store={ store } />

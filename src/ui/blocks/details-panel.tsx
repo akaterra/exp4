@@ -35,8 +35,10 @@ export const DetailsPanel = observer(({ store }: { store?: ModalStore }) => {
 
   return <DetailsPanelAtom
     // buttons={ modalStore?.initialOpts?.buttons }
+    isShowing={ store.isShowing }
     title={ TitleComponent && <TitleComponent { ...store.optsState?.props } /> }
     onClose={ store?.optsState?.onClose }
+    onTransitionEnd={ store?.onTransitionEnd.bind(store) }
   >
     {
       ContentComponent && <ContentComponent { ...store.optsState?.props } />

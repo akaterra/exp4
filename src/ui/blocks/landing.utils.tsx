@@ -28,7 +28,7 @@ export function getLandingLogoGradient() {
     a = calcColor(3, i);
 
     gradients.push(
-      `rgba(${r}, ${g}, ${b}, ${a}) ${i}%`
+      i === 0 ? '#f0f0f0' : `rgba(${r}, ${g}, ${b}, ${a}) ${i}%`
     );
   }
 
@@ -45,7 +45,7 @@ export function getLandingLogoGradient() {
     return Math.floor(color1[p] + (color2[p] - color1[p]) * i / stop);
   }
 
-  return `linear-gradient(135deg, ${gradients.join(', ')})`;
+  return `linear-gradient(0deg, ${gradients.join(', ')})`;
 }
 
 export const gradient2 = `linear-gradient(135deg, transparent 0%, transparent 16%, #f9f87140 16%, #f9f87140 18%, transparent 18%, transparent 22%, #f9f87180 22%, #f9f87180 24%, transparent 24%)`;

@@ -2,9 +2,12 @@ import * as React from 'react-dom';
 import { computed, makeObservable, observable } from 'mobx';
 import { BaseStore } from './base-store';
 
+let nextId = 0;
+
 export class AlertsStore extends BaseStore {
   @observable alerts: {
-    id?: unknown;
+    id?: number | string;
+    isShowing?: boolean;
     message: React.Component | React.FunctionComponent | { level: string, value: string } | string;
     timestamp: number;
   }[] = [];
@@ -24,14 +27,16 @@ export class AlertsStore extends BaseStore {
     this.cleanAlertsTimer = setInterval(() => {
       const now = Date.now();
 
-      this.alerts = this.alerts.length
-        ? this.alerts.filter((alert) => now - alert.timestamp < 15000)
-        : this.alerts;
+      for (const alert of this.alerts) {
+        if (now - alert.timestamp > 15000) {
+          alert.isShowing = false;
+        }
+      }
     }, 500);
   }
 
   close(alert: typeof AlertsStore.prototype['alerts'][0]) {
-    this.alerts = this.alerts.filter((a) => a !== alert);
+    this.alerts.find((a) => a === alert)!.isShowing = false;
   }
 
   dispose(): void {
@@ -40,13 +45,14 @@ export class AlertsStore extends BaseStore {
     clearInterval(this.cleanAlertsTimer);
   }
 
-  push(message: React.Component | React.FunctionComponent | { level: string, value: string } | string, id?: unknown) {
+  push(message: React.Component | React.FunctionComponent | { level: string, value: string } | string, id?: number | string) {
     if (id && this.alerts.some((alert) => alert.id === id)) {
       return;
     }
 
     this.alerts.push({
-      id,
+      id: id ?? nextId ++,
+      isShowing: true,
       message,
       timestamp: Date.now(),
     });
@@ -58,5 +64,11 @@ export class AlertsStore extends BaseStore {
 
   hideLoader() {
     this.isLoaderShownIteration = this.isLoaderShownIteration > 0 ? this.isLoaderShownIteration - 1 : 0;
+  }
+
+  onTransitionEnd(alert: typeof AlertsStore.prototype['alerts'][0]) {
+    if (!alert.isShowing) {
+      this.alerts = this.alerts.filter((a) => a !== alert);
+    }
   }
 }

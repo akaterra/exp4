@@ -88,14 +88,13 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
   return <div className='children-gap span default' key={ key }>
     <div className='flex flex-hor'>
       <div>
-        <SubTitle>
+        <SubTitle title={ projectTarget.target?.description }>
           <a className='link document-color' onClick={ () => setIsShown(!isShown) }>
             { projectTarget.target?.title ?? projectTarget.target?.id }
           </a>
           &nbsp;
           <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
         </SubTitle>
-        <Label>{projectTarget.target?.description ?? 'No description'}</Label>
       </div>
       <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasArtifacts } x={null} onClick={ () => projectTarget.applyArtifactsDownload() }><i className="fa-solid fa-file-arrow-down fa-lg"></i></Button>
       <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasArtifacts } x={null} onClick={ () => projectTarget.applyArtifactsExportToClipboard() }><i className="fa-solid fa-copy fa-lg"></i></Button>

@@ -58,14 +58,13 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
   return <div className='children-gap span default'>
     <div className='flex flex-hor'>
       <div>
-        <SubTitle>
+        <SubTitle title={ projectTarget.target?.description }>
           <a className='link document-color' onClick={ () => setIsShown(!isShown) }>
             { projectTarget.target?.title ?? projectTarget.target?.id }
           </a>
           &nbsp;
           <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
         </SubTitle>
-        <Label>{projectTarget.target?.description ?? 'No description'}</Label>
       </div>
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>

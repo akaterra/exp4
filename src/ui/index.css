@@ -5,3 +5,69 @@ svg.fa-lg {
 svg.svg-inline--fa.fa-lg {
   vertical-align: -0.25em;
 }
+
+.ef-show .ef-slide {
+  animation: ef-show-slide 0.1s cubic-bezier(0.350, 0.600, 0.550, 1.000) both;
+}
+
+@keyframes ef-show-slide {
+  0% {
+    transform: translateX(100px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.ef-show .ef-slide-up {
+  animation: ef-show-slide-up 1s cubic-bezier(0.350, 0.600, 0.550, 1.000) both,
+    ef-show-fade 1s cubic-bezier(0.350, 0.600, 0.550, 1.000) both;
+}
+
+@keyframes ef-show-slide-up {
+  0% {
+    transform: translateY(20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.ef-hide .ef-slide {
+  animation: ef-hide-slide 0.1s cubic-bezier(0.350, 0.600, 0.550, 1.000) both;
+}
+
+@keyframes ef-hide-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100px);
+  }
+}
+
+.ef-show .ef-fade {
+  animation: ef-show-fade 0.1s cubic-bezier(0.350, 0.600, 0.550, 1.000) both;
+}
+
+@keyframes ef-show-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.ef-hide .ef-fade {
+  animation: ef-hide-fade 0.1s cubic-bezier(0.350, 0.600, 0.550, 1.000) both;
+}
+
+@keyframes ef-hide-fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

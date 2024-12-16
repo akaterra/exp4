@@ -5,12 +5,14 @@ export const CLOSE = Symbol('close');
 
 export class ModalStore {
   @observable
+    isShowing?: boolean;
+  @observable
     optsState?: ModalStore['opts'];
   @observable
     selectedAction?: string;
 
   @computed
-  get isShow(): boolean {
+  get isShown(): boolean {
     return !!this.optsState;
   }
 
@@ -72,7 +74,8 @@ export class ModalStore {
       }
     }
 
-    this.optsState = undefined;
+    this.isShowing = false;
+    // this.optsState = undefined;
 
     if (this.onSelectPromiseResolve) {
       this.onSelectPromiseResolve(this.selectedAction);
@@ -104,6 +107,8 @@ export class ModalStore {
       this.onShow(true);
     }
 
+    this.isShowing = true;
+
     if (!opts.buttons) {
       opts.buttons = {
         cancel: { action: 'cancel', title: 'Cancel' },
@@ -117,7 +122,7 @@ export class ModalStore {
       props: { ...opts.props, storage: this },
       onClose: opts.onClose || opts.withClose ? this.close.bind(this) : null,
       onSelect: this.select.bind(this),
-    };
+   };
 
     if (this.optsState?.buttons) {
       this.optsState.buttons = Object
@@ -138,6 +143,12 @@ export class ModalStore {
     if (this.optsState?.buttons?.[id]) {
       this.optsState.buttons[id] = { ...this.optsState.buttons[id], ...opts };
       this.optsState = { ...this.optsState };
+    }
+  }
+
+  onTransitionEnd() {
+    if (!this.isShowing) {
+      this.optsState = undefined;
     }
   }
 }

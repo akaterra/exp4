@@ -97,9 +97,9 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
 
   if (store.isAuthorized === false) {
     return <div style={ style.container }>
-      <div className='flex flex-ver flex-middle children-gap' style={ style.landing.container }>
-        <div style={ style.landing.logo } />
-        <div style={ style.landing.slogan } className='pad-hor triple'>{ SLOGAN }</div>
+      <div className='flex flex-ver flex-middle children-gap ef-show' style={ style.landing.container }>
+        <div className='ef-slide-up' style={ style.landing.logo } />
+        <div className='pad-hor triple ef-slide-up' style={ style.landing.slogan }>{ SLOGAN }</div>
         <div style={ style.landing.containerGradient2 } />
       </div>
       <div className="container med ltr square pad-hor triple roof">

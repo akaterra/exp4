@@ -14,8 +14,8 @@ export const SubSubTitle = ({ x = null, children, className = undefined, style =
 
 SubSubTitle.Primary = stylize(SubSubTitle, { className: 'primary' });
 
-export const SubTitle = ({ x = null, children, className = undefined, style = undefined }) => {
-  const control = <div className={ className ? `caption smaller ${className}` : 'caption smaller' } style={ style }>{ children }</div>;
+export const SubTitle = ({ x = null, children, className = undefined, style = undefined, title = undefined }) => {
+  const control = <div className={ className ? `caption smaller ${className}` : 'caption smaller' } style={ style } title={ title }>{ children }</div>;
 
   if (x !== null) {
     return <C x={ x }>{ control }</C>;

@@ -20,18 +20,22 @@ export const Modal = ({
     },
   },
   children,
+  isShowing = true,
   title = undefined,
   onClose = undefined,
   onSelect = undefined,
+  onTransitionEnd = undefined,
 }: {
   buttons?: Record<string, { action?: string; disabled?: boolean; onSelect?: (action?) => void, title?: string, type?: string }>;
   children,
+  isShowing?: boolean;
   title: React.ReactElement | string;
   onClose?: () => void,
   onSelect?: (action?: string) => void,
+  onTransitionEnd?: () => void,
 }) => {
-  return <div className="modal">
-    <div className="modal-content f10 f14-s- bg-light shadow shadow-high pad-hor triple flex">
+  return <div className={ isShowing ? "ef-show" : "ef-hide" }><div className="modal ef-fade" onAnimationEnd={ onTransitionEnd }>
+    <div className="modal-content f10 f14-s- bg-light shadow shadow-high pad-hor triple flex ef-slide">
       <div className='w00 paragraph paragraph-lrg'>
         <div className='c18'>
           <div>
@@ -69,5 +73,5 @@ export const Modal = ({
         </div>
       </div>
     </div>
-  </div>;
+  </div></div>;
 }
