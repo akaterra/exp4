@@ -24,7 +24,7 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
       !onlyChild
         ? <Row>
           <C>
-            <div className={ `tabs underlined ${decoration ?? ''}` }>
+            <div className={ `tabs ${decoration ?? ''}` }>
               <div className='tabs-bar'>
                 {
                   tabs.map((tab, i) => {
@@ -67,7 +67,6 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
                   })
                 }
               </div>
-              <div className='tabs-content underlined' />
             </div>
           </C>
         </Row>

@@ -9,13 +9,13 @@
 		"target": "es2022",
 		"sourceMap": true,
 		"outDir": "./dist",
-		"baseUrl": "./src/ui",
+		"baseUrl": "./src",
 		"resolveJsonModule": true,
 		"incremental": true,
 		"jsx": "react-jsx"
 	},
     "include": [
-        "./src/ui"
+        "./src"
     ],
     "exclude": [
         "./dist",

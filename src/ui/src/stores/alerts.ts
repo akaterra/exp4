@@ -50,7 +50,7 @@ export class AlertsStore extends BaseStore {
       return;
     }
 
-    this.alerts.push({
+    this.alerts.unshift({
       id: id ?? nextId ++,
       isShowing: true,
       message,

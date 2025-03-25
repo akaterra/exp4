@@ -50,7 +50,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
     const collection = await this.getCollectionUsers();
     const doc = await collection.findOne(filter);
 
-    return doc?.toObject ? doc.toObject() : (doc ?? null);
+    return doc?.toObject ? doc.toObject() : (doc as any ?? null);
   }
 
   @Log('debug')
@@ -58,7 +58,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
     const collection = await this.getCollectionUsers();
     const doc = await collection.findOne({ key, type });
 
-    return doc?.toObject ? doc.toObject() : (doc ?? null);
+    return doc?.toObject ? doc.toObject() : (doc as any ?? null);
   }
 
   @Log('debug')
