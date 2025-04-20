@@ -1,8 +1,8 @@
 import Container from 'typedi';
-import { AuthStrategiesService } from '../../auth-strategies.service';
+import { AuthStrategyHolderService } from '../../auth/_auth-strategy.holder.service';
 import { logger } from '../../logger';
 
-const authStrategiesServiceAuth = Container.get(AuthStrategiesService);
+const authStrategiesServiceAuth = Container.get(AuthStrategyHolderService);
 
 // /auth/methods
 export async function authMethodList(req, res) {

@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IStorageService } from './storage.service';
+import { IStorageService } from './_storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
@@ -11,6 +11,8 @@ import { IGeneralManifest } from '../general';
 import { lstat } from 'node:fs/promises';
 import { iter } from '../utils';
 import YAML from 'yaml'
+import { ReleaseState } from '../release';
+import { TargetState } from '../target';
 
 @Service()
 export class FileStorageService extends EntityService implements IStorageService {
@@ -85,6 +87,16 @@ export class FileStorageService extends EntityService implements IStorageService
     }
 
     return manifests;
+  }
+
+  @Log('debug')
+  async releaseGet(target: TargetState): Promise<ReleaseState> {
+    return null;
+  }
+
+  @Log('debug')
+  async releaseSet(target: TargetState): Promise<void> {
+    return null;
   }
 
   @Log('debug')

@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
 import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IActionService } from './step.service';
+import { IActionService } from './_action.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { getPossibleTargetIds, markDirty } from './utils';
-import { StreamServiceStreamMoveOptsStrategy } from '../streams/stream.service';
+import { StreamServiceStreamMoveOptsStrategy } from '../streams/_stream.service';
 
 @Service()
 export class MoveToActionService extends EntityService implements IActionService {

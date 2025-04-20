@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { IIntegrationService, IncStatistics } from './integration.service';
+import { IIntegrationService, IncStatistics } from './_integration.service';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import fetch from 'node-fetch-native';

@@ -1,20 +1,22 @@
 import { Service } from 'typedi';
-import { IStorageService } from './storage.service';
+import { IStorageService } from './_storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { IntegrationsService } from '../integrations.service';
+import { IntegrationHolderService } from '../integrations/_integration-holder.service';
 import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
+import { ReleaseState } from '../release';
+import { TargetState } from '../target';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {
   static readonly type: string = 'github';
 
-  @Autowired() protected integrationsService: IntegrationsService;
+  @Autowired() protected integrationsService: IntegrationHolderService;
   protected cache = new AwaitedCache();
 
   private get integration() {
@@ -31,6 +33,28 @@ export class GithubStorageService extends EntityService implements IStorageServi
   @Log('debug')
   async manifestsLoad(): Promise<Array<IGeneralManifest | IProjectManifest>> {
     return [];
+  }
+
+  @Log('debug')
+  async releaseGet(target: TargetState): Promise<ReleaseState> {
+    return null;
+  }
+
+  @Log('debug')
+  async releaseSet(target: TargetState): Promise<void> {
+    const intKey = GithubStorageService.getKey([ target.id, 'release' ]);
+    const val = GithubStorageService.getVarComplex({
+      id: target.release.id,
+      description: target.release.sections,
+    });
+
+    if (await this.releaseGet(target) === null) {
+      await this.integration.orgVarCreate(intKey, GithubStorageService.getVarComplex(val));
+    } else {
+      await this.integration.orgVarUpdate(intKey, GithubStorageService.getVarComplex(val));
+    }
+
+    this.cache.set(intKey, val, 60);
   }
 
   @Log('debug')

@@ -1,15 +1,15 @@
 import { Service } from 'typedi';
-import { IStreamStateContext, StreamState } from './stream';
-import { IProjectTargetStreamDef } from './project';
-import { AwaitedCache } from './cache';
-import { ProjectsService } from './projects.service';
-import { IStreamService } from './streams/stream.service';
-import { EntitiesServiceWithFactory } from './entities.service';
-import { Autowired } from './utils';
-import { logError } from './logger';
+import { IStreamStateContext, StreamState } from '../stream';
+import { IProjectTargetStreamDef } from '../project';
+import { AwaitedCache } from '../cache';
+import { ProjectsService } from '../projects.service';
+import { IStreamService } from './_stream.service';
+import { EntitiesServiceWithFactory } from '../entities.service';
+import { Autowired } from '../utils';
+import { logError } from '../logger';
 
 @Service()
-export class StreamsService extends EntitiesServiceWithFactory<IStreamService> {
+export class StreamHolderService extends EntitiesServiceWithFactory<IStreamService> {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
   protected cache = new AwaitedCache<StreamState>();
 

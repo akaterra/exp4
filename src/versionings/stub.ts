@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IVersioningService } from './versioning.service';
+import { IVersioningService } from './_versioning.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 

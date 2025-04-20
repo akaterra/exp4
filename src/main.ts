@@ -2,17 +2,17 @@ import 'reflect-metadata';
 // import 'source-map-support/register';
 import 'universal-dotenv/register';
 import cors from 'cors';
-import { createProject } from './project-loader';
+import { createProject } from './loaders/project-loader';
 import { GithubStreamService } from './streams/github';
 import Container from 'typedi';
 import { ProjectsService } from './projects.service';
-import { StreamsService } from './streams.service';
+import { StreamHolderService } from './streams/_stream.holder.service';
 import express from 'express';
 import { projectStateList } from './api/project-state/list';
 import { projectList } from './api/project/list';
 import { projectFlowRun } from './api/project-flow/action.run';
-import { createGeneral } from './general-loader';
-import { AuthStrategiesService } from './auth-strategies.service';
+import { createGeneral } from './loaders/general-loader';
+import { AuthStrategyHolderService } from './auth/_auth-strategy.holder.service';
 import { GithubAuthStrategyService } from './auth/github';
 import { err, loadModules } from './utils';
 import { authMethodList } from './api/auth/method.list';
@@ -20,7 +20,7 @@ import { statisticsList } from './api/statistics/list';
 import { authorize } from './auth.service';
 import { logError } from './logger';
 import { authUserGetCurrent } from './api/auth/user.get-current';
-import { StoragesService } from './storages.service';
+import { StorageHolderService } from './storages/_storage.holder.service';
 import { IGeneralManifest } from './general';
 import { IProjectManifest } from './project';
 import cookieParser from 'cookie-parser';
@@ -38,7 +38,7 @@ function auth(req, res, next) {
 
 (async () => {
   const projects = Container.get(ProjectsService);
-  const storages = new StoragesService();
+  const storages = new StorageHolderService();
 
   for (const storageSymbol of await loadModules(__dirname + '/storages', 'StorageService')) {
     storages.addFactory(storageSymbol);
@@ -91,10 +91,10 @@ function auth(req, res, next) {
     }
   }
 
-  const authStrategies = Container.get(AuthStrategiesService);
+  const authStrategies = Container.get(AuthStrategyHolderService);
   authStrategies.addFactory(GithubAuthStrategyService);
 
-  const ss = Container.get(StreamsService);
+  const ss = Container.get(StreamHolderService);
   ss.addFactory(GithubStreamService);
 
   const app = express();

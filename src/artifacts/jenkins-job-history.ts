@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IArtifactService } from './artifact.service';
+import { IArtifactService } from './_artifact.service';
 import { IProjectArtifact, IProjectDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';

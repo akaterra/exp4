@@ -1,15 +1,15 @@
-import { IProjectManifest, Project } from './project';
-import { IntegrationsService } from './integrations.service';
-import { StoragesService } from './storages.service';
-import { StreamsService } from './streams.service';
-import { ActionsService } from './steps.service';
-import { VersioningsService } from './versionings.service';
-import { TargetsService } from './targets.service';
-import { iter, loadModules } from './utils';
-import { ArtifactsService } from './artifacts.service';
+import { IProjectManifest, Project } from '../project';
+import { IntegrationHolderService } from '../integrations/_integration-holder.service';
+import { StorageHolderService } from '../storages/_storage.holder.service';
+import { StreamHolderService } from '../streams/_stream.holder.service';
+import { ActionHolderService } from '../actions/_action.holder.service';
+import { VersioningsService } from '../versionings.service';
+import { TargetsService } from '../targets.service';
+import { iter, loadModules } from '../utils';
+import { ArtifactHolderService } from '../artifacts/_artifact.holder.service';
 import * as _ from 'lodash';
-import { MANIFEST_PROJECT_TYPE } from './const';
-import { ValidatorService } from './validator.service';
+import { MANIFEST_PROJECT_TYPE } from '../const';
+import { ValidatorService } from '../services/validator.service';
 
 export async function createProject(
   manifest: IProjectManifest & { env?: Project['env'] },
@@ -25,11 +25,11 @@ export async function createProject(
   }
 
   manifest.env = {
-    actions: new ActionsService(),
-    artifacts: new ArtifactsService(),
-    integrations: new IntegrationsService(),
-    storages: new StoragesService(),
-    streams: new StreamsService(),
+    actions: new ActionHolderService(),
+    artifacts: new ArtifactHolderService(),
+    integrations: new IntegrationHolderService(),
+    storages: new StorageHolderService(),
+    streams: new StreamHolderService(),
     targets: new TargetsService(),
     validator: new ValidatorService(),
     versionings: new VersioningsService(),

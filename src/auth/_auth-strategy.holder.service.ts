@@ -1,11 +1,11 @@
 import express from 'express';
 import { Service } from 'typedi';
-import { IAuthStrategyMethod, IAuthStrategyService } from './auth/auth-strategy.service';
-import { EntitiesServiceWithFactory } from './entities.service';
+import { IAuthStrategyMethod, IAuthStrategyService } from './_auth-strategy.service';
+import { EntitiesServiceWithFactory } from '../entities.service';
 import * as _ from 'lodash';
 
 @Service()
-export class AuthStrategiesService extends EntitiesServiceWithFactory<IAuthStrategyService> {
+export class AuthStrategyHolderService extends EntitiesServiceWithFactory<IAuthStrategyService> {
   get domain() {
     return 'Auth strategy';
   }

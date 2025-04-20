@@ -1,13 +1,13 @@
 import { Service } from 'typedi';
-import { EntitiesServiceWithFactory } from './entities.service';
-import { IArtifactService } from './artifacts/artifact.service';
-import { Autowired } from './utils';
-import { ProjectsService } from './projects.service';
-import { StreamState } from './stream';
-import { IProjectArtifact } from './project';
+import { EntitiesServiceWithFactory } from '../entities.service';
+import { IArtifactService } from './_artifact.service';
+import { Autowired } from '../utils';
+import { ProjectsService } from '../projects.service';
+import { StreamState } from '../stream';
+import { IProjectArtifact } from '../project';
 
 @Service()
-export class ArtifactsService extends EntitiesServiceWithFactory<IArtifactService> {
+export class ArtifactHolderService extends EntitiesServiceWithFactory<IArtifactService> {
   @Autowired() protected projectsService: ProjectsService;
 
   get domain() {

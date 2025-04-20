@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IStorageService } from './storage.service';
+import { IStorageService } from './_storage.service';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';

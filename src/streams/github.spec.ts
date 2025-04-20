@@ -4,9 +4,9 @@ import { Observe, Observer, SnapshotStorageFormat, extendJest } from '@akaterra.
 import { Project } from '../project';
 import { ProjectsService } from '../projects.service';
 import { GithubStreamService } from './github';
-import { StreamsService } from '../streams.service';
+import { StreamHolderService } from './_stream.holder.service';
 import Container from 'typedi';
-import { IntegrationsService } from '../integrations.service';
+import { IntegrationHolderService } from '../integrations/_integration-holder.service';
 import { GithubIntegrationService } from '../integrations/github';
 import { StubVersioningService } from '../versionings/stub';
 import { VersioningsService } from '../versionings.service';
@@ -54,8 +54,8 @@ describe('Github stream', () => {
     Container.get(ProjectsService).add(new TestProject({
       id: 'test',
       env: {
-        integrations: new IntegrationsService().add(new TestGithubIntegrationService()),
-        streams: new StreamsService(),
+        integrations: new IntegrationHolderService().add(new TestGithubIntegrationService()),
+        streams: new StreamHolderService(),
         versionings: new VersioningsService().add(new TestVersioningService()),
       },
     }));

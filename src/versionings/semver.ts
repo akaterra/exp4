@@ -1,9 +1,9 @@
 import { Service } from 'typedi';
 import semver from 'semver';
-import { IVersioningService } from './versioning.service';
+import { IVersioningService } from './_versioning.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
-import { IStorageService } from '../storages/storage.service';
+import { IStorageService } from '../storages/_storage.service';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';

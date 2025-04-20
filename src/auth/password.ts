@@ -2,9 +2,9 @@ import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Autowired, err } from '../utils';
-import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
+import { IAuthStrategyMethod, IAuthStrategyService } from './_auth-strategy.service';
 import { IUser } from '../user';
-import { StoragesService } from '../storages.service';
+import { StorageHolderService } from '../storages/_storage.holder.service';
 import { authSendData as execAuthSendData, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
 const { compare } = require('bcrypt');
@@ -13,7 +13,7 @@ const { compare } = require('bcrypt');
 export class PasswordAuthStrategyService extends EntityService implements IAuthStrategyService {
   static readonly type: string = 'password';
 
-  @Autowired() protected storagesService: StoragesService;
+  @Autowired() protected storagesService: StorageHolderService;
 
   private get storage() {
     return this.storagesService.get(this.config?.storage ?? 'default');

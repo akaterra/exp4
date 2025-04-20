@@ -2,9 +2,9 @@ import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Autowired, err } from '../utils';
-import { IAuthStrategyMethod, IAuthStrategyService } from './auth-strategy.service';
+import { IAuthStrategyMethod, IAuthStrategyService } from './_auth-strategy.service';
 import { IUser } from '../user';
-import { StoragesService } from '../storages.service';
+import { StorageHolderService } from '../storages/_storage.holder.service';
 import { authSendData as execAuthSendData, authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth.service';
 import { Log } from '../logger';
 import { Saml2Service } from '../services/saml2.service';
@@ -14,7 +14,7 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
   static readonly type: string = 'saml2';
 
   protected client: Saml2Service;
-  @Autowired() protected storagesService: StoragesService;
+  @Autowired() protected storagesService: StorageHolderService;
 
   private get storage() {
     return this.storagesService.get(this.config?.storage ?? 'default');

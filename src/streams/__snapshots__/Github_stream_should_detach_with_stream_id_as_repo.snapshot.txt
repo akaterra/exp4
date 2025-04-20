@@ -15,10 +15,10 @@
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:298:8
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- [[ Pass instanceOf : TestGithubIntegrationService ]]
-    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:294:8
+    caller = GithubStreamService.getIntegrationService : ./src/streams/github.ts:298:8
 
 --> TestProject.getEnvIntegraionByTargetStream --> {
         * = []
@@ -36,10 +36,10 @@
         }
         assertType = "github"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:309:33
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:33
 
 <-- TestProject.getEnvIntegraionByTargetStream <-- [[ Pass instanceOf : TestGithubIntegrationService ]]
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:309:33
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:313:33
 
 --> TestProject.getTargetByTargetStream --> {
         * = []
@@ -56,14 +56,14 @@
             }
         }
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:28
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:314:28
 
 <-- TestProject.getTargetByTargetStream <-- {
         id = "testTarget"
         type = "test"
         versioning = "test"
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:310:28
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:314:28
 
 --> TestProject.getEnvVersioningByTarget --> {
         * = []
@@ -73,10 +73,10 @@
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:308:20
 
 <-- TestProject.getEnvVersioningByTarget <-- [[ Pass instanceOf : TestVersioningService ]]
-    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:304:20
+    caller = GithubStreamService.getVersioningService : ./src/streams/github.ts:308:20
 
 --> TestVersioningService.getCurrent --> {
         * = [
@@ -88,10 +88,10 @@
             versioning = "test"
         }
     }
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:314:31
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:318:31
 
 <-- TestVersioningService.getCurrent <-- "testBranch"
-    caller = GithubStreamService.getBranch : ./src/streams/github.ts:314:31
+    caller = GithubStreamService.getBranch : ./src/streams/github.ts:318:31
 
 --> TestGithubIntegrationService.branchDelete --> {
         * = []

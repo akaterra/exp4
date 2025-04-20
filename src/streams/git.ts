@@ -1,4 +1,4 @@
-import { IStreamService } from './stream.service';
+import { IStreamService } from './_stream.service';
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { StreamState } from '../stream';
 import { Service } from 'typedi';

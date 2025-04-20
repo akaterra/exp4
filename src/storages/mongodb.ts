@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IStorageService } from './storage.service';
+import { IStorageService } from './_storage.service';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';

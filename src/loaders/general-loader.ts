@@ -1,10 +1,10 @@
 import Container from 'typedi';
-import { IntegrationsService } from './integrations.service';
-import { IGeneralManifest } from './general';
-import { AuthStrategiesService } from './auth-strategies.service';
-import { StoragesService } from './storages.service';
-import { loadModules } from './utils';
-import { MANIFEST_GENERAL_TYPE } from './const';
+import { IntegrationHolderService } from '../integrations/_integration-holder.service';
+import { IGeneralManifest } from '../general';
+import { AuthStrategyHolderService } from '../auth/_auth-strategy.holder.service';
+import { StorageHolderService } from '../storages/_storage.holder.service';
+import { loadModules } from '../utils';
+import { MANIFEST_GENERAL_TYPE } from '../const';
 
 export async function createGeneral(manifest: IGeneralManifest, notThrow?: boolean): Promise<void> {
   if (manifest?.type !== MANIFEST_GENERAL_TYPE) {
@@ -16,7 +16,7 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
   }
 
   if (manifest.auth) {
-    const authStrategiesService = Container.get(AuthStrategiesService);
+    const authStrategiesService = Container.get(AuthStrategyHolderService);
 
     for (const auth of await loadModules(__dirname + '/auth', 'AuthStrategyService')) {
       authStrategiesService.addFactory(auth);
@@ -28,7 +28,7 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
   }
 
   if (manifest.integrations) {
-    const integrationsService = Container.get(IntegrationsService);
+    const integrationsService = Container.get(IntegrationHolderService);
 
     for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
       integrationsService.addFactory(integration);
@@ -40,7 +40,7 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
   }
 
   if (manifest.storages) {
-    const storagesService = Container.get(StoragesService);
+    const storagesService = Container.get(StorageHolderService);
 
     for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
       storagesService.addFactory(storage);

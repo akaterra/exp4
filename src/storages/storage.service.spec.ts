@@ -6,7 +6,7 @@ import { SqlStorageService } from './sql';
 import { ExternalRestServiceStorageService } from './external-rest-service';
 import { RestApiService } from '../services/rest-api.service';
 import { GithubStorageService } from './github';
-import { IntegrationsService } from '../integrations.service';
+import { IntegrationHolderService } from '../integrations/_integration-holder.service';
 import { GithubIntegrationService } from '../integrations/github';
 
 describe('Storage', () => {
@@ -73,7 +73,7 @@ describe('Storage', () => {
           }
         }
 
-        Container.get(IntegrationsService).add(new TestGithubIntegrationService(), 'test');
+        Container.get(IntegrationHolderService).add(new TestGithubIntegrationService(), 'test');
 
         return {
           calls,

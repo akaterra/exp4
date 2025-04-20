@@ -1,10 +1,12 @@
 import { IProjectTargetStreamDef } from './project';
+import { ReleaseState } from './release';
 import { StreamState } from './stream';
 
 export class TargetState {
   id: string;
   type: string;
 
+  release?: ReleaseState;
   streams?: Record<IProjectTargetStreamDef['id'], StreamState>;
   version?: string;
 

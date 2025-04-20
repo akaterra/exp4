@@ -1,17 +1,17 @@
-import { ActionsService } from './steps.service';
-import { IntegrationsService } from './integrations.service';
-import { IIntegrationService } from './integrations/integration.service';
-import { StoragesService } from './storages.service';
-import { StreamsService } from './streams.service';
-import { IStreamService } from './streams/stream.service';
+import { ActionHolderService } from './actions/_action.holder.service';
+import { IntegrationHolderService } from './integrations/_integration-holder.service';
+import { IIntegrationService } from './integrations/_integration.service';
+import { StorageHolderService } from './storages/_storage.holder.service';
+import { StreamHolderService } from './streams/_stream.holder.service';
+import { IStreamService } from './streams/_stream.service';
 import { TargetsService } from './targets.service';
 import { VersioningsService } from './versionings.service';
-import { ArtifactsService } from './artifacts.service';
+import { ArtifactHolderService } from './artifacts/_artifact.holder.service';
 import { ProjectsService } from './projects.service';
 import { Autowired } from './utils';
 import { StreamState } from './stream';
 import { ProjectState } from './project-state';
-import { ValidatorService } from './validator.service';
+import { ValidatorService } from './services/validator.service';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
@@ -143,11 +143,11 @@ export class Project implements IProject {
   description: string;
 
   env: {
-    artifacts?: ArtifactsService;
-    actions?: ActionsService;
-    integrations?: IntegrationsService;
-    storages?: StoragesService;
-    streams?: StreamsService;
+    actions?: ActionHolderService;
+    artifacts?: ArtifactHolderService;
+    integrations?: IntegrationHolderService;
+    storages?: StorageHolderService;
+    streams?: StreamHolderService;
     targets?: TargetsService;
     validator?: ValidatorService;
     versionings?: VersioningsService;
@@ -275,58 +275,6 @@ export class Project implements IProject {
 
                 ver: 0,
               };
-
-              // if (streamDef.actions) {
-              //   Object.entries(streamDef.actions).forEach((action, i) => {
-              //     const flowId = `${Date.now()}:${i}:${targetId}:${streamId}`;
-
-              //     this.flows[flowId] = {
-              //       id: flowId,
-              //       type: 'flow',
-
-              //       ref: { flowId, projectId: this.id, streamId, targetId },
-
-              //       title: null,
-              //       description: null,
-
-              //       targets: [ def.id ?? key ],
-              //       actions: Object
-              //         .entries(streamDef.actions ?? {})
-              //         .reduce((acc, [ actionKey, actionDef ]) => {
-              //           const actionId = actionDef.id ?? actionKey;
-              //           this.assertKey(actionId);
-
-              //           if (actionDef.params) {
-              //             this.env.validator.addSchemaFromDef(actionDef.params, actionId);
-              //           }
-
-              //           acc[actionId] = {
-              //             id: actionId,
-              //             type: actionDef.type,
-
-              //             ref: { actionId, flowId, projectId: this.id, streamId, targetId },
-
-              //             title: actionDef.title,
-              //             description: actionDef.description,
-
-              //             params: actionDef.params,
-              //             streams: actionDef.streams,
-              //             steps: actionDef.steps.map((step, i) => ({
-              //               id: step.id ?? i,
-              //               type: step.type,
-              //               ref: { actionId, flowId, projectId: this.id, streamId, targetId },
-              //               config: this.getDefinition(step.config),
-              //               description: step.description,
-              //               params: actionDef.params,
-              //               targets: step.targets ?? actionDef.targets ?? [],
-              //             })),
-              //           };
-          
-              //           return acc;
-              //         }, {}),
-              //     };
-              //   });
-              // }
 
               return acc;
             }, {}),
