@@ -1,25 +1,25 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
 
 @Service()
-export class BookmarkStepService extends EntityService implements IStepService {
-  static readonly type = 'bookmark';
+export class StreamHistoryRollbackActionService extends EntityService implements IActionService {
+  static readonly type = 'streamHistory:rollback';
 
   @Autowired() protected projectsService: ProjectsService;
 
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStepDef,
+    action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
-      step.targets,
+      action.targets,
       getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
     );
 
@@ -30,18 +30,16 @@ export class BookmarkStepService extends EntityService implements IStepService {
         : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
       for (const streamId of streamIds) {
-        const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId, true);
+        const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
 
-        if (targetStream) {
-          await project.getEnvStreamByTargetStream(targetStream).streamBookmark(
-            targetStream,
-          );
+        await project.getEnvVersioningByTarget(target).rollbackStream(
+          targetStream,
+        );
 
-          makeDirty(targetStream);
-        }
+        markDirty(targetStream);
       }
 
-      makeDirty(target);
+      markDirty(target);
     }
   }
 }

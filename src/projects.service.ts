@@ -41,7 +41,7 @@ export class ProjectsService extends EntitiesService<Project> {
 
       project.env.validator.validate(params, fId);
 
-      for (const step of flow.steps) {
+      for (const step of flow.actions) {
         logger.info({
           message: 'flowStepRun',
           ref: step.ref,
@@ -50,7 +50,7 @@ export class ProjectsService extends EntitiesService<Project> {
         });
 
         try {
-          await project.env.steps.get(step.type).run(flow, step, targetsStreams, params);
+          await project.env.actions.get(step.type).run(flow, step, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${projectId}.errors`, {
             message: err?.message ?? err ?? null,

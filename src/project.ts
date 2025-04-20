@@ -1,4 +1,4 @@
-import { StepsService } from './steps.service';
+import { ActionsService } from './steps.service';
 import { IntegrationsService } from './integrations.service';
 import { IIntegrationService } from './integrations/integration.service';
 import { StoragesService } from './storages.service';
@@ -57,7 +57,7 @@ export interface IProjectFlowActionParam extends IProjectDef {
   validationSchema?: Record<string, any>;
 }
 
-export interface IProjectFlowActionStep<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
+export interface IProjectAction<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
   params?: Record<string, IProjectFlowActionParam>;
@@ -65,13 +65,13 @@ export interface IProjectFlowActionStep<C extends Record<string, unknown>, T ext
   targets?: IProjectTargetDef['id'][];
 }
 
-export type IProjectFlowActionStepDef = IProjectFlowActionStep<Record<string, unknown>>;
+export type IProjectActionDef = IProjectAction<Record<string, unknown>>;
 
 export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
 
   params?: Record<string, IProjectFlowActionParam>;
-  steps: IProjectFlowActionStep<C>[];
+  actions: IProjectAction<C>[];
   targets: IProjectTargetDef['id'][];
 }
 
@@ -144,7 +144,7 @@ export class Project implements IProject {
 
   env: {
     artifacts?: ArtifactsService;
-    steps?: StepsService;
+    actions?: ActionsService;
     integrations?: IntegrationsService;
     storages?: StoragesService;
     streams?: StreamsService;
@@ -214,7 +214,7 @@ export class Project implements IProject {
           description: flowDef.description,
 
           params: flowDef.params,
-          steps: flowDef.steps.map((stepDef, i) => {
+          actions: flowDef.actions.map((stepDef, i) => {
             const stepId = stepDef.id ?? String(i);
             this.assertKey(stepId);
 
@@ -412,8 +412,8 @@ export class Project implements IProject {
     return this.env.artifacts.get(artifactId, assertType, true);
   }
 
-  getEnvActionByFlowActionStep(actionStep: IProjectFlowActionStepDef) {
-    return this.env.steps.get(actionStep.type);
+  getEnvActionByFlowActionStep(actionStep: IProjectActionDef) {
+    return this.env.actions.get(actionStep.type);
   }
 
   getEnvIntegraionByIntegrationId<T extends IIntegrationService>(integrationId: IProjectDef['id'], assertType?: IProjectTargetStreamDef['type']): T {

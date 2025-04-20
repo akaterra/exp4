@@ -1,14 +1,14 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { getPossibleTargetIds, makeDirty } from './utils';
+import { getPossibleTargetIds, markDirty } from './utils';
 import { StreamServiceStreamMoveOptsStrategy } from '../streams/stream.service';
 
 @Service()
-export class MoveStepService extends EntityService implements IStepService {
+export class MoveActionService extends EntityService implements IActionService {
   static readonly type = 'move';
 
   @Autowired() protected projectsService: ProjectsService;
@@ -17,14 +17,14 @@ export class MoveStepService extends EntityService implements IStepService {
 
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStepDef,
+    action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets);
 
     for (let tIdOfSource of sourceTargetIds) {
-      for (let tIdOfTarget of step.targets) {
+      for (let tIdOfTarget of action.targets) {
         const [ sId, tId ] = tIdOfTarget.split(':');
 
         if (tId) {
@@ -48,11 +48,11 @@ export class MoveStepService extends EntityService implements IStepService {
                 targetStream,
                 sourceStream,
                 {
-                  strategy: step.config?.strategy as StreamServiceStreamMoveOptsStrategy,
+                  strategy: action.config?.strategy as StreamServiceStreamMoveOptsStrategy,
                 },
               );
 
-            makeDirty(sourceStream, targetStream);
+            markDirty(sourceStream, targetStream);
           }
         }
       }

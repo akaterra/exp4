@@ -62,7 +62,7 @@ describe('Github stream', () => {
   });
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    // jest.restoreAllMocks();
 
     observer.begin();
   });
@@ -225,7 +225,7 @@ describe('Github stream', () => {
     expect(snapshot()).toMatchSnapshot();
   });
 
-  it.only.update('should get state', async () => {
+  it('should get state', async () => {
     const stream = new GithubStreamService();
 
     observer.override(TestGithubIntegrationService, {

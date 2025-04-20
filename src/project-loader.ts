@@ -2,7 +2,7 @@ import { IProjectManifest, Project } from './project';
 import { IntegrationsService } from './integrations.service';
 import { StoragesService } from './storages.service';
 import { StreamsService } from './streams.service';
-import { StepsService } from './steps.service';
+import { ActionsService } from './steps.service';
 import { VersioningsService } from './versionings.service';
 import { TargetsService } from './targets.service';
 import { iter, loadModules } from './utils';
@@ -25,8 +25,8 @@ export async function createProject(
   }
 
   manifest.env = {
+    actions: new ActionsService(),
     artifacts: new ArtifactsService(),
-    steps: new StepsService(),
     integrations: new IntegrationsService(),
     storages: new StoragesService(),
     streams: new StreamsService(),
@@ -35,16 +35,16 @@ export async function createProject(
     versionings: new VersioningsService(),
   }
 
+  for (const action of await loadModules(__dirname + '/actions', 'ActionService')) {
+    manifest.env.actions.addFactory(action);
+  }
+
   for (const artifact of await loadModules(__dirname + '/artifacts', 'ArtifactService')) {
     manifest.env.artifacts.addFactory(artifact);
   }
 
   for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
     manifest.env.integrations.addFactory(integration);
-  }
-
-  for (const step of await loadModules(__dirname + '/steps', 'StepService')) {
-    manifest.env.steps.addFactory(step);
   }
 
   for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
@@ -67,18 +67,12 @@ export async function createProject(
   resolveUse(manifest.targets, manifest);
   resolveUse(manifest.versionings, manifest);
 
+  const actionsService = manifest.env.actions;
   const artifactsService = manifest.env.artifacts;
   const integrationsService = manifest.env.integrations;
-  const stepsService = manifest.env.steps;
   const storagesService = manifest.env.storages;
   const streamsService = manifest.env.streams;
   const versioningsService = manifest.env.versionings;
-
-  if (manifest.artifacts) {
-    for (const [ defId, defConfig ] of Object.entries(manifest.artifacts)) {
-      artifactsService.add(artifactsService.getInstance(defConfig.type, defConfig.config), defId);
-    }
-  }
 
   if (manifest.integrations) {
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
@@ -98,11 +92,17 @@ export async function createProject(
     }
   }
 
+  if (manifest.artifacts) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.artifacts)) {
+      artifactsService.add(artifactsService.getInstance(defConfig.type, defConfig.config), defId);
+    }
+  }
+
   if (manifest.flows) {
     for (const [ ,flow ] of Object.entries(manifest.flows)) {
-      flow.steps?.forEach((step) => {
-        if (!stepsService.has(step.type)) {
-          stepsService.add(stepsService.getInstance(step.type, step.config), step.type);
+      flow.actions?.forEach((action) => {
+        if (!actionsService.has(action.type)) {
+          actionsService.add(actionsService.getInstance(action.type, action.config), action.type);
         }
       });
     }

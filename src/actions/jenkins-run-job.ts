@@ -1,10 +1,10 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectAction, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired, resolvePlaceholders } from '../utils';
-import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
 import { JenkinsIntegrationService } from '../integrations/jenkins';
 import * as _ from 'lodash';
 import { Log } from '../logger';
@@ -17,7 +17,7 @@ export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
 }
 
 @Service()
-export class JenkinsJobRunStepService extends EntityService implements IStepService {
+export class JenkinsJobRunActionService extends EntityService implements IActionService {
   static readonly type = 'jenkins:jobRun';
 
   @Autowired() protected projectsService: ProjectsService;
@@ -29,14 +29,14 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
   @Log('debug')
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStep<IJenkinsJobRunStepConfig>,
+    action: IProjectAction<IJenkinsJobRunStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
     params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const projectState = await this.projectsService.getState(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
-      step.targets,
+      action.targets,
       getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
     );
 
@@ -68,7 +68,7 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
 
         params = {
           ...this.config?.jobParams,
-          ...step.config?.jobParams,
+          ...action.config?.jobParams,
           ...targetStream.config?.jenkins?.jobParams,
           ...this.getStreamConfig(targetStream, flow)?.jobParams,
           ...params,
@@ -83,20 +83,20 @@ export class JenkinsJobRunStepService extends EntityService implements IStepServ
         }
 
         await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(
-          rep(step.config?.integration ?? 'jenkins'),
+          rep(action.config?.integration ?? 'jenkins'),
           'jenkins',
         ).withContext(context).runJob(
           this.getStreamConfig(targetStream, flow)?.jobName ??
             targetStream.config?.jenkins?.jobName ??
-            step.config?.jobName ??
+            action.config?.jobName ??
             this.config?.jobName,
           params,
         );
 
-        makeDirty(targetStream);
+        markDirty(targetStream);
       }
 
-      makeDirty(target);
+      markDirty(target);
     }
   }
 

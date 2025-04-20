@@ -175,14 +175,14 @@ versionings:
 #     actions:
 #       test:
 #         title: "Run tests"
-#         steps:
+#         actions:
 #           - type: "runAction"
 #             title: "Run tests"
 #             config:
 #               name: "test"
 #       test2:
 #         title: "Run tests 2"
-#         steps:
+#         actions:
 #           - type: "runAction"
 #             title: "Run tests"
 #             config:
@@ -197,7 +197,7 @@ versionings:
 #     actions:
 #       release:
 #         title: "Create release"
-#         steps:
+#         actions:
 #           - type: "version:release"
 #             title: "Increase minor version"
 #             targets:
@@ -221,7 +221,7 @@ versionings:
 #       finishRelease:
 #         title: "Finish release"
 #         description: "Move release to production and close release"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
@@ -244,21 +244,21 @@ versionings:
 #               - "production"
 #       mergeToDev:
 #         title: "Merge to develop"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
 #               - "dev"
 #       mergeFromDev:
 #         title: "Merge latest develop"
-#         steps:
+#         actions:
 #           - type: "moveFrom"
 #             title: ""
 #             targets:
 #               - "dev"
 #       exclude:
 #         title: "Exclude"
-#         steps:
+#         actions:
 #           - type: "detach"
 #             title: ""
 #             targets:
@@ -269,14 +269,14 @@ versionings:
 #               - "stg"
 #       sync:
 #         title: "Sync"
-#         steps:
+#         actions:
 #           - type: "argocd:sync"
 #             title: ""
 #             config:
 #               integration: "argocdStg"
 #       test:
 #         title: "Run tests"
-#         steps:
+#         actions:
 #           - type: "runAction"
 #             title: "Run tests"
 #             config:
@@ -289,7 +289,7 @@ versionings:
 #     actions:
 #       hotfix:
 #         title: "Create hotfix"
-#         steps:
+#         actions:
 #           - type: "version:override"
 #             title: ""
 #             targets:
@@ -308,7 +308,7 @@ versionings:
 #               - "production"
 #       finishHotfix:
 #         title: "Finish hotfix"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
@@ -331,14 +331,14 @@ versionings:
 #               - "production"
 #       mergeToQa:
 #         title: "Merge to QA"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
 #               - "stg"
 #       mergeFromProduction:
 #         title: "Merge latest production"
-#         steps:
+#         actions:
 #           - type: "moveFrom"
 #             title: ""
 #             targets:
@@ -349,7 +349,7 @@ versionings:
 #               - "stgHotfix"
 #       exclude:
 #         title: "Exclude"
-#         steps:
+#         actions:
 #           - type: "detach"
 #             title: ""
 #             targets:
@@ -360,7 +360,7 @@ versionings:
 #               - "stgHotfix"
 #       test:
 #         title: "Run tests"
-#         steps:
+#         actions:
 #           - type: "runAction"
 #             title: "Run tests"
 #             config:
@@ -373,7 +373,7 @@ versionings:
 #     actions:
 #       mergeToDevelop:
 #         title: "Merge to develop"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
@@ -460,7 +460,7 @@ targets:
         actions:
           test:
             title: "Push to remote"
-            steps:
+            actions:
               - type: "runAction"
                 title: "Run tests"
                 config:

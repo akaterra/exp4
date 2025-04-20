@@ -8,4 +8,7 @@ export default defineConfig({
     react(),
     dts({ tsconfigPath: './tsconfig.ui.json' }),
   ],
+  server: {
+    port: 9002,
+  },
 });

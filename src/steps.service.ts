@@ -1,10 +1,10 @@
 import { Service } from 'typedi';
-import { IStepService } from './steps/step.service';
+import { IActionService } from './actions/step.service';
 import { EntitiesServiceWithFactory } from './entities.service';
 
 @Service()
-export class StepsService extends EntitiesServiceWithFactory<IStepService> {
+export class ActionsService extends EntitiesServiceWithFactory<IActionService> {
   get domain() {
-    return 'Step';
+    return 'Action';
   }
 }

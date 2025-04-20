@@ -281,7 +281,7 @@ flows:
       - dev
       - stg
       - stgHotfix
-    steps:
+    actions:
       - type: "runAction"
         title: "Run tests"
         config:
@@ -291,19 +291,19 @@ flows:
     title: "Create release"
     targets:
       - stg
-    steps:
+    actions:
       - type: "version:release"
         title: "Increase minor version"
+        targets:
+          - "stg"
+      - type: "streamVersion:override"
+        title: ""
         targets:
           - "stg"
       - type: "moveFrom"
         title: "Create release branch"
         targets:
           - "dev"
-      - type: "streamVersion:override"
-        title: ""
-        targets:
-          - "stg"
     params:
       releaseName:
         title: "Release name"
@@ -317,7 +317,7 @@ flows:
     title: "Publish release candidate"
     targets:
       - stg
-    steps:
+    actions:
       - type: "moveTo"
         title: ""
         targets:
@@ -343,7 +343,7 @@ flows:
     title: "Finish release"
     targets:
       - stg
-    steps:
+    actions:
       - type: "moveTo"
         title: ""
         targets:
@@ -379,7 +379,7 @@ flows:
       - stg
       - stgHotfix
       - production
-    steps:
+    actions:
       - type: "moveTo"
         title: ""
         targets:
@@ -389,7 +389,7 @@ flows:
     title: "Merge latest develop"
     targets:
       - stg
-    steps:
+    actions:
       - type: "streamVersion:override"
         title: ""
         targets:
@@ -403,7 +403,7 @@ flows:
     title: "Merge latest hotfix"
     targets:
       - stg
-    steps:
+    actions:
       - type: "streamVersion:override"
         title: ""
         targets:
@@ -418,7 +418,7 @@ flows:
     targets:
       - stg
       - stgHotfix
-    steps:
+    actions:
       - type: "streamVersion:override"
         title: ""
         targets:
@@ -433,7 +433,7 @@ flows:
     targets:
       - stg
       - stgHotfix
-    steps:
+    actions:
       - type: "detach"
         title: ""
 
@@ -441,7 +441,7 @@ flows:
     title: "Sync"
     targets:
       - stg
-    steps:
+    actions:
       - type: "argocd:sync"
         title: ""
         config:
@@ -451,7 +451,7 @@ flows:
     title: "Sync"
     targets:
       - stgHotfix
-    steps:
+    actions:
       - type: "argocd:sync"
         title: ""
         config:
@@ -461,7 +461,7 @@ flows:
     title: "Sync"
     targets:
       - production
-    steps:
+    actions:
       - type: "argocd:sync"
         title: ""
         config:
@@ -471,7 +471,7 @@ flows:
     title: "Create hotfix"
     targets:
       - stgHotfix
-    steps:
+    actions:
       - type: "version:override"
         title: ""
         targets:
@@ -493,7 +493,7 @@ flows:
     title: "Publish hotfix candidate"
     targets:
       - stgHotfix
-    steps:
+    actions:
       - type: "moveTo"
         title: ""
         targets:
@@ -519,7 +519,7 @@ flows:
     title: "Finish hotfix"
     targets:
       - stgHotfix
-    steps:
+    actions:
       - type: "moveTo"
         title: ""
         targets:
@@ -553,7 +553,7 @@ flows:
     title: "Migrate"
     targets:
       - dev
-    steps:
+    actions:
       - type: "jenkins:jobRun"
         title: ""
         targets:
@@ -567,7 +567,7 @@ flows:
     targets:
       - stgHotfix
       - production
-    steps:
+    actions:
       - type: "jenkins:jobRun"
         title: ""
         config:
@@ -578,7 +578,7 @@ flows:
     title: "Migrate"
     targets:
       - stg
-    steps:
+    actions:
       - type: "jenkins:jobRun"
         title: ""
         targets:
@@ -592,7 +592,7 @@ flows:
     description: "Dangerous! Production! Think well before."
     targets:
       - production
-    steps:
+    actions:
       - type: "runAction"
         title: "Run tests"
         config:

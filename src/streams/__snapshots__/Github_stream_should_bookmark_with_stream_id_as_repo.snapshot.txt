@@ -28,7 +28,7 @@
         commitMessage = null
         repo = "test"
         org = null
-        lightweight = false
+        lightweight = true
     }
     caller = GithubStreamService.streamBookmark : ./src/streams/github.ts:61:23
 

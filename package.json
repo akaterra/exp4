@@ -5,7 +5,7 @@
     "dev:fe": "npx vite",
     "doc": "npx docsify serve docs",
     "lint": "npx eslint ./src/* --ext=.tsx,.ts --fix",
-    "test": "npx jest --no-cache"
+    "test": "rm -rf ./dist && npx jest --no-cache"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -51,14 +51,9 @@
     "@types/jest": "^29.5.11",
     "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
-    "copy-webpack-plugin": "^10.2.4",
-    "css-loader": "^6.6.0",
     "docsify-cli": "^4.4.4",
     "eslint": "^8.48.0",
     "eslint-plugin-unused-imports": "^3.0.0",
-    "file-loader": "^6.2.0",
-    "html-loader": "3.1.0",
-    "html-webpack-plugin": "5.5.0",
     "install": "^0.13.0",
     "mobx": "^6.10.0",
     "mobx-react-lite": "^4.0.3",
@@ -68,13 +63,11 @@
     "npm": "^9.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "style-loader": "^3.3.1",
     "theme-ui": "^0.16.1",
     "ts-jest": "^29.1.2",
     "ts-loader": "9.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6",
-    "url-loader": "^4.1.1",
     "vite": "^6.2.3",
     "vite-plugin-dts": "^4.5.3"
   },

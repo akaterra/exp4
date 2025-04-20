@@ -1,15 +1,15 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { getPossibleTargetIds, makeDirty } from './utils';
+import { getPossibleTargetIds, markDirty as markDirty } from './utils';
 import { StreamServiceStreamMoveOptsStrategy } from '../streams/stream.service';
 
 @Service()
-export class MoveToStepService extends EntityService implements IStepService {
-  static readonly type = 'moveTo';
+export class MoveFromActionService extends EntityService implements IActionService {
+  static readonly type = 'moveFrom';
 
   @Autowired() protected projectsService: ProjectsService;
 
@@ -17,7 +17,7 @@ export class MoveToStepService extends EntityService implements IStepService {
 
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStepDef,
+    step: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
@@ -36,16 +36,16 @@ export class MoveToStepService extends EntityService implements IStepService {
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
-            await project.getEnvStreamByTargetStream(sourceStream)
+            await project.getEnvStreamByTargetStream(targetStream)
               .streamMove(
-                sourceStream,
                 targetStream,
+                sourceStream,
                 {
                   strategy: step.config?.strategy as StreamServiceStreamMoveOptsStrategy,
                 }
               );
 
-            makeDirty(sourceStream, targetStream);
+            markDirty(sourceStream, targetStream);
           }
         }
       }

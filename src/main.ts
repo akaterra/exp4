@@ -98,7 +98,7 @@ function auth(req, res, next) {
   ss.addFactory(GithubStreamService);
 
   const app = express();
-  app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
+  app.use(cors({ credentials: true, origin: 'http://localhost:9002' }));
   app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

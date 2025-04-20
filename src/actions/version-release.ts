@@ -1,26 +1,26 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { Autowired } from '../utils';
 import { EntityService } from '../entities.service';
-import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
 
 @Service()
-export class VersionReleaseStepService extends EntityService implements IStepService {
+export class VersionReleaseActionService extends EntityService implements IActionService {
   static readonly type = 'version:release';
 
   @Autowired() protected projectsService: ProjectsService;
 
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStepDef,
+    action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
     params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
-      step.targets,
+      action.targets,
       getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
     );
 
@@ -29,7 +29,7 @@ export class VersionReleaseStepService extends EntityService implements IStepSer
 
       await project.getEnvVersioningByTarget(target).release(target, params);
 
-      makeDirty(target);
+      markDirty(target);
     }
   }
 }

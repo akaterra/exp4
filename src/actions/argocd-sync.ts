@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStep, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectAction, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ArgocdIntegrationService } from '../integrations/argocd';
-import { getPossibleTargetIds, makeDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
 import { Log } from '../logger';
 
 export interface IArgocdSyncStepConfig extends Record<string, unknown> {
@@ -13,7 +13,7 @@ export interface IArgocdSyncStepConfig extends Record<string, unknown> {
 }
 
 @Service()
-export class ArgocdSyncStepService extends EntityService implements IStepService {
+export class ArgocdSyncActionService extends EntityService implements IActionService {
   static readonly type = 'argocd:sync';
 
   @Autowired() protected projectsService: ProjectsService;
@@ -25,13 +25,13 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
   @Log('debug')
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStep<IArgocdSyncStepConfig>,
+    action: IProjectAction<IArgocdSyncStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
     const projectState = await this.projectsService.getState(flow.ref.projectId);
     const sourceTargetIds = notEmptyArray(
-      step.targets,
+      action.targets,
       getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
     );
 
@@ -58,7 +58,7 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
         }
 
         await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(
-          rep(step.config?.integration ?? 'argocd'),
+          rep(action.config?.integration ?? 'argocd'),
           'argocd',
         ).withContext(context).syncResource(
           this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName
@@ -72,10 +72,10 @@ export class ArgocdSyncStepService extends EntityService implements IStepService
             },
         );
 
-        makeDirty(targetStream);
+        markDirty(targetStream);
       }
 
-      makeDirty(target);
+      markDirty(target);
     }
   }
 

@@ -57,7 +57,7 @@ versionings:
 #     actions:
 #       test:
 #         title: "Run tests"
-#         steps:
+#         actions:
 #           - type: "runAction"
 #             title: "Run tests"
 #             config:
@@ -70,7 +70,7 @@ versionings:
 #     actions:
 #       release:
 #         title: "Create release"
-#         steps:
+#         actions:
 #           - type: "version:release"
 #             title: "Increase minor version"
 #             targets:
@@ -85,21 +85,21 @@ versionings:
 #               - "stg"
 #       mergeToDev:
 #         title: "Release to develop"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
 #               - "dev"
 #       mergeFromDev:
 #         title: "Fetch latest develop"
-#         steps:
+#         actions:
 #           - type: "moveFrom"
 #             title: ""
 #             targets:
 #               - "dev"
 #       test:
 #         title: "Run tests"
-#         steps:
+#         actions:
 #           - type: "runAction"
 #             title: "Run tests"
 #             config:
@@ -112,7 +112,7 @@ versionings:
 #     actions:
 #       release:
 #         title: "Release to production"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:
@@ -129,7 +129,7 @@ versionings:
 #     actions:
 #       hotfix:
 #         title: "Merge to development"
-#         steps:
+#         actions:
 #           - type: "moveTo"
 #             title: ""
 #             targets:

@@ -1,15 +1,15 @@
 import { Service } from 'typedi';
-import { IProjectFlowActionStepDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IStepService } from './step.service';
+import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IActionService } from './step.service';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { getPossibleTargetIds, makeDirty } from './utils';
+import { getPossibleTargetIds, markDirty } from './utils';
 import { StreamServiceStreamMoveOptsStrategy } from '../streams/stream.service';
 
 @Service()
-export class MoveFromStepService extends EntityService implements IStepService {
-  static readonly type = 'moveFrom';
+export class MoveToActionService extends EntityService implements IActionService {
+  static readonly type = 'moveTo';
 
   @Autowired() protected projectsService: ProjectsService;
 
@@ -17,7 +17,7 @@ export class MoveFromStepService extends EntityService implements IStepService {
 
   async run(
     flow: IProjectFlowDef,
-    step: IProjectFlowActionStepDef,
+    action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
@@ -30,22 +30,22 @@ export class MoveFromStepService extends EntityService implements IStepService {
           : targetsStreams?.[tIdOfSource] as string[] ?? []
         : Object.keys(project.getTargetByTargetId(tIdOfSource).streams);
 
-      for (const tIdOfTarget of step.targets) {
+      for (const tIdOfTarget of action.targets) {
         for (const sId of streamIds) {
           const sourceStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfSource, sId, true);
           const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
-            await project.getEnvStreamByTargetStream(targetStream)
+            await project.getEnvStreamByTargetStream(sourceStream)
               .streamMove(
-                targetStream,
                 sourceStream,
+                targetStream,
                 {
-                  strategy: step.config?.strategy as StreamServiceStreamMoveOptsStrategy,
+                  strategy: action.config?.strategy as StreamServiceStreamMoveOptsStrategy,
                 }
               );
 
-            makeDirty(sourceStream, targetStream);
+            markDirty(sourceStream, targetStream);
           }
         }
       }
