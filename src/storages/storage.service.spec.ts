@@ -6,7 +6,7 @@ import { SqlStorageService } from './sql';
 import { ExternalRestServiceStorageService } from './external-rest-service';
 import { RestApiService } from '../services/rest-api.service';
 import { GithubStorageService } from './github';
-import { IntegrationHolderService } from '../integrations/_integration-holder.service';
+import { IntegrationHolderService } from '../integrations';
 import { GithubIntegrationService } from '../integrations/github';
 
 describe('Storage', () => {

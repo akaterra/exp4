@@ -374,8 +374,8 @@ export class ProjectStore extends BaseStore {
     mode: {
       target?: ProjectStoreMode;
     } = {
-      target: ProjectStoreMode.STREAMS,
-    };
+        target: ProjectStoreMode.STREAMS,
+      };
   @observable
     project: IProject;
   @observable

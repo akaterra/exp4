@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IArtifactService } from './_artifact.service';
+import { IArtifactService } from '.';
 import { IProjectArtifact } from '../project';
 import { IStreamStateContext, StreamState } from '../stream';
 import { EntityService } from '../entities.service';

@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { IProjectAction, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { IActionService } from './_action.service';
+import { IActionService } from '.';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired, resolvePlaceholders } from '../utils';

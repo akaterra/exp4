@@ -122,7 +122,7 @@ export class ModalStore {
       props: { ...opts.props, storage: this },
       onClose: opts.onClose || opts.withClose ? this.close.bind(this) : null,
       onSelect: this.select.bind(this),
-   };
+    };
 
     if (this.optsState?.buttons) {
       this.optsState.buttons = Object

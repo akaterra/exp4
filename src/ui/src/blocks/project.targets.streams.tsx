@@ -2,7 +2,6 @@ import * as React from 'react';
 import { SubTitle } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
-import { Label } from '../atoms/label';
 import { Checkbox } from '../atoms/input';
 import { Button } from '../atoms/button';
 import { InfoCollapsable } from '../atoms/info-collapse';

@@ -8,7 +8,6 @@ import { FICTIVE } from '../atoms/utils';
 import { ProjectTargetsActionsAndChanges } from './project.targets.actions-and-changes';
 import { SubTitle, Title } from '../atoms/title';
 import { Tabs } from '../atoms/tabs';
-import { Label } from '../atoms/label';
 
 export const ProjectTargets = observer(({ project }: { project?: ProjectStore }) => {
   if (!project?.project?.id) {

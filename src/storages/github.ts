@@ -1,16 +1,17 @@
 import { Service } from 'typedi';
-import { IStorageService } from './_storage.service';
+import { IStorageService } from '.';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { IntegrationHolderService } from '../integrations/_integration-holder.service';
+import { IntegrationHolderService } from '../integrations';
 import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { ReleaseState } from '../release';
 import { TargetState } from '../target';
+import { StreamState } from '../stream';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {
@@ -36,25 +37,18 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async releaseGet(target: TargetState): Promise<ReleaseState> {
-    return null;
+  async releaseGet(target: TargetState, def?: ReleaseState): Promise<ReleaseState> {
+    const val = await this.varGetTarget(target, 'release', null, true);
+
+    return val !== undefined ? new ReleaseState(val) : def;
   }
 
   @Log('debug')
   async releaseSet(target: TargetState): Promise<void> {
-    const intKey = GithubStorageService.getKey([ target.id, 'release' ]);
-    const val = GithubStorageService.getVarComplex({
+    this.varSetTarget(target, 'release', {
       id: target.release.id,
-      description: target.release.sections,
-    });
-
-    if (await this.releaseGet(target) === null) {
-      await this.integration.orgVarCreate(intKey, GithubStorageService.getVarComplex(val));
-    } else {
-      await this.integration.orgVarUpdate(intKey, GithubStorageService.getVarComplex(val));
-    }
-
-    this.cache.set(intKey, val, 60);
+      sections: target.release.sections,
+    }, true);
   }
 
   @Log('debug')
@@ -89,7 +83,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKeyOfType(key, target.id, 'target');
     
     if (!this.config?.noCache && this.cache.has(intKey)) {
@@ -108,7 +102,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
     const intKey = GithubStorageService.getKeyOfType(key, target.id, 'target');
 
     if (await this.varGetTarget(target, key) === null) {
@@ -128,7 +122,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
 
   @Log('debug')
   async varAddTarget<D>(
-    target: IProjectTargetDef,
+    target: IProjectTargetDef | TargetState,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
@@ -164,7 +158,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async varIncTarget(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
+  async varIncTarget(target: IProjectTargetDef | TargetState, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetTarget(target, key, '0'));
 
     await this.varSetTarget(target, key, !isNaN(intVal) ? intVal + add : add);
@@ -173,7 +167,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
+  async varGetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], def: D = null, isComplex?: boolean): Promise<D> {
     const intKey = GithubStorageService.getKeyOfType(key, stream.id);
 
     if (!this.config?.noCache && this.cache.has(intKey)) {
@@ -191,7 +185,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
     return val !== undefined ? val : def;
   }
 
-  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
+  async varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {
     const intKey = GithubStorageService.getKeyOfType(key, stream.id);
 
     if (await this.varGetStream(stream, key) === null) {
@@ -211,7 +205,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
 
   @Log('debug')
   async varAddStream<D>(
-    stream: IProjectTargetStreamDef,
+    stream: IProjectTargetStreamDef | StreamState,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
@@ -247,7 +241,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number> {
+  async varIncStream(stream: IProjectTargetStreamDef | StreamState, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetStream(stream, key, '0'));
 
     await this.varSetStream(stream, key, !isNaN(intVal) ? intVal + add : add);

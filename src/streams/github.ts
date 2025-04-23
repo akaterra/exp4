@@ -1,4 +1,4 @@
-import { IStreamService, IStreamServiceStreamMoveOpts, StreamServiceStreamMoveOptsStrategy } from './_stream.service';
+import { IStreamService, IStreamServiceStreamMoveOpts, StreamServiceStreamMoveOptsStrategy } from '.';
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { IStreamStateContext, StreamState } from '../stream';
 import { Service } from 'typedi';
@@ -256,30 +256,30 @@ export class GithubStreamService extends EntityService implements IStreamService
       );
     } else {
       switch (opts?.strategy) {
-        case StreamServiceStreamMoveOptsStrategy.REQUEST:
-          await targetIntegration.pullRequestCreate(
-            targetBranchName,
-            sourceBranchName,
-            `Release ${sourceState.version}`,
-            undefined,
-            undefined,
-            targetStream.id,
-          );
-          break;
-        case StreamServiceStreamMoveOptsStrategy.APPROVE:
-          await targetIntegration.pullRequestMerge(
-            (await targetIntegration.pullRequestList(sourceBranchName, targetBranchName, targetStream.id))?.[0]?.number ?? -99,
-            targetStream.id,
-          );
-          break;
-        default:
-          await targetIntegration.merge(
-            targetBranchName,
-            sourceBranchName,
-            `Release ${sourceState.version}`,
-            targetStream.id,
-          );
-          break;
+      case StreamServiceStreamMoveOptsStrategy.REQUEST:
+        await targetIntegration.pullRequestCreate(
+          targetBranchName,
+          sourceBranchName,
+          `Release ${sourceState.version}`,
+          undefined,
+          undefined,
+          targetStream.id,
+        );
+        break;
+      case StreamServiceStreamMoveOptsStrategy.APPROVE:
+        await targetIntegration.pullRequestMerge(
+          (await targetIntegration.pullRequestList(sourceBranchName, targetBranchName, targetStream.id))?.[0]?.number ?? -99,
+          targetStream.id,
+        );
+        break;
+      default:
+        await targetIntegration.merge(
+          targetBranchName,
+          sourceBranchName,
+          `Release ${sourceState.version}`,
+          targetStream.id,
+        );
+        break;
       }
     }
   }

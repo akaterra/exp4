@@ -1,3 +1,5 @@
+import { Service } from 'typedi';
+import { EntitiesServiceWithFactory } from '../entities.service';
 import { IService } from '../entities.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 
@@ -27,4 +29,15 @@ export interface IVersioningService extends IService {
   rollbackStream(target: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string>;
 
   exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string>;
+}
+
+@Service()
+export class VersioningHolderService extends EntitiesServiceWithFactory<IVersioningService> {
+  get domain() {
+    return 'Versioning';
+  }
+
+  getByTarget(target: IProjectTargetDef): IVersioningService {
+    return this.get(target.versioning);
+  }
 }

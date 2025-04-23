@@ -1,12 +1,12 @@
 import { IProjectManifest, Project } from '../project';
-import { IntegrationHolderService } from '../integrations/_integration-holder.service';
-import { StorageHolderService } from '../storages/_storage.holder.service';
-import { StreamHolderService } from '../streams/_stream.holder.service';
-import { ActionHolderService } from '../actions/_action.holder.service';
-import { VersioningsService } from '../versionings.service';
+import { IntegrationHolderService } from '../integrations';
+import { StorageHolderService } from '../storages';
+import { StreamHolderService } from '../streams';
+import { ActionHolderService } from '../actions';
+import { VersioningHolderService } from '../versionings';
 import { TargetsService } from '../targets.service';
 import { iter, loadModules } from '../utils';
-import { ArtifactHolderService } from '../artifacts/_artifact.holder.service';
+import { ArtifactHolderService } from '../artifacts';
 import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from '../const';
 import { ValidatorService } from '../services/validator.service';
@@ -32,7 +32,7 @@ export async function createProject(
     streams: new StreamHolderService(),
     targets: new TargetsService(),
     validator: new ValidatorService(),
-    versionings: new VersioningsService(),
+    versionings: new VersioningHolderService(),
   }
 
   for (const action of await loadModules(__dirname + '/actions', 'ActionService')) {

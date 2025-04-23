@@ -1,12 +1,36 @@
-import { Service } from 'typedi';
 import { IStreamStateContext, StreamState } from '../stream';
-import { IProjectTargetStreamDef } from '../project';
+import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { TargetState } from '../target';
+import { IService } from '../entities.service';
+import { Service } from 'typedi';
 import { AwaitedCache } from '../cache';
 import { ProjectsService } from '../projects.service';
-import { IStreamService } from './_stream.service';
 import { EntitiesServiceWithFactory } from '../entities.service';
 import { Autowired } from '../utils';
 import { logError } from '../logger';
+
+export enum StreamServiceStreamMoveOptsStrategy {
+  APPROVE = 'approve',
+  REQUEST = 'request',
+}
+
+export interface IStreamServiceStreamMoveOpts {
+  strategy?: StreamServiceStreamMoveOptsStrategy;
+}
+
+export interface IStreamService extends IService {
+  actionRun(id: string);
+
+  streamBookmark(stream: IProjectTargetStreamDef): Promise<StreamState>;
+
+  streamDetach(stream: IProjectTargetStreamDef): Promise<StreamState>;
+
+  streamGetState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState>;
+
+  streamMove(sourceStream: IProjectTargetStreamDef, targetStream: IProjectTargetStreamDef, opts?: IStreamServiceStreamMoveOpts);
+
+  targetGetState(target: IProjectTargetDef, scopes?: Record<string, boolean>): Promise<TargetState>;
+}
 
 @Service()
 export class StreamHolderService extends EntitiesServiceWithFactory<IStreamService> {

@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { IStorageService } from './_storage.service';
+import { IStorageService } from '.';
 import { AwaitedCache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
@@ -9,6 +9,9 @@ import { Log } from '../logger';
 import * as _ from 'lodash';
 import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
+import { TargetState } from '../target';
+import { StreamState } from '../stream';
+import { ReleaseState } from '../release';
 
 @Service()
 export class SqlStorageService extends EntityService implements IStorageService {
@@ -52,6 +55,21 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
+  async releaseGet(target: TargetState, def?: ReleaseState): Promise<ReleaseState> {
+    const val = await this.varGetTarget(target, 'release', null);
+
+    return val !== undefined ? new ReleaseState(val) : def;
+  }
+
+  @Log('debug')
+  async releaseSet(target: TargetState): Promise<void> {
+    this.varSetTarget(target, 'release', {
+      id: target.release.id,
+      sections: target.release.sections,
+    });
+  }
+
+  @Log('debug')
   async userGet(filter: Record<string, unknown>): Promise<IUser> {
     const qb = (await this.getTableUsers()).qb;
 
@@ -83,7 +101,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async varGetTarget<D>(target: IProjectTargetDef, key: string | string[], def: D = null): Promise<D> {
+  async varGetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], def: D = null): Promise<D> {
     const intKey = SqlStorageService.getKeyOfType(key, target.id, 'target');
     const cacheKey = `${intKey}:target`;
     
@@ -97,7 +115,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async varSetTarget<D>(target: IProjectTargetDef, key: string | string[], val: D = null): Promise<void> {
+  async varSetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], val: D = null): Promise<void> {
     const intKey = SqlStorageService.getKeyOfType(key, target.id, 'target');
     const qb = (await this.getTableVars()).qb;
 
@@ -110,7 +128,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
 
   @Log('debug')
   async varAddTarget<D>(
-    target: IProjectTargetDef,
+    target: IProjectTargetDef | TargetState,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
@@ -146,7 +164,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async varIncTarget(target: IProjectTargetDef, key: string | string[], add: number): Promise<number> {
+  async varIncTarget(target: IProjectTargetDef | TargetState, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetTarget(target, key, '0'));
 
     await this.varSetTarget(target, key, !isNaN(intVal) ? intVal + add : add);
@@ -154,7 +172,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
     return intVal;
   }
 
-  async varGetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], def: D = null): Promise<D> {
+  async varGetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], def: D = null): Promise<D> {
     const intKey = SqlStorageService.getKeyOfType(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
@@ -168,7 +186,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async varSetStream<D>(stream: IProjectTargetStreamDef, key: string | string[], val: D = null): Promise<void> {
+  async varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D = null): Promise<void> {
     const intKey = SqlStorageService.getKeyOfType(key, stream.id);
     const qb = (await this.getTableVars()).qb;
 
@@ -181,7 +199,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
 
   @Log('debug')
   async varAddStream<D>(
-    stream: IProjectTargetStreamDef,
+    stream: IProjectTargetStreamDef | StreamState,
     key: string | string[],
     val: D,
     uniq?: boolean | ((valExising: D, valNew: D) => boolean),
@@ -217,7 +235,7 @@ export class SqlStorageService extends EntityService implements IStorageService 
   }
 
   @Log('debug')
-  async varIncStream(stream: IProjectTargetStreamDef, key: string | string[], add: number): Promise<number> {
+  async varIncStream(stream: IProjectTargetStreamDef | StreamState, key: string | string[], add: number): Promise<number> {
     const intVal = parseInt(await this.varGetStream(stream, key, '0'));
 
     await this.varSetStream(stream, key, !isNaN(intVal) ? intVal + add : add);

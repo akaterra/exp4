@@ -2,10 +2,10 @@ import express from 'express';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Autowired, err } from '../utils';
-import { IAuthStrategyMethod, IAuthStrategyService } from './_auth-strategy.service';
+import { IAuthStrategyMethod, IAuthStrategyService } from '.';
 import { IUser } from '../user';
-import { StorageHolderService } from '../storages/_storage.holder.service';
-import { authSendData as execAuthSendData, authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth.service';
+import { StorageHolderService } from '../storages';
+import { authSendData as execAuthSendData, authorizeByOneTimeToken, generateOneTimeToken, prepareAuthData } from '../auth';
 import { Log } from '../logger';
 import { Saml2Service } from '../services/saml2.service';
 

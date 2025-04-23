@@ -1,10 +1,19 @@
+import { IService } from '../entities.service';
+import { IProjectArtifact } from '../project';
+import { IStreamStateContext, StreamState } from '../stream';
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';
-import { IArtifactService } from './_artifact.service';
 import { Autowired } from '../utils';
 import { ProjectsService } from '../projects.service';
-import { StreamState } from '../stream';
-import { IProjectArtifact } from '../project';
+
+export interface IArtifactService extends IService {
+  run(
+    entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },
+    streamState: StreamState,
+    params?: Record<string, unknown>,
+    scopes?: Record<string, boolean>,
+  ): Promise<void>;
+}
 
 @Service()
 export class ArtifactHolderService extends EntitiesServiceWithFactory<IArtifactService> {

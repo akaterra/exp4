@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { Title } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore } from '../stores/project';
-import { Label } from '../atoms/label';
 import { Tabs } from '../atoms/tabs';
 import { ProjectTargets } from './project.targets';
 import { ProjectStatistics } from './project.statistics';

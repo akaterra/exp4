@@ -1,6 +1,6 @@
 import * as Resources from '@gitbeaker/core';
 import { Gitlab } from '@gitbeaker/rest';
-import { IIntegrationService, IncStatistics } from './_integration.service';
+import { IIntegrationService, IncStatistics } from '.';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { Log, logErrorWarn } from '../logger';

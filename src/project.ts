@@ -1,12 +1,12 @@
-import { ActionHolderService } from './actions/_action.holder.service';
-import { IntegrationHolderService } from './integrations/_integration-holder.service';
-import { IIntegrationService } from './integrations/_integration.service';
-import { StorageHolderService } from './storages/_storage.holder.service';
-import { StreamHolderService } from './streams/_stream.holder.service';
-import { IStreamService } from './streams/_stream.service';
+import { ActionHolderService } from './actions';
+import { IntegrationHolderService } from './integrations';
+import { IIntegrationService } from './integrations';
+import { StorageHolderService } from './storages';
+import { StreamHolderService } from './streams';
+import { IStreamService } from './streams';
 import { TargetsService } from './targets.service';
-import { VersioningsService } from './versionings.service';
-import { ArtifactHolderService } from './artifacts/_artifact.holder.service';
+import { VersioningHolderService } from './versionings';
+import { ArtifactHolderService } from './artifacts';
 import { ProjectsService } from './projects.service';
 import { Autowired } from './utils';
 import { StreamState } from './stream';
@@ -150,7 +150,7 @@ export class Project implements IProject {
     streams?: StreamHolderService;
     targets?: TargetsService;
     validator?: ValidatorService;
-    versionings?: VersioningsService;
+    versionings?: VersioningHolderService;
   };
 
   info?: IProject['info'];

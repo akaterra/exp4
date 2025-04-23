@@ -1,5 +1,5 @@
 import Container from 'typedi';
-import { AuthStrategyHolderService } from '../../auth/_auth-strategy.holder.service';
+import { AuthStrategyHolderService } from '../../auth/index';
 import { logger } from '../../logger';
 
 const authStrategiesServiceAuth = Container.get(AuthStrategyHolderService);

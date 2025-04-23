@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { authLogout as execAuthLogout } from '../../auth.service';
+import { authLogout as execAuthLogout } from '../../auth';
 
 // /auth/logout
 export async function authLogout(req, res) {

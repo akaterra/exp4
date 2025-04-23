@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, { Fragment } from 'react';
 import { SubTitle } from '../atoms/title';
 import { NavLink } from '../atoms/link';
 import { ProjectsStore } from '../stores/projects';

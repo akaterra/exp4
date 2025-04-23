@@ -1,8 +1,8 @@
 import Container from 'typedi';
-import { IntegrationHolderService } from '../integrations/_integration-holder.service';
+import { IntegrationHolderService } from '../integrations';
 import { IGeneralManifest } from '../general';
-import { AuthStrategyHolderService } from '../auth/_auth-strategy.holder.service';
-import { StorageHolderService } from '../storages/_storage.holder.service';
+import { AuthStrategyHolderService } from '../auth/index';
+import { StorageHolderService } from '../storages';
 import { loadModules } from '../utils';
 import { MANIFEST_GENERAL_TYPE } from '../const';
 

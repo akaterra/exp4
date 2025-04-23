@@ -4,12 +4,12 @@ import { Observe, Observer, SnapshotStorageFormat, extendJest } from '@akaterra.
 import { Project } from '../project';
 import { ProjectsService } from '../projects.service';
 import { GithubStreamService } from './github';
-import { StreamHolderService } from './_stream.holder.service';
+import { StreamHolderService } from '.';
 import Container from 'typedi';
-import { IntegrationHolderService } from '../integrations/_integration-holder.service';
+import { IntegrationHolderService } from '../integrations';
 import { GithubIntegrationService } from '../integrations/github';
 import { StubVersioningService } from '../versionings/stub';
-import { VersioningsService } from '../versionings.service';
+import { VersioningHolderService } from '../versionings';
 
 extendJest(SnapshotStorageFormat.COMPACT);
 
@@ -56,7 +56,7 @@ describe('Github stream', () => {
       env: {
         integrations: new IntegrationHolderService().add(new TestGithubIntegrationService()),
         streams: new StreamHolderService(),
-        versionings: new VersioningsService().add(new TestVersioningService()),
+        versionings: new VersioningHolderService().add(new TestVersioningService()),
       },
     }));
   });
