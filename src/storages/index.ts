@@ -3,7 +3,7 @@ import { IGeneralManifest } from '../general';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { ReleaseState } from '../release';
 import { StreamState } from '../stream';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { IUser } from '../user';
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';

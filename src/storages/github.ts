@@ -10,7 +10,7 @@ import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { ReleaseState } from '../release';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { StreamState } from '../stream';
 
 @Service()

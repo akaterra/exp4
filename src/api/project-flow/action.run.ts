@@ -8,8 +8,7 @@ const projectsService = Container.get(ProjectsService);
 export async function projectFlowRun(req, res) {
   logger.info({ message: 'projectFlowActionRun', data: req.data });
 
-  res.json(await projectsService.flowRun(
-    req.params.projectId,
+  res.json(await projectsService.get(req.params.projectId).flowRun(
     req.params.flowId.split(','),
     req.body?.targetsStreams,
     req.body?.params,

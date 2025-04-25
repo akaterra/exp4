@@ -9,7 +9,7 @@ import { Log } from '../logger';
 import * as _ from 'lodash';
 import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { StreamState } from '../stream';
 import { ReleaseState } from '../release';
 

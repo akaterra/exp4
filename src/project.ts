@@ -4,14 +4,17 @@ import { IIntegrationService } from './integrations';
 import { StorageHolderService } from './storages';
 import { StreamHolderService } from './streams';
 import { IStreamService } from './streams';
-import { TargetsService } from './targets.service';
+import { TargetHolderService } from './targets';
 import { VersioningHolderService } from './versionings';
 import { ArtifactHolderService } from './artifacts';
 import { ProjectsService } from './projects.service';
-import { Autowired } from './utils';
-import { StreamState } from './stream';
+import { Autowired, AwaitableContainer, iter } from './utils';
+import { IStreamStateContext, StreamState } from './stream';
 import { ProjectState } from './project-state';
 import { ValidatorService } from './services/validator.service';
+import { TargetState } from './targets';
+import { StatisticsService} from './statistics.service';
+import { logger } from './logger';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
@@ -136,6 +139,7 @@ export interface IProjectManifest extends IProjectDef {
 
 export class Project implements IProject {
   @Autowired() protected projectsService: ProjectsService;
+  @Autowired() protected statisticsService: StatisticsService;
 
   id: string = 'unknown';
 
@@ -148,7 +152,7 @@ export class Project implements IProject {
     integrations?: IntegrationHolderService;
     storages?: StorageHolderService;
     streams?: StreamHolderService;
-    targets?: TargetsService;
+    targets?: TargetHolderService;
     validator?: ValidatorService;
     versionings?: VersioningHolderService;
   };
@@ -159,6 +163,8 @@ export class Project implements IProject {
     intervalSeconds?: number;
     at?: Date;
   };
+
+  state: ProjectState = null;
 
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>> = {};
   definitions: Record<string, Record<string, unknown>> = {};
@@ -292,16 +298,25 @@ export class Project implements IProject {
     return this.flows[flowId];
   }
 
-  getStateByTargetId(targetId: IProjectTargetDef['id']): Promise<ProjectState> {
-    return this.projectsService.getState(this.id, { [targetId]: true });
+  async getTargetStateByTargetId(targetId: IProjectTargetDef['id']): Promise<TargetState> {
+    const targetState = await this.env.targets.getState(this.getTargetByTargetId(targetId));
+
+    return targetState;
   }
 
   async getStreamStateByTargetIdAndStreamId(
     targetId: IProjectTargetDef['id'],
     streamId: IProjectTargetStreamDef['id'],
     scopes?: Record<string, boolean>,
-  ): Promise<StreamState> {
-    return (await this.projectsService.getState(this.id, { [targetId]: [ streamId ] }, scopes))?.targets?.[targetId]?.streams?.[streamId];
+    context?: IStreamStateContext,
+  ) {
+    const streamState = await this.env.streams.getState(
+      this.getTargetStreamByTargetIdAndStreamId(targetId as IProjectTargetDef['id'], streamId as IProjectTargetStreamDef['id']),
+      scopes,
+      context,
+    );
+
+    return streamState;
   }
 
   getTargetByTargetId<S extends IProjectTargetDef = IProjectTargetDef>(id: string, unsafe?: boolean): S {
@@ -404,6 +419,53 @@ export class Project implements IProject {
     if (key.includes(':')) {
       throw new Error(`Key "${key}" contains reserved character ":"`);
     }
+  }
+
+  async flowRun(
+    flowId: string | string[],
+    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    params?: Record<string, any>,
+  ) {
+    for (const [ , fId ] of iter(flowId)) {
+      const flow = this.getFlowByFlowId(fId);
+
+      if (!flow) {
+        continue;
+      }
+
+      this.env.validator.validate(params, fId);
+
+      for (const step of flow.actions) {
+        logger.info({
+          message: 'flowStepRun',
+          ref: step.ref,
+          params,
+          targetsStreams,
+        });
+
+        try {
+          await this.env.actions.get(step.type).run(flow, step, targetsStreams, params);
+        } catch (err) {
+          this.statisticsService.add(`projects.${this.id}.errors`, {
+            message: err?.message ?? err ?? null,
+            time: new Date(),
+            type: 'projectFlow:run',
+          });
+
+          if (
+            !step.bypassErrorCodes ||
+            (
+              !step.bypassErrorCodes.includes(err?.cause) &&
+              !step.bypassErrorCodes.includes('*')
+            )
+          ) {
+            throw err;
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
   toJSON() {

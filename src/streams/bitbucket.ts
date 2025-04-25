@@ -2,7 +2,7 @@ import { IStreamService } from '.';
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { StreamState } from '../stream';
 import { Service } from 'typedi';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';

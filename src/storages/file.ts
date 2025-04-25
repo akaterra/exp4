@@ -12,7 +12,7 @@ import { lstat } from 'node:fs/promises';
 import { iter } from '../utils';
 import YAML from 'yaml'
 import { ReleaseState } from '../release';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { StreamState } from '../stream';
 
 @Service()

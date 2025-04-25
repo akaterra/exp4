@@ -8,7 +8,7 @@ import { IUser } from '../user';
 import { Log } from '../logger';
 import { RestApiService } from '../services/rest-api.service';
 import { IGeneralManifest } from '../general';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { StreamState } from '../stream';
 import { ReleaseState } from '../release';
 

@@ -4,7 +4,7 @@ import { StorageHolderService } from '../storages';
 import { StreamHolderService } from '../streams';
 import { ActionHolderService } from '../actions';
 import { VersioningHolderService } from '../versionings';
-import { TargetsService } from '../targets.service';
+import { TargetHolderService } from '../targets';
 import { iter, loadModules } from '../utils';
 import { ArtifactHolderService } from '../artifacts';
 import * as _ from 'lodash';
@@ -30,7 +30,7 @@ export async function createProject(
     integrations: new IntegrationHolderService(),
     storages: new StorageHolderService(),
     streams: new StreamHolderService(),
-    targets: new TargetsService(),
+    targets: new TargetHolderService(),
     validator: new ValidatorService(),
     versionings: new VersioningHolderService(),
   }

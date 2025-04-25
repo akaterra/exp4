@@ -3,7 +3,7 @@ import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './proje
 import { ProjectsService } from './projects.service';
 import { StreamState } from './stream';
 import { Autowired } from './utils';
-import { TargetState } from './target';
+import { TargetState } from './targets';
 
 @Service()
 export class ProjectState {

@@ -5,7 +5,7 @@ import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { IProjectManifest } from '../project';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { ReleaseState } from '../release';
 
 @Service()

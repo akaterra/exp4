@@ -1,6 +1,6 @@
 import { IStreamStateContext, StreamState } from '../stream';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { IService } from '../entities.service';
 import { Service } from 'typedi';
 import { AwaitedCache } from '../cache';

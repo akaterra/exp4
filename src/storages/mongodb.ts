@@ -8,7 +8,7 @@ import { MongoClient, Db } from 'mongodb';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { StreamState } from '../stream';
 import { ReleaseState } from '../release';
 

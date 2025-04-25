@@ -2,7 +2,7 @@ import { IStreamService, IStreamServiceStreamMoveOpts, StreamServiceStreamMoveOp
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
 import { IStreamStateContext, StreamState } from '../stream';
 import { Service } from 'typedi';
-import { TargetState } from '../target';
+import { TargetState } from '../targets';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';

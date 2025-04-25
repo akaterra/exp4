@@ -11,6 +11,7 @@ export interface IReleaseStateSection {
     artifacts?: { id: string; type: string }[];
     notes?: string[];
   }[];
+  priority?: number;
 }
 
 export class ReleaseState {
@@ -25,16 +26,33 @@ export class ReleaseState {
     return props as ReleaseState;
   }
 
+  getSection(id: string): IReleaseStateSection | null {
+    return this.sections.find((s) => s.id === id) ?? null;
+  }
+
   setSection(section: Partial<IReleaseStateSection>): this {
-    const existingSection = this.sections.find((s) => s.id === section.id);
+    const existingSection = this.getSection(section.id);
 
     if (existingSection) {
       Object.assign(existingSection, section);
     } else {
-      this.sections.push({
-        ...section,
-        changes: section.changes ?? [],
-      } as IReleaseStateSection);
+      if (section.priority === undefined) {
+        section.priority = Infinity;
+      }
+
+      const index = this.sections.findLastIndex((s) => s.priority <= section.priority);
+
+      if (index === -1) {
+        this.sections.push({
+          ...section,
+          changes: section.changes ?? [],
+        } as IReleaseStateSection);
+      } else {
+        this.sections.splice(index + 1, 0, {
+          ...section,
+          changes: section.changes ?? [],
+        } as IReleaseStateSection);
+      }
     }
 
     return this;
@@ -45,17 +63,18 @@ export class ReleaseState {
     artifacts?: IReleaseStateSection['changes'][0]['artifacts'],
     notes?: IReleaseStateSection['changes'][0]['notes'],
   ): this {
-    this.setSection({
-      id: streamId,
+    const existingSectionChange = this.getSection(`stream:${streamId}`)?.changes.find((c) => c.streamId === streamId);
+
+    return this.setSection({
+      id: `stream:${streamId}`,
       changes: [
         {
           streamId,
-          artifacts,
-          notes,
+          artifacts: artifacts ?? existingSectionChange?.artifacts ?? [],
+          notes: notes ?? existingSectionChange?.notes ?? [],
         },
       ],
+      priority: 1,
     });
-
-    return this;
   }
 }
