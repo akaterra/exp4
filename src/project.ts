@@ -9,12 +9,13 @@ import { VersioningHolderService } from './versionings';
 import { ArtifactHolderService } from './artifacts';
 import { ProjectsService } from './projects.service';
 import { Autowired, AwaitableContainer, iter } from './utils';
-import { IStreamStateContext, StreamState } from './stream';
+import { IStreamStateContext, StreamState } from './stream-state';
 import { ProjectState } from './project-state';
 import { ValidatorService } from './services/validator.service';
-import { TargetState } from './targets';
+import { TargetState } from './target-state';
 import { StatisticsService} from './statistics.service';
 import { logger } from './logger';
+import {NotificationHolderService} from './notifications';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
@@ -150,6 +151,7 @@ export class Project implements IProject {
     actions?: ActionHolderService;
     artifacts?: ArtifactHolderService;
     integrations?: IntegrationHolderService;
+    notifications?: NotificationHolderService;
     storages?: StorageHolderService;
     streams?: StreamHolderService;
     targets?: TargetHolderService;
@@ -413,6 +415,10 @@ export class Project implements IProject {
 
   getEnvVersioningByTarget(target: IProjectTargetDef, assertType?: IProjectVersioning['type']) {
     return this.env.versionings.get(target.versioning, assertType);
+  }
+
+  getEnvVersioningByTargetStream(stream: IProjectTargetStreamDef, assertType?: IProjectVersioning['type']) {
+    return this.env.versionings.get(this.getTargetByTargetStream(stream).versioning, assertType);
   }
 
   assertKey(key: string) {

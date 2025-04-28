@@ -1,8 +1,8 @@
 import { IStreamService } from '.';
 import { IProjectTargetDef, IProjectTargetStream } from '../project';
-import { StreamState } from '../stream';
+import { StreamState } from '../stream-state';
 import { Service } from 'typedi';
-import { TargetState } from '../targets';
+import { TargetState } from '../target-state';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
@@ -89,9 +89,6 @@ export class GitlabStreamService extends EntityService implements IStreamService
     const state: StreamState = await this.cache.get(cacheKey) ?? new StreamState({
       id: stream.id,
       type: this.type,
-
-      projectId: stream.ref.projectId,
-      targetId: stream.ref.targetId,
 
       history: {
         action: [],

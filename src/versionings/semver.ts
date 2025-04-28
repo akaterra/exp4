@@ -7,6 +7,7 @@ import { IStorageService } from '../storages';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';
+import { ReleaseState } from '../release';
 
 export interface ISemverConfig {
   format?: string;
@@ -211,6 +212,10 @@ export class SemverVersioningService extends EntityService implements IVersionin
     }
 
     return version;
+  }
+
+  async getCurrentRelease(target: IProjectTargetDef): Promise<ReleaseState> {
+    return await this.getStorage(target).releaseGet(target, await this.getCurrent(target));
   }
 
   @Log('debug')

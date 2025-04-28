@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from '.';
 import { IProjectArtifact } from '../project';
-import { IStreamStateContext, StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream-state';
 import { EntityService } from '../entities.service';
 import * as _ from 'lodash';
 import { iter } from '../utils';

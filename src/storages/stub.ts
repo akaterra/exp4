@@ -4,8 +4,8 @@ import { EntityService } from '../entities.service';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
-import { IProjectManifest } from '../project';
-import { TargetState } from '../targets';
+import { IProjectManifest, IProjectTargetDef } from '../project';
+import { TargetState } from '../target-state';
 import { ReleaseState } from '../release';
 
 @Service()
@@ -18,12 +18,12 @@ export class StubStorageService extends EntityService implements IStorageService
   }
 
   @Log('debug')
-  async releaseGet(target: TargetState, def?: ReleaseState): Promise<ReleaseState> {
+  async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
     return null;
   }
 
   @Log('debug')
-  async releaseSet(target: TargetState): Promise<void> {
+  async releaseSet(target: TargetState, version?: string): Promise<void> {
     return null;
   }
 

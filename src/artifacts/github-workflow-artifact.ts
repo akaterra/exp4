@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { IArtifactService } from '.';
 import { IProjectArtifact, IProjectDef } from '../project';
-import { IStreamStateContext, StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream-state';
 import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';

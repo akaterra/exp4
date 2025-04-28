@@ -10,8 +10,8 @@ import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { ReleaseState } from '../release';
-import { TargetState } from '../targets';
-import { StreamState } from '../stream';
+import { TargetState } from '../target-state';
+import { StreamState } from '../stream-state';
 
 @Service()
 export class GithubStorageService extends EntityService implements IStorageService {
@@ -37,15 +37,15 @@ export class GithubStorageService extends EntityService implements IStorageServi
   }
 
   @Log('debug')
-  async releaseGet(target: TargetState, def?: ReleaseState): Promise<ReleaseState> {
-    const val = await this.varGetTarget(target, 'release', null, true);
+  async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
+    const val = await this.varGetTarget(target, [ 'release', version ], null, true);
 
     return val !== undefined ? new ReleaseState(val) : def;
   }
 
   @Log('debug')
-  async releaseSet(target: TargetState): Promise<void> {
-    this.varSetTarget(target, 'release', {
+  async releaseSet(target: TargetState, version?: string): Promise<void> {
+    this.varSetTarget(target, [ 'release', version ], {
       id: target.release.id,
       sections: target.release.sections,
     }, true);

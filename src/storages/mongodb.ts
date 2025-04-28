@@ -8,8 +8,8 @@ import { MongoClient, Db } from 'mongodb';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
-import { TargetState } from '../targets';
-import { StreamState } from '../stream';
+import { TargetState } from '../target-state';
+import { StreamState } from '../stream-state';
 import { ReleaseState } from '../release';
 
 @Service()
@@ -49,15 +49,15 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   }
 
   @Log('debug')
-  async releaseGet(target: TargetState, def?: ReleaseState): Promise<ReleaseState> {
-    const val = await this.varGetTarget(target, 'release', null);
+  async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
+    const val = await this.varGetTarget(target, [ 'release', version ], null);
 
     return val !== undefined ? new ReleaseState(val) : def;
   }
 
   @Log('debug')
-  async releaseSet(target: TargetState): Promise<void> {
-    this.varSetTarget(target, 'release', {
+  async releaseSet(target: TargetState, version?: string): Promise<void> {
+    this.varSetTarget(target, [ 'release', version ], {
       id: target.release.id,
       sections: target.release.sections,
     });

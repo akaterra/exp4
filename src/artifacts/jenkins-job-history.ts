@@ -5,7 +5,7 @@ import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { AwaitedCache } from '../cache';
-import { IStreamStateContext, StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream-state';
 import { JenkinsIntegrationService } from '../integrations/jenkins';
 
 export interface IJenkinsJobHistoryArtifactConfig {

@@ -1,4 +1,5 @@
 import { Status } from './enums/status';
+import {IProjectTargetStreamDef} from './project';
 
 export interface IStreamStateContext extends Record<string, unknown> {
   artifact?: Record<string, unknown>;
@@ -23,8 +24,7 @@ export class StreamState<
   id: string;
   type: string;
 
-  projectId: string;
-  targetId: string;
+  stream: IProjectTargetStreamDef;
 
   history: {
     action?: {
@@ -81,7 +81,7 @@ export class StreamState<
   }
 
   incVer() {
-    this.ver += 1;
+    this.ver ++;
 
     return this;
   }
@@ -126,5 +126,12 @@ export class StreamState<
     }
 
     return this;
+  }
+
+  toJSON() {
+    return {
+      ...this,
+      stream: undefined,
+    };
   }
 }

@@ -6,7 +6,7 @@ import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { ArgocdIntegrationService } from '../integrations/argocd';
 import { AwaitedCache } from '../cache';
-import { IStreamStateContext, StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream-state';
 
 export interface IArgocdApplicationArtifactConfig {
   integration: IProjectDef['id'];

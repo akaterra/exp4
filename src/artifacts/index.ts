@@ -1,6 +1,6 @@
 import { IService } from '../entities.service';
 import { IProjectArtifact } from '../project';
-import { IStreamStateContext, StreamState } from '../stream';
+import { IStreamStateContext, StreamState } from '../stream-state';
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';
 import { Autowired } from '../utils';
