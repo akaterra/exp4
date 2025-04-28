@@ -35,7 +35,7 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
       : this.cache.get(this.config?.integration);
 
     if (!artifact) {
-      artifact = await this.getIntegration(entity.ref).getApplication();
+      artifact = await this.getIntegration(entity.ref).applicationGet();
     }
 
     if (entity.context) {

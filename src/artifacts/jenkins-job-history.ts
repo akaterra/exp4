@@ -35,7 +35,7 @@ export class JenkinsJobHistoryArtifactService extends EntityService implements I
       : this.cache.get(this.config?.integration);
 
     if (!artifact) {
-      artifact = await this.getIntegration(entity.ref).getJobHistory();
+      artifact = await this.getIntegration(entity.ref).jobHistoryGet();
     }
 
     if (entity.context) {

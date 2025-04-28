@@ -85,7 +85,7 @@ export class JenkinsJobRunActionService extends EntityService implements IAction
         await project.getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(
           rep(action.config?.integration ?? 'jenkins'),
           'jenkins',
-        ).withContext(context).runJob(
+        ).withContext(context).jobRun(
           this.getStreamConfig(targetStream, flow)?.jobName ??
             targetStream.config?.jenkins?.jobName ??
             action.config?.jobName ??

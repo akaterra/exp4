@@ -60,7 +60,7 @@ export class ArgocdSyncActionService extends EntityService implements IActionSer
         await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(
           rep(action.config?.integration ?? 'argocd'),
           'argocd',
-        ).withContext(context).syncResource(
+        ).withContext(context).resourceSync(
           this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName
             ? {
               resourceName: this.getStreamConfig(targetStream, flow)?.serviceName ?? targetStream.config?.argocdServiceName as any,

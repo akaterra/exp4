@@ -10,6 +10,7 @@ import { ArtifactHolderService } from '../artifacts';
 import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from '../const';
 import { ValidatorService } from '../services/validator.service';
+import {NotificationHolderService} from '../notifications';
 
 export async function createProject(
   manifest: IProjectManifest & { env?: Project['env'] },
@@ -28,6 +29,7 @@ export async function createProject(
     actions: new ActionHolderService(),
     artifacts: new ArtifactHolderService(),
     integrations: new IntegrationHolderService(),
+    notifications: new NotificationHolderService(),
     storages: new StorageHolderService(),
     streams: new StreamHolderService(),
     targets: new TargetHolderService(),
@@ -35,27 +37,31 @@ export async function createProject(
     versionings: new VersioningHolderService(),
   }
 
-  for (const action of await loadModules(__dirname + '/actions', 'ActionService')) {
+  for (const action of await loadModules(__dirname + '/../actions', 'ActionService')) {
     manifest.env.actions.addFactory(action);
   }
 
-  for (const artifact of await loadModules(__dirname + '/artifacts', 'ArtifactService')) {
+  for (const artifact of await loadModules(__dirname + '/../artifacts', 'ArtifactService')) {
     manifest.env.artifacts.addFactory(artifact);
   }
 
-  for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
+  for (const integration of await loadModules(__dirname + '/../integrations', 'IntegrationService')) {
     manifest.env.integrations.addFactory(integration);
   }
 
-  for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
+  for (const notification of await loadModules(__dirname + '/../notifications', 'NotificationService')) {
+    manifest.env.notifications.addFactory(notification);
+  }
+
+  for (const storage of await loadModules(__dirname + '/../storages', 'StorageService')) {
     manifest.env.storages.addFactory(storage);
   }
 
-  for (const stream of await loadModules(__dirname + '/streams', 'StreamService')) {
+  for (const stream of await loadModules(__dirname + '/../streams', 'StreamService')) {
     manifest.env.streams.addFactory(stream);
   }
 
-  for (const versioning of await loadModules(__dirname + '/versionings', 'VersioningService')) {
+  for (const versioning of await loadModules(__dirname + '/../versionings', 'VersioningService')) {
     manifest.env.versionings.addFactory(versioning);
   }
 

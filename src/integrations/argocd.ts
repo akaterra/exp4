@@ -1,9 +1,8 @@
 import { IIntegrationService, IncStatistics } from '.';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
-import { ArgocdService } from '../services/argocd.service';
 import { AwaitedCache } from '../cache';
-import { resolvePlaceholders } from '../utils';
+import { iter, request, resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
 import { Log } from '../logger';
 import { maybeReplaceEnvVars } from './utils';
@@ -12,7 +11,7 @@ export interface IArgocdConfig {
   applicationName?: string;
 
   cacheTtlSec?: number;
-  host?: string;
+  host: string;
 
   username?: string;
   password?: string;
@@ -20,58 +19,110 @@ export interface IArgocdConfig {
   token?: string;
 }
 
+export interface IArgocdServiceSync {
+  appNamespace: string;
+  revision: string;
+  prune: false;
+  dryRun: false;
+  strategy: {
+    hook: {
+      force: false;
+    };
+  };
+  resources: unknown[];
+  syncOptions: null;
+}
+
 @Service()
 export class ArgocdIntegrationService extends EntityService implements IIntegrationService {
+  protected accessToken: string = null;
   protected cache = new AwaitedCache<unknown>();
-  protected client: ArgocdService;
 
   static readonly type: string = 'argocd';
 
-  constructor(public readonly config?: IArgocdConfig) {
+  get isLoggedIn() {
+    return !!this.accessToken;
+  }
+
+  constructor(public readonly config: IArgocdConfig) {
     super();
 
-    this.client = new ArgocdService(
-      maybeReplaceEnvVars(config?.host),
-      maybeReplaceEnvVars(config?.username),
-      maybeReplaceEnvVars(config?.password),
-      maybeReplaceEnvVars(config?.token),
-    );
+    this.config = {
+      ...this.config,
+      host: maybeReplaceEnvVars(this.config.host) || process.env.ARGOCD_HOST,
+      username: maybeReplaceEnvVars(this.config.username) || process.env.ARGOCD_USERNAME,
+      password: maybeReplaceEnvVars(this.config.password) || process.env.ARGOCD_PASSWORD,
+      token: maybeReplaceEnvVars(this.config.token) || process.env.ARGOCD_TOKEN,
+    };
   }
 
   @Log('debug') @IncStatistics()
-  async getApplication(name?) {
-    if (!name) {
-      name = this.config?.applicationName;
+  async applicationGet(applicationName?: string) {
+    if (!this.isLoggedIn) {
+      await this.login();
     }
 
-    if (!name) {
+    if (!applicationName) {
+      applicationName = this.config?.applicationName;
+    }
+
+    if (!applicationName) {
       return;
     }
 
-    if (this.cache.has(name)) {
-      return this.cache.get(name);
+    if (this.cache.has(applicationName)) {
+      return this.cache.get(applicationName);
     }
 
-    const res = await this.client.getApplication(name);
+    const res = await request(`${this.config.host}/api/v1/applications/${applicationName}`, undefined, 'get', this.accessToken);
 
-    this.cache.set(name, res, this.config?.cacheTtlSec ?? 30);
+    this.cache.set(applicationName, res, this.config?.cacheTtlSec ?? 30);
 
     return res;
   }
 
+  @IncStatistics()
+  async login(username?: string, password?: string) {
+    this.accessToken = (await request(
+      `${this.config.host}/api/v1/session`,
+      {
+        username: username ?? this.config.username,
+        password: password ?? this.config.password,
+      },
+      'post',
+    ))?.token;
+  }
+
   @Log('debug') @IncStatistics()
-  async syncResource(params: {
+  async sync(params: IArgocdServiceSync, applicationName?: string) {
+    if (!this.isLoggedIn) {
+      await this.login();
+    }
+
+    if (!applicationName) {
+      applicationName = this.config?.applicationName;
+    }
+
+    if (!applicationName) {
+      return;
+    }
+
+    return request(`${this.config.host}/api/v1/applications/${applicationName}/sync`, params, 'post', this.accessToken);
+  }
+
+  @Log('debug') @IncStatistics()
+  async resourceSync(params: {
     resourceName: string | string[],
     resourceKind: string
   } | {
     resourceNameIn: string | string[],
     resourceKind: string
-  }, name?) {
-    if (!name) {
-      name = this.config?.applicationName;
+  }, applicationName?: string) {
+    if (!applicationName) {
+      applicationName = this.config?.applicationName;
     }
 
-    if (!name) {
+    if (!applicationName) {
       return;
     }
 
@@ -89,6 +140,59 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
       params = _.mapValues(params, rep);
     }
 
-    await this.client.syncResource(rep(name), params);
+    if (!this.isLoggedIn) {
+      await this.login();
+    }
+
+    const application = await this.applicationGet(applicationName);
+    const resources: unknown[] = [];
+
+    if ('resourceName' in params) {
+      for (const [ , resourceName ] of iter(params.resourceName)) {
+        const resource = Array.isArray(params.resourceKind)
+          ? application?.status?.resources?.find((resource) => {
+            return resource.name === resourceName && params.resourceKind.includes(resource.kind);
+          })
+          : application?.status?.resources?.find((resource) => {
+            return resource.name === resourceName && resource.kind === params.resourceKind;
+          });
+
+        if (resource) {
+          resources.push(resource);
+        }
+      }
+    } else if ('resourceNameIn' in params) {
+      for (const [ , resourceNameIn ] of iter(params.resourceNameIn)) {
+        const resource = Array.isArray(params.resourceKind)
+          ? application?.status?.resources?.find((resource) => {
+            return resourceNameIn.includes(resource.name) && params.resourceKind.includes(resource.kind);
+          })
+          : application?.status?.resources?.find((resource) => {
+            return resourceNameIn.includes(resource.name) && resource.kind === params.resourceKind;
+          });
+
+        if (resource) {
+          resources.push(resource);
+        }
+      }
+    }
+
+    if (!resources.length) {
+      return null;
+    }
+
+    await this.sync({
+      appNamespace: application.metadata.namespace,
+      revision: application.spec.source.targetRevision,
+      prune: false,
+      dryRun: false,
+      strategy: {
+        hook: {
+          force: false
+        }
+      },
+      resources,
+      syncOptions: null,
+    }, applicationName);
   }
 }

@@ -18,7 +18,7 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
   if (manifest.auth) {
     const authStrategiesService = Container.get(AuthStrategyHolderService);
 
-    for (const auth of await loadModules(__dirname + '/auth', 'AuthStrategyService')) {
+    for (const auth of await loadModules(__dirname + '/../auth', 'AuthStrategyService')) {
       authStrategiesService.addFactory(auth);
     }
 
@@ -30,7 +30,7 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
   if (manifest.integrations) {
     const integrationsService = Container.get(IntegrationHolderService);
 
-    for (const integration of await loadModules(__dirname + '/integrations', 'IntegrationService')) {
+    for (const integration of await loadModules(__dirname + '/../integrations', 'IntegrationService')) {
       integrationsService.addFactory(integration);
     }
 
@@ -42,7 +42,7 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
   if (manifest.storages) {
     const storagesService = Container.get(StorageHolderService);
 
-    for (const storage of await loadModules(__dirname + '/storages', 'StorageService')) {
+    for (const storage of await loadModules(__dirname + '/../storages', 'StorageService')) {
       storagesService.addFactory(storage);
     }
 

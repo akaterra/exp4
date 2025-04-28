@@ -40,7 +40,7 @@ export class GithubStorageService extends EntityService implements IStorageServi
   async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
     const val = await this.varGetTarget(target, [ 'release', version ], null, true);
 
-    return val !== undefined ? new ReleaseState(val) : def;
+    return val != null ? new ReleaseState(val) : def;
   }
 
   @Log('debug')
@@ -94,11 +94,11 @@ export class GithubStorageService extends EntityService implements IStorageServi
       ? GithubStorageService.tryParseComplex(await this.integration.orgVarGet(intKey))
       : await this.integration.orgVarGet(intKey);
 
-    if (val !== undefined) {
+    if (val != null) {
       this.cache.set(intKey, val, 60);
     }
 
-    return val !== undefined ? val : def;
+    return val != null ? val : def;
   }
 
   @Log('debug')
@@ -178,11 +178,11 @@ export class GithubStorageService extends EntityService implements IStorageServi
       ? GithubStorageService.tryParseComplex(await this.integration.orgVarGet(intKey))
       : await this.integration.orgVarGet(intKey);
 
-    if (val !== undefined) {
+    if (val != null) {
       this.cache.set(intKey, val, 60);
     }
 
-    return val !== undefined ? val : def;
+    return val != null ? val : def;
   }
 
   async varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D = null, isComplex?: boolean): Promise<void> {

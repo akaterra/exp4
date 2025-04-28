@@ -25,6 +25,12 @@ import { IGeneralManifest } from './general';
 import { IProjectManifest } from './project';
 import cookieParser from 'cookie-parser';
 import { authLogout } from './api/auth/logout';
+import SourceMapSupport from 'source-map-support';
+
+SourceMapSupport.install({
+  environment: 'node',
+  handleUncaughtExceptions: true,
+});
 
 process.on('uncaughtException', (err) => {
   logError(err, 'uncaughtException');
