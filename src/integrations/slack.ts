@@ -1,8 +1,8 @@
-import {Service} from 'typedi';
-import {EntityService} from '../entities.service';
-import {IIntegrationService, IncStatistics} from '.';
-import {request} from '../utils';
-import {Log} from '../logger';
+import { Service } from 'typedi';
+import { EntityService } from '../entities.service';
+import { IIntegrationService, IncStatistics } from '.';
+import { request } from '../utils';
+import { Log } from '../logger';
 
 export interface ISlackConfig {
   webhookUrl: string;

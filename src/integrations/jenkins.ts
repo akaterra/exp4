@@ -6,7 +6,7 @@ import { resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
 import { Log } from '../logger';
 import { maybeReplaceEnvVars } from './utils';
-import { rest} from '../services/rest-api.service';
+import { rest } from '../services/rest-api.service';
 
 export interface IJenkinsConfig {
   cacheTtlSec?: number;

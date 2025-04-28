@@ -1,5 +1,5 @@
 import { Status } from './enums/status';
-import {IProjectTargetStreamDef} from './project';
+import { IProjectTargetStreamDef } from './project';
 
 export interface IStreamStateContext extends Record<string, unknown> {
   artifact?: Record<string, unknown>;

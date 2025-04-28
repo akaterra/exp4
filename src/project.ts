@@ -8,14 +8,14 @@ import { TargetHolderService } from './targets';
 import { VersioningHolderService } from './versionings';
 import { ArtifactHolderService } from './artifacts';
 import { ProjectsService } from './projects.service';
-import { Autowired, AwaitableContainer, iter } from './utils';
-import { IStreamStateContext, StreamState } from './stream-state';
+import { Autowired, iter } from './utils';
+import { IStreamStateContext } from './stream-state';
 import { ProjectState } from './project-state';
 import { ValidatorService } from './services/validator.service';
 import { TargetState } from './target-state';
-import { StatisticsService} from './statistics.service';
+import { StatisticsService } from './statistics.service';
 import { logger } from './logger';
-import {NotificationHolderService} from './notifications';
+import { NotificationHolderService } from './notifications';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;

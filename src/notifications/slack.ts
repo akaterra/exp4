@@ -1,6 +1,7 @@
-import {Service} from 'typedi';
-import {INotificationService} from '.';
-import {EntityService} from '../entities.service';
+import { Service } from 'typedi';
+import { INotificationService } from '.';
+import { EntityService } from '../entities.service';
+import { TargetState } from '../target-state';
 
 @Service()
 export class SlackNotificationService extends EntityService implements INotificationService {
@@ -10,6 +11,6 @@ export class SlackNotificationService extends EntityService implements INotifica
     super();
   }
 
-  async publishRelease(targetState: any): Promise<void> {
+  async publishRelease(targetState: TargetState): Promise<void> {
   }
 }

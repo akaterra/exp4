@@ -10,7 +10,7 @@ import { ArtifactHolderService } from '../artifacts';
 import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from '../const';
 import { ValidatorService } from '../services/validator.service';
-import {NotificationHolderService} from '../notifications';
+import { NotificationHolderService } from '../notifications';
 
 export async function createProject(
   manifest: IProjectManifest & { env?: Project['env'] },
