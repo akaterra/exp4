@@ -1,4 +1,4 @@
-import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import * as _ from 'lodash';
 
 export function notEmptyArray(...args) {
@@ -11,6 +11,8 @@ export function markDirty(...entities: Array<IProjectTargetDef | IProjectTargetS
   });
 }
 
-export function getPossibleTargetIds(targetsStreams, flowTargetIds) {
-  return (targetsStreams ? _.intersection(Object.keys(targetsStreams), flowTargetIds) : flowTargetIds) ?? [];
+export function getPossibleTargetIds(targetsStreams, flowTargetIds: IProjectTargetDef['id'][]) {
+  const targetIds = targetsStreams ? Object.keys(targetsStreams) : null;
+
+  return (targetIds?.length ? _.intersection(targetIds, flowTargetIds) : flowTargetIds) ?? [];
 }

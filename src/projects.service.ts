@@ -109,6 +109,7 @@ export class ProjectsService extends EntitiesService<Project> {
 
     for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
       await project.updateTargetState(tId);
+      await project.triggerTargetEvent(tId, 'targetUpdated');
     }
 
     project.state = projectState;

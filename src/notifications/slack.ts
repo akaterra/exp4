@@ -5,6 +5,7 @@ import { TargetState } from '../target-state';
 import {Autowired, request} from '../utils';
 import {ProjectsService} from '../projects.service';
 import {SlackIntegrationService} from '../integrations/slack';
+import {IProjectDef} from '../project';
 
 @Service()
 export class SlackNotificationService extends EntityService implements INotificationService {
@@ -18,16 +19,21 @@ export class SlackNotificationService extends EntityService implements INotifica
 
   async publishRelease(targetState: TargetState): Promise<void> {
     const project = this.projectsService.get(targetState.target.ref?.projectId);
-    const payload = {
-      text: `### Release ${targetState.version}`,
-      blocks: [],
-    }
+    const payload: { blocks: any[] } = {
+      blocks: [ {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: `Release ${targetState.version}`,
+        }
+      } ],
+    };
 
     const blockArtifacts = {
-      text: [],
+      components: [], artifactsIds: [], artifacts: [],
     };
     const blockComponents = {
-      text: [],
+      components: [],
     };
     const blockDefault = {
       text: [],
@@ -40,29 +46,19 @@ export class SlackNotificationService extends EntityService implements INotifica
             const stream = project.getTargetStreamByTargetAndStream(targetState.id, changelog.streamId);
 
             if (changelog.notes?.length) {
-              if (!blockComponents.text.length) {
-                blockArtifacts.text.push('##### Components');
-              }
-
-              blockComponents.text.push(`**${stream.title}**`);
-
-              changelog.notes.forEach((note) => {
-                blockComponents.text.push(`* ` + note.text);
-              });
+              blockComponents.components.push([ stream.title, changelog.notes.map((v) => v.text) ]);
             }
 
             if (changelog.artifacts?.length) {
-              if (!blockArtifacts.text.length) {
-                blockArtifacts.text.push('##### Artifacts');
-                blockArtifacts.text.push('| Component | Artifact ID | Artifact value |');
-                blockArtifacts.text.push('| --- | --- | --: |');
-              }
-
               changelog.artifacts.forEach((artifact, i) => {
                 if (i === 0) {
-                  blockArtifacts.text.push(`| ${stream.title} | ${artifact.id} | ${artifact.description} |`);
+                  blockArtifacts.components.push(stream.title);
+                  blockArtifacts.artifactsIds.push(artifact.id);
+                  blockArtifacts.artifacts.push(artifact.description);
                 } else {
-                  blockArtifacts.text.push(`| | ${artifact.id} | ${artifact.description} |`);
+                  blockArtifacts.components.push('');
+                  blockArtifacts.artifactsIds.push(artifact.id);
+                  blockArtifacts.artifacts.push(artifact.description);
                 }
               });
             }
@@ -87,34 +83,46 @@ export class SlackNotificationService extends EntityService implements INotifica
       });
     }
 
-    if (blockComponents.text.length) {
+    if (blockComponents.components.length) {
       payload.blocks.push({
+        type: 'header',
+        text: { type: 'plain_text', text: 'Components' },
+      }, {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: blockComponents.text.join('\n'),
+          text: blockComponents.components.map((component) => [ `*${component[0]}*`, ...component[1].map((v) => `- ${v}`) ]).flat().join('\n'),
         }
       });
     }
 
-    if (blockArtifacts.text.length) {
+    if (blockArtifacts.components.length) {
       payload.blocks.push({
+        type: 'header',
+        text: { type: 'plain_text', text: 'Artifacts' },
+      }, {
         type: 'section',
-        text: {
+        fields: [ {
           type: 'mrkdwn',
-          text: blockArtifacts.text.join('\n'),
-        }
+          text: '*Component*\n' + blockArtifacts.components.join('\n'),
+        }, {
+          type: 'mrkdwn',
+          text: '*Artifact ID*\n' + blockArtifacts.artifactsIds.join('\n'),
+        }, {
+          type: 'mrkdwn',
+          text: '*Artifact*\n' + blockArtifacts.artifacts.join('\n'),
+        } ],
       });
     }
 
-    console.log(payload);
+    console.log(JSON.stringify(payload,undefined,2));
 
-    // await this.getIntegrationService(targetState).send(payload);
+    await this.getIntegrationService(targetState).send(payload);
   }
 
   private getIntegrationService(targetState: TargetState) {
     return this.projectsService
       .get(targetState.target.ref.projectId)
-      .getEnvIntegraionByIntegration<SlackIntegrationService>(targetState.target.notification, this.type);
+      .getEnvIntegraionByIntegration<SlackIntegrationService>(this.config?.integration, this.type);
   }
 }

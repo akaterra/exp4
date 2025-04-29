@@ -3,6 +3,7 @@ import { EntityService } from '../entities.service';
 import { IIntegrationService, IncStatistics } from '.';
 import { request } from '../utils';
 import { Log } from '../logger';
+import {maybeReplaceEnvVars} from './utils';
 
 export interface ISlackConfig {
   webhookUrl: string;
@@ -12,13 +13,18 @@ export interface ISlackConfig {
 export class SlackIntegrationService extends EntityService implements IIntegrationService {
   static readonly type: string = 'slack';
 
-  constructor(public readonly config?: ISlackConfig) {
+  constructor(public readonly config: ISlackConfig) {
     super();
+
+    this.config = {
+      ...this.config,
+      webhookUrl: maybeReplaceEnvVars(this.config.webhookUrl) || process.env.SLACK_WEBHOOK_URL,
+    };
   }
 
   @Log('debug') @IncStatistics()
   send(message: string | {
-    text: string;
+    text?: string;
     blocks?: {
       type: string;
       block_id?: string;
@@ -28,9 +34,8 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
       };
     }[];
   }, channel?: string): Promise<void> {
-    return request(this.config.webhookUrl, {
+    return request(this.config.webhookUrl, typeof message === 'string' ? {
       text: message,
-      channel: channel || '#general',
-    }, 'post');
+    } : message, 'post');
   }
 }

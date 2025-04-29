@@ -15,7 +15,7 @@ import { ValidatorService } from './services/validator.service';
 import { TargetState } from './target-state';
 import { StatisticsService } from './statistics.service';
 import { logger } from './logger';
-import { NotificationHolderService } from './notifications';
+import { INotificationService, NotificationHolderService } from './notifications';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
@@ -41,11 +41,6 @@ export interface IProjectRef {
 export interface IProjectArtifact<C extends Record<string, any> = Record<string, any>> extends IProjectDef<C> {
   dependsOn?: IProjectArtifact['id'][];
   ref?: IProjectRef;
-}
-
-export interface IProjectNotification<T extends string = string> extends IProjectDef<unknown, T> {
-  namespace?: string;
-  integration?: string;
 }
 
 export interface IProjectVersioning<T extends string = string> extends IProjectDef<unknown, T> {
@@ -101,7 +96,7 @@ export interface IProjectTarget<C extends Record<string, unknown>> extends IProj
 
   artifacts?: IProjectArtifact['id'][];
   streams: Record<string, IProjectTargetStream<C>>;
-  notification?: IProjectNotification['id'];
+  events?: Record<string, IProjectDef[]>;
   release?: {
     sections: {
       id?: string;
@@ -151,6 +146,7 @@ export interface IProjectManifest extends IProjectDef {
 
   artifacts: Record<string, IProjectDefInput & Pick<IProjectArtifact, 'dependsOn'>>;
   definitions: Record<string, Record<string, unknown>>;
+  events: Record<string, IProjectDefInput[]>;
   flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDefInput>;
   notifications?: Record<string, IProjectDefInput>;
@@ -191,6 +187,7 @@ export class Project implements IProject {
 
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>> = {};
   definitions: Record<string, Record<string, unknown>> = {};
+  events: Record<string, IProjectDef[]> = {};
   flows: Record<string, IProjectFlowDef> = {};
   integrations?: Record<string, IProjectDef>;
   storages?: Record<string, IProjectDef>;
@@ -222,6 +219,10 @@ export class Project implements IProject {
 
     if (config.definitions) {
       this.definitions = config.definitions;
+    }
+
+    if (config.events) {
+      this.events = config.events;
     }
 
     if (config.env) {
@@ -282,6 +283,7 @@ export class Project implements IProject {
           description: targetDef.description,
 
           artifacts: targetDef.artifacts,
+          events: targetDef.events,
           streams: Object
             .entries(targetDef.streams ?? {})
             .reduce((acc, [ streamKey, streamDef ]) => {
@@ -416,6 +418,10 @@ export class Project implements IProject {
     return this.env.integrations.get(stream.config?.integration as string, assertType) as T;
   }
 
+  getEnvNotificationByNotification<T extends INotificationService>(mixed: IProjectDef['id'] | IProjectDef, assertType?: IProjectTargetStreamDef['type']): T {
+    return this.env.notifications.get(typeof mixed === 'string' ? mixed : mixed.id, assertType) as T;
+  }
+
   getEnvStorageByStorageId(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
     return this.env.storages.get(typeof mixed === 'string' ? mixed : mixed.id);
   }
@@ -448,9 +454,17 @@ export class Project implements IProject {
 
   async flowRun(
     flowId: string | string[],
-    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    targetsStreams?: Record<IProjectTargetDef['id'], [ string, ...string[] ] | true> | IProjectTargetDef['id'][],
     params?: Record<string, any>,
   ) {
+    if (Array.isArray(targetsStreams)) {
+      targetsStreams = targetsStreams.reduce((acc, tId) => {
+        acc[tId] = true;
+
+        return acc;
+      }, {});
+    }
+
     for (const [ , fId ] of iter(flowId)) {
       const flow = this.getFlowByFlow(fId);
 
@@ -460,16 +474,16 @@ export class Project implements IProject {
 
       this.env.validator.validate(params, fId);
 
-      for (const step of flow.actions) {
+      for (const action of flow.actions) {
         logger.info({
           message: 'flowStepRun',
-          ref: step.ref,
+          ref: action.ref,
           params,
           targetsStreams,
         });
 
         try {
-          await this.env.actions.get(step.type).run(flow, step, targetsStreams, params);
+          await this.env.actions.get(action.type).run(flow, action, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${this.id}.errors`, {
             message: err?.message ?? err ?? null,
@@ -478,10 +492,10 @@ export class Project implements IProject {
           });
 
           if (
-            !step.bypassErrorCodes ||
+            !action.bypassErrorCodes ||
             (
-              !step.bypassErrorCodes.includes(err?.cause) &&
-              !step.bypassErrorCodes.includes('*')
+              !action.bypassErrorCodes.includes(err?.cause) &&
+              !action.bypassErrorCodes.includes('*')
             )
           ) {
             throw err;
@@ -491,6 +505,54 @@ export class Project implements IProject {
     }
 
     return true;
+  }
+
+  async triggerEvent(eventId: string, params?: Record<string, any>) {
+    const targets = Object.keys(this.targets);
+    const events = this.events?.[eventId];
+
+    if (!events) {
+      logger.warn(`Project "${this.id}" event "${eventId}" not found`);
+
+      return;
+    }
+
+    for (const event of events) {
+      switch (event.type) {
+        case 'flow:run':
+          await this.flowRun(
+            event.config?.flowId,
+            targets,
+            params,
+          );
+
+          break;
+      }
+    }
+  }
+
+  async triggerTargetEvent(mixed: IProjectTargetDef['id'] | IProjectTargetDef, eventId: string, params?: Record<string, any>) {
+    const target = this.getTargetByTarget(mixed);
+    const events = target.events?.[eventId];
+
+    if (!events) {
+      logger.warn(`Project "${this.id}" target "${target.id}" event "${eventId}" not found`);
+
+      return;
+    }
+
+    for (const event of events) {
+      switch (event.type) {
+        case 'flow:run':
+          await this.flowRun(
+            event.config?.flowId,
+            [ target.id ],
+            params,
+          );
+
+          break;
+      }
+    }
   }
 
   async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
@@ -511,6 +573,7 @@ export class Project implements IProject {
       description: this.description ?? null,
 
       definitions: this.definitions,
+      events: this.events,
       flows: this.flows,
       integrations: this.integrations,
       storages: this.storages,

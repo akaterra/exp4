@@ -37,16 +37,16 @@ export async function createProject(
     versionings: new VersioningHolderService(),
   }
 
+  for (const integration of await loadModules(__dirname + '/../integrations', 'IntegrationService')) {
+    manifest.env.integrations.addFactory(integration);
+  }
+
   for (const action of await loadModules(__dirname + '/../actions', 'ActionService')) {
     manifest.env.actions.addFactory(action);
   }
 
   for (const artifact of await loadModules(__dirname + '/../artifacts', 'ArtifactService')) {
     manifest.env.artifacts.addFactory(artifact);
-  }
-
-  for (const integration of await loadModules(__dirname + '/../integrations', 'IntegrationService')) {
-    manifest.env.integrations.addFactory(integration);
   }
 
   for (const notification of await loadModules(__dirname + '/../notifications', 'NotificationService')) {
@@ -144,14 +144,6 @@ export async function createProject(
         if (!streamsService.has(streamDefConfig.type)) {
           streamsService.add(streamsService.getInstance(streamDefConfig.type, streamDefConfig.config), streamDefConfig.type);
         }
-
-        // if (streamDefConfig.notification) {
-        //   manifest.env.notifications.get(streamDefConfig.notification);
-        // }
-      }
-
-      if (targetDefConfig.notification) {
-        notificationsService.get(targetDefConfig.notification);
       }
 
       versioningsService.get(targetDefConfig.versioning);
