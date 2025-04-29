@@ -2,7 +2,8 @@ import { Service } from 'typedi';
 import { IVersioningService } from '.';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
+import { TargetState } from '../target-state';
 
 @Service()
 export class StubVersioningService extends EntityService implements IVersioningService {
@@ -56,10 +57,14 @@ export class StubVersioningService extends EntityService implements IVersioningS
     return null;
   }
 
-  async getCurrentRelease(target: IProjectTargetDef): Promise<ReleaseState> {
-    return null;
+  async getCurrentRelease(target: IProjectTargetDef): Promise<ReleaseState> { // eslint-disable-line
+    return new ReleaseState({});
   }
 
+  async setCurrentRelease(targetState: TargetState): Promise<void> { // eslint-disable-line
+    return null;
+  }
+  
   async exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string> { // eslint-disable-line
     return null;
   }

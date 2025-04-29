@@ -11,7 +11,7 @@ import { IGeneralManifest } from '../general';
 import { lstat } from 'node:fs/promises';
 import { iter } from '../utils';
 import YAML from 'yaml'
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 
@@ -88,21 +88,6 @@ export class FileStorageService extends EntityService implements IStorageService
     }
 
     return manifests;
-  }
-
-  @Log('debug')
-  async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
-    const val = await this.varGetTarget(target, [ 'release', version ], null);
-
-    return val !== undefined ? new ReleaseState(val) : def;
-  }
-
-  @Log('debug')
-  async releaseSet(target: TargetState, version?: string): Promise<void> {
-    this.varSetTarget(target, [ 'release', version ], {
-      id: target.release.id,
-      sections: target.release.sections,
-    });
   }
 
   @Log('debug')

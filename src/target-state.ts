@@ -1,5 +1,5 @@
 import { IProjectTargetDef, IProjectTargetStreamDef } from './project';
-import { ReleaseState } from './release';
+import { IReleaseStateSection, ReleaseState } from './release-state';
 import { StreamState } from './stream-state';
 
 export class TargetState {
@@ -22,6 +22,15 @@ export class TargetState {
     props.streams = props.streams ?? {};
 
     return props as TargetState;
+  }
+
+  setReleaseSectionByStreamId(
+    streamId: IProjectTargetStreamDef['id'],
+    artifacts?: IReleaseStateSection['changelog'][0]['artifacts'],
+    notes?: IReleaseStateSection['changelog'][0]['notes'],
+    onlyExisting?: boolean,
+  ) {
+    return this.release.setSectionByStreamId(streamId, artifacts, notes, onlyExisting);
   }
 
   toJSON() {

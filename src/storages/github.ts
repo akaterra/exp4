@@ -9,7 +9,7 @@ import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 
@@ -34,21 +34,6 @@ export class GithubStorageService extends EntityService implements IStorageServi
   @Log('debug')
   async manifestsLoad(): Promise<Array<IGeneralManifest | IProjectManifest>> {
     return [];
-  }
-
-  @Log('debug')
-  async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
-    const val = await this.varGetTarget(target, [ 'release', version ], null, true);
-
-    return val != null ? new ReleaseState(val) : def;
-  }
-
-  @Log('debug')
-  async releaseSet(target: TargetState, version?: string): Promise<void> {
-    this.varSetTarget(target, [ 'release', version ], {
-      id: target.release.id,
-      sections: target.release.sections,
-    }, true);
   }
 
   @Log('debug')
@@ -256,13 +241,13 @@ export class GithubStorageService extends EntityService implements IStorageServi
   protected static getKey(key: string | string[]): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `sf__${key}`.toLowerCase().replace(/\-/g, '_');
+    return `sf__${key}`.toLowerCase().replace(/[\-\.]/g, '_');
   }
 
   protected static getKeyOfType(key: string | string[], id: IProjectTargetStreamDef['id'], type?: string): string {
     key = Array.isArray(key) ? key.join('__') : key;
 
-    return `sf__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
+    return `sf__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/[\-\.]/g, '_');
   }
 
   protected static getVarComplex(val) {

@@ -21,7 +21,7 @@ export class MoveActionService extends EntityService implements IActionService {
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets);
+    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets);
 
     for (let tIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of action.targets) {
@@ -32,15 +32,15 @@ export class MoveActionService extends EntityService implements IActionService {
           tIdOfTarget = tId;
         }
 
-        project.getTargetByTargetId(tIdOfSource);
-        const target = project.getTargetByTargetId(tIdOfTarget);
+        project.getTargetByTarget(tIdOfSource);
+        const target = project.getTargetByTarget(tIdOfTarget);
         const streamIds = targetsStreams?.[tIdOfSource] === true
           ? Object.keys(target.streams)
           : targetsStreams?.[tIdOfSource] as string[] ?? Object.keys(target.streams);
 
         for (const sId of streamIds) {
-          const sourceStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfSource, sId, true);
-          const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, sId, true);
+          const sourceStream = project.getTargetStreamByTargetAndStream(tIdOfSource, sId, true);
+          const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, sId, true);
 
           if (sourceStream && targetStream) {
             await project.getEnvStreamByTargetStream(targetStream)

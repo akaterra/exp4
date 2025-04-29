@@ -59,7 +59,7 @@ export class ProjectsService extends EntitiesService<Project> {
     const isSyncing = projectState.isSyncing;
 
     for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
-      const target = project.getTargetByTargetId(tId);
+      const target = project.getTargetByTarget(tId);
       const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
         ? targetStreams[tId] === true
           ? Object.keys(target.streams)
@@ -81,14 +81,22 @@ export class ProjectsService extends EntitiesService<Project> {
           syncEntries = projectState.popTargetSync(100);
 
           for (const [ tId, streamIds, scopes ] of syncEntries) {
-            projectState.setTarget(tId, await project.getTargetStateByTargetId(tId));
+            projectState.setTargetState(tId, await project.getTargetStateByTarget(tId));
 
             for (const sId of streamIds) {
-              const stream = project.getTargetStreamByTargetIdAndStreamId(tId, sId, true);
+              const stream = project.getTargetStreamByTargetAndStream(tId, sId, true);
 
               if (stream) {
                 await streamContainer.push(async () => {
-                  projectState.setTargetStream(tId, await project.getStreamStateByTargetIdAndStreamId(tId, sId, scopes));
+                  const streamState = await project.getStreamStateByTargetAndStream(tId, sId, scopes);
+
+                  projectState.setTargetStreamState(tId, streamState);
+                  projectState.getTargetState(tId).setReleaseSectionByStreamId(
+                    sId,
+                    streamState.history.artifact,
+                    null,
+                    true,
+                  );
                 });
               }
             }
@@ -97,6 +105,10 @@ export class ProjectsService extends EntitiesService<Project> {
           await streamContainer.wait();
         } while (syncEntries.length);
       })();
+    }
+
+    for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
+      await project.updateTargetState(tId);
     }
 
     project.state = projectState;

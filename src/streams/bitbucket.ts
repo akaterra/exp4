@@ -52,7 +52,7 @@ export class BitbucketStreamService extends EntityService implements IStreamServ
 
     const source = await this.projectsService
       .get(stream.ref?.projectId)
-      .getStreamStateByTargetIdAndStreamId(stream.ref?.targetId, stream.ref?.streamId, { change: true });
+      .getStreamStateByTargetAndStream(stream.ref?.targetId, stream.ref?.streamId, { change: true });
 
     if (!source?.history?.change?.[0]?.id) {
       return;
@@ -222,7 +222,7 @@ export class BitbucketStreamService extends EntityService implements IStreamServ
 
     const source = await this.projectsService
       .get(sourceStream.ref?.projectId)
-      .getStreamStateByTargetIdAndStreamId(sourceStream.ref?.targetId, sourceStream.ref?.streamId, { change: true });
+      .getStreamStateByTargetAndStream(sourceStream.ref?.targetId, sourceStream.ref?.streamId, { change: true });
 
     if (!source?.history?.change?.[0]?.id) {
       return;

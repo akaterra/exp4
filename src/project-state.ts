@@ -13,12 +13,12 @@ export class ProjectState {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   get isSyncing(): boolean {
-    return Object.values(this.targets).some((target) => target.isSyncing);
+    return Object.values(this.targetsStates).some((target) => target.isSyncing);
   }
 
   constructor(
     public id: IProjectDef['id'] = null,
-    public targets: Record<IProjectTargetDef['id'], TargetState> = {},
+    public targetsStates: Record<IProjectTargetDef['id'], TargetState> = {},
   ) {
   }
 
@@ -48,33 +48,53 @@ export class ProjectState {
     return ids;
   }
 
-  setTarget(targetId: IProjectTargetDef['id'], target: Partial<TargetState>) {
-    const oldTarget = this.targets[targetId];
+  getTargetState(targetId: IProjectTargetDef['id']): TargetState {
+    const targetState = this.targetsStates[targetId] ?? null;
+
+    if (!targetState) {
+      throw new Error(`Target state not found for target "${targetId}"`);
+    }
+
+    return targetState;
+  }
+
+  setTargetState(targetId: IProjectTargetDef['id'], targetState: Partial<TargetState>) {
+    const oldTarget = this.targetsStates[targetId];
 
     if (oldTarget) {
-      for (const key of Object.keys(target)) {
-        oldTarget[key] = target[key];
+      for (const key of Object.keys(targetState)) {
+        oldTarget[key] = targetState[key];
       }
     } else {
-      this.targets[targetId] = target instanceof TargetState
-        ? target
-        : new TargetState(target);
+      this.targetsStates[targetId] = targetState instanceof TargetState
+        ? targetState
+        : new TargetState(targetState);
     }
 
     return this;
   }
 
-  setTargetStream(targetId: IProjectTargetDef['id'], stream: Partial<StreamState>) {
-    const oldTargetStream = this.ensureTarget(targetId).streams[stream.id];
+  getTargetStreamState(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']): StreamState {
+    const streamState = this.targetsStates[targetId]?.streams[streamId] ?? null;
+
+    if (!streamState) {
+      throw new Error(`Stream state not found for target "${targetId}", stream "${streamId}"`);
+    }
+
+    return streamState;
+  }
+
+  setTargetStreamState(targetId: IProjectTargetDef['id'], streamState: Partial<StreamState>) {
+    const oldTargetStream = this.ensureTarget(targetId).streams[streamState.id];
 
     if (oldTargetStream) {
-      for (const key of Object.keys(stream)) {
-        oldTargetStream[key] = stream[key];
+      for (const key of Object.keys(streamState)) {
+        oldTargetStream[key] = streamState[key];
       }
     } else {
-      this.targets[targetId].streams[stream.id] = stream instanceof StreamState
-        ? stream
-        : new StreamState(stream);
+      this.targetsStates[targetId].streams[streamState.id] = streamState instanceof StreamState
+        ? streamState
+        : new StreamState(streamState);
     }
 
     return this;
@@ -102,24 +122,24 @@ export class ProjectState {
   toJSON() {
     return {
       id: this.id,
-      targets: this.targets,
+      targets: this.targetsStates,
       updatedAt: this.updatedAt,
     };
   }
 
   private ensureTarget(targetId): TargetState {
-    if (!this.targets[targetId]) {
-      this.setTarget(targetId, { id: targetId });
+    if (!this.targetsStates[targetId]) {
+      this.setTargetState(targetId, { id: targetId });
     }
 
-    return this.targets[targetId];
+    return this.targetsStates[targetId];
   }
 
   private ensureTargetStream(targetId, streamId): StreamState {
     if (!this.ensureTarget(targetId).streams[targetId]) {
-      this.setTargetStream(targetId, { id: streamId });
+      this.setTargetStreamState(targetId, { id: streamId });
     }
 
-    return this.targets[targetId].streams[streamId];
+    return this.targetsStates[targetId].streams[streamId];
   }
 }

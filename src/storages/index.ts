@@ -1,7 +1,7 @@
 import { IService } from '../entities.service';
 import { IGeneralManifest } from '../general';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
 import { StreamState } from '../stream-state';
 import { TargetState } from '../target-state';
 import { IUser } from '../user';
@@ -10,10 +10,6 @@ import { EntitiesServiceWithFactory } from '../entities.service';
 
 export interface IStorageService extends IService {
   manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>>;
-
-  releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState>;
-
-  releaseSet(target: TargetState, version?: string): Promise<void>;
 
   userGet(filter: Record<string, unknown>): Promise<IUser>;
 

@@ -83,7 +83,7 @@ export class GithubWorkflowJobLogArtifactService extends EntityService implement
     return this.config?.integration
       ? this.projectsService
         .get(ref?.projectId)
-        .getEnvIntegraionByIntegrationId<GithubIntegrationService>(this.config?.integration, 'github')
+        .getEnvIntegraionByIntegration<GithubIntegrationService>(this.config?.integration, 'github')
       : this.projectsService
         .get(ref?.projectId)
         .getEnvIntegraionByTargetIdAndStreamId<GithubIntegrationService>(

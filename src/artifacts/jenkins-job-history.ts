@@ -49,7 +49,7 @@ export class JenkinsJobHistoryArtifactService extends EntityService implements I
     return this.config?.integration
       ? this.projectsService
         .get(ref?.projectId)
-        .getEnvIntegraionByIntegrationId<JenkinsIntegrationService>(this.config?.integration, 'jenkins')
+        .getEnvIntegraionByIntegration<JenkinsIntegrationService>(this.config?.integration, 'jenkins')
       : this.projectsService
         .get(ref?.projectId)
         .getEnvIntegraionByTargetIdAndStreamId<JenkinsIntegrationService>(

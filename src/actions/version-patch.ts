@@ -21,11 +21,11 @@ export class VersionPatchActionService extends EntityService implements IActionS
     const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
       action.targets,
-      getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
+      getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets),
     );
 
     for (const tIdOfTarget of sourceTargetIds) {
-      const target = project.getTargetByTargetId(tIdOfTarget);
+      const target = project.getTargetByTarget(tIdOfTarget);
 
       await project.getEnvVersioningByTarget(target).patch(target, params);
 

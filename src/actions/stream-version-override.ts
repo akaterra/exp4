@@ -18,7 +18,7 @@ export class StreamVersionOverrideActionService extends EntityService implements
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets);
+    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets);
 
     for (let tIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of action.targets) {
@@ -29,15 +29,15 @@ export class StreamVersionOverrideActionService extends EntityService implements
           tIdOfTarget = tId;
         }
 
-        const source = project.getTargetByTargetId(tIdOfSource);
-        const target = project.getTargetByTargetId(tIdOfTarget);
+        const source = project.getTargetByTarget(tIdOfSource);
+        const target = project.getTargetByTarget(tIdOfTarget);
         const streamIds = targetsStreams?.[tIdOfSource] === true
           ? Object.keys(target.streams)
           : targetsStreams?.[tIdOfSource] as string[] ?? Object.keys(target.streams);
 
         for (const streamId of streamIds) {
-          const sourceStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfSource, streamId);
-          const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
+          const sourceStream = project.getTargetStreamByTargetAndStream(tIdOfSource, streamId);
+          const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, streamId);
 
           await project.getEnvVersioningByTarget(target).overrideStream(
             source,

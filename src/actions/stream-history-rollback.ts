@@ -20,17 +20,17 @@ export class StreamHistoryRollbackActionService extends EntityService implements
     const project = this.projectsService.get(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
       action.targets,
-      getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
+      getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets),
     );
 
     for (const tIdOfTarget of sourceTargetIds) {
-      const target = project.getTargetByTargetId(tIdOfTarget);
+      const target = project.getTargetByTarget(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)
         : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
       for (const streamId of streamIds) {
-        const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
+        const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, streamId);
 
         await project.getEnvVersioningByTarget(target).rollbackStream(
           targetStream,

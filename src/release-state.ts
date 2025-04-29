@@ -1,4 +1,6 @@
 import { IProjectTargetStreamDef } from './project';
+import {StreamState} from './stream-state';
+import * as _ from 'lodash';
 
 export interface IReleaseStateSection {
   id: string;
@@ -6,10 +8,10 @@ export interface IReleaseStateSection {
 
   description?: string;
 
-  changes: {
+  changelog: {
     streamId: IProjectTargetStreamDef['id'];
-    artifacts?: { id: string; type: string }[];
-    notes?: string[];
+    artifacts?: StreamState['history']['artifact'];
+    notes?: { id: string; text: string }[];
   }[];
   priority?: number;
 }
@@ -21,6 +23,10 @@ export class ReleaseState {
   sections: IReleaseStateSection[] = [];
 
   constructor(props: Partial<ReleaseState>) {
+    if (!props.sections) {
+      props.sections = [];
+    }
+
     Reflect.setPrototypeOf(props, ReleaseState.prototype);
 
     return props as ReleaseState;
@@ -30,8 +36,12 @@ export class ReleaseState {
     return this.sections.find((s) => s.id === id) ?? null;
   }
 
-  setSection(section: Partial<IReleaseStateSection>): this {
+  setSection(section: Partial<IReleaseStateSection>, onlyExisting?: boolean): this {
     const existingSection = this.getSection(section.id);
+
+    if (onlyExisting && !existingSection) {
+      return this;
+    }
 
     if (existingSection) {
       Object.assign(existingSection, section);
@@ -45,12 +55,12 @@ export class ReleaseState {
       if (index === -1) {
         this.sections.push({
           ...section,
-          changes: section.changes ?? [],
+          changelog: section.changelog ?? [],
         } as IReleaseStateSection);
       } else {
         this.sections.splice(index + 1, 0, {
           ...section,
-          changes: section.changes ?? [],
+          changelog: section.changelog ?? [],
         } as IReleaseStateSection);
       }
     }
@@ -60,18 +70,31 @@ export class ReleaseState {
 
   setSectionByStreamId(
     streamId: IProjectTargetStreamDef['id'],
-    artifacts?: IReleaseStateSection['changes'][0]['artifacts'],
-    notes?: IReleaseStateSection['changes'][0]['notes'],
+    artifacts?: IReleaseStateSection['changelog'][0]['artifacts'],
+    notes?: IReleaseStateSection['changelog'][0]['notes'],
+    onlyExisting?: boolean,
   ): this {
-    const existingSectionChange = this.getSection(`stream:${streamId}`)?.changes.find((c) => c.streamId === streamId);
+    const existingSection = this.getSection(`stream:${streamId}`);
+
+    if (onlyExisting && !existingSection) {
+      return this;
+    }
+
+    const existingSectionChangelog = existingSection?.changelog.find((c) => c.streamId === streamId);
 
     return this.setSection({
       id: `stream:${streamId}`,
-      changes: [
+      type: 'stream',
+
+      changelog: [
         {
           streamId,
-          artifacts: artifacts ?? existingSectionChange?.artifacts ?? [],
-          notes: notes ?? existingSectionChange?.notes ?? [],
+          artifacts: artifacts
+            ? _.unionBy(artifacts, existingSectionChangelog?.artifacts ?? [], 'id') ?? []
+            : existingSectionChangelog?.artifacts ?? [],
+          notes: notes
+            ? _.unionBy(notes, existingSectionChangelog?.notes ?? [], 'id') ?? []
+            : existingSectionChangelog?.notes ?? [],
         },
       ],
       priority: 1,

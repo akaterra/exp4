@@ -11,7 +11,7 @@ import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
 
 @Service()
 export class SqlStorageService extends EntityService implements IStorageService {
@@ -52,21 +52,6 @@ export class SqlStorageService extends EntityService implements IStorageService 
     }
 
     return manifests;
-  }
-
-  @Log('debug')
-  async releaseGet(target:IProjectTargetDef |  TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
-    const val = await this.varGetTarget(target, [ 'release', version ], null);
-
-    return val !== undefined ? new ReleaseState(val) : def;
-  }
-
-  @Log('debug')
-  async releaseSet(target: TargetState, version?: string): Promise<void> {
-    this.varSetTarget(target, [ 'release', version ], {
-      id: target.release.id,
-      sections: target.release.sections,
-    });
   }
 
   @Log('debug')

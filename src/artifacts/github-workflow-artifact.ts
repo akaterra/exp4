@@ -89,7 +89,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
       const zipEntry = zip.getEntries().find((entry) => entry.entryName === this.config?.file);
   
       if (zipEntry) {
-        entity.context.githubWorkflowArtifact = zip.readAsText(zipEntry);
+        entity.context.githubWorkflowArtifact = zip.readAsText(zipEntry).trim();
 
         if (this.config?.saveAs) {
           const artifact = {
@@ -113,7 +113,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
     return this.config?.integration
       ? this.projectsService
         .get(ref?.projectId)
-        .getEnvIntegraionByIntegrationId<GithubIntegrationService>(this.config?.integration, 'github')
+        .getEnvIntegraionByIntegration<GithubIntegrationService>(this.config?.integration, 'github')
       : this.projectsService
         .get(ref?.projectId)
         .getEnvIntegraionByTargetIdAndStreamId<GithubIntegrationService>(

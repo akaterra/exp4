@@ -51,7 +51,7 @@ export class ArtifactHolderService extends EntitiesServiceWithFactory<IArtifactS
     const context = entity.context ?? {};
 
     for (const artifactId of entity.artifacts) {
-      const artifact = project.getArtifactByArtifactId(artifactId);
+      const artifact = project.getArtifactByArtifact(artifactId);
 
       if (artifact.dependsOn?.length) {
         for (const artifactId of artifact.dependsOn) {
@@ -69,7 +69,7 @@ export class ArtifactHolderService extends EntitiesServiceWithFactory<IArtifactS
         }
       }
 
-      await project.getEnvArtifactByArtifactId(artifactId).run(
+      await project.getEnvArtifactByArtifact(artifactId).run(
         { ref: entity.ref, context },
         streamState,
         params,

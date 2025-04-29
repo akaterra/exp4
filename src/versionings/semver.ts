@@ -7,7 +7,8 @@ import { IStorageService } from '../storages';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
+import {TargetState} from '../target-state';
 
 export interface ISemverConfig {
   format?: string;
@@ -124,7 +125,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
   @Log('debug')
   async getCurrentStream(stream: IProjectTargetStreamDef, format?: false | string): Promise<string> {
-    const version = await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId)).varGetStream(
+    const version = await this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTarget(stream.ref.targetId)).varGetStream(
       stream,
       [ 'version', stream.ref.projectId, this.config?.namespace ?? stream.ref.targetId ],
       null,
@@ -144,7 +145,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   @Log('debug')
   async overrideStream(source: IProjectTargetDef, target: IProjectTargetStreamDef): Promise<string> {
     const sourceVersion = await this.projectsService.get(source.ref.projectId).getEnvVersioningByTarget(source).getCurrent(source, false) ?? '0.1.0';
-    const storage = this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTargetId(target.ref.targetId));
+    const storage = this.getStorage(this.projectsService.get(target.ref.projectId).getTargetByTarget(target.ref.targetId));
 
     await this.setStreamVersionHistory(target, storage, sourceVersion);
     await this.setStreamVersion(target, storage, sourceVersion);
@@ -155,7 +156,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   @Log('debug')
   async patchStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrentStream(stream, false);
-    const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
+    const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTarget(stream.ref.targetId));
 
     version = incVersion(version, params?.releaseName, 'patch');
 
@@ -168,7 +169,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   @Log('debug')
   async releaseStream(stream: IProjectTargetStreamDef, params?: Record<string, any>): Promise<string> {
     let version = await this.getCurrentStream(stream, false);
-    const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId));
+    const storage = this.getStorage(this.projectsService.get(stream.ref.projectId).getTargetByTarget(stream.ref.targetId));
 
     version = incVersion(version, params?.releaseName, 'minor');
 
@@ -180,7 +181,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
 
   @Log('debug')
   async rollbackStream(stream: IProjectTargetStreamDef): Promise<string> {
-    const target = this.projectsService.get(stream.ref.projectId).getTargetByTargetId(stream.ref.targetId);
+    const target = this.projectsService.get(stream.ref.projectId).getTargetByTarget(stream.ref.targetId);
     const targetVersion = await this.getCurrent(target, false);
     const storage = this.getStorage(target);
     const versionHistory = await storage.varGetStream<ISemverHistoryItem[]>(
@@ -215,7 +216,27 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   async getCurrentRelease(target: IProjectTargetDef): Promise<ReleaseState> {
-    return await this.getStorage(target).releaseGet(target, await this.getCurrent(target));
+    const storage = this.getStorage(target);
+    const targetVersion = await this.getCurrent(target, false);
+
+    return new ReleaseState(await storage.varGetTarget(
+      target,
+      [ 'release', target.ref.projectId, this.config?.namespace ?? target.id, targetVersion ],
+      null,
+      true,
+    ) ?? {});
+  }
+
+  async setCurrentRelease(targetState: TargetState): Promise<void> {
+    const storage = this.getStorage(targetState.target);
+    const targetVersion = await this.getCurrent(targetState.target, false);
+
+    await storage.varSetTarget(
+      targetState,
+      [ 'release', targetState.target.ref.projectId, this.config?.namespace ?? targetState.target.id, targetVersion ],
+      targetState.release,
+      true,
+    );
   }
 
   @Log('debug')

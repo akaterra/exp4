@@ -18,7 +18,7 @@ export class VersionOverrideActionService extends EntityService implements IActi
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets);
+    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets);
 
     for (let sIdOfSource of sourceTargetIds) {
       for (let tIdOfTarget of action.targets) {
@@ -29,8 +29,8 @@ export class VersionOverrideActionService extends EntityService implements IActi
           tIdOfTarget = tId;
         }
 
-        const source = project.getTargetByTargetId(sIdOfSource);
-        const target = project.getTargetByTargetId(tIdOfTarget);
+        const source = project.getTargetByTarget(sIdOfSource);
+        const target = project.getTargetByTarget(tIdOfTarget);
 
         await project.getEnvVersioningByTarget(target).override(source, target);
 

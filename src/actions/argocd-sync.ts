@@ -32,20 +32,20 @@ export class ArgocdSyncActionService extends EntityService implements IActionSer
     const projectState = await this.projectsService.getState(flow.ref.projectId);
     const sourceTargetIds = notEmptyArray(
       action.targets,
-      getPossibleTargetIds(targetsStreams, project.getFlowByFlowId(flow.ref.flowId).targets),
+      getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets),
     );
 
     for (const tIdOfTarget of sourceTargetIds) {
-      const target = project.getTargetByTargetId(tIdOfTarget);
+      const target = project.getTargetByTarget(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)
         : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
       for (const streamId of streamIds) {
-        const targetStream = project.getTargetStreamByTargetIdAndStreamId(tIdOfTarget, streamId);
+        const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, streamId);
         const context: Record<string, unknown> = {
           stream: targetStream,
-          streamState: projectState.targets?.[tIdOfTarget]?.streams?.[streamId],
+          streamState: projectState.targetsStates?.[tIdOfTarget]?.streams?.[streamId],
           target,
         };
 
@@ -57,7 +57,7 @@ export class ArgocdSyncActionService extends EntityService implements IActionSer
           return resolvePlaceholders(val, context);
         }
 
-        await project.getEnvIntegraionByIntegrationId<ArgocdIntegrationService>(
+        await project.getEnvIntegraionByIntegration<ArgocdIntegrationService>(
           rep(action.config?.integration ?? 'argocd'),
           'argocd',
         ).withContext(context).resourceSync(

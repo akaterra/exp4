@@ -6,7 +6,7 @@ import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
 import { IProjectManifest, IProjectTargetDef } from '../project';
 import { TargetState } from '../target-state';
-import { ReleaseState } from '../release';
+import { ReleaseState } from '../release-state';
 
 @Service()
 export class StubStorageService extends EntityService implements IStorageService {
@@ -15,16 +15,6 @@ export class StubStorageService extends EntityService implements IStorageService
   @Log('debug')
   async manifestsLoad(): Promise<Array<IGeneralManifest | IProjectManifest>> {
     return [];
-  }
-
-  @Log('debug')
-  async releaseGet(target: IProjectTargetDef | TargetState, version?: string, def?: ReleaseState): Promise<ReleaseState> {
-    return null;
-  }
-
-  @Log('debug')
-  async releaseSet(target: TargetState, version?: string): Promise<void> {
-    return null;
   }
 
   @Log('debug')

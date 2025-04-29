@@ -292,28 +292,26 @@ export class Project implements IProject {
     }
   }
 
-  getArtifactByArtifactId(artifactId: IProjectArtifact['id']): IProjectArtifact {
-    return this.artifacts[artifactId];
+  getArtifactByArtifact(mixed: IProjectArtifact['id'] | IProjectArtifact): IProjectArtifact {
+    return this.artifacts[typeof mixed === 'string' ? mixed : mixed.id];
   }
 
-  getFlowByFlowId(flowId: IProjectFlowDef['id']): IProjectFlowDef {
-    return this.flows[flowId];
+  getFlowByFlow(mixed: IProjectFlowDef['id'] | IProjectFlowDef): IProjectFlowDef {
+    return this.flows[typeof mixed === 'string' ? mixed : mixed.id];
   }
 
-  async getTargetStateByTargetId(targetId: IProjectTargetDef['id']): Promise<TargetState> {
-    const targetState = await this.env.targets.getState(this.getTargetByTargetId(targetId));
-
-    return targetState;
+  async getTargetStateByTarget(mixed: IProjectTargetDef['id'] | IProjectTargetDef): Promise<TargetState> {
+    return await this.env.targets.getState(this.getTargetByTarget(mixed));
   }
 
-  async getStreamStateByTargetIdAndStreamId(
-    targetId: IProjectTargetDef['id'],
-    streamId: IProjectTargetStreamDef['id'],
+  async getStreamStateByTargetAndStream(
+    targetMixed: IProjectTargetDef['id'] | IProjectTargetDef,
+    streamMixed: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef,
     scopes?: Record<string, boolean>,
     context?: IStreamStateContext,
   ) {
     const streamState = await this.env.streams.getState(
-      this.getTargetStreamByTargetIdAndStreamId(targetId as IProjectTargetDef['id'], streamId as IProjectTargetStreamDef['id']),
+      this.getTargetStreamByTargetAndStream(targetMixed, streamMixed),
       scopes,
       context,
     );
@@ -321,7 +319,8 @@ export class Project implements IProject {
     return streamState;
   }
 
-  getTargetByTargetId<S extends IProjectTargetDef = IProjectTargetDef>(id: string, unsafe?: boolean): S {
+  getTargetByTarget<S extends IProjectTargetDef = IProjectTargetDef>(mixed: IProjectTargetDef['id'] | IProjectTargetDef, unsafe?: boolean): S {
+    const id = typeof mixed === 'string' ? mixed : mixed.id;
     const target = this.targets[id] as S;
 
     if (!target) {
@@ -335,37 +334,39 @@ export class Project implements IProject {
     return target;
   }
 
-  getTargetByTargetStream(stream: IProjectTargetStreamDef) {
-    return this.getTargetByTargetId(stream.ref.targetId);
+  getTargetByTargetStream(mixed: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef) {
+    return this.getTargetByTarget(typeof mixed === 'string' ? mixed : mixed.ref.targetId);
   }
 
-  getTargetStreamByTargetIdAndStreamId<S extends IProjectTargetStreamDef = IProjectTargetStreamDef>(
-    targetId: IProjectTargetDef['id'],
-    streamId: IProjectTargetStreamDef['id'],
+  getTargetStreamByTargetAndStream<S extends IProjectTargetStreamDef = IProjectTargetStreamDef>(
+    targetMixed: IProjectTargetDef['id'] | IProjectTargetDef,
+    streamMixed: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef,
     unsafe?: boolean,
   ): S {
-    const stream = this.getTargetByTargetId(targetId).streams[streamId] as S;
+    const id = typeof streamMixed === 'string' ? streamMixed : streamMixed.id;
+    const stream = this.getTargetByTarget(targetMixed).streams[id] as S;
 
     if (!stream) {
       if (unsafe) {
         return null;
       }
 
-      throw new Error(`Project stream "${streamId}" not found`);
+      throw new Error(`Project stream "${id}" not found`);
     }
 
     return stream;
   }
 
-  getTargetVersioning(targetId: string, unsafe?: boolean): IProjectTargetDef['versioning'] {
-    const versioning = this.getTargetByTargetId(targetId).versioning;
+  getTargetVersioning(mixed: IProjectTargetDef['id'] | IProjectTargetDef, unsafe?: boolean): IProjectTargetDef['versioning'] {
+    const id = typeof mixed === 'string' ? mixed : mixed.id;
+    const versioning = this.getTargetByTarget(id).versioning;
 
     if (versioning === undefined) {
       if (unsafe) {
         return null;
       }
 
-      throw new Error(`Project target "${targetId}" versioning not found`);
+      throw new Error(`Project target "${id}" versioning not found`);
     }
 
     return versioning;
@@ -373,20 +374,20 @@ export class Project implements IProject {
 
   // helpers
 
-  getEnvArtifactByArtifactId(artifactId: IProjectArtifact['id'], assertType?: IProjectArtifact['type']) {
-    return this.env.artifacts.get(artifactId, assertType, true);
+  getEnvArtifactByArtifact(mixed: IProjectArtifact['id'] | IProjectArtifact, assertType?: IProjectArtifact['type']) {
+    return this.env.artifacts.get(typeof mixed === 'string' ? mixed : mixed.id, assertType, true);
   }
 
   getEnvActionByFlowActionStep(actionStep: IProjectActionDef) {
     return this.env.actions.get(actionStep.type);
   }
 
-  getEnvIntegraionByIntegrationId<T extends IIntegrationService>(integrationId: IProjectDef['id'], assertType?: IProjectTargetStreamDef['type']): T {
-    return this.env.integrations.get(integrationId, assertType) as T;
+  getEnvIntegraionByIntegration<T extends IIntegrationService>(mixed: IProjectDef['id'] | IProjectDef, assertType?: IProjectTargetStreamDef['type']): T {
+    return this.env.integrations.get(typeof mixed === 'string' ? mixed : mixed.id, assertType) as T;
   }
 
   getEnvIntegraionByTargetIdAndStreamId<T extends IIntegrationService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id'], assertType?: IProjectTargetStreamDef['type']): T {
-    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetIdAndStreamId<T>(targetId, streamId), assertType) as T;
+    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetAndStream<T>(targetId, streamId), assertType) as T;
   }
 
   getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']) {
@@ -402,7 +403,7 @@ export class Project implements IProject {
   }
 
   getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
-    return this.env.streams.get(stream.type, assertType) as T;
+    return this.env.streams.get(this.getTargetStreamByTargetAndStream(stream.ref?.targetId, stream.id).type, assertType) as T;
   }
 
   getEnvVersioningByVersioningId(versiningId: IProjectVersioning['id'], assertType?: IProjectVersioning['type']) {
@@ -410,11 +411,11 @@ export class Project implements IProject {
   }
 
   getEnvVersioningByTargetId(targetId: IProjectTargetDef['id'], assertType?: IProjectVersioning['type']) {
-    return this.getEnvVersioningByTarget(this.getTargetByTargetId(targetId), assertType);
+    return this.getEnvVersioningByTarget(this.getTargetByTarget(targetId), assertType);
   }
 
   getEnvVersioningByTarget(target: IProjectTargetDef, assertType?: IProjectVersioning['type']) {
-    return this.env.versionings.get(target.versioning, assertType);
+    return this.env.versionings.get(this.getTargetByTarget(target.id).versioning, assertType);
   }
 
   getEnvVersioningByTargetStream(stream: IProjectTargetStreamDef, assertType?: IProjectVersioning['type']) {
@@ -433,7 +434,7 @@ export class Project implements IProject {
     params?: Record<string, any>,
   ) {
     for (const [ , fId ] of iter(flowId)) {
-      const flow = this.getFlowByFlowId(fId);
+      const flow = this.getFlowByFlow(fId);
 
       if (!flow) {
         continue;
@@ -472,6 +473,16 @@ export class Project implements IProject {
     }
 
     return true;
+  }
+
+  async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
+    const target = typeof mixed === 'string'
+      ? this.getTargetByTarget(mixed)
+      : mixed;
+
+    await this
+      .getEnvVersioningByTargetId(target.id)
+      .setCurrentRelease(await this.getTargetStateByTarget(target.id));
   }
 
   toJSON() {

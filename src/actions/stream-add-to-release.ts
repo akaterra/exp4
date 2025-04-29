@@ -7,8 +7,8 @@ import { Autowired } from '../utils';
 import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
 
 @Service()
-export class DetachActionService extends EntityService implements IActionService {
-  static readonly type = 'detach';
+export class StreamAddToReleaseActionService extends EntityService implements IActionService {
+  static readonly type = 'stream:addToRelease';
 
   @Autowired() protected projectsService: ProjectsService;
 
@@ -25,23 +25,18 @@ export class DetachActionService extends EntityService implements IActionService
 
     for (const tIdOfTarget of sourceTargetIds) {
       const target = project.getTargetByTarget(tIdOfTarget);
+      const targetState = await project.getTargetStateByTarget(tIdOfTarget);
       const streamIds = targetsStreams?.[tIdOfTarget] === true
         ? Object.keys(target.streams)
         : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
       for (const streamId of streamIds) {
-        const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, streamId, true);
+        const targetStreamState = await project.getStreamStateByTargetAndStream(tIdOfTarget, streamId);
 
-        if (targetStream) {
-          await project.getEnvStreamByTargetStream(targetStream).streamDetach(
-            targetStream,
-          );
-
-          markDirty(targetStream);
-        }
+        targetState.setReleaseSectionByStreamId(streamId, targetStreamState.history.artifact);
       }
 
-      markDirty(target);
+      await project.updateTargetState(target);
     }
   }
 }
