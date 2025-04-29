@@ -52,7 +52,7 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
         .getEnvIntegraionByIntegration<ArgocdIntegrationService>(this.config?.integration, 'argocd')
       : this.projectsService
         .get(ref?.projectId)
-        .getEnvIntegraionByTargetIdAndStreamId<ArgocdIntegrationService>(
+        .getEnvIntegraionByTargetAndStream<ArgocdIntegrationService>(
           ref?.targetId,
           ref?.streamId,
           'argocd',

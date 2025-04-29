@@ -95,7 +95,7 @@ export class GitStreamService extends EntityService implements IStreamService {
       const branch = hasScope('change', scopes) ? await integration.branchGet(branchName) : null;
       const versioningService = await this.projectsService
         .get(stream.ref.projectId)
-        .getEnvVersioningByTargetId(stream.ref.targetId);
+        .getEnvVersioningByTargetStream(stream);
 
       const metadata = {
         // org: stream.config?.org ?? integration.config?.org,

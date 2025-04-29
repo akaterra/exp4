@@ -43,6 +43,11 @@ export interface IProjectArtifact<C extends Record<string, any> = Record<string,
   ref?: IProjectRef;
 }
 
+export interface IProjectNotification<T extends string = string> extends IProjectDef<unknown, T> {
+  namespace?: string;
+  integration?: string;
+}
+
 export interface IProjectVersioning<T extends string = string> extends IProjectDef<unknown, T> {
   namespace?: string;
   storage?: string;
@@ -85,7 +90,6 @@ export interface IProjectTargetStream<C extends Record<string, unknown>, T exten
   isDirty?: boolean;
 
   artifacts?: IProjectArtifact['id'][];
-  // actions?: Record<string, IProjectFlowActionDef>;
   tags?: string[];
   targets?: IProjectTargetDef['id'][];
 }
@@ -97,6 +101,22 @@ export interface IProjectTarget<C extends Record<string, unknown>> extends IProj
 
   artifacts?: IProjectArtifact['id'][];
   streams: Record<string, IProjectTargetStream<C>>;
+  notification?: IProjectNotification['id'];
+  release?: {
+    sections: {
+      id?: string;
+      type?: string;
+
+      changelog?: {
+        artifacts?: {
+          id?: string;
+          type?: string;
+
+          flowId?: IProjectFlowDef['id'];
+        }[];
+      };
+    }[];
+  };
   tags?: string[];
   versioning?: IProjectVersioning['id'];
 }
@@ -133,6 +153,7 @@ export interface IProjectManifest extends IProjectDef {
   definitions: Record<string, Record<string, unknown>>;
   flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDefInput>;
+  notifications?: Record<string, IProjectDefInput>;
   storages?: Record<string, IProjectDefInput>;
   targets: Record<string, IProjectTargetInput & { streams: Record<string, IProjectTargetStreamInput & { use?: string }> }>;
   versionings: Record<string, IProjectDefInput>;
@@ -286,6 +307,7 @@ export class Project implements IProject {
 
               return acc;
             }, {}),
+          release: targetDef.release,
           versioning: targetDef.versioning,
         };
       }
@@ -386,39 +408,35 @@ export class Project implements IProject {
     return this.env.integrations.get(typeof mixed === 'string' ? mixed : mixed.id, assertType) as T;
   }
 
-  getEnvIntegraionByTargetIdAndStreamId<T extends IIntegrationService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id'], assertType?: IProjectTargetStreamDef['type']): T {
-    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetAndStream<T>(targetId, streamId), assertType) as T;
+  getEnvIntegraionByTargetAndStream<T extends IIntegrationService>(mixedTarget: IProjectTargetDef['id'] | IProjectTargetDef, mixedStream: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
+    return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetAndStream<T>(mixedTarget, mixedStream), assertType) as T;
   }
 
   getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']) {
     return this.env.integrations.get(stream.config?.integration as string, assertType) as T;
   }
 
-  getEnvStorageByStorageId(storageId: IProjectTargetDef['id']) {
-    return this.env.storages.get(storageId);
+  getEnvStorageByStorageId(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
+    return this.env.storages.get(typeof mixed === 'string' ? mixed : mixed.id);
   }
 
-  getEnvStreamByTargetIdAndStreamId<T extends IStreamService>(targetId: IProjectTargetDef['id'], streamId: IProjectTargetStreamDef['id']): T {
-    return this.env.streams.get(this.targets[targetId]?.streams[streamId]?.type) as T;
+  getEnvStreamByTargetAndStream<T extends IStreamService>(mixedTarget: IProjectTargetDef['id'] | IProjectTargetDef, mixedStream: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef): T {
+    return this.env.streams.get(this.targets[typeof mixedTarget === 'string' ? mixedTarget : mixedTarget.id]?.streams[typeof mixedStream === 'string' ? mixedStream : mixedStream.id]?.type) as T;
   }
 
   getEnvStreamByTargetStream<T extends IStreamService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
     return this.env.streams.get(this.getTargetStreamByTargetAndStream(stream.ref?.targetId, stream.id).type, assertType) as T;
   }
 
-  getEnvVersioningByVersioningId(versiningId: IProjectVersioning['id'], assertType?: IProjectVersioning['type']) {
-    return this.env.versionings.get(versiningId, assertType);
+  getEnvVersioningByVersioning(mixed: IProjectVersioning['id'] | IProjectVersioning, assertType?: IProjectVersioning['type']) {
+    return this.env.versionings.get(typeof mixed === 'string' ? mixed : mixed.id, assertType);
   }
 
-  getEnvVersioningByTargetId(targetId: IProjectTargetDef['id'], assertType?: IProjectVersioning['type']) {
-    return this.getEnvVersioningByTarget(this.getTargetByTarget(targetId), assertType);
+  getEnvVersioningByTarget(target: IProjectTargetDef['id'] | IProjectTargetDef, assertType?: IProjectVersioning['type']) {
+    return this.env.versionings.get(this.getTargetByTarget(target).versioning, assertType);
   }
 
-  getEnvVersioningByTarget(target: IProjectTargetDef, assertType?: IProjectVersioning['type']) {
-    return this.env.versionings.get(this.getTargetByTarget(target.id).versioning, assertType);
-  }
-
-  getEnvVersioningByTargetStream(stream: IProjectTargetStreamDef, assertType?: IProjectVersioning['type']) {
+  getEnvVersioningByTargetStream(stream: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef, assertType?: IProjectVersioning['type']) {
     return this.env.versionings.get(this.getTargetByTargetStream(stream).versioning, assertType);
   }
 
@@ -481,7 +499,7 @@ export class Project implements IProject {
       : mixed;
 
     await this
-      .getEnvVersioningByTargetId(target.id)
+      .getEnvVersioningByTarget(target)
       .setCurrentRelease(await this.getTargetStateByTarget(target.id));
   }
 

@@ -18,13 +18,16 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
 
   @Log('debug') @IncStatistics()
   send(message: string | {
-    type: string;
-    block_id?: string;
-    text: {
-      type: 'text' | 'mrkdwn';
-      text: string;
-    };
-  }[], channel?: string): Promise<void> {
+    text: string;
+    blocks?: {
+      type: string;
+      block_id?: string;
+      text: {
+        type: 'text' | 'mrkdwn';
+        text: string;
+      };
+    }[];
+  }, channel?: string): Promise<void> {
     return request(this.config.webhookUrl, {
       text: message,
       channel: channel || '#general',

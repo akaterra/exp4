@@ -24,6 +24,7 @@ export class TargetHolderService {
     }
 
     entity.release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
+    entity.release.schema = target.release;
     entity.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 
     this.cache.set(key, entity);

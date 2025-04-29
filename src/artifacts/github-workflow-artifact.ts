@@ -116,7 +116,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
         .getEnvIntegraionByIntegration<GithubIntegrationService>(this.config?.integration, 'github')
       : this.projectsService
         .get(ref?.projectId)
-        .getEnvIntegraionByTargetIdAndStreamId<GithubIntegrationService>(
+        .getEnvIntegraionByTargetAndStream<GithubIntegrationService>(
           ref?.targetId,
           ref?.streamId,
           'github',

@@ -109,7 +109,7 @@ export class GitlabStreamService extends EntityService implements IStreamService
       const branch = hasScope('change', scopes) ? await integration.branchGet(branchName, stream.id) : null;
       const versioningService = await this.projectsService
         .get(stream.ref.projectId)
-        .getEnvVersioningByTargetId(stream.ref.targetId);
+        .getEnvVersioningByTargetStream(stream);
       // const workflowRuns = hasScope('action', scopes) && branch
       //   ? await integration.workflowRunsGet(stream.config.branch, stream.id)
       //   : null;

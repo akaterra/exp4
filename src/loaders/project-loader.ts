@@ -69,6 +69,7 @@ export async function createProject(
   resolveUse(manifest.definitions, manifest);
   resolveUse(manifest.flows, manifest);
   resolveUse(manifest.integrations, manifest);
+  resolveUse(manifest.notifications, manifest);
   resolveUse(manifest.storages, manifest);
   resolveUse(manifest.targets, manifest);
   resolveUse(manifest.versionings, manifest);
@@ -76,6 +77,7 @@ export async function createProject(
   const actionsService = manifest.env.actions;
   const artifactsService = manifest.env.artifacts;
   const integrationsService = manifest.env.integrations;
+  const notificationsService = manifest.env.notifications;
   const storagesService = manifest.env.storages;
   const streamsService = manifest.env.streams;
   const versioningsService = manifest.env.versionings;
@@ -83,6 +85,12 @@ export async function createProject(
   if (manifest.integrations) {
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
       integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
+    }
+  }
+
+  if (manifest.notifications) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.notifications)) {
+      notificationsService.add(notificationsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 
@@ -136,9 +144,17 @@ export async function createProject(
         if (!streamsService.has(streamDefConfig.type)) {
           streamsService.add(streamsService.getInstance(streamDefConfig.type, streamDefConfig.config), streamDefConfig.type);
         }
+
+        // if (streamDefConfig.notification) {
+        //   manifest.env.notifications.get(streamDefConfig.notification);
+        // }
       }
 
-      manifest.env.versionings.get(targetDefConfig.versioning);
+      if (targetDefConfig.notification) {
+        notificationsService.get(targetDefConfig.notification);
+      }
+
+      versioningsService.get(targetDefConfig.versioning);
     }
   }
 

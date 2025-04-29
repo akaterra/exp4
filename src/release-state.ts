@@ -1,4 +1,4 @@
-import { IProjectTargetStreamDef } from './project';
+import { IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import {StreamState} from './stream-state';
 import * as _ from 'lodash';
 
@@ -9,9 +9,17 @@ export interface IReleaseStateSection {
   description?: string;
 
   changelog: {
-    streamId: IProjectTargetStreamDef['id'];
-    artifacts?: StreamState['history']['artifact'];
+    streamId?: IProjectTargetStreamDef['id'];
     notes?: { id: string; text: string }[];
+
+    artifacts?: Array<Pick<
+      StreamState['history']['artifact'][number],
+      'id' | 'type' | 'description' | 'link' | 'status' | 'time'
+    > & { flowId?: IProjectTargetDef['release']['sections'][number]['changelog']['artifacts'][number]['flowId'] }>;
+    changes?: Pick<
+      StreamState['history']['change'][number],
+      'id' | 'type' | 'description' | 'link' | 'status' | 'time'
+    >[];
   }[];
   priority?: number;
 }
@@ -21,6 +29,7 @@ export class ReleaseState {
   type: string;
 
   sections: IReleaseStateSection[] = [];
+  schema: IProjectTargetDef['release'];
 
   constructor(props: Partial<ReleaseState>) {
     if (!props.sections) {
@@ -41,6 +50,37 @@ export class ReleaseState {
 
     if (onlyExisting && !existingSection) {
       return this;
+    }
+
+    const releaseSection = {
+      ...section,
+      changelog: section.changelog ?? [],
+    } as IReleaseStateSection;
+
+    if (this.schema) {
+      const schemaSection = this.schema.sections?.find((s) => s.id === section.id || s.type === section.type);
+
+      if (schemaSection?.changelog?.artifacts) {
+        for (const schemaArtifact of schemaSection.changelog.artifacts) {
+          for (const changelog of releaseSection.changelog) {
+            if (!changelog.artifacts) {
+              continue;
+            }
+
+            changelog.artifacts = changelog.artifacts.filter((artifact) => artifact.id === schemaArtifact.id || artifact.type === schemaArtifact.type).map((artifact) => ({
+              id: artifact.id,
+              type: artifact.type,
+
+              description: artifact.description,
+              link: artifact.link,
+              status: artifact.status,
+              time: artifact.time,
+
+              flowId: schemaArtifact.flowId,
+            }));
+          }
+        }
+      }
     }
 
     if (existingSection) {
@@ -99,5 +139,12 @@ export class ReleaseState {
       ],
       priority: 1,
     });
+  }
+
+  toJSON() {
+    return {
+      ...this,
+      schema: undefined,
+    };
   }
 }
