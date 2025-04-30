@@ -7,12 +7,14 @@ import { ProjectState } from './project-state';
 import { StatisticsService } from './statistics.service';
 import moment from 'moment-timezone';
 import { Log, logger } from './logger';
+import {TargetState} from './target-state';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => StatisticsService) protected statisticsService: StatisticsService;
 
   private statesCache = new AwaitedCache<ProjectState>();
+  private tasksContainer = new AwaitableContainer(2);
 
   get domain() {
     return 'Project';
@@ -73,21 +75,25 @@ export class ProjectsService extends EntitiesService<Project> {
 
     if (!isSyncing) {
       (async () => {
-        const streamContainer = new AwaitableContainer(2);
-
         let syncEntries;
 
         do {
           syncEntries = projectState.popTargetSync(100);
 
-          for (const [ tId, streamIds, scopes ] of syncEntries) {
-            projectState.setTargetState(tId, await project.getTargetStateByTarget(tId));
+          for (const [ tId, ] of syncEntries) {
+            this.tasksContainer.onGroup('streamState').async.push(async () => {
+              projectState.setTargetState(tId, await project.getTargetStateByTarget(tId));
+            });
+          }
 
+          await this.tasksContainer.onGroup('streamState').wait();
+
+          for (const [ tId, streamIds, scopes ] of syncEntries) {
             for (const sId of streamIds) {
               const stream = project.getTargetStreamByTargetAndStream(tId, sId, true);
 
               if (stream) {
-                await streamContainer.push(async () => {
+                this.tasksContainer.onGroup('streamState').async.push(async () => {
                   const streamState = await project.getStreamStateByTargetAndStream(tId, sId, scopes);
 
                   projectState.setTargetStreamState(tId, streamState);
@@ -102,7 +108,7 @@ export class ProjectsService extends EntitiesService<Project> {
             }
           }
 
-          await streamContainer.wait();
+          await this.tasksContainer.onGroup('streamState').wait();
         } while (syncEntries.length);
       })();
     }
@@ -115,6 +121,17 @@ export class ProjectsService extends EntitiesService<Project> {
     project.state = projectState;
 
     return projectState;
+  }
+
+  async updateTargetState(
+    targetState: TargetState,
+  ) {
+    this.tasksContainer.onGroup('targetState').async.push(async () => {
+      await this.get(targetState.target.ref.projectId)
+        .getEnvVersioningByTarget(targetState.target)
+        .setCurrentRelease(targetState);
+    });
+    await this.tasksContainer.onGroup('targetState').wait();
   }
 
   async runStatesResync() {

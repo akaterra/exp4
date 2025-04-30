@@ -28,10 +28,15 @@ export class ReleaseState {
   id: string;
   type: string;
 
+  metadata: Record<string, any>;
   sections: IReleaseStateSection[] = [];
   schema: IProjectTargetDef['release'];
 
   constructor(props: Partial<ReleaseState>) {
+    if (!props.metadata) {
+      props.metadata = {};
+    }
+
     if (!props.sections) {
       props.sections = [];
     }

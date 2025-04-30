@@ -343,7 +343,7 @@ export class Project implements IProject {
     return streamState;
   }
 
-  getTargetByTarget<S extends IProjectTargetDef = IProjectTargetDef>(mixed: IProjectTargetDef['id'] | IProjectTargetDef, unsafe?: boolean): S {
+  getTargetByTarget<S extends IProjectTargetDef = IProjectTargetDef>(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState, unsafe?: boolean): S {
     const id = typeof mixed === 'string' ? mixed : mixed.id;
     const target = this.targets[id] as S;
 
@@ -438,7 +438,7 @@ export class Project implements IProject {
     return this.env.versionings.get(typeof mixed === 'string' ? mixed : mixed.id, assertType);
   }
 
-  getEnvVersioningByTarget(target: IProjectTargetDef['id'] | IProjectTargetDef, assertType?: IProjectVersioning['type']) {
+  getEnvVersioningByTarget(target: IProjectTargetDef['id'] | IProjectTargetDef | TargetState, assertType?: IProjectVersioning['type']) {
     return this.env.versionings.get(this.getTargetByTarget(target).versioning, assertType);
   }
 
@@ -519,7 +519,7 @@ export class Project implements IProject {
 
     for (const event of events) {
       switch (event.type) {
-        case 'flow:run':
+        default:
           await this.flowRun(
             event.config?.flowId,
             targets,
@@ -543,7 +543,7 @@ export class Project implements IProject {
 
     for (const event of events) {
       switch (event.type) {
-        case 'flow:run':
+        default:
           await this.flowRun(
             event.config?.flowId,
             [ target.id ],
@@ -555,14 +555,12 @@ export class Project implements IProject {
     }
   }
 
-  async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
+  async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState) {
     const target = typeof mixed === 'string'
       ? this.getTargetByTarget(mixed)
       : mixed;
 
-    await this
-      .getEnvVersioningByTarget(target)
-      .setCurrentRelease(await this.getTargetStateByTarget(target.id));
+    await this.projectsService.updateTargetState(await this.getTargetStateByTarget(target.id));
   }
 
   toJSON() {

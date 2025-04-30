@@ -29,6 +29,7 @@ export class ReleaseNotifyActionService extends EntityService implements IAction
       await project
         .getEnvNotificationByNotification(action.config?.notification)
         .publishRelease(targetState);
+      await project.updateTargetState(targetState);
     }
   }
 }

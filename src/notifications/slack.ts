@@ -24,20 +24,13 @@ export class SlackNotificationService extends EntityService implements INotifica
         type: 'header',
         text: {
           type: 'plain_text',
-          text: `Release ${targetState.version}`,
+          text: `⭐ Release ${targetState.version}`,
         }
       } ],
     };
 
-    const blockArtifacts = {
-      components: [], artifactsIds: [], artifacts: [],
-    };
-    const blockComponents = {
-      components: [],
-    };
-    const blockDefault = {
-      text: [],
-    };
+    const blockArtifacts: { stream; artifacts: { id, value }[]; notes }[] = [];
+    const blockDefault: { notes }[] = [];
 
     for (const section of targetState.release.sections) {
       switch (section.type) {
@@ -45,79 +38,61 @@ export class SlackNotificationService extends EntityService implements INotifica
           for (const changelog of section.changelog) {
             const stream = project.getTargetStreamByTargetAndStream(targetState.id, changelog.streamId);
 
-            if (changelog.notes?.length) {
-              blockComponents.components.push([ stream.title, changelog.notes.map((v) => v.text) ]);
-            }
-
-            if (changelog.artifacts?.length) {
-              changelog.artifacts.forEach((artifact, i) => {
-                if (i === 0) {
-                  blockArtifacts.components.push(stream.title);
-                  blockArtifacts.artifactsIds.push(artifact.id);
-                  blockArtifacts.artifacts.push(artifact.description);
-                } else {
-                  blockArtifacts.components.push('');
-                  blockArtifacts.artifactsIds.push(artifact.id);
-                  blockArtifacts.artifacts.push(artifact.description);
-                }
-              });
-            }
+            blockArtifacts.push({
+              stream: stream.title,
+              artifacts: changelog.artifacts.map((artifact) => ({
+                id: artifact.id,
+                value: artifact.description,
+              })),
+              notes: changelog.notes,
+            });
           }
 
           break;
         }
         default:
           if (section.description) {
-            blockDefault.text.push(section.description);
+            blockDefault.push({ notes: [ section.description ] });
           }
       }
     }
 
-    if (blockDefault.text.length) {
+    if (blockDefault.length) {
       payload.blocks.push({
+        type: 'header',
+        text: { type: 'plain_text', text: 'Notes' },
+      }, {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: blockDefault.text.join('\n'),
+          text: blockDefault.map((section) => section.notes.map((note) => note.text)).flat().map((note, i) => `${i.toString().padEnd(2, ' ')}. ${note}`).join('\n'),
         }
       });
     }
 
-    if (blockComponents.components.length) {
+    if (blockArtifacts.length) {
       payload.blocks.push({
         type: 'header',
         text: { type: 'plain_text', text: 'Components' },
-      }, {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: blockComponents.components.map((component) => [ `*${component[0]}*`, ...component[1].map((v) => `- ${v}`) ]).flat().join('\n'),
-        }
-      });
-    }
-
-    if (blockArtifacts.components.length) {
-      payload.blocks.push({
-        type: 'header',
-        text: { type: 'plain_text', text: 'Artifacts' },
-      }, {
+      }, ...blockArtifacts.map((blockArtifact) => ({
         type: 'section',
         fields: [ {
           type: 'mrkdwn',
-          text: '*Component*\n' + blockArtifacts.components.join('\n'),
+          text: `*${blockArtifact.stream}*\n\n${blockArtifact.notes.map((note, i) => `${i.toString().padEnd(2, ' ')}. ${note.text}`).join('\n')}`,
         }, {
           type: 'mrkdwn',
-          text: '*Artifact ID*\n' + blockArtifacts.artifactsIds.join('\n'),
-        }, {
-          type: 'mrkdwn',
-          text: '*Artifact*\n' + blockArtifacts.artifacts.join('\n'),
+          text: blockArtifact.artifacts.map((artifact) => `> ${artifact.id}\n> _${artifact.value}_\n`).join('\n'),
         } ],
-      });
+      })));
     }
 
     console.log(JSON.stringify(payload,undefined,2));
 
-    await this.getIntegrationService(targetState).send(payload);
+    const metadata = await this.getIntegrationService(targetState).send(payload, targetState.release.metadata.messageId);
+
+    if (metadata?.messageId) {
+      targetState.release.metadata.messageId = metadata.messageId;
+    }
   }
 
   private getIntegrationService(targetState: TargetState) {

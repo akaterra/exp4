@@ -88,9 +88,7 @@ export class ProjectState {
     const oldTargetStream = this.ensureTarget(targetId).streams[streamState.id];
 
     if (oldTargetStream) {
-      for (const key of Object.keys(streamState)) {
-        oldTargetStream[key] = streamState[key];
-      }
+      Object.assign(oldTargetStream, streamState);
     } else {
       this.targetsStates[targetId].streams[streamState.id] = streamState instanceof StreamState
         ? streamState
