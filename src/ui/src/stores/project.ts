@@ -4,13 +4,14 @@ import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from '.
 import { ProjectsStore } from './projects';
 import { BaseStore } from './base-store';
 import { modalStore } from '../blocks/modal';
-import { ProjectRunActionModalContent, ProjectRunActionModalTitle } from '../blocks/project.run-action.modal';
+import { ProjectActionRunModalContent, ProjectActionRunModalTitle } from '../blocks/project.action.run.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target.stream.details-panel';
 import { processing, saveContent, saveTextAligned, splitFilterTokens } from './utils';
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 import { FormStore } from './form';
+import {ProjectTargetReleaseModalContent, ProjectTargetReleaseModalTitle} from '../blocks/project.target.release.modal';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -201,6 +202,11 @@ export class ProjectTargetStore extends BaseStore {
 
   @computed
   get targetState() {
+    return this.projectStore.projectTargetsStores?.[this.projectTargetState.id]?.projectTargetState;
+  }
+
+  @computed
+  get targetStateStore() {
     return this.projectStore.projectTargetsStores?.[this.projectTargetState.id];
   }
 
@@ -327,7 +333,25 @@ export class ProjectTargetStore extends BaseStore {
       selectedStreamIds = [ streamId ];
     }
 
-    yield this.projectStore.applyRunAction(this.target?.id, selectedStreamIds, flowId);
+    yield this.projectStore.applyActionRun(this.target?.id, selectedStreamIds, flowId);
+  }
+
+  @flow @processing
+  *applyRelease() {
+    const action = yield modalStore.show({
+      content: ProjectTargetReleaseModalContent,
+      props: {
+        // projectFlow: projectFlow,
+        // projectFlowParamsStore,
+        projectTargetStore: this,
+        // projectTargetStreams: Object
+        //   .values(this.getTargetByTargetId(targetId).streams)
+        //   .filter((stream) => selectedStreamIds.includes(stream.id)),
+      },
+      // onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.__validateAll() : true,
+      title: ProjectTargetReleaseModalTitle,
+      withClose: true,
+    });
   }
 
   @flow
@@ -374,8 +398,8 @@ export class ProjectStore extends BaseStore {
     mode: {
       target?: ProjectStoreMode;
     } = {
-        target: ProjectStoreMode.STREAMS,
-      };
+      target: ProjectStoreMode.STREAMS,
+    };
   @observable
     project: IProject;
   @observable
@@ -459,7 +483,7 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyRunAction(targetId: string, streamId: string | string[] | null, flowId?: string) {
+  *applyActionRun(targetId: string, streamId: string | string[] | null, flowId?: string) {
     let selectedStreamIds: IProjectTargetStream['id'][];
 
     if (streamId) {
@@ -480,7 +504,7 @@ export class ProjectStore extends BaseStore {
       projectFlow,
     );
     const action = yield modalStore.show({
-      content: ProjectRunActionModalContent,
+      content: ProjectActionRunModalContent,
       props: {
         projectFlow: projectFlow,
         projectFlowParamsStore,
@@ -490,7 +514,7 @@ export class ProjectStore extends BaseStore {
           .filter((stream) => selectedStreamIds.includes(stream.id)),
       },
       onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.__validateAll() : true,
-      title: ProjectRunActionModalTitle,
+      title: ProjectActionRunModalTitle,
       withClose: true,
     });
 

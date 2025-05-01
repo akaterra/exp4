@@ -2,10 +2,10 @@ import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectStoreMode } from '../stores/project';
 import { CheckboxControl, Input } from '../atoms/input';
-import { ProjectTargetsStreams } from './project.targets.streams';
-import { ProjectTargetsArtifacts } from './project.targets.artifacts';
+import { ProjectTargetsStreams } from './project.target.stream';
+import { ProjectTargetsArtifacts } from './project.target.artifact';
 import { FICTIVE } from '../atoms/utils';
-import { ProjectTargetsActionsAndChanges } from './project.targets.actions-and-changes';
+import { ProjectTargetsActionsAndChanges } from './project.target.action-and-change';
 import { SubTitle, Title } from '../atoms/title';
 import { Tabs } from '../atoms/tabs';
 

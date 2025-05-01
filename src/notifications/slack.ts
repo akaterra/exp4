@@ -36,7 +36,7 @@ export class SlackNotificationService extends EntityService implements INotifica
       switch (section.type) {
         case 'stream': {
           for (const changelog of section.changelog) {
-            const stream = project.getTargetStreamByTargetAndStream(targetState.id, changelog.streamId);
+            const stream = project.getTargetStreamByTargetAndStream(targetState.id, changelog.id);
 
             blockArtifacts.push({
               stream: stream.title,

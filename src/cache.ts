@@ -92,3 +92,27 @@ export class AwaitedCache<T = any, K = string> {
     return this;
   }
 }
+
+export class Mutex {
+  private locks = new Map<string, Promise<void>>();
+
+  async acquire(id: string): Promise<() => void> {
+    if (this.locks.has(id)) {
+      await this.locks.get(id);
+    }
+
+    let release: () => void;
+
+    const lock = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    this.locks.set(id, lock);
+
+    lock.then(() => {
+      this.locks.delete(id);
+    });
+
+    return release!;
+  }
+}

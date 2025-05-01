@@ -2,8 +2,8 @@ import { Status } from '../../enums/status';
 import { IProject, IProjectTarget, IProjectTargetStream } from './project';
 
 export interface IStreamHistoryStep {
-  id: string;
-  type: string;
+  id: IProjectTargetStream['id'];
+  type: IProjectTargetStream['type'];
 
   description: string;
   link: string;
@@ -57,11 +57,11 @@ export interface IProjectTargetStreamState {
       time: string;
     }[];
   };
-  isSyncing: boolean;
   link: string;
   metadata: Record<string, unknown>;
   version: string;
-
+  
+  isSyncing: boolean;
   ver: number;
 
   _artifactsLabel: 'default' | 'failure' | 'success' | 'warning';
@@ -71,15 +71,40 @@ export interface IProjectTargetStreamState {
   _search: Set<string>;
 }
 
+export type IReleaseStateSection {
+  id: IProjectTarget['id'];
+  type: IProjectTarget['type'];
+
+  description?: string;
+
+  changelog: {
+    id?: IProjectTarget['id'];
+    notes?: { id: string; text: string }[];
+
+    artifacts?: Pick<
+      IProjectTargetStreamState['history']['artifact'][number],
+      'id' | 'type' | 'description' | 'link' | 'status' | 'time'
+    >[];
+    changes?: Pick<
+      IProjectTargetStreamState['history']['change'][number],
+      'id' | 'type' | 'description' | 'link' | 'status' | 'time'
+    >[];
+  }[];
+  level?: number;
+}
+
 export type IProjectTargetState = {
   id: IProjectTarget['id'];
   type: IProjectTarget['type'];
 
   ref: IProjectTarget['ref'];
 
-  isSyncing: boolean;
+  release: IReleaseStateSection;
   streams: Record<string, IProjectTargetStreamState>;
   version: string;
+
+  isSyncing: boolean;
+  ver: number;
 };
 
 export type IProjectState = {

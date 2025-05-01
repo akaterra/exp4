@@ -98,7 +98,7 @@ export const ProjectTargetActionsAndChanges = observer(({ projectTarget, key }: 
             { projectTarget.target?.title ?? projectTarget.target?.id }
           </a>
           &nbsp;
-          <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
+          <span className='font-sml sup'>{projectTarget.targetStateStore?.projectTargetState?.version}</span>
         </SubTitle>
       </div>
       <Button className='button-sml default transparent w-auto' disabled={ !isShown || !hasActionsOrChanges } x={null} onClick={ () => projectTarget.applyActionsAndChangesDownload() }><i className="fa-solid fa-file-arrow-down fa-lg"></i></Button>

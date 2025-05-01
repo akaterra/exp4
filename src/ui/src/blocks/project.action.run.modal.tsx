@@ -5,7 +5,7 @@ import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
 import { FormInput, FormSelect } from './form';
 
-export const ProjectRunActionModalTitle = ({
+export const ProjectActionRunModalTitle = ({
   // store,
   projectFlow,
   // projectFlowActionParamsStore,
@@ -28,7 +28,7 @@ export const ProjectRunActionModalTitle = ({
   </div>;
 };
 
-export const ProjectRunActionModalContent = ({
+export const ProjectActionRunModalContent = ({
   // store,
   projectFlow,
   projectFlowParamsStore,
@@ -78,7 +78,7 @@ export const ProjectRunActionModalContent = ({
   }
 
   return <React.Fragment>
-    <div className='flex flex-ver paragraph paragraph children-gap'>
+    <div className='flex flex-ver paragraph children-gap'>
       <div>
           Are you sure to run flow <span className='bold'>"{ projectFlow?.title ?? projectFlow?.id }"</span> for
         <ul>

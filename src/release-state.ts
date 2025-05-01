@@ -1,5 +1,5 @@
-import { IProjectTargetDef, IProjectTargetStreamDef } from './project';
-import {StreamState} from './stream-state';
+import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { StreamState } from './stream-state';
 import * as _ from 'lodash';
 
 export interface IReleaseStateSection {
@@ -9,19 +9,19 @@ export interface IReleaseStateSection {
   description?: string;
 
   changelog: {
-    streamId?: IProjectTargetStreamDef['id'];
+    id?: IProjectDef['id'];
     notes?: { id: string; text: string }[];
 
-    artifacts?: Array<Pick<
+    artifacts?: Pick<
       StreamState['history']['artifact'][number],
       'id' | 'type' | 'description' | 'link' | 'status' | 'time'
-    >>;
+    >[];
     changes?: Pick<
       StreamState['history']['change'][number],
       'id' | 'type' | 'description' | 'link' | 'status' | 'time'
     >[];
   }[];
-  priority?: number;
+  level?: number;
 }
 
 export class ReleaseState {
@@ -89,11 +89,11 @@ export class ReleaseState {
     if (existingSection) {
       Object.assign(existingSection, section);
     } else {
-      if (section.priority === undefined) {
-        section.priority = Infinity;
+      if (section.level === undefined) {
+        section.level = Infinity;
       }
 
-      const index = this.sections.findLastIndex((s) => s.priority <= section.priority);
+      const index = this.sections.findLastIndex((s) => s.level <= section.level);
 
       if (index === -1) {
         this.sections.push({
@@ -123,7 +123,7 @@ export class ReleaseState {
       return this;
     }
 
-    const existingSectionChangelog = existingSection?.changelog.find((c) => c.streamId === streamId);
+    const existingSectionChangelog = existingSection?.changelog.find((c) => c.id === streamId);
 
     return this.setSection({
       id: `stream:${streamId}`,
@@ -131,7 +131,7 @@ export class ReleaseState {
 
       changelog: [
         {
-          streamId,
+          id: streamId,
           artifacts: artifacts
             ? _.unionBy(artifacts, existingSectionChangelog?.artifacts ?? [], 'id') ?? []
             : existingSectionChangelog?.artifacts ?? [],
@@ -140,7 +140,7 @@ export class ReleaseState {
             : existingSectionChangelog?.notes ?? [],
         },
       ],
-      priority: 1,
+      level: 1,
     });
   }
 

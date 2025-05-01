@@ -62,9 +62,14 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
             { projectTarget.target?.title ?? projectTarget.target?.id }
           </a>
           &nbsp;
-          <span className='font-sml sup'>{projectTarget.targetState?.projectTargetState?.version}</span>
+          <span className='font-sml sup'>{projectTarget.targetStateStore?.projectTargetState?.version}</span>
         </SubTitle>
       </div>
+      {
+        projectTarget.target?.versioning
+          ? <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.applyRelease() }><i className="fa-solid fa-pen fa-lg"></i></Button>
+          : null
+      }
       <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.fetchStateForMaybeSelectedStreamIds() }><i className="fa-solid fa-arrow-rotate-right fa-rotate-270 fa-lg"></i></Button>
     </div>
     { ContentElement }

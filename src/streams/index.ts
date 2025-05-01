@@ -3,7 +3,7 @@ import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { TargetState } from '../target-state';
 import { IService } from '../entities.service';
 import { Service } from 'typedi';
-import { AwaitedCache } from '../cache';
+import { AwaitedCache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { EntitiesServiceWithFactory } from '../entities.service';
 import { Autowired } from '../utils';
@@ -36,6 +36,7 @@ export interface IStreamService extends IService {
 export class StreamHolderService extends EntitiesServiceWithFactory<IStreamService> {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
   protected cache = new AwaitedCache<StreamState>();
+  protected mutex = new Mutex();
 
   get domain() {
     return 'Stream';
@@ -46,41 +47,47 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
 
     const project = this.projectsService.get(stream.ref?.projectId);
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
-    const entity = stream.isDirty || scopes
-      ? await this.get(stream.type).streamGetState(stream, scopes, context)
-      : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream, scopes, context);
+    const release = await this.mutex.acquire(key);
 
-    if (!entity) {
-      return null;
-    }
+    try {
+      const entity = stream.isDirty || scopes
+        ? await this.get(stream.type).streamGetState(stream, scopes, context)
+        : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream, scopes, context);
 
-    entity.stream = stream;
-
-    if (context.artifact) {
-      try {
-        entity.isSyncing = true;
-
-        await project.env.artifacts.run(
-          { artifacts: stream.artifacts, ref: stream.ref },
-          entity,
-          context.artifact,
-          scopes,
-        );
-      } catch (err) {
-        logError(err, 'StreamsService.getState', { ref: stream.ref, scopes });
-      } finally {
-        entity.isSyncing = false;
+      if (!entity) {
+        return null;
       }
+
+      entity.stream = stream;
+
+      if (context.artifact) {
+        try {
+          entity.isSyncing = true;
+
+          await project.env.artifacts.run(
+            { artifacts: stream.artifacts, ref: stream.ref },
+            entity,
+            context.artifact,
+            scopes,
+          );
+        } catch (err) {
+          logError(err, 'StreamsService.getState', { ref: stream.ref, scopes });
+        } finally {
+          entity.isSyncing = false;
+        }
+      }
+
+      entity.version = entity.version ?? await project
+        .getEnvVersioningByTargetStream(stream)
+        .getCurrent(project.getTargetByTargetStream(stream));
+
+      stream.isDirty = false;
+
+      this.cache.set(key, entity);
+
+      return entity;
+    } finally {
+      release();
     }
-
-    entity.version = entity.version ?? await project
-      .getEnvVersioningByTargetStream(stream)
-      .getCurrent(project.getTargetByTargetStream(stream));
-
-    stream.isDirty = false;
-
-    this.cache.set(key, entity);
-
-    return entity;
   }
 }
