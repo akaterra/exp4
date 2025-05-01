@@ -15,7 +15,7 @@ export interface IReleaseStateSection {
     artifacts?: Array<Pick<
       StreamState['history']['artifact'][number],
       'id' | 'type' | 'description' | 'link' | 'status' | 'time'
-    > & { flowId?: IProjectTargetDef['release']['sections'][number]['changelog']['artifacts'][number]['flowId'] }>;
+    >>;
     changes?: Pick<
       StreamState['history']['change'][number],
       'id' | 'type' | 'description' | 'link' | 'status' | 'time'
@@ -72,7 +72,7 @@ export class ReleaseState {
               continue;
             }
 
-            changelog.artifacts = changelog.artifacts.filter((artifact) => artifact.id === schemaArtifact.id || artifact.type === schemaArtifact.type).map((artifact) => ({
+            changelog.artifacts = changelog.artifacts.filter((artifact) => artifact.id === schemaArtifact).map((artifact) => ({
               id: artifact.id,
               type: artifact.type,
 
@@ -80,8 +80,6 @@ export class ReleaseState {
               link: artifact.link,
               status: artifact.status,
               time: artifact.time,
-
-              flowId: schemaArtifact.flowId,
             }));
           }
         }

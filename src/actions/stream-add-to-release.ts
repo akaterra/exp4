@@ -18,25 +18,30 @@ export class StreamAddToReleaseActionService extends EntityService implements IA
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
-      action.targets,
-      getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets),
-    );
+    const sourceTargetIds = getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets);
 
-    for (const tIdOfTarget of sourceTargetIds) {
-      const target = project.getTargetByTarget(tIdOfTarget);
-      const targetState = await project.getTargetStateByTarget(tIdOfTarget);
-      const streamIds = targetsStreams?.[tIdOfTarget] === true
-        ? Object.keys(target.streams)
-        : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
+    for (let tIdOfSource of sourceTargetIds) {
+      for (let tIdOfTarget of action.targets) {
+        const [ sId, tId ] = tIdOfTarget.split(':');
 
-      for (const streamId of streamIds) {
-        const targetStreamState = await project.getStreamStateByTargetAndStream(tIdOfTarget, streamId);
+        if (tId) {
+          tIdOfSource = sId;
+          tIdOfTarget = tId;
+        }
 
-        targetState.setReleaseSectionByStreamId(streamId, targetStreamState.history.artifact);
+        const target = project.getTargetByTarget(tIdOfTarget);
+        const streamIds = targetsStreams?.[tIdOfSource] === true
+          ? Object.keys(target.streams)
+          : targetsStreams?.[tIdOfSource] as string[] ?? Object.keys(target.streams);
+        const targetState = await project.getTargetStateByTarget(tIdOfTarget);
+
+        for (const streamId of streamIds) {
+          const targetStreamState = await project.getStreamStateByTargetAndStream(tIdOfTarget, streamId);
+          targetState.setReleaseSectionByStreamId(streamId, targetStreamState.history.artifact);
+        }
+
+        await project.updateTargetState(target);
       }
-
-      await project.updateTargetState(target);
     }
   }
 }

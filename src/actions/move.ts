@@ -32,7 +32,6 @@ export class MoveActionService extends EntityService implements IActionService {
           tIdOfTarget = tId;
         }
 
-        project.getTargetByTarget(tIdOfSource);
         const target = project.getTargetByTarget(tIdOfTarget);
         const streamIds = targetsStreams?.[tIdOfSource] === true
           ? Object.keys(target.streams)

@@ -103,13 +103,9 @@ export interface IProjectTarget<C extends Record<string, unknown>> extends IProj
       type?: string;
 
       changelog?: {
-        artifacts?: {
-          id?: string;
-          type?: string;
-
-          flowId?: IProjectFlowDef['id'];
-        }[];
+        artifacts?: IProjectArtifact['id'][];
       };
+      flows?: IProjectFlowDef['id'][];
     }[];
   };
   tags?: string[];

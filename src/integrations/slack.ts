@@ -8,6 +8,7 @@ import {maybeReplaceEnvVars} from './utils';
 export interface ISlackConfig {
   oauthToken?: string;
   channelId?: string;
+  channelMessageId?: string;
   webhookUrl?: string;
 }
 
@@ -22,6 +23,7 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
       ...this.config,
       oauthToken: maybeReplaceEnvVars(this.config.oauthToken) || process.env.SLACK_OAUTH_TOKEN,
       channelId: maybeReplaceEnvVars(this.config.channelId) || process.env.SLACK_CHANNEL_ID,
+      channelMessageId: maybeReplaceEnvVars(this.config.channelMessageId) || process.env.SLACK_CHANNEL_MESSAGE_ID,
       webhookUrl: maybeReplaceEnvVars(this.config.webhookUrl) || process.env.SLACK_WEBHOOK_URL,
     };
   }
@@ -41,6 +43,10 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
     },
     messageId?: string,
   ): Promise<{ messageId?: string }> {
+    if (!messageId) {
+      messageId = this.config.channelMessageId;
+    }
+
     if (this.config.oauthToken) {
       return request(messageId ? 'https://slack.com/api/chat.update' : 'https://slack.com/api/chat.postMessage', typeof message === 'string' ? {
         channel: this.config.channelId, ts: messageId,
@@ -48,7 +54,9 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
       } : {
         channel: this.config.channelId, ts: messageId,
         ...message,
-      }, 'post', this.config.oauthToken).then((res) => ({ messageId: res.ts }));
+      }, 'post', this.config.oauthToken).then((res) => {
+        return { messageId: res.ts };
+      });
     }
 
     if (this.config.webhookUrl) {
@@ -58,7 +66,9 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
       } : {
         channel: this.config.channelId,
         ...message,
-      }, 'post').then(() => ({ messageId: null }));
+      }, 'post').then(() => {
+        return { messageId: null };
+      });
     }
   }
 }
