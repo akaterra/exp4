@@ -71,7 +71,7 @@ export interface IProjectTargetStreamState {
   _search: Set<string>;
 }
 
-export type IReleaseStateSection {
+export type IReleaseStateSection = {
   id: IProjectTarget['id'];
   type: IProjectTarget['type'];
 
@@ -90,6 +90,7 @@ export type IReleaseStateSection {
       'id' | 'type' | 'description' | 'link' | 'status' | 'time'
     >[];
   }[];
+  flows?: IProject['id'][];
   level?: number;
 }
 
@@ -99,7 +100,7 @@ export type IProjectTargetState = {
 
   ref: IProjectTarget['ref'];
 
-  release: IReleaseStateSection;
+  release: { sections: IReleaseStateSection[] };
   streams: Record<string, IProjectTargetStreamState>;
   version: string;
 

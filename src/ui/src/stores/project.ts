@@ -338,20 +338,7 @@ export class ProjectTargetStore extends BaseStore {
 
   @flow @processing
   *applyRelease() {
-    const action = yield modalStore.show({
-      content: ProjectTargetReleaseModalContent,
-      props: {
-        // projectFlow: projectFlow,
-        // projectFlowParamsStore,
-        projectTargetStore: this,
-        // projectTargetStreams: Object
-        //   .values(this.getTargetByTargetId(targetId).streams)
-        //   .filter((stream) => selectedStreamIds.includes(stream.id)),
-      },
-      // onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.__validateAll() : true,
-      title: ProjectTargetReleaseModalTitle,
-      withClose: true,
-    });
+    yield this.projectStore.applyRelease(this.target?.id);
   }
 
   @flow
@@ -374,6 +361,72 @@ export class ProjectTargetStore extends BaseStore {
     }
 
     return this;
+  }
+}
+
+export class ProjectTargetReleaseParamsStore extends FormStore {
+  declare notes: string[];
+  declare streams: {
+    id: string;
+    description: string;
+  }[];
+  declare flows: {
+    notes: string[];
+    flows: string[];
+  }[];
+
+  constructor(public projectsStore: ProjectsStore, public projectTarget: IProjectTarget) {
+    const release = projectsStore.getStoreById(projectTarget.ref.projectId)?.getTargetStoreByTargetId(projectTarget.id)?.targetState?.release;
+
+    const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => section.description);
+    const streamsIv = release.sections?.filter((section) => section.type === 'stream').map((section) => ({
+      id: section.id.slice(7),
+      description: section.description,
+    })) ?? [];
+    const flowsIv = release.sections?.filter((section) => section.type === 'flow').map((section) => ({
+      notes: section.description,
+      flows: section.flows ?? [],
+    })) ?? [];
+
+    super({
+      notes: {
+        constraints: { maxLength: 1000 },
+        type: 'string',
+        initialValue: notesIv.length ? notesIv : [ '' ],
+      },
+      streams: {
+        constraints: { maxLength: 1000 },
+        type: {
+          id: {
+            constraints: {},
+            type: 'const',
+            initialValue: null,
+          },
+          description: {
+            constraints: { maxLength: 1000 },
+            type: 'string',
+            initialValue: null,
+          },
+        },
+        initialValue: streamsIv,
+      },
+      flows: {
+        constraints: { maxLength: 1000 },
+        type: {
+          notes: {
+            constraints: { maxLength: 1000 },
+            type: 'string',
+            initialValue: null,
+          },
+          flows: {
+            constraints: {},
+            type: 'string',
+            initialValue: [],
+          },
+        },
+        initialValue: flowsIv,
+      },
+    });
   }
 }
 
@@ -534,6 +587,27 @@ export class ProjectStore extends BaseStore {
 
       break;
     }
+  }
+
+  @flow @processing
+  *applyRelease(targetId: string) {
+    const projectTargetReleaseParamsStore = new ProjectTargetReleaseParamsStore(
+      this.projectsStore,
+      this.getTargetByTargetId(targetId),
+    );
+
+    const action = yield modalStore.show({
+      content: ProjectTargetReleaseModalContent,
+      props: {
+        projectTargetReleaseParamsStore,
+        projectTargetStore: this.getTargetStoreByTargetId(targetId),
+      },
+      onBeforeSelect: (action) => action === 'ok' ? projectTargetReleaseParamsStore.__validateAll() : true,
+      title: ProjectTargetReleaseModalTitle,
+      withClose: true,
+    });
+
+    console.log(action, JSON.parse(JSON.stringify(projectTargetReleaseParamsStore.getState())));
   }
 }
 

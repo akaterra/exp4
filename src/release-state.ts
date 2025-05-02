@@ -1,4 +1,4 @@
-import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectFlow, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { StreamState } from './stream-state';
 import * as _ from 'lodash';
 
@@ -21,6 +21,7 @@ export interface IReleaseStateSection {
       'id' | 'type' | 'description' | 'link' | 'status' | 'time'
     >[];
   }[];
+  flows?: IProjectFlowDef['id'][];
   level?: number;
 }
 

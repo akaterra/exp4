@@ -43,10 +43,10 @@ export const ProjectActionRunModalContent = ({
 }) => {
   let ParamsElements: React.ReactElement[] | null = null;
 
-  if (projectFlowParamsStore?.projectFlow?.params) {
+  if (projectFlowParamsStore?.__schema) {
     ParamsElements = [];
 
-    for (const [ key, param ] of Object.entries(projectFlowParamsStore?.projectFlow?.params)) {
+    for (const [ key, param ] of Object.entries(projectFlowParamsStore.__schema)) {
       switch (param.type) {
       case 'enum':
         ParamsElements.push(<div>
@@ -92,5 +92,5 @@ export const ProjectActionRunModalContent = ({
         ParamsElements
       }
     </div>
-  </React.Fragment>
+  </React.Fragment>;
 };

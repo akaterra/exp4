@@ -38,6 +38,10 @@ export class ProjectsStore extends BaseStore {
     return this.projects?.[id];
   }
 
+  getStoreById(id) {
+    return this.projectsStores?.[id];
+  }
+
   @flow @processing
   *fetch() {
     const res: Record<string, IProject> = yield this.service.list();

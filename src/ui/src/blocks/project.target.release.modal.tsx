@@ -1,26 +1,21 @@
 import * as React from 'react';
 import { IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { ProjectFlowParamsStore, ProjectTargetStore } from '../stores/project';
+import { ProjectFlowParamsStore, ProjectTargetReleaseParamsStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
-import { Title } from '../atoms/title';
-import { FormInput, FormSelect } from './form';
+import { SubSubTitle, SubTitle, Title } from '../atoms/title';
+import { FormInput, FormSelect, FormTextInput } from './form';
+import {Tabs} from '../atoms/tabs';
 
 export const ProjectTargetReleaseModalTitle = ({
-  // store,
-  // projectFlow,
-  // projectFlowActionParamsStore,
+  projectTargetReleaseParamsStore,
   projectTargetStore,
-  // projectTargetStreams,
 }: {
-  // store: ModalStore;
-  // projectFlow?: IProjectFlow;
-  // projectFlowActionParamsStore?: ProjectFlowActionParamsStore;
+  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
-  // projectTargetStreams?: IProjectTargetStream[];
 }) => {
   return <div>
     <Title>
-      { projectTargetStore.target.title ?? projectTargetStore.target.title }&nbsp;
+      { projectTargetStore.target.title ?? projectTargetStore.target.id }&nbsp;
       <span className='font-sml sup'>{projectTargetStore.targetState.version}</span>
     </Title>
     {
@@ -32,69 +27,59 @@ export const ProjectTargetReleaseModalTitle = ({
 };
 
 export const ProjectTargetReleaseModalContent = ({
-  // store,
-  projectFlow,
-  projectFlowParamsStore,
-  projectTarget,
-  projectTargetStreams,
+  projectTargetReleaseParamsStore,
+  projectTargetStore,
 }: {
-  // store: ModalStore;
-  projectFlow?: IProjectFlow;
-  projectFlowParamsStore?: ProjectFlowParamsStore;
-  projectTarget?: IProjectTarget;
-  projectTargetStreams?: IProjectTargetStream[];
+  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
+  projectTargetStore?: ProjectTargetStore;
 }) => {
-  // let ParamsElements: React.ReactElement[] | null = null;
+  let ParamsElements: React.ReactElement[] | null = null;
 
-  // if (projectFlowParamsStore?.projectFlow?.params) {
-  //   ParamsElements = [];
+  if (projectTargetReleaseParamsStore?.__schema) {
+    ParamsElements = [];
 
-  //   for (const [ key, param ] of Object.entries(projectFlowParamsStore?.projectFlow?.params)) {
-  //     switch (param.type) {
-  //     case 'enum':
-  //       ParamsElements.push(<div>
-  //         <FormSelect
-  //           store={ projectFlowParamsStore }
-  //           items={ param.constraints?.enum ?? [] }
-  //           id={ key }
-  //           label={ param.title ?? key }
-  //           x={ null }
-  //         />
-  //       </div>);
+    ParamsElements.push(<SubSubTitle>Notes</SubSubTitle>);
 
-  //       break;
+    projectTargetReleaseParamsStore.notes.forEach((note, i) => {
+      ParamsElements.push(<div>
+        <FormTextInput
+          store={ projectTargetReleaseParamsStore }
+          id={ `notes.${i}` }
+          label={ null }
+          x={ null }
+        />
+      </div>);
+    });
 
-  //     case 'string':
-  //     case 'value':
-  //       ParamsElements.push(<div>
-  //         <FormInput
-  //           store={ projectFlowParamsStore }
-  //           id={ key }
-  //           label={ param.title ?? key }
-  //           x={ null }
-  //         />
-  //       </div>);
+    ParamsElements.push(<SubSubTitle>Components</SubSubTitle>);
 
-  //       break;
-  //     }
-  //   }
-  // }
+    const tabs = projectTargetReleaseParamsStore.streams.map((stream, i) => ({
+      id: String(i),
+      title: projectTargetStore.target.streams[stream.id].title ?? stream.id,
+    }));
+    const tabsContents = projectTargetReleaseParamsStore.streams.map((stream, i) => <div key={ i }>
+      <FormTextInput
+        store={ projectTargetReleaseParamsStore }
+        id={ `streams.${i}.description` }
+        label={ null }
+        x={ null }
+      />
+    </div>);
 
-  // return <React.Fragment>
-  //   <div className='flex flex-ver paragraph children-gap'>
-  //     <div>
-  //         Are you sure to run flow <span className='bold'>"{ projectFlow?.title ?? projectFlow?.id }"</span> for
-  //       <ul>
-  //         {
-  //           projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
-  //         }
-  //       </ul>
-  //         on <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
-  //     </div>
-  //     {
-  //       ParamsElements
-  //     }
-  //   </div>
-  // </React.Fragment>
-  return null;
+    ParamsElements.push(<Tabs
+      selectedIndex={ '0' }
+      tabs={ tabs }
+      tabsDecoration='default'
+    >
+      { tabsContents }
+    </Tabs>);
+  }
+
+  return <React.Fragment>
+    <div className='flex flex-ver paragraph children-gap'>
+      {
+        ParamsElements
+      }
+    </div>
+  </React.Fragment>;
 };
