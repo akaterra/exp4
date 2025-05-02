@@ -2,17 +2,22 @@ import React from 'react';
 import './input.css';
 import { maybeLabeledControl } from './utils';
 
-export const Textarea = ({ children, id = undefined, label = undefined, onChange = undefined, placeholder='', rows = 5, x = undefined, style = undefined }: any) => {
+export const Textarea = ({ children, className = undefined, disabled = undefined, error = undefined, id = undefined, label = undefined, onBlur = undefined, onChange = undefined, placeholder='', rows = 5, x = undefined, style = undefined }: any) => {
+  if (error) {
+    className = className ? `${className} failure` : 'failure';
+  }
+
   const control = <textarea
-    className='control'
+    className={ className ? `control ${className}` : 'control' }
     key={ id }
     placeholder={ placeholder }
     rows={ rows }
     style={ style }
+    onBlur={ !disabled && onBlur ? ((e) => onBlur((e.target as HTMLTextAreaElement).value)) : undefined }
     onChange={ onChange && ((e) => {
       onChange((e.target as HTMLTextAreaElement).value);
     }) }
   >{ children }</textarea>;
 
-  return maybeLabeledControl(control, x, label);
+  return maybeLabeledControl(control, x, label, error);
 }

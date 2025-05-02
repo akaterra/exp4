@@ -370,9 +370,9 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
     id: string;
     description: string;
   }[];
-  declare flows: {
-    notes: string[];
+  declare ops: {
     flows: string[];
+    description: string;
   }[];
 
   constructor(public projectsStore: ProjectsStore, public projectTarget: IProjectTarget) {
@@ -383,10 +383,12 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
       id: section.id.slice(7),
       description: section.description,
     })) ?? [];
-    const flowsIv = release.sections?.filter((section) => section.type === 'flow').map((section) => ({
-      notes: section.description,
+    const opsIv = release.sections?.filter((section) => section.type === 'ops').map((section) => ({
       flows: section.flows ?? [],
+      description: section.description,
     })) ?? [];
+
+    opsIv.push({ description: null, flows: [] });
 
     super({
       notes: {
@@ -410,21 +412,21 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
         },
         initialValue: streamsIv,
       },
-      flows: {
+      ops: {
         constraints: { maxLength: 1000 },
         type: {
-          notes: {
-            constraints: { maxLength: 1000 },
-            type: 'string',
-            initialValue: null,
-          },
           flows: {
             constraints: {},
             type: 'string',
             initialValue: [],
           },
+          description: {
+            constraints: { maxLength: 1000 },
+            type: 'string',
+            initialValue: null,
+          },
         },
-        initialValue: flowsIv,
+        initialValue: opsIv,
       },
     });
   }

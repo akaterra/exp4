@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx';
 import * as _ from 'lodash';
 
-export type FormStoreSchema = Record<string, {
+export type FormStoreSchemaDef = {
   constraints?: {
     enum?: unknown[];
     max?: number;
@@ -14,12 +14,14 @@ export type FormStoreSchema = Record<string, {
   title?: string;
   type?: 'boolean' | 'const' | 'enum' | 'number' | 'string' | 'value' | FormStoreSchema;
   initialValue?: unknown;
-}>;
+};
+export type FormStoreSchema = Record<string, FormStoreSchemaDef>;
 
 export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
   __isError: Record<string, null | string> = {};
   __isErrorCheck: Record<string, null | string> = {};
   __isValid: boolean = false;
+  __schemaKeysRefs: Record<string, FormStoreSchemaDef> = {};
 
   constructor(public readonly __schema: T) {
     this.__clear();
@@ -91,17 +93,41 @@ export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
 
     if (Array.isArray(val)) {
       val.forEach((v, i) => {
-        this.__validate(key + '[' + i + ']', v ?? null, onlyCheck, schema);
+        this.__validate(key + '.' + i, v ?? null, onlyCheck, schema);
       });
 
       return;
     }
 
-    const optsKey = (schema ?? this.__schema)[key];
+    let schemaKey = this.__schemaKeysRefs[key];
 
-    if (val && typeof val === 'object' && optsKey && typeof optsKey.type === 'object') {
-      for (const k of Object.keys(optsKey.type)) {
-        this.__validate(key + '.' + k, val[k], onlyCheck, optsKey.type);
+    if (!schemaKey) {
+      schema = schema ?? this.__schema;
+
+      if (key.includes('.')) {
+        const keys = key.split('.');
+
+        for (let i = 0, l = keys.length; i < l; i ++) {
+          if (i === l - 1) {
+            schemaKey = schema[keys[i]];
+          } else if (isNaN(keys[i])) {
+            schema = schema?.[keys[i]]?.type as FormStoreSchema;
+          }
+        }
+      } else {
+        schemaKey = schema[key];
+      }
+
+      this.__schemaKeysRefs[key] = schemaKey;
+    }
+
+    if (!schemaKey) {
+      return;
+    }
+
+    if (val && typeof val === 'object' && schemaKey && typeof schemaKey.type === 'object') {
+      for (const k of Object.keys(schemaKey.type)) {
+        this.__validate(key + '.' + k, val[k], onlyCheck, schemaKey.type as FormStoreSchema);
       }
 
       return;
@@ -109,8 +135,8 @@ export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
 
     let err: null | string = null;
 
-    if (optsKey?.constraints) {
-      const c = optsKey?.constraints;
+    if (schemaKey?.constraints) {
+      const c = schemaKey?.constraints;
       let ignore = false;
 
       if (typeof c?.optional === 'boolean') {
