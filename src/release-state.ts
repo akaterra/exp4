@@ -47,12 +47,12 @@ export class ReleaseState {
     return props as ReleaseState;
   }
 
-  getSection(id: string): IReleaseStateSection | null {
-    return this.sections.find((s) => s.id === id) ?? null;
+  getSection(id: string, type: string): IReleaseStateSection | null {
+    return this.sections.find((s) => s.id === id && s.type === type) ?? null;
   }
 
   setSection(section: Partial<IReleaseStateSection>, onlyExisting?: boolean): this {
-    const existingSection = this.getSection(section.id);
+    const existingSection = this.getSection(section.id, section.type);
 
     if (onlyExisting && !existingSection) {
       return this;
@@ -64,7 +64,7 @@ export class ReleaseState {
     } as IReleaseStateSection;
 
     if (this.schema) {
-      const schemaSection = this.schema.sections?.find((s) => s.id === section.id || s.type === section.type);
+      const schemaSection = this.schema.sections?.find((s) => section.id ? s.id === section.id : s.type === section.type);
 
       if (schemaSection?.changelog?.artifacts) {
         for (const schemaArtifact of schemaSection.changelog.artifacts) {
@@ -97,7 +97,7 @@ export class ReleaseState {
       const index = this.sections.findLastIndex((s) => s.level <= section.level);
 
       if (index === -1) {
-        this.sections.push({
+        this.sections.splice(this.sections.findLastIndex((s) => s.level === section.level) + 1, 0, {
           ...section,
           changelog: section.changelog ?? [],
         } as IReleaseStateSection);
@@ -118,7 +118,7 @@ export class ReleaseState {
     notes?: IReleaseStateSection['changelog'][0]['notes'],
     onlyExisting?: boolean,
   ): this {
-    const existingSection = this.getSection(`stream:${streamId}`);
+    const existingSection = this.getSection(streamId, 'stream');
 
     if (onlyExisting && !existingSection) {
       return this;
@@ -143,6 +143,22 @@ export class ReleaseState {
       ],
       level: 1,
     });
+  }
+
+  update(release: Partial<ReleaseState>) {
+    if (release.metadata) {
+      this.metadata = Object.assign(this.metadata, release.metadata);
+    }
+
+    if (release.schema) {
+      this.schema = release.schema;
+    }
+
+    if (release.sections) {
+      release.sections.forEach((section) => this.setSection(section));
+    }
+
+    return this;
   }
 
   toJSON() {

@@ -33,6 +33,16 @@ export class TargetState {
     return this.release.setSectionByStreamId(streamId, artifacts, notes, onlyExisting);
   }
 
+  updateRelease(release: Partial<ReleaseState>) {
+    if (!this.release) {
+      this.release = new ReleaseState({ id: this.id, type: this.type });
+    } else {
+      this.release.update(release);
+    }
+
+    return this;
+  }
+
   toJSON() {
     return {
       ...this,

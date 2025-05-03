@@ -72,8 +72,8 @@ export const ProjectTargetReleaseComponentsModalContent = ({
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  if (!projectTargetReleaseParamsStore?.__schema) {
-    return null;
+  if (!projectTargetReleaseParamsStore.state.streams?.length) {
+    return <Label>No components available</Label>;
   }
 
   const tabs = projectTargetReleaseParamsStore.state.streams.map((stream, i) => ({

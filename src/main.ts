@@ -26,6 +26,7 @@ import { IProjectManifest } from './project';
 import cookieParser from 'cookie-parser';
 import { authLogout } from './api/auth/logout';
 import SourceMapSupport from 'source-map-support';
+import {projectTargetReleaseUpdate} from './api/project-target-state/release.update';
 
 SourceMapSupport.install({
   environment: 'node',
@@ -147,6 +148,9 @@ function auth(req, res, next) {
   );
   app.post(
     '/projects/:projectId/flow/:flowId/run', err(auth), err(projectFlowRun),
+  );
+  app.put(
+    '/projects/:projectId/target/:targetId/release', err(auth), err(projectTargetReleaseUpdate),
   );
   app.get(
     '/statistics', err(auth), err(statisticsList),

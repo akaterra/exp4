@@ -29,35 +29,9 @@ export class SlackNotificationService extends EntityService implements INotifica
       } ],
     };
 
-    const blockArtifacts: { stream; artifacts: { id, value }[]; notes }[] = [];
-    const blockDefault: { notes }[] = [];
+    const notesSections = targetState.release.sections.filter((section) => section.type === 'note');
 
-    for (const section of targetState.release.sections) {
-      switch (section.type) {
-        case 'stream': {
-          for (const changelog of section.changelog) {
-            const stream = project.getTargetStreamByTargetAndStream(targetState.id, changelog.id);
-
-            blockArtifacts.push({
-              stream: stream.title,
-              artifacts: changelog.artifacts.map((artifact) => ({
-                id: artifact.id,
-                value: artifact.description,
-              })),
-              notes: changelog.notes,
-            });
-          }
-
-          break;
-        }
-        default:
-          if (section.description) {
-            blockDefault.push({ notes: [ section.description ] });
-          }
-      }
-    }
-
-    if (blockDefault.length) {
+    if (notesSections.length) {
       payload.blocks.push({
         type: 'header',
         text: { type: 'plain_text', text: 'Notes' },
@@ -65,25 +39,34 @@ export class SlackNotificationService extends EntityService implements INotifica
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: blockDefault.map((section) => section.notes.map((note) => note.text)).flat().map((note, i) => `${i.toString().padEnd(2, ' ')}. ${note}`).join('\n'),
+          text: notesSections.map((section) => section.description).map((note) => `${note}\n`).join('\n'),
         }
       });
     }
 
-    if (blockArtifacts.length) {
-      payload.blocks.push({
-        type: 'header',
-        text: { type: 'plain_text', text: 'Components' },
-      }, ...blockArtifacts.map((blockArtifact) => ({
-        type: 'section',
-        fields: [ {
-          type: 'mrkdwn',
-          text: `*${blockArtifact.stream}*\n\n${blockArtifact.notes.map((note, i) => `${i.toString().padEnd(2, ' ')}. ${note.text}`).join('\n')}`,
-        }, {
-          type: 'mrkdwn',
-          text: blockArtifact.artifacts.map((artifact) => `> ${artifact.id}\n> _${artifact.value}_\n`).join('\n'),
-        } ],
-      })));
+    const streamsSections = targetState.release.sections.filter((section) => section.type === 'stream');
+
+    if (streamsSections.length) {
+      payload.blocks.push(
+        {
+          type: 'header',
+          text: { type: 'plain_text', text: 'Components' },
+        },
+        ...streamsSections.map((section) => {
+          const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id);
+
+          return {
+            type: 'section',
+            fields: [ {
+              type: 'mrkdwn',
+              text: `*${stream?.title ?? section.id}*\n\n${section.description}`,
+            }, {
+              type: 'mrkdwn',
+              text: section.changelog.map((changelog) => changelog.artifacts?.map((artifact) => `> ${artifact.id}\n> _${artifact.description}_\n`)).flat().join('\n'),
+            } ],
+          };
+        },
+      ));
     }
 
     console.log(JSON.stringify(payload,undefined,2));

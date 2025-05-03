@@ -27,7 +27,7 @@ export class TargetHolderService {
         return null;
       }
 
-      entity.release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
+      entity.updateRelease(await project.getEnvVersioningByTarget(target).getCurrentRelease(target));
       entity.release.schema = target.release;
       entity.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 

@@ -382,8 +382,8 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
     description: string;
   }[];
 }> {
-  constructor(public projectsStore: ProjectsStore, public projectTarget: IProjectTarget) {
-    const release = projectsStore.getStoreById(projectTarget.ref.projectId)?.getTargetStoreByTargetId(projectTarget.id)?.targetState?.release;
+  constructor(public projectStore: ProjectStore, public projectTarget: IProjectTarget) {
+    const release = projectStore.getTargetStoreByTargetId(projectTarget.id)?.targetState?.release;
 
     const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => ({
       id: section.id ?? nextId(),
@@ -395,7 +395,7 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
       flows: section.flows ?? [],
       description: section.description,
     })) ?? [];
-    const opsIv = release.sections?.filter((section) => section.type === 'ops').map((section) => ({
+    const opsIv = release.sections?.filter((section) => section.type === 'op').map((section) => ({
       id: section.id ?? nextId(),
       flows: section.flows ?? [],
       description: section.description,
@@ -675,7 +675,7 @@ export class ProjectStore extends BaseStore {
   @flow @processing
   *applyRelease(targetId: string) {
     const projectTargetReleaseParamsStore = new ProjectTargetReleaseParamsStore(
-      this.projectsStore,
+      this,
       this.getTargetByTargetId(targetId),
     );
 
@@ -694,37 +694,37 @@ export class ProjectStore extends BaseStore {
       case 'cancel':
         break;
       case 'ok':
-        const state = projectTargetReleaseParamsStore.state;
+        const payload: IProjectTargetState['release'] = {
+          date: projectTargetReleaseParamsStore.state.date,
+          sections: [
+            ...projectTargetReleaseParamsStore.state.streams.map((stream) => ({
+              id: stream.id,
+              type: 'stream',
+              description: stream.description,
+              flows: null,
+            })),
+            ...projectTargetReleaseParamsStore.state.ops.map((op) => ({
+              id: op.id,
+              type: 'op',
+              description: op.description,
+              flows: op.flows,
+            })),
+            ...projectTargetReleaseParamsStore.state.notes.map((note) => ({
+              id: note.id,
+              type: 'note',
+              description: note.description,
+              flows: null,
+            })),
+          ],
+        };
 
-        yield this.projectsStore.service.releaseUpdate(
+        const updated = yield this.projectsStore.service.releaseUpdate(
           this.project.id,
           targetId,
-          {
-            date: state.date,
-            sections: [
-              ...state.streams.map((stream) => ({
-                id: `stream:${stream.id}`,
-                type: 'stream',
-                description: stream.description,
-                flows: null,
-              })),
-              ...state.ops.map((op) => ({
-                id: `op:${op.id}`,
-                type: 'op',
-                description: op.description,
-                flows: op.flows,
-              })),
-              ...state.notes.map((note) => ({
-                id: nextId(),
-                type: 'note',
-                description: note,
-                flows: null,
-              })),
-            ],
-          },
+          payload,
         );
-        yield this.fetchState();
-  
+        this.getTargetStoreByTargetId(targetId).targetState.release = updated;
+console.log(this.getTargetStoreByTargetId(targetId).targetState.release);
         break;
       }
   }
