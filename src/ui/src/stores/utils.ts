@@ -93,6 +93,12 @@ export async function saveContent(content, contentType, target: 'clipboard' | 'd
   }
 }
 
+let nextIdCounter = 100000;
+
+export function nextId(): string {
+  return String(nextIdCounter ++);
+}
+
 export function processing(target, prop, descriptor) {
   const fn = descriptor.value;
 

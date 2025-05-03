@@ -6,6 +6,7 @@ import { SubSubTitle, SubTitle, Title } from '../atoms/title';
 import { FormButton, FormInput, FormSelect, FormTextInput } from './form';
 import {Tabs} from '../atoms/tabs';
 import {observer} from 'mobx-react-lite';
+import {Button} from '../atoms/button';
 
 export const ProjectTargetReleaseModalTitle = ({
   projectTargetReleaseParamsStore,
@@ -34,9 +35,7 @@ export const ProjectTargetReleaseNotesModalContent = ({
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  const ParamsElements: React.ReactElement[] = [
-    <SubSubTitle>Notes</SubSubTitle>,
-  ];
+  const ParamsElements: React.ReactElement[] = [];
 
   projectTargetReleaseParamsStore.notes.forEach((note, i) => {
     ParamsElements.push(<div>
@@ -63,9 +62,7 @@ export const ProjectTargetReleaseComponentsModalContent = ({
     return null;
   }
 
-  const ParamsElements: React.ReactElement[] = [
-    <SubSubTitle>Components</SubSubTitle>,
-  ];
+  const ParamsElements: React.ReactElement[] = [];
 
   const tabs = projectTargetReleaseParamsStore.streams.map((stream, i) => ({
     id: String(i),
@@ -98,40 +95,83 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  const ParamsElements: React.ReactElement[] = [
-    <SubSubTitle>Ops</SubSubTitle>,
-  ];
+  const ParamsElements: React.ReactElement[] = [];
 
   projectTargetReleaseParamsStore.ops.forEach((op, i) => {
-    ParamsElements.push(<div>
-      <FormInput
-        store={ projectTargetReleaseParamsStore }
-        id={ `ops.${i}.description` }
-        label={ null }
-        x={ null }
-      />
-    </div>, <div>
-      {
-        projectTargetStore.flows.map(({ flow }, j) => {
-          const isSet = op.flows.includes(flow.id);
-
-          return <FormButton
-            className={ isSet ? 'button-sml success w-auto' : 'button-sml default w-auto' }
+    ParamsElements.push(
+      <div key={ op.id ?? i }>
+        <div>
+          <FormInput
             store={ projectTargetReleaseParamsStore }
-            id={ `ops.${i}.flows` }
-            x={ 'w50' }
-            onClick={ () => {
-              if (isSet) {
-                op.flows = op.flows.filter((flowId) => flowId !== flow.id);
-              } else {
-                op.flows.push(flow.id);
-              }
-            } }
-          >{ flow.title ?? flow.id }</FormButton>;
-        })
-      }
-    </div>);
+            id={ `ops.${i}.description` }
+            key={ null }
+            label={ null }
+            x={ null }
+          />
+        </div>
+        <div className='flex flex-hor children-gap-hor'>
+          {
+            projectTargetStore.flows.map(({ flow }, j) => {
+              const isSet = op.flows.includes(flow.id);
+
+              return <FormButton
+                className={ isSet ? 'button-sml success w-auto' : 'button-sml default w-auto' }
+                store={ projectTargetReleaseParamsStore }
+                id={ `ops.${i}.flows` }
+                key={ null }
+                x={ null }
+                onClick={ () => {
+                  if (isSet) {
+                    op.flows = op.flows.filter((flowId) => flowId !== flow.id);
+                  } else {
+                    op.flows.push(flow.id);
+                  }
+                } }
+              >{ flow.title ?? flow.id }</FormButton>;
+            })
+          }
+        </div>
+        <div className='flex flex-hor children-gap-hor'>
+          <Button
+            className='button-sml w-auto'
+            x={ null }
+            key={ null }
+            onClick={ () => projectTargetReleaseParamsStore.moveOpDown(op) }
+          ><i className="fa-solid fa-arrow-down fa-lg"></i></Button>
+          <Button
+            className='button-sml w-auto'
+            x={ null }
+            key={ null }
+            onClick={ () => projectTargetReleaseParamsStore.moveOpUp(op) }
+          ><i className="fa-solid fa-arrow-up fa-lg"></i></Button>
+          <Button
+            className='button-sml w-auto'
+            x={ null }
+            key={ null }
+            onClick={ () => projectTargetReleaseParamsStore.delOp(op) }
+          ><i className="fa-solid fa-trash fa-lg"></i></Button>
+          <Button
+            className='button-sml w-auto'
+            x={ null }
+            key={ null }
+            onClick={ () => projectTargetReleaseParamsStore.addOp(null, i) }
+          ><i className="fa-solid fa-plus fa-lg"></i></Button>
+        </div>
+      </div>
+    );
   });
+
+  if (projectTargetReleaseParamsStore.ops.length === 0) {
+    ParamsElements.push(
+      <div>
+        <Button
+          className='button-sml w-auto'
+          x={ null }
+          onClick={ () => projectTargetReleaseParamsStore.addOp() }
+        ><i className="fa-solid fa-plus fa-lg"></i></Button>
+      </div>
+    );
+  }
 
   return ParamsElements;
 });
@@ -143,8 +183,12 @@ export const ProjectTargetReleaseModalContent = observer(({
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  return <React.Fragment>
-    <div className='flex flex-ver paragraph children-gap'>
+  return <div className='flex flex-ver paragraph children-gap'>
+    <Tabs
+      selectedIndex={ 'notes' }
+      tabs={ [ { id: 'notes', title: 'Notes' }, { id: 'components', title: 'Components' }, { id: 'ops', title: 'Ops' } ] }
+      tabsDecoration='default'
+    >
       <ProjectTargetReleaseNotesModalContent
         projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
         projectTargetStore={ projectTargetStore }
@@ -157,6 +201,6 @@ export const ProjectTargetReleaseModalContent = observer(({
         projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
         projectTargetStore={ projectTargetStore }
       />
-    </div>
-  </React.Fragment>;
+    </Tabs>
+  </div>;
 });

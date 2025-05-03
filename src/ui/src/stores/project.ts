@@ -7,7 +7,7 @@ import { modalStore } from '../blocks/modal';
 import { ProjectActionRunModalContent, ProjectActionRunModalTitle } from '../blocks/project.action.run.modal';
 import { detailsPanelStore } from '../blocks/details-panel';
 import { ProjectTargetStreamDetailsModalContent, ProjectTargetStreamDetailsModalTitle } from '../blocks/project.target.stream.details-panel';
-import { processing, saveContent, saveTextAligned, splitFilterTokens } from './utils';
+import { nextId, processing, saveContent, saveTextAligned, splitFilterTokens } from './utils';
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 import { FormStore } from './form';
@@ -368,9 +368,11 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
   declare notes: string[];
   declare streams: {
     id: string;
+    flows: string[];
     description: string;
   }[];
   declare ops: {
+    id: string;
     flows: string[];
     description: string;
   }[];
@@ -381,14 +383,16 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
     const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => section.description);
     const streamsIv = release.sections?.filter((section) => section.type === 'stream').map((section) => ({
       id: section.id.slice(7),
+      flows: section.flows ?? [],
       description: section.description,
     })) ?? [];
     const opsIv = release.sections?.filter((section) => section.type === 'ops').map((section) => ({
+      id: nextId(),
       flows: section.flows ?? [],
       description: section.description,
     })) ?? [];
 
-    opsIv.push({ description: null, flows: [] });
+    opsIv.push({ id: null, description: null, flows: [] });
 
     super({
       notes: {
@@ -421,7 +425,7 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
             initialValue: [],
           },
           description: {
-            constraints: { maxLength: 1000 },
+            constraints: { maxLength: 100 },
             type: 'string',
             initialValue: null,
           },
@@ -429,6 +433,44 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
         initialValue: opsIv,
       },
     });
+  }
+
+  addOp(op?: Partial<ProjectTargetReleaseParamsStore['ops'][number]>, index?: number) {
+    const newOp = {
+      id: op?.id ?? nextId(),
+      description: op?.description,
+      flows: op?.flows ?? [],
+    };
+
+    if (index != null && index >= 0 && index < this.ops.length - 1) {
+      this.ops.splice(index + 1, 0, newOp);
+    } else {
+      this.ops.push(newOp);
+    }
+  }
+
+  delOp(op: ProjectTargetReleaseParamsStore['ops'][number]) {
+    this.ops = this.ops.filter((o) => o.id !== op.id);
+  }
+
+  moveOpUp(op: ProjectTargetReleaseParamsStore['ops'][number]) {
+    const index = this.ops.findIndex((o) => o.id === op.id);
+
+    if (index > 0) {
+      const tmp = this.ops[index - 1];
+      this.ops[index - 1] = this.ops[index];
+      this.ops[index] = tmp;
+    }
+  }
+
+  moveOpDown(op: ProjectTargetReleaseParamsStore['ops'][number]) {
+    const index = this.ops.findIndex((o) => o.id === op.id);
+
+    if (index < this.ops.length - 1) {
+      const tmp = this.ops[index + 1];
+      this.ops[index + 1] = this.ops[index];
+      this.ops[index] = tmp;
+    }
   }
 }
 
