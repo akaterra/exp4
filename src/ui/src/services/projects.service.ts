@@ -1,6 +1,6 @@
 import { Status } from '../enums/status';
 import { IProject, IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { IProjectState } from '../stores/dto/project-state';
+import { IProjectState, IProjectTargetState } from '../stores/dto/project-state';
 import { splitFilterTokens } from '../stores/utils';
 import { RestApiService } from './rest-api.service';
 
@@ -97,7 +97,7 @@ export class ProjectsService {
     return this.rest.get('statistics').then((res) => res?.projects?.[id] ?? {});
   }
 
-  runFlow(
+  flowRun(
     projectId: IProject['id'],
     flowId: IProjectFlow['id'],
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,
@@ -107,5 +107,9 @@ export class ProjectsService {
       targetsStreams,
       params,
     });
+  }
+
+  releaseUpdate(projectId: IProject['id'], targetId: IProjectTarget['id'], release: IProjectTargetState['release']) {
+    return this.rest.put(`projects/${projectId}/target/${targetId}/release`, release);
   }
 }

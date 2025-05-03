@@ -132,12 +132,12 @@ export const Landing = observer(({ store }: { store: RootStore }) => {
         }
         <div className='flex flex-center paragraph paragraph-lrg'>
           {
-            Object.values(rootStore.authMethods).map((authMethod) => {
+            Object.values(rootStore.authMethods).map((authMethod, i) => {
               if (authMethod === authMethodPassword) {
                 return null;
               }
 
-              return <div className='center'>
+              return <div className='center' key={ i }>
                 <button
                   className={ `button default transparent unbound ${authMethodTypeToLogoMap[authMethod.type] ?? authMethodTypeToLogoMap.default}` }
                   style={ style.landing.authMethodButton }

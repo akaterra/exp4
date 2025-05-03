@@ -77,7 +77,7 @@ export type IReleaseStateSection = {
 
   description?: string;
 
-  changelog: {
+  changelog?: {
     id?: IProjectTarget['id'];
     notes?: { id: string; text: string }[];
 
@@ -100,7 +100,7 @@ export type IProjectTargetState = {
 
   ref: IProjectTarget['ref'];
 
-  release: { sections: IReleaseStateSection[] };
+  release: { date: Date; sections: IReleaseStateSection[] };
   streams: Record<string, IProjectTargetStreamState>;
   version: string;
 

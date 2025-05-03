@@ -14,7 +14,10 @@ export class RootStore {
   private isReadyResolve: () => any;
   private router: Router;
 
-  readonly authPasswordStore = new FormStore({
+  readonly authPasswordStore = new FormStore<{
+    username: string;
+    password: string;
+  }>({
     username: { constraints: { minLength: 3, optional: false } },
     password: { constraints: { minLength: 3, optional: false } },
   });
@@ -99,7 +102,7 @@ export class RootStore {
           this.authMethods[id]?.actions?.callbackUrl?.method ?? 'get',
         ).catch((err) => {
           if (err === 'Invalid username or password') {
-            this.authPasswordStore.__setError({
+            this.authPasswordStore.setError({
               username: err, password: err,
             });
 
@@ -107,7 +110,7 @@ export class RootStore {
           }
 
           if (err === 'User is blocked') {
-            this.authPasswordStore.__setError({
+            this.authPasswordStore.setError({
               username: err,
             });
 
@@ -171,7 +174,7 @@ export class RootStore {
 
     this.accessToken = null;
     this.isAuthorized = false;
-    this.authPasswordStore.__clear();
+    this.authPasswordStore.clear();
 
     yield this.usersService.logout();
     yield this.authorize();

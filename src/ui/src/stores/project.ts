@@ -364,41 +364,64 @@ export class ProjectTargetStore extends BaseStore {
   }
 }
 
-export class ProjectTargetReleaseParamsStore extends FormStore {
-  declare notes: string[];
-  declare streams: {
+export class ProjectTargetReleaseParamsStore extends FormStore<{
+  date: Date;
+  notes: {
     id: string;
     flows: string[];
     description: string;
   }[];
-  declare ops: {
+  streams: {
     id: string;
     flows: string[];
     description: string;
   }[];
-
+  ops: {
+    id: string;
+    flows: string[];
+    description: string;
+  }[];
+}> {
   constructor(public projectsStore: ProjectsStore, public projectTarget: IProjectTarget) {
     const release = projectsStore.getStoreById(projectTarget.ref.projectId)?.getTargetStoreByTargetId(projectTarget.id)?.targetState?.release;
 
-    const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => section.description);
+    const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => ({
+      id: section.id ?? nextId(),
+      flows: section.flows ?? [],
+      description: section.description,
+    })) ?? [];
     const streamsIv = release.sections?.filter((section) => section.type === 'stream').map((section) => ({
-      id: section.id.slice(7),
+      id: section.id ?? nextId(),
       flows: section.flows ?? [],
       description: section.description,
     })) ?? [];
     const opsIv = release.sections?.filter((section) => section.type === 'ops').map((section) => ({
-      id: nextId(),
+      id: section.id ?? nextId(),
       flows: section.flows ?? [],
       description: section.description,
     })) ?? [];
 
-    opsIv.push({ id: null, description: null, flows: [] });
-
-    super({
+    const schema = {
+      date: {
+        constraints: {},
+        type: 'date',
+        initialValue: release.date,
+      },
       notes: {
         constraints: { maxLength: 1000 },
-        type: 'string',
-        initialValue: notesIv.length ? notesIv : [ '' ],
+        type: {
+          id: {
+            constraints: {},
+            type: 'const',
+            initialValue: null,
+          },
+          description: {
+            constraints: { maxLength: 1000 },
+            type: 'string',
+            initialValue: null,
+          },
+        },
+        initialValue: notesIv.length ? notesIv : [ { id: nextId(), description: null } ],
       },
       streams: {
         constraints: { maxLength: 1000 },
@@ -432,44 +455,60 @@ export class ProjectTargetReleaseParamsStore extends FormStore {
         },
         initialValue: opsIv,
       },
-    });
+    } as const;
+
+    super(schema);
   }
 
-  addOp(op?: Partial<ProjectTargetReleaseParamsStore['ops'][number]>, index?: number) {
+  addOp(op?: Partial<ProjectTargetReleaseParamsStore['state']['ops'][number]>, index?: number) {
     const newOp = {
       id: op?.id ?? nextId(),
       description: op?.description,
       flows: op?.flows ?? [],
     };
 
-    if (index != null && index >= 0 && index < this.ops.length - 1) {
-      this.ops.splice(index + 1, 0, newOp);
+    if (index != null && index >= 0 && index < this.state.ops.length - 1) {
+      this.state.ops.splice(index + 1, 0, newOp);
     } else {
-      this.ops.push(newOp);
+      this.state.ops.push(newOp);
     }
   }
 
-  delOp(op: ProjectTargetReleaseParamsStore['ops'][number]) {
-    this.ops = this.ops.filter((o) => o.id !== op.id);
+  delOp(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
+    this.state.ops = this.state.ops.filter((o) => o.id !== op.id);
   }
 
-  moveOpUp(op: ProjectTargetReleaseParamsStore['ops'][number]) {
-    const index = this.ops.findIndex((o) => o.id === op.id);
+  moveOpUp(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
+    const index = this.state.ops.findIndex((o) => o.id === op.id);
 
     if (index > 0) {
-      const tmp = this.ops[index - 1];
-      this.ops[index - 1] = this.ops[index];
-      this.ops[index] = tmp;
+      const tmp = this.state.ops[index - 1];
+      this.state.ops[index - 1] = this.state.ops[index];
+      this.state.ops[index] = tmp;
     }
   }
 
-  moveOpDown(op: ProjectTargetReleaseParamsStore['ops'][number]) {
-    const index = this.ops.findIndex((o) => o.id === op.id);
+  moveOpDown(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
+    const index = this.state.ops.findIndex((o) => o.id === op.id);
 
-    if (index < this.ops.length - 1) {
-      const tmp = this.ops[index + 1];
-      this.ops[index + 1] = this.ops[index];
-      this.ops[index] = tmp;
+    if (index < this.state.ops.length - 1) {
+      const tmp = this.state.ops[index + 1];
+      this.state.ops[index + 1] = this.state.ops[index];
+      this.state.ops[index] = tmp;
+    }
+  }
+
+  toggleOpFlow(op: ProjectTargetReleaseParamsStore['state']['ops'][number], flowId: string) {
+    const index = this.state.ops.findIndex((o) => o.id === op.id);
+
+    if (index >= 0) {
+      const flowIndex = this.state.ops[index].flows.findIndex((flow) => flow === flowId);
+
+      if (flowIndex >= 0) {
+        this.state.ops[index].flows.splice(flowIndex, 1);
+      } else {
+        this.state.ops[index].flows.push(flowId);
+      }
     }
   }
 }
@@ -610,7 +649,7 @@ export class ProjectStore extends BaseStore {
           .values(this.getTargetByTargetId(targetId).streams)
           .filter((stream) => selectedStreamIds.includes(stream.id)),
       },
-      onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.__validateAll() : true,
+      onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.validateAll() : true,
       title: ProjectActionRunModalTitle,
       withClose: true,
     });
@@ -619,13 +658,13 @@ export class ProjectStore extends BaseStore {
     case 'cancel':
       break;
     case 'ok':
-      yield this.projectsStore.service.runFlow(
+      yield this.projectsStore.service.flowRun(
         this.project.id,
         projectFlow?.id,
         {
           [targetId]: selectedStreamIds as [ string, ...string[] ],
         },
-        projectFlowParamsStore.getState(),
+        projectFlowParamsStore.state,
       );
       yield this.fetchState();
 
@@ -646,12 +685,48 @@ export class ProjectStore extends BaseStore {
         projectTargetReleaseParamsStore,
         projectTargetStore: this.getTargetStoreByTargetId(targetId),
       },
-      onBeforeSelect: (action) => action === 'ok' ? projectTargetReleaseParamsStore.__validateAll() : true,
+      onBeforeSelect: (action) => action === 'ok' ? projectTargetReleaseParamsStore.validateAll() : true,
       title: ProjectTargetReleaseModalTitle,
       withClose: true,
     });
 
-    console.log(action, JSON.parse(JSON.stringify(projectTargetReleaseParamsStore.getState())));
+    switch (action) {
+      case 'cancel':
+        break;
+      case 'ok':
+        const state = projectTargetReleaseParamsStore.state;
+
+        yield this.projectsStore.service.releaseUpdate(
+          this.project.id,
+          targetId,
+          {
+            date: state.date,
+            sections: [
+              ...state.streams.map((stream) => ({
+                id: `stream:${stream.id}`,
+                type: 'stream',
+                description: stream.description,
+                flows: null,
+              })),
+              ...state.ops.map((op) => ({
+                id: `op:${op.id}`,
+                type: 'op',
+                description: op.description,
+                flows: op.flows,
+              })),
+              ...state.notes.map((note) => ({
+                id: nextId(),
+                type: 'note',
+                description: note,
+                flows: null,
+              })),
+            ],
+          },
+        );
+        yield this.fetchState();
+  
+        break;
+      }
   }
 }
 

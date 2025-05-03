@@ -22,54 +22,52 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
   return <Fragment>
     {
       !onlyChild
-        ? <Row>
-          <C>
-            <div className={ `tabs ${decoration ?? ''}` }>
-              <div className='tabs-bar'>
-                {
-                  tabs.map((tab, i) => {
-                    const isSelected = i.toString() === String(currentSelectedIndex);
-                    let tabTitle = tab;
-                    let tabId = tab;
+        ? <Row><C>
+          <div className={ `tabs ${decoration ?? ''}` }>
+            <div className='tabs-bar'>
+              {
+                tabs.map((tab, i) => {
+                  const isSelected = i === currentSelectedIndex;
+                  let tabTitle = tab;
+                  let tabId = tab;
 
-                    if (tab && typeof tab === 'object') {
-                      let Component: any;
-                      let props;
+                  if (tab && typeof tab === 'object') {
+                    let Component: any;
+                    let props;
 
-                      switch (tab.type) {
-                      case 'link':
-                        Component = NavLink;
-                        props = { href: tab.href };
-                        break;
-                      }
-
-                      if (Component) {
-                        return <Component className={ isSelected ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
-                          setCurrentSelectedIndex(i);
-      
-                          if (onSelect) {
-                            onSelect(i, tab.id);
-                          }
-                        } } { ...props }>{ tab.title }</Component>;
-                      }
-
-                      tabTitle = tab.title;
-                      tabId = tab.id;
+                    switch (tab.type) {
+                    case 'link':
+                      Component = NavLink;
+                      props = { href: tab.href };
+                      break;
                     }
 
-                    return <button className={ i.toString() === String(currentSelectedIndex) ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
-                      setCurrentSelectedIndex(i);
-  
-                      if (onSelect) {
-                        onSelect(i, tabId);
-                      }
-                    } }>{ tabTitle }</button>;
-                  })
-                }
-              </div>
+                    if (Component) {
+                      return <Component className={ isSelected ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } key={ i } onClick={ () => {
+                        setCurrentSelectedIndex(i);
+    
+                        if (onSelect) {
+                          onSelect(i, tab.id);
+                        }
+                      } } { ...props }>{ tab.title }</Component>;
+                    }
+
+                    tabTitle = tab.title;
+                    tabId = tab.id;
+                  }
+
+                  return <Fragment key={ i }><button className={ isSelected ? `tab active ${tabsDecoration}` : `tab ${tabsDecoration}` } onClick={ () => {
+                    setCurrentSelectedIndex(i);
+
+                    if (onSelect) {
+                      onSelect(i, tabId);
+                    }
+                  } }>{ tabTitle }</button></Fragment>;
+                })
+              }
             </div>
-          </C>
-        </Row>
+          </div>
+        </C></Row>
         : null
     }
     { !onlyTabs ? child : null }

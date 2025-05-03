@@ -9,30 +9,32 @@ export function maybeClassName(base, extended) {
   return extended ? `${base} ${extended}` : base;
 }
 
-export function maybeLabeledControl(Element, x, label?, error?) {
-  const E = <React.Fragment>
-    { Element }
-    {
-      error
-        ? <div className='label failure flex flex-right'>{ error }</div>
-        : null
-    }
-  </React.Fragment>;
+export function maybeLabeledControl(Element, x, label?, error?, id?) {
+  const E = error
+    ? <Fragment>
+      { Element }
+      {
+        error
+          ? <div className='label failure flex flex-right'>{ error }</div>
+          : null
+      }
+    </Fragment>
+    : Element;
 
   if (!label) {
     if (x !== null) {
-      return <C x={ x }>{ E }</C>;
+      return <C id={ id } x={ x }>{ E }</C>;
     }
 
-    return E;
+    return id ? <Fragment key={ id }>{ E }</Fragment> : E;
   }
 
   return x !== null
-    ?<C className='children-gap-full' x={ x }>
+    ?<C className='children-gap-full' id={ id } x={ x }>
       <Label error={ error }>{ label === FICTIVE ? '' : label }</Label>
       { E }
     </C>
-    : <Fragment>
+    : <Fragment key={ id } >
       <Label error={ error }>{ label === FICTIVE ? '' : label }</Label>
       { E }
     </Fragment>;

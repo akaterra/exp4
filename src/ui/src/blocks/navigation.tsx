@@ -30,14 +30,14 @@ export const Navigation = observer(({ projects, root }: { projects: ProjectsStor
       <div className='list'>
         {
           projects.projectsList.map((e, i) => {
-            return <Fragment>
-              <div className='list-item bold' key={ i }>
+            return <Fragment key={ i }>
+              <div className='list-item bold'>
                 <NavLink activeClassName='link active' href={ `/projects/${e.id}` } className='link'>{ e.title ?? e.id }</NavLink>
               </div>
-              <div className='list-item sub bold' key={ i }>
+              <div className='list-item sub bold'>
                 <NavLink activeClassName='link active' href={ `/projects/${e.id}/targets` } className='link'>Targets</NavLink>
               </div>
-              <div className='list-item sub bold' key={ i }>
+              <div className='list-item sub bold'>
                 <NavLink activeClassName='link active' href={ `/projects/${e.id}/statistics` } className='link'>Statistics</NavLink>
               </div>
             </Fragment>;

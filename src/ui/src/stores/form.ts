@@ -12,60 +12,67 @@ export type FormStoreSchemaDef = {
     value?: string;
   };
   title?: string;
-  type?: 'boolean' | 'const' | 'enum' | 'number' | 'string' | 'value' | FormStoreSchema;
+  type?: 'boolean' | 'const' | 'date' | 'enum' | 'number' | 'string' | 'value' | FormStoreSchema;
   initialValue?: unknown;
 };
 export type FormStoreSchema = Record<string, FormStoreSchemaDef>;
 
-export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
-  __isError: Record<string, null | string> = {};
-  __isErrorCheck: Record<string, null | string> = {};
-  __isValid: boolean = false;
-  __schemaKeysRefs: Record<string, FormStoreSchemaDef> = {};
+export class FormStore<
+  T extends Record<string, any> = Record<string, any>,
+  U extends { [K in keyof T]: K extends keyof T ? FormStoreSchemaDef : never } = { [K in keyof T]: K extends keyof T ? FormStoreSchemaDef : never }
+> {
+  isError: Record<string, null | string> = {};
+  isValid: boolean = false;
+  state: T;
 
-  constructor(public readonly __schema: T) {
-    this.__clear();
+  protected isErrorCheck: Record<string, null | string> = {};
+  protected schemaKeysRefs: Record<string, FormStoreSchemaDef> = {};
 
-    makeObservable(this, Object.keys(__schema).reduce((acc, key) => {
+  constructor(public readonly __schema: U) {
+    this.clear();
+
+    this.state = Object.keys(__schema).reduce((acc, key) => {
+      const def = __schema[key];
+      
+      if (def?.initialValue !== undefined) {
+        acc[key] = def.initialValue;
+      } else {
+        acc[key] = null;
+      }
+
+      return acc;
+    }, {}) as T;
+    makeObservable(this.state, Object.keys(__schema).reduce((acc, key) => {
       acc[key] = observable;
 
       return acc;
-    }, { __isError: observable, __isValid: observable }));
+    }, {}));
+    makeObservable(this, { isError: observable, isValid: observable });
   }
 
-  getState() {
-    const state: Record<string, unknown> = {};
-
-    for (const key of Object.keys(this.__schema)) {
-      state[key] = this[key];
-    }
-
-    return state;
-  }
-
-  __setError(fields: Record<string, string>) {
+  setError(fields: Record<string, string>) {
     for (const [ key, val ] of Object.entries(fields)) {
-      this.__isError[key] = val;
+      this.isError[key] = val;
     }
   }
 
-  __clear() {
+  clear() {
     for (const [ key, def ] of Object.entries(this.__schema)) {
       this[key] = def.initialValue ?? null;
     }
 
-    this.__validateAll(true);
+    this.validateAll(true);
 
     if (!Object.keys(this.__schema).length) {
-      this.__isValid = true; 
+      this.isValid = true; 
     }
   }
 
-  __get(key: string): unknown {
-    return _.get(this, key);
+  get(key: string): unknown {
+    return _.get(this.state, key);
   }
 
-  __onChange(key, val) {
+  onChange(key, val) {
     const optsKey = this.__schema[key];
     let isConst = false;
 
@@ -76,30 +83,33 @@ export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
     case 'const':
       isConst = true;
       return;
+    case 'date':
+      val = new Date(val);
+      break;
     case 'number':
       val = parseInt(val, 10);
       break;
     }
 
-    _.set(this, key, val);
+    _.set(this.state, key, val);
 
-    this.__validate(key, val, true);
+    this.validate(key, val, true);
   }
 
-  __validate(key, val?, onlyCheck?, schema?: FormStoreSchema): void {
+  validate(key, val?, onlyCheck?, schema?: FormStoreSchema): void {
     if (val === undefined) {
-      val = _.get(this, key);
+      val = _.get(this.state, key);
     }
 
     if (Array.isArray(val)) {
       val.forEach((v, i) => {
-        this.__validate(key + '.' + i, v ?? null, onlyCheck, schema);
+        this.validate(key + '.' + i, v ?? null, onlyCheck, schema);
       });
 
       return;
     }
 
-    let schemaKey = this.__schemaKeysRefs[key];
+    let schemaKey = this.schemaKeysRefs[key];
 
     if (!schemaKey) {
       schema = schema ?? this.__schema;
@@ -118,7 +128,7 @@ export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
         schemaKey = schema[key];
       }
 
-      this.__schemaKeysRefs[key] = schemaKey;
+      this.schemaKeysRefs[key] = schemaKey;
     }
 
     if (!schemaKey) {
@@ -127,7 +137,7 @@ export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
 
     if (val && typeof val === 'object' && schemaKey && typeof schemaKey.type === 'object') {
       for (const k of Object.keys(schemaKey.type)) {
-        this.__validate(key + '.' + k, val[k], onlyCheck, schemaKey.type as FormStoreSchema);
+        this.validate(key + '.' + k, val[k], onlyCheck, schemaKey.type as FormStoreSchema);
       }
 
       return;
@@ -189,23 +199,23 @@ export class FormStore<T extends FormStoreSchema = FormStoreSchema> {
     }
 
     if (!onlyCheck || !err) {
-      this.__isError[key] = err;
+      this.isError[key] = err;
     }
 
-    this.__isErrorCheck[key] = err;
+    this.isErrorCheck[key] = err;
 
     if (err) {
-      this.__isValid = false;
+      this.isValid = false;
     } else {
-      this.__isValid = Object.values(this.__isError).every((error) => !error) && Object.values(this.__isErrorCheck).every((error) => !error);
+      this.isValid = Object.values(this.isError).every((error) => !error) && Object.values(this.isErrorCheck).every((error) => !error);
     }
   }
 
-  __validateAll(onlyCheck?, schema?: FormStoreSchema): boolean {
+  validateAll(onlyCheck?, schema?: FormStoreSchema): boolean {
     for (const key of Object.keys(schema ?? this.__schema)) {
-      this.__validate(key, undefined, onlyCheck);
+      this.validate(key, undefined, onlyCheck);
     }
 
-    return this.__isValid;
+    return this.isValid;
   }
 }

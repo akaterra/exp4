@@ -93,7 +93,7 @@ export async function saveContent(content, contentType, target: 'clipboard' | 'd
   }
 }
 
-let nextIdCounter = 100000;
+let nextIdCounter = 1000000;
 
 export function nextId(): string {
   return String(nextIdCounter ++);

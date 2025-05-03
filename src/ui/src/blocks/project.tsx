@@ -19,7 +19,7 @@ export const Project = observer(({ project }: { project?: ProjectStore }) => {
     ] }
     tabsDecoration='default'
   >
-    <ProjectTargets project={ project } />
-    <ProjectStatistics project={ project } />
+    <ProjectTargets key={ 0 } project={ project } />
+    <ProjectStatistics key={ 1 } project={ project } />
   </Tabs>;
 });

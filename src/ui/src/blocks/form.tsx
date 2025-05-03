@@ -1,90 +1,91 @@
 import * as React from 'react-dom';
+import { Fragment } from 'react';
 import { observer } from "mobx-react-lite";
 import { ModalStore } from "../stores/modal";
 import { FormStore } from '../stores/form';
 import { Button } from '../atoms/button';
 import { Input } from '../atoms/input';
 import { Select } from '../atoms/select';
-import {Textarea} from '../atoms/textarea';
+import { Textarea } from '../atoms/textarea';
 
 export const detailsPanelStore = new ModalStore();
 
-export const FormButton = observer(({ store, id, key, ...props }: { store: FormStore, id?: string } & Record<string, unknown>) => {
+export const FormButton = observer(({ store, id, subId, ...props }: { store: FormStore; id?: string; subId?: number | string; key?: string } & Record<string, unknown>) => {
   return <Button
     { ...props }
-    error={ id ? store.__isError[id] : null }
-    id={ key ?? id }
+    error={ id ? store.isError[id] : null }
+    key={ subId ? `${id}.${subId}` : id }
     label={ id ? store.__schema[id]?.title ?? props.label : props.label }
-    onBlur={ () => store.__validate(id) }
+    onBlur={ () => store.validate(id) }
     onClick={ () => formOnClick(store, props.onClick) }
   />;
 });
 
-export const FormInput = observer(({ store, id, key, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
+export const FormInput = observer(({ store, id, subId, ...props }: { store: FormStore, id: string; subId?: number } & Record<string, unknown>) => {
   return <Input
-    { ...props } currentValue={ store.__get(id) ?? '' }
-    error={ store.__isError[id] }
-    id={ key ?? id }
+    { ...props } currentValue={ store.get(id) ?? '' }
+    error={ store.isError[id] }
+    key={ subId ? `${id}.${subId}` : id }
     label={ store.__schema[id]?.title ?? props.label }
-    onBlur={ () => store.__validate(id) }
-    onChange={ (val) => store.__onChange(id, val) }
+    onBlur={ () => store.validate(id) }
+    onChange={ (val) => store.onChange(id, val) }
   />;
 });
 
-export const FormTextInput = observer(({ store, id, key, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
+export const FormTextInput = observer(({ store, id, subId, ...props }: { store: FormStore, id: string; subId?: number } & Record<string, unknown>) => {
   return <Textarea
-    { ...props } children={ store.__get(id) ?? '' }
-    error={ store.__isError[id] }
-    id={ key ?? id }
+    { ...props } currentValue={ store.get(id) ?? '' }
+    error={ store.isError[id] }
+    key={ subId ? `${id}.${subId}` : id }
     label={ store.__schema[id]?.title ?? props.label }
-    onBlur={ () => store.__validate(id) }
-    onChange={ (val) => store.__onChange(id, val) }
+    onBlur={ () => store.validate(id) }
+    onChange={ (val) => store.onChange(id, val) }
   />;
 });
 
-export const FormSelect = observer(({ store, id, key, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
+export const FormSelect = observer(({ store, id, subId, ...props }: { store: FormStore, id: string; subId?: number } & Record<string, unknown>) => {
   return <Select
-    { ...props } currentValue={ store.__get(id) }
-    error={ store.__isError[id] }
-    id={ key ?? id }
+    { ...props } currentValue={ store.get(id) }
+    error={ store.isError[id] }
+    key={ subId ? `${id}.${subId}` : id }
     label={ store.__schema[id]?.title ?? props.label }
-    onBlur={ () => store.__validate(id) }
-    onChange={ (val) => store.__onChange(id, val) }
+    onBlur={ () => store.validate(id) }
+    onChange={ (val) => store.onChange(id, val) }
   />;
 });
 
-export const FormSubmit = observer(({ store, id, key, ...props }: { store: FormStore, id?: string } & Record<string, unknown>) => {
+export const FormSubmit = observer(({ store, id, subId, ...props }: { store: FormStore, id?: string; subId?: number } & Record<string, unknown>) => {
   return <Button
     { ...props }
     disabled={ false }
-    error={ id ? store.__isError[id] : null }
-    id={ key ?? id }
+    error={ id ? store.isError[id] : null }
+    key={ subId ? `${id}.${subId}` : id }
     label={ id ? store.__schema[id]?.title ?? props.label : props.label }
     preventDefault={ true }
     type='submit'
-    onBlur={ () => store.__validate(id) }
+    onBlur={ () => store.validate(id) }
     onClick={ () => formOnClick(store, props.onClick) }
   />;
 });
 
-export const FormSubmitActive = observer(({ store, id, key, ...props }: { store: FormStore, id?: string } & Record<string, unknown>) => {
+export const FormSubmitActive = observer(({ store, id, subId, ...props }: { store: FormStore, id?: string; subId?: number } & Record<string, unknown>) => {
   return <Button
     { ...props }
-    disabled={ !store.__isValid }
-    error={ id ? store.__isError[id] : null }
-    id={ key ?? id }
+    disabled={ !store.isValid }
+    error={ id ? store.isError[id] : null }
+    key={ subId ? `${id}.${subId}` : id }
     label={ id ? store.__schema[id]?.title ?? props.label : props.label }
     preventDefault={ true }
     type='submit'
-    onBlur={ () => store.__validate(id) }
+    onBlur={ () => store.validate(id) }
     onClick={ () => formOnClick(store, props.onClick) }
   />;
 });
 
 function formOnClick(store: FormStore, cb) {
-  store.__validateAll();
+  store.validateAll();
 
-  if (store.__isValid && cb) {
+  if (store.isValid && cb) {
     cb();
   }
 }

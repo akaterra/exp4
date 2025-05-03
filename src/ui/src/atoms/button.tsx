@@ -1,4 +1,5 @@
 import React from 'react';
+import { Fragment } from 'react';
 import { maybeLabeledControl, stylize } from './utils';
 
 export const componentStyle = {
@@ -8,11 +9,10 @@ export const componentSingleStyle = {
 
 };
 
-export const Button = ({ children, className = null, disabled = false, error = undefined, key = undefined, label = null, preventDefault = undefined, x = undefined, type = undefined, onBlur = undefined, onClick = undefined, style = {} }: any) => {
+export const Button = ({ children, className = null, disabled = false, error = undefined, id = undefined, label = null, preventDefault = undefined, x = undefined, type = undefined, onBlur = undefined, onClick = undefined, style = {} }: any) => {
   const Component = <button
     className={ disabled ? `button unbound ${className ?? ''} disabled` : `button unbound ${className ?? ''}` }
     disabled={ disabled }
-    key={ key }
     style={ style }
     type={ type }
     onBlur={ !disabled && onBlur ? ((e) => onBlur((e.target as HTMLInputElement).value)) : undefined }
@@ -30,7 +30,7 @@ export const Button = ({ children, className = null, disabled = false, error = u
     }
   >{ children }</button>;
 
-  return maybeLabeledControl(Component, x, label, error);
+  return maybeLabeledControl(Component, x, label, error, id);
 }
 
 Button.Failure = stylize(Button, { className: 'failure' });
