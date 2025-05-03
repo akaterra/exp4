@@ -126,7 +126,7 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
               return <FormButton
                 store={ projectTargetReleaseParamsStore }
                 id={ `ops.${i}.flows` }
-                subId={ j }
+                key={ `ops.${i}.flows.${j}` }
                 className={ isSet ? 'button-sml success w-auto' : 'button-sml default w-auto' }
                 x={ null }
                 onClick={ () => projectTargetReleaseParamsStore.toggleOpFlow(op, flow.id) }

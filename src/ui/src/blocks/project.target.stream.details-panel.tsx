@@ -119,7 +119,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
               ? <InfoCollapsable label={ projectTargetStreamState?._lastActionLabel } showTitle='Info' hideTitle='Hide'>
                 <ul className='font-sml'>
                   {
-                    Object.values(lastAction?.steps).map((step) => <li>
+                    Object.values(lastAction?.steps).map((step, i) => <li key={ i }>
                       <a
                         className='link'
                         href={ step.link }
@@ -164,7 +164,7 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
               ? <InfoCollapsable isFailed={ isFailed } showTitle='Info' hideTitle='Hide'>
                 <ul className='font-sml'>
                   {
-                    Object.values(lastChange?.steps).map((step) => <li>
+                    Object.values(lastChange?.steps).map((step, i) => <li key={ i }>
                       <a
                         className='link'
                         href={ step.link }
@@ -185,8 +185,8 @@ export const ProjectTargetStreamDetailsModalContent = observer(({
         ? <div className='flex flex-ver paragraph paragraph-lrg children-gap'>
           <div className='caption smallest clear-pt'>Artifacts <StatusValue.Subscription status={ projectTargetStreamState._artifactsLabel === 'warning' ? Status.NOT_STABLE : Status.STABLE } /></div>
           {
-            projectTargetStreamState?.history?.artifact.map((artifact) => {
-              return <TitledLine title={ `${artifact.id}:` }>
+            projectTargetStreamState?.history?.artifact.map((artifact, i) => {
+              return <TitledLine key={ i } title={ `${artifact.id}:` }>
                 { artifact.description }
               </TitledLine>
             })

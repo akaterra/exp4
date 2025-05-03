@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Fragment } from 'react';
 import { SubTitle } from '../atoms/title';
 import { observer } from 'mobx-react-lite';
 import { ProjectStore, ProjectTargetStore } from '../stores/project';
@@ -8,7 +9,7 @@ import { ValueMaybeSuccess } from '../atoms/status-line';
 import { ProjectTargetStreamInfoButton, ProjectTargetStreamTitle } from './project.shared';
 import { Time } from '../atoms/time';
 
-export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projectTarget?: ProjectTargetStore, key? }) => {
+export const ProjectTargetArtifacts = observer(({ projectTarget }: { projectTarget?: ProjectTargetStore }) => {
   const [ isShown, setIsShown ] = React.useState(true);
 
   if (!projectTarget?.target?.id) {
@@ -18,7 +19,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
   const hasArtifacts = projectTarget.streamsWithStatesAndArtifacts?.some((streamState) => streamState.artifacts?.length);
 
   const ContentElement = isShown
-    ? <React.Fragment>
+    ? <Fragment>
       <div className='paragraph paragraph-lrg'>
         {
           hasArtifacts
@@ -29,7 +30,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                 <th className='w20'>Artifact value</th>
               </tr>
               {
-                projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }) => {
+                projectTarget.streamsWithStatesAndArtifacts.map(({ stream, streamState, artifacts }, i) => {
                   if (!artifacts?.length) {
                     return null;
                   }
@@ -37,7 +38,7 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
                   const lastChange = streamState.history?.change[0];
       
                   return artifacts?.map((artifact, j) => {
-                    return <tr>
+                    return <tr key={ `${i}.${j}` }>
                       <td className={ lastChange ? `w20` : `w20 opacity-med` }>
                         {
                           j === 0
@@ -82,10 +83,10 @@ export const ProjectTargetArtifacts = observer(({ projectTarget, key }: { projec
             : <Label>No artifacts available</Label>
         }
       </div>
-    </React.Fragment>
+    </Fragment>
     : null;
 
-  return <div className='children-gap span default' key={ key }>
+  return <div className='children-gap span default'>
     <div className='flex flex-hor'>
       <div>
         <SubTitle title={ projectTarget.target?.description }>

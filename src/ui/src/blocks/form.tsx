@@ -10,56 +10,51 @@ import { Textarea } from '../atoms/textarea';
 
 export const detailsPanelStore = new ModalStore();
 
-export const FormButton = observer(({ store, id, subId, ...props }: { store: FormStore; id?: string; subId?: number | string; key?: string } & Record<string, unknown>) => {
+export const FormButton = observer(({ store, id, ...props }: { store: FormStore; id?: string } & Record<string, unknown>) => {
   return <Button
     { ...props }
     error={ id ? store.isError[id] : null }
-    key={ subId ? `${id}.${subId}` : id }
     label={ id ? store.__schema[id]?.title ?? props.label : props.label }
     onBlur={ () => store.validate(id) }
     onClick={ () => formOnClick(store, props.onClick) }
   />;
 });
 
-export const FormInput = observer(({ store, id, subId, ...props }: { store: FormStore, id: string; subId?: number } & Record<string, unknown>) => {
+export const FormInput = observer(({ store, id, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
   return <Input
     { ...props } currentValue={ store.get(id) ?? '' }
     error={ store.isError[id] }
-    key={ subId ? `${id}.${subId}` : id }
     label={ store.__schema[id]?.title ?? props.label }
     onBlur={ () => store.validate(id) }
     onChange={ (val) => store.onChange(id, val) }
   />;
 });
 
-export const FormTextInput = observer(({ store, id, subId, ...props }: { store: FormStore, id: string; subId?: number } & Record<string, unknown>) => {
+export const FormTextInput = observer(({ store, id, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
   return <Textarea
     { ...props } currentValue={ store.get(id) ?? '' }
     error={ store.isError[id] }
-    key={ subId ? `${id}.${subId}` : id }
     label={ store.__schema[id]?.title ?? props.label }
     onBlur={ () => store.validate(id) }
     onChange={ (val) => store.onChange(id, val) }
   />;
 });
 
-export const FormSelect = observer(({ store, id, subId, ...props }: { store: FormStore, id: string; subId?: number } & Record<string, unknown>) => {
+export const FormSelect = observer(({ store, id, ...props }: { store: FormStore, id: string } & Record<string, unknown>) => {
   return <Select
     { ...props } currentValue={ store.get(id) }
     error={ store.isError[id] }
-    key={ subId ? `${id}.${subId}` : id }
     label={ store.__schema[id]?.title ?? props.label }
     onBlur={ () => store.validate(id) }
     onChange={ (val) => store.onChange(id, val) }
   />;
 });
 
-export const FormSubmit = observer(({ store, id, subId, ...props }: { store: FormStore, id?: string; subId?: number } & Record<string, unknown>) => {
+export const FormSubmit = observer(({ store, id, ...props }: { store: FormStore, id?: string } & Record<string, unknown>) => {
   return <Button
     { ...props }
     disabled={ false }
     error={ id ? store.isError[id] : null }
-    key={ subId ? `${id}.${subId}` : id }
     label={ id ? store.__schema[id]?.title ?? props.label : props.label }
     preventDefault={ true }
     type='submit'
@@ -68,12 +63,11 @@ export const FormSubmit = observer(({ store, id, subId, ...props }: { store: For
   />;
 });
 
-export const FormSubmitActive = observer(({ store, id, subId, ...props }: { store: FormStore, id?: string; subId?: number } & Record<string, unknown>) => {
+export const FormSubmitActive = observer(({ store, id, ...props }: { store: FormStore, id?: string } & Record<string, unknown>) => {
   return <Button
     { ...props }
     disabled={ !store.isValid }
     error={ id ? store.isError[id] : null }
-    key={ subId ? `${id}.${subId}` : id }
     label={ id ? store.__schema[id]?.title ?? props.label : props.label }
     preventDefault={ true }
     type='submit'
