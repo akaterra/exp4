@@ -1,15 +1,13 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import { IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { ProjectFlowParamsStore, ProjectTargetReleaseParamsStore, ProjectTargetStore } from '../stores/project';
+import { ProjectTargetReleaseParamsStore, ProjectTargetStore } from '../stores/project';
 import { Label } from '../atoms/label';
-import { SubSubTitle, SubTitle, Title } from '../atoms/title';
+import { Title } from '../atoms/title';
 import { FormButton, FormInput, FormSelect, FormTextInput } from './form';
-import {Tabs} from '../atoms/tabs';
-import {observer} from 'mobx-react-lite';
-import {Button} from '../atoms/button';
-import {Row} from '../atoms/row';
-import {nextId} from '../stores/utils';
+import { Tabs } from '../atoms/tabs';
+import { observer } from 'mobx-react-lite';
+import { Button } from '../atoms/button';
+import { Row } from '../atoms/row';
 
 export const ProjectTargetReleaseModalTitle = ({
   projectTargetReleaseParamsStore,
@@ -52,13 +50,22 @@ export const ProjectTargetReleaseNotesModalContent = ({
   });
 
   return <Fragment>
-    <Row><FormInput
-      store={ projectTargetReleaseParamsStore }
-      id='date'
-      label='Date'
-      x={ 6 }
-      type='datetime-local'
-    /></Row>
+    <Row>
+      <FormInput
+        store={ projectTargetReleaseParamsStore }
+        id='date'
+        label='Date'
+        x={ 6 }
+        type='datetime-local'
+      />
+      <FormSelect
+        store={ projectTargetReleaseParamsStore }
+        id='status'
+        items={ { 'scheduled': 'Scheduled', 'completed': 'Completed' } }
+        label='Status'
+        x={ 6 }
+      />
+    </Row>
     {
       ParamsElements
     }

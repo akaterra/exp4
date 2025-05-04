@@ -3,7 +3,7 @@ import { EntityService } from '../entities.service';
 import { IIntegrationService, IncStatistics } from '.';
 import { request } from '../utils';
 import { Log, logger } from '../logger';
-import {maybeReplaceEnvVars} from './utils';
+import { maybeReplaceEnvVars } from './utils';
 
 export interface ISlackConfig {
   oauthToken?: string;

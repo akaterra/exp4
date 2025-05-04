@@ -10,7 +10,6 @@ import { RestApiService } from '../services/rest-api.service';
 import { IGeneralManifest } from '../general';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
-import { ReleaseState } from '../release-state';
 
 @Service()
 export class ExternalRestServiceStorageService extends EntityService implements IStorageService {

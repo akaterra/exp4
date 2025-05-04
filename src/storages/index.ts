@@ -1,7 +1,6 @@
 import { IService } from '../entities.service';
 import { IGeneralManifest } from '../general';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
-import { ReleaseState } from '../release-state';
 import { StreamState } from '../stream-state';
 import { TargetState } from '../target-state';
 import { IUser } from '../user';

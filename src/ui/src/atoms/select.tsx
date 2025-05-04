@@ -7,7 +7,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
   }
 
   const [ value, setValue ] = useState(currentValue);
-console.log(currentValue);
+  console.log(currentValue);
   const control = Array.isArray(items)
     ? <select
       autoComplete={ autoComplete }

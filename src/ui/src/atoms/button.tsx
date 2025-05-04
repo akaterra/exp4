@@ -1,5 +1,4 @@
 import React from 'react';
-import { Fragment } from 'react';
 import { maybeLabeledControl, stylize } from './utils';
 
 export const componentStyle = {

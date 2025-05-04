@@ -1,4 +1,5 @@
-import { IProjectDef, IProjectFlow, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { Status } from './enums/status';
+import { IProjectDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { StreamState } from './stream-state';
 import * as _ from 'lodash';
 
@@ -35,6 +36,8 @@ export class ReleaseState {
   metadata: Record<string, any>;
   sections: IReleaseStateSection[] = [];
   schema: IProjectTargetDef['release'];
+  status: Status;
+  statusUpdateAt?: Date;
 
   ver?: number;
 
@@ -73,7 +76,7 @@ export class ReleaseState {
     } as IReleaseStateSection;
 
     if (this.schema) {
-      const schemaSection = this.schema.sections?.find((s) => section.id ? s.id === section.id : s.type === section.type);
+      const schemaSection = this.schema.sections?.find((s) => s.id ? s.id === section.id : s.type === section.type);
 
       if (schemaSection?.changelog?.artifacts) {
         for (const schemaArtifact of schemaSection.changelog.artifacts) {
@@ -152,6 +155,17 @@ export class ReleaseState {
       ],
       level: 1,
     });
+  }
+
+  setStatus(status: Status): this {
+    if (!status || status === this.status) {
+      return this;
+    }
+
+    this.status = status;
+    this.statusUpdateAt = new Date();
+
+    return this;
   }
 
   toJSON(ver?: number) {

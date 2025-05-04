@@ -7,7 +7,7 @@ import { ProjectState } from './project-state';
 import { StatisticsService } from './statistics.service';
 import moment from 'moment-timezone';
 import { Log, logger } from './logger';
-import {TargetState} from './target-state';
+import { TargetState } from './target-state';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {

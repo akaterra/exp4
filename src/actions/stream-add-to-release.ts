@@ -4,7 +4,7 @@ import { IActionService } from '.';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
-import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
+import { getPossibleTargetIds } from './utils';
 
 @Service()
 export class StreamAddToReleaseActionService extends EntityService implements IActionService {

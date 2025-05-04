@@ -15,6 +15,10 @@ export async function projectTargetReleaseUpdate(req, res) {
     targetState.release.date = new Date(req.body.date);
   }
 
+  if (req.body.status) {
+    targetState.release.setStatus(req.body.status);
+  }
+
   for (const section of req.body.sections) {
     if (section.type === 'note') {
       section.level = 0;

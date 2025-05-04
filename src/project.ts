@@ -496,14 +496,14 @@ export class Project implements IProject {
 
     for (const event of events) {
       switch (event.type) {
-        default:
-          await this.flowRun(
-            event.config?.flowId,
-            targets,
-            params,
-          );
+      default:
+        await this.flowRun(
+          event.config?.flowId,
+          targets,
+          params,
+        );
 
-          break;
+        break;
       }
     }
   }
@@ -520,14 +520,14 @@ export class Project implements IProject {
 
     for (const event of events) {
       switch (event.type) {
-        default:
-          await this.flowRun(
-            event.config?.flowId,
-            [ target.id ],
-            params,
-          );
+      default:
+        await this.flowRun(
+          event.config?.flowId,
+          [ target.id ],
+          params,
+        );
 
-          break;
+        break;
       }
     }
   }
@@ -554,7 +554,7 @@ export class Project implements IProject {
   }
 
   async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState) {
-    let targetState = this.state.getTargetState(mixed, true);
+    const targetState = this.state.getTargetState(mixed, true);
 
     if (!targetState) {
       return;

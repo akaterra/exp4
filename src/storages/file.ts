@@ -11,7 +11,6 @@ import { IGeneralManifest } from '../general';
 import { lstat } from 'node:fs/promises';
 import { iter } from '../utils';
 import YAML from 'yaml'
-import { ReleaseState } from '../release-state';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 

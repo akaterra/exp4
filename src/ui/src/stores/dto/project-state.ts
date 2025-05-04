@@ -102,7 +102,7 @@ export type IProjectTargetState = {
 
   ref: IProjectTarget['ref'];
 
-  release: { date: Date; sections: IReleaseStateSection[] };
+  release: { date: Date; sections: IReleaseStateSection[]; status: Status };
   streams: Record<string, IProjectTargetStreamState>;
   version: string;
 

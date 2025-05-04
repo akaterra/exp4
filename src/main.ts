@@ -26,7 +26,7 @@ import { IProjectManifest } from './project';
 import cookieParser from 'cookie-parser';
 import { authLogout } from './api/auth/logout';
 import SourceMapSupport from 'source-map-support';
-import {projectTargetReleaseUpdate} from './api/project-target-state/release.update';
+import { projectTargetReleaseUpdate } from './api/project-target-state/release.update';
 
 SourceMapSupport.install({
   environment: 'node',

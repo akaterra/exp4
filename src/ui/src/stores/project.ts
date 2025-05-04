@@ -11,7 +11,8 @@ import { nextId, processing, saveContent, saveTextAligned, splitFilterTokens } f
 import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 import { FormStore } from './form';
-import {ProjectTargetReleaseModalContent, ProjectTargetReleaseModalTitle} from '../blocks/project.target.release.modal';
+import { ProjectTargetReleaseModalContent, ProjectTargetReleaseModalTitle } from '../blocks/project.target.release.modal';
+import { Status } from '../enums/status';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -387,6 +388,7 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
     flows: string[];
     status: null;
   }[];
+  status: Status;
 }> {
   constructor(public projectStore: ProjectStore, public projectTarget: IProjectTarget) {
     const release = projectStore.getTargetStoreByTargetId(projectTarget.id)?.targetState?.release;
@@ -417,9 +419,12 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
       date: {
         constraints: {},
         type: 'date',
-        initialValue: release.date
-          ? new Date(new Date(release.date).getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().substring(0, 16) // FIXME
-          : null,
+        initialValue: release.date ? new Date(new Date(release.date).getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().substring(0, 16) : null, // FIXME
+      },
+      status: {
+        constraints: {},
+        type: 'string',
+        initialValue: release.status,
       },
       notes: {
         constraints: { maxLength: 1000 },
@@ -565,8 +570,8 @@ export class ProjectStore extends BaseStore {
     mode: {
       target?: ProjectStoreMode;
     } = {
-      target: ProjectStoreMode.STREAMS,
-    };
+        target: ProjectStoreMode.STREAMS,
+      };
   @observable
     project: IProject;
   @observable
@@ -722,45 +727,46 @@ export class ProjectStore extends BaseStore {
     });
 
     switch (action) {
-      case 'cancel':
-        break;
-      case 'ok':
-        const payload: IProjectTargetState['release'] = {
-          date: projectTargetReleaseParamsStore.state.date,
-          sections: [
-            ...projectTargetReleaseParamsStore.state.streams.map((stream) => ({
-              id: stream.id,
-              type: 'stream',
-              description: stream.description,
-              flows: null,
-              status: stream.status,
-            })),
-            ...projectTargetReleaseParamsStore.state.ops.map((op) => ({
-              id: op.id,
-              type: 'op',
-              description: op.description,
-              flows: op.flows,
-              status: op.status,
-            })),
-            ...projectTargetReleaseParamsStore.state.notes.map((note) => ({
-              id: note.id,
-              type: 'note',
-              description: note.description,
-              flows: null,
-              status: note.status,
-            })),
-          ],
-        };
+    case 'cancel':
+      break;
+    case 'ok':
+      const payload: IProjectTargetState['release'] = {
+        date: projectTargetReleaseParamsStore.state.date,
+        sections: [
+          ...projectTargetReleaseParamsStore.state.streams.map((stream) => ({
+            id: stream.id,
+            type: 'stream',
+            description: stream.description,
+            flows: null,
+            status: stream.status,
+          })),
+          ...projectTargetReleaseParamsStore.state.ops.map((op) => ({
+            id: op.id,
+            type: 'op',
+            description: op.description,
+            flows: op.flows,
+            status: op.status,
+          })),
+          ...projectTargetReleaseParamsStore.state.notes.map((note) => ({
+            id: note.id,
+            type: 'note',
+            description: note.description,
+            flows: null,
+            status: note.status,
+          })),
+        ],
+        status: projectTargetReleaseParamsStore.state.status,
+      };
 
-        const updated = yield this.projectsStore.service.releaseUpdate(
-          this.project.id,
-          targetId,
-          payload,
-        );
-        this.getTargetStoreByTargetId(targetId).targetState.release = updated;
+      const updated = yield this.projectsStore.service.releaseUpdate(
+        this.project.id,
+        targetId,
+        payload,
+      );
+      this.getTargetStoreByTargetId(targetId).targetState.release = updated;
 
-        break;
-      }
+      break;
+    }
   }
 }
 

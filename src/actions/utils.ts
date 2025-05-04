@@ -1,4 +1,4 @@
-import { IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
+import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import * as _ from 'lodash';
 
 export function notEmptyArray(...args) {

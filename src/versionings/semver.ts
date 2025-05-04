@@ -8,7 +8,7 @@ import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';
 import { ReleaseState } from '../release-state';
-import {TargetState} from '../target-state';
+import { TargetState } from '../target-state';
 
 export interface ISemverConfig {
   format?: string;

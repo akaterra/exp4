@@ -2,10 +2,11 @@ import { Service } from 'typedi';
 import { INotificationService } from '.';
 import { EntityService } from '../entities.service';
 import { TargetState } from '../target-state';
-import {Autowired, request} from '../utils';
-import {ProjectsService} from '../projects.service';
-import {SlackIntegrationService} from '../integrations/slack';
-import {IProjectDef} from '../project';
+import { Autowired } from '../utils';
+import { ProjectsService } from '../projects.service';
+import { SlackIntegrationService } from '../integrations/slack';
+import { Status } from '../enums/status';
+import * as _ from 'lodash';
 
 @Service()
 export class SlackNotificationService extends EntityService implements INotificationService {
@@ -51,6 +52,26 @@ export class SlackNotificationService extends EntityService implements INotifica
       });
     }
 
+    if (targetState.release.status && targetState.release.status === Status.COMPLETED) {
+      payload.blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `_Completed at ${new Date(targetState.release.statusUpdateAt).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}_`,
+        },
+      });
+    }
+
+    if (targetState.release.status && targetState.release.status === Status.CANCELED) {
+      payload.blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `_Canceled at ${new Date(targetState.release.statusUpdateAt).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}_`,
+        },
+      });
+    }
+
     const streamsSections = targetState.release.sections.filter((section) => section.type === 'stream');
 
     if (streamsSections.length) {
@@ -64,7 +85,7 @@ export class SlackNotificationService extends EntityService implements INotifica
         },
         ...streamsSections.map((section) => {
           const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id);
-          let i = 0;
+          const i = 0;
 
           return {
             type: 'section',
@@ -95,7 +116,7 @@ export class SlackNotificationService extends EntityService implements INotifica
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: opsSections.map((section, i) => `${section.description ?? ''}\n*${section.status ?? 'pending'}*\n`).join('\n'),
+            text: opsSections.map((section, i) => `${section.description ?? ''}\n_${_.capitalize(section.status ?? 'pending')}_\n`).join('\n'),
           },
         },
       );

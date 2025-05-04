@@ -11,7 +11,6 @@ import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
-import { ReleaseState } from '../release-state';
 
 @Service()
 export class SqlStorageService extends EntityService implements IStorageService {

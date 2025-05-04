@@ -9,7 +9,6 @@ import { GithubIntegrationService } from '../integrations/github';
 import { IUser } from '../user';
 import { Log } from '../logger';
 import { IGeneralManifest } from '../general';
-import { ReleaseState } from '../release-state';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 
