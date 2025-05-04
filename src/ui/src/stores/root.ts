@@ -146,8 +146,8 @@ export class RootStore {
     }
 
     yield this.authorize(id, {
-      username: this.authPasswordStore['username'],
-      password: this.authPasswordStore['password'],
+      username: this.authPasswordStore.state.username,
+      password: this.authPasswordStore.state.password,
     });
   }
 

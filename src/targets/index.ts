@@ -27,7 +27,12 @@ export class TargetHolderService {
         return null;
       }
 
-      entity.updateRelease(await project.getEnvVersioningByTarget(target).getCurrentRelease(target));
+      const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
+
+      if (!entity.release || (release && release.ver > entity.release.ver)) {
+        entity.release = release;
+      }
+
       entity.release.schema = target.release;
       entity.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 

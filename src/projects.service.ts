@@ -25,13 +25,14 @@ export class ProjectsService extends EntitiesService<Project> {
   }
 
   @Log('debug')
-  async getState(
+  async rereadState(
     projectId: IProjectDef['id'],
     targetStreams?: Record<IProjectTargetDef['id'], IProjectTargetStreamDef['id'][] | boolean>,
     scopes?: Record<string, boolean>,
   ): Promise<ProjectState> {
     const project = this.get(projectId);
-    const projectState = await this.statesCache.get(projectId) ??
+    const projectState =
+      await this.statesCache.get(projectId) ??
       await this.statesCache.set(projectId, new ProjectState(projectId));
 
     if (!scopes) {
@@ -82,11 +83,12 @@ export class ProjectsService extends EntitiesService<Project> {
 
           for (const [ tId, ] of syncEntries) {
             this.tasksContainer.onGroup('streamState').async.push(async () => {
-              projectState.setTargetState(tId, await project.getTargetStateByTarget(tId));
+              await project.rereadTargetStateByTarget(tId);
             });
           }
 
           await this.tasksContainer.onGroup('streamState').wait();
+
 
           for (const [ tId, streamIds, scopes ] of syncEntries) {
             for (const sId of streamIds) {
@@ -94,9 +96,8 @@ export class ProjectsService extends EntitiesService<Project> {
 
               if (stream) {
                 this.tasksContainer.onGroup('streamState').async.push(async () => {
-                  const streamState = await project.getStreamStateByTargetAndStream(tId, sId, scopes);
+                  const streamState = await project.rereadcStreamStateByTargetAndStream(tId, sId, scopes);
 
-                  projectState.setTargetStreamState(tId, streamState);
                   projectState.getTargetState(tId).setReleaseSectionByStreamId(
                     sId,
                     streamState.history.artifact,
@@ -109,13 +110,16 @@ export class ProjectsService extends EntitiesService<Project> {
           }
 
           await this.tasksContainer.onGroup('streamState').wait();
+
+          for (const [ tId, ] of syncEntries) {
+            this.tasksContainer.onGroup('streamState').async.push(async () => {
+              await project.updateTargetState(tId);
+            });
+          }
+
+          await this.tasksContainer.onGroup('streamState').wait();
         } while (syncEntries.length);
       })();
-    }
-
-    for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
-      await project.updateTargetState(tId);
-      await project.triggerTargetEvent(tId, 'targetUpdated');
     }
 
     project.state = projectState;
@@ -123,15 +127,14 @@ export class ProjectsService extends EntitiesService<Project> {
     return projectState;
   }
 
-  async updateTargetState(
-    targetState: TargetState,
-  ) {
-    this.tasksContainer.onGroup('targetState').async.push(async () => {
+  async updateTargetState(targetState: TargetState) {
+    await this.tasksContainer.async.push(async () => {
       await this.get(targetState.target.ref.projectId)
         .getEnvVersioningByTarget(targetState.target)
         .setCurrentRelease(targetState);
+
+      targetState.release.ver += 1;
     });
-    await this.tasksContainer.onGroup('targetState').wait();
   }
 
   async runStatesResync() {
@@ -157,7 +160,7 @@ export class ProjectsService extends EntitiesService<Project> {
         project.resync.at = now.toDate();
         resynced = true;
 
-        await this.getState(project.id, null, { '*': true });
+        await this.rereadState(project.id, null, { '*': true });
 
         this.statisticsService.inc(`projects.${project.id}.statesResyncCount`);
         this.statisticsService.set(`projects.${project.id}.statesResyncAt`, now.toDate());

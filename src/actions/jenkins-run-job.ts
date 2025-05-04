@@ -34,7 +34,7 @@ export class JenkinsJobRunActionService extends EntityService implements IAction
     params?: Record<string, any>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const projectState = await this.projectsService.getState(flow.ref.projectId);
+    const projectState = await this.projectsService.rereadState(flow.ref.projectId);
     const sourceTargetIds: IProjectTargetDef['id'][] = notEmptyArray(
       action.targets,
       getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets),

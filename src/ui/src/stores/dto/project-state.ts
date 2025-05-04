@@ -77,6 +77,7 @@ export type IReleaseStateSection = {
 
   description?: string;
 
+  assingeeUserId?: string;
   changelog?: {
     id?: IProjectTarget['id'];
     notes?: { id: string; text: string }[];
@@ -92,6 +93,7 @@ export type IReleaseStateSection = {
   }[];
   flows?: IProject['id'][];
   level?: number;
+  status?: string;
 }
 
 export type IProjectTargetState = {

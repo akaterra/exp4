@@ -48,11 +48,11 @@ export class ProjectState {
     return ids;
   }
 
-  getTargetState(targetId: IProjectTargetDef['id']): TargetState {
-    const targetState = this.targetsStates[targetId] ?? null;
+  getTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState, unsafe?: boolean): TargetState {
+    const targetState = this.targetsStates[typeof mixed === 'string' ? mixed : mixed.id] ?? null;
 
-    if (!targetState) {
-      throw new Error(`Target state not found for target "${targetId}"`);
+    if (!targetState && !unsafe) {
+      throw new Error(`Target state not found for target "${typeof mixed === 'string' ? mixed : mixed.id}"`);
     }
 
     return targetState;

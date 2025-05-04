@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
 import { IIntegrationService, IncStatistics } from '.';
 import { request } from '../utils';
-import { Log } from '../logger';
+import { Log, logger } from '../logger';
 import {maybeReplaceEnvVars} from './utils';
 
 export interface ISlackConfig {
@@ -55,6 +55,8 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
         channel: this.config.channelId, ts: messageId,
         ...message,
       }, 'post', this.config.oauthToken).then((res) => {
+        logger.debug('SlackIntegrationService.res', res);
+
         return { messageId: res.ts };
       });
     }
@@ -66,7 +68,9 @@ export class SlackIntegrationService extends EntityService implements IIntegrati
       } : {
         channel: this.config.channelId,
         ...message,
-      }, 'post').then(() => {
+      }, 'post').then((res) => {
+        logger.debug('SlackIntegrationService.res', res);
+
         return { messageId: null };
       });
     }

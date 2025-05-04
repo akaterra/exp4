@@ -13,7 +13,7 @@ export class SlackNotificationService extends EntityService implements INotifica
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(protected config?: { integration?: string }) {
+  constructor(protected config?: { integration?: string; locale?: string; tz?: string }) {
     super();
   }
 
@@ -33,14 +33,21 @@ export class SlackNotificationService extends EntityService implements INotifica
 
     if (notesSections.length) {
       payload.blocks.push({
-        type: 'header',
-        text: { type: 'plain_text', text: 'Notes' },
-      }, {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: notesSections.map((section) => section.description).map((note) => `${note}\n`).join('\n'),
+          text: notesSections.map((section) => section.description ?? '').map((note) => `${note}\n`).join('\n'),
         }
+      });
+    }
+
+    if (targetState.release.date) {
+      payload.blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `_Scheduled for ${new Date(targetState.release.date).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}_`,
+        },
       });
     }
 
@@ -50,23 +57,48 @@ export class SlackNotificationService extends EntityService implements INotifica
       payload.blocks.push(
         {
           type: 'header',
-          text: { type: 'plain_text', text: 'Components' },
+          text: {
+            type: 'plain_text',
+            text: 'Components',
+          },
         },
         ...streamsSections.map((section) => {
           const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id);
+          let i = 0;
 
           return {
             type: 'section',
             fields: [ {
               type: 'mrkdwn',
-              text: `*${stream?.title ?? section.id}*\n\n${section.description}`,
+              text: `*${stream?.title ?? section.id}*\n\n${section.description ?? ''}`,
             }, {
               type: 'mrkdwn',
-              text: section.changelog.map((changelog) => changelog.artifacts?.map((artifact) => `> ${artifact.id}\n> _${artifact.description}_\n`)).flat().join('\n'),
-            } ],
+              text: section.changelog.map((changelog) => changelog.artifacts?.map((artifact) => `${artifact.id}\n*${getDescriptionValue(artifact.description) ?? ''}*\n`)).flat().join('\n'),
+            } ]
           };
+        }).flat(),
+      );
+    }
+
+    const opsSections = targetState.release.sections.filter((section) => section.type === 'op');
+
+    if (opsSections.length) {
+      payload.blocks.push(
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'To do',
+          },
         },
-      ));
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: opsSections.map((section, i) => `${section.description ?? ''}\n*${section.status ?? 'pending'}*\n`).join('\n'),
+          },
+        },
+      );
     }
 
     console.log(JSON.stringify(payload,undefined,2));
@@ -83,4 +115,16 @@ export class SlackNotificationService extends EntityService implements INotifica
       .get(targetState.target.ref.projectId)
       .getEnvIntegraionByIntegration<SlackIntegrationService>(this.config?.integration, this.type);
   }
+}
+
+function getDescriptionValue(description) {
+  return description?.value ?? description;
+}
+
+function getTzOffsetMin(timeZone = 'UTC') {
+  return (
+    new Date(new Date().toLocaleString('en-US', { timeZone: 'UTC' })).getTime()
+    -
+    new Date(new Date().toLocaleString('en-US', { timeZone })).getTime()
+  ) / 6e4;
 }

@@ -7,7 +7,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
   }
 
   const [ value, setValue ] = useState(currentValue);
-
+console.log(currentValue);
   const control = Array.isArray(items)
     ? <select
       autoComplete={ autoComplete }
@@ -31,7 +31,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
         }
         : undefined
       }
-    >{ items.map((e) => <option selected={ e === value } value={ e }>{ e }</option>) }</select>
+    >{ items.map((e, i) => <option key={ i } selected={ e === value } value={ e }>{ e }</option>) }</select>
     : <select
       className={ disabled ? `control ${decoration ?? ''} disabled` : `control ${decoration ?? ''}` }
       disabled={ disabled }
@@ -53,7 +53,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
         }
         : undefined
       }
-    >{ Object.entries<string>(items ?? {}).map(([ optionVal, optionTitle ]) => <option selected={ optionVal === value } value={ optionVal }>{ optionTitle }</option>) }</select>;
+    >{ Object.entries<string>(items ?? {}).map(([ optionVal, optionTitle ], i) => <option key={ i } selected={ optionVal === value } value={ optionVal }>{ optionTitle }</option>) }</select>;
 
   return maybeLabeledControl(<div className='select'>{ control }</div>, x, label, error);
 }

@@ -8,6 +8,7 @@ export interface IReleaseStateSection {
 
   description?: string;
 
+  assigneeUserId?: string;
   changelog: {
     id?: IProjectDef['id'];
     notes?: { id: string; text: string }[];
@@ -23,15 +24,19 @@ export interface IReleaseStateSection {
   }[];
   flows?: IProjectFlowDef['id'][];
   level?: number;
+  status?: string;
 }
 
 export class ReleaseState {
   id: string;
   type: string;
 
+  date?: Date;
   metadata: Record<string, any>;
   sections: IReleaseStateSection[] = [];
   schema: IProjectTargetDef['release'];
+
+  ver?: number;
 
   constructor(props: Partial<ReleaseState>) {
     if (!props.metadata) {
@@ -40,6 +45,10 @@ export class ReleaseState {
 
     if (!props.sections) {
       props.sections = [];
+    }
+
+    if (!props.ver) {
+      props.ver = 0;
     }
 
     Reflect.setPrototypeOf(props, ReleaseState.prototype);
@@ -127,7 +136,7 @@ export class ReleaseState {
     const existingSectionChangelog = existingSection?.changelog.find((c) => c.id === streamId);
 
     return this.setSection({
-      id: `stream:${streamId}`,
+      id: streamId,
       type: 'stream',
 
       changelog: [
@@ -145,26 +154,16 @@ export class ReleaseState {
     });
   }
 
-  update(release: Partial<ReleaseState>) {
-    if (release.metadata) {
-      this.metadata = Object.assign(this.metadata, release.metadata);
-    }
-
-    if (release.schema) {
-      this.schema = release.schema;
-    }
-
-    if (release.sections) {
-      release.sections.forEach((section) => this.setSection(section));
-    }
-
-    return this;
-  }
-
-  toJSON() {
-    return {
+  toJSON(ver?: number) {
+    const obj = {
       ...this,
       schema: undefined,
     };
+
+    if (ver != null) {
+      obj.ver = ver;
+    }
+
+    return obj;
   }
 }

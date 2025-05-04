@@ -31,17 +31,6 @@ export class FormStore<
   constructor(public readonly __schema: U) {
     this.clear();
 
-    this.state = Object.keys(__schema).reduce((acc, key) => {
-      const def = __schema[key];
-      
-      if (def?.initialValue !== undefined) {
-        acc[key] = def.initialValue;
-      } else {
-        acc[key] = null;
-      }
-
-      return acc;
-    }, {}) as T;
     makeObservable(this.state, Object.keys(__schema).reduce((acc, key) => {
       acc[key] = observable;
 
@@ -57,9 +46,17 @@ export class FormStore<
   }
 
   clear() {
-    for (const [ key, def ] of Object.entries(this.__schema)) {
-      this[key] = def.initialValue ?? null;
-    }
+    this.state = Object.keys(this.__schema).reduce((acc, key) => {
+      const def = this.__schema[key];
+      
+      if (def?.initialValue !== undefined) {
+        acc[key] = def.initialValue;
+      } else {
+        acc[key] = null;
+      }
+
+      return acc;
+    }, {}) as T;
 
     this.validateAll(true);
 

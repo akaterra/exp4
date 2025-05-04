@@ -29,7 +29,7 @@ export class ArgocdSyncActionService extends EntityService implements IActionSer
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
   ): Promise<void> {
     const project = this.projectsService.get(flow.ref.projectId);
-    const projectState = await this.projectsService.getState(flow.ref.projectId);
+    const projectState = await this.projectsService.rereadState(flow.ref.projectId);
     const sourceTargetIds = notEmptyArray(
       action.targets,
       getPossibleTargetIds(targetsStreams, project.getFlowByFlow(flow.ref.flowId).targets),

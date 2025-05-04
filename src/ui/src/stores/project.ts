@@ -368,18 +368,24 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
   date: Date;
   notes: {
     id: string;
-    flows: string[];
+    assigneeUserId: string;
     description: string;
+    flows: string[];
+    status: null;
   }[];
   streams: {
     id: string;
+    assigneeUserId: string;
     flows: string[];
     description: string;
+    status: null;
   }[];
   ops: {
     id: string;
-    flows: string[];
+    assigneeUserId: string;
     description: string;
+    flows: string[];
+    status: null;
   }[];
 }> {
   constructor(public projectStore: ProjectStore, public projectTarget: IProjectTarget) {
@@ -387,25 +393,33 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
 
     const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => ({
       id: section.id ?? nextId(),
-      flows: section.flows ?? [],
+      assigneeUserId: section.assingeeUserId ?? null,
       description: section.description,
+      flows: section.flows ?? [],
+      status: section.status ?? null,
     })) ?? [];
     const streamsIv = release.sections?.filter((section) => section.type === 'stream').map((section) => ({
       id: section.id ?? nextId(),
-      flows: section.flows ?? [],
+      assigneeUserId: section.assingeeUserId ?? null,
       description: section.description,
+      flows: section.flows ?? [],
+      status: section.status ?? null,
     })) ?? [];
     const opsIv = release.sections?.filter((section) => section.type === 'op').map((section) => ({
       id: section.id ?? nextId(),
-      flows: section.flows ?? [],
+      assigneeUserId: section.assingeeUserId ?? null,
       description: section.description,
+      flows: section.flows ?? [],
+      status: section.status ?? null,
     })) ?? [];
 
     const schema = {
       date: {
         constraints: {},
         type: 'date',
-        initialValue: release.date,
+        initialValue: release.date
+          ? new Date(new Date(release.date).getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().substring(0, 16) // FIXME
+          : null,
       },
       notes: {
         constraints: { maxLength: 1000 },
@@ -417,6 +431,11 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
           },
           description: {
             constraints: { maxLength: 1000 },
+            type: 'string',
+            initialValue: null,
+          },
+          status: {
+            constraints: {},
             type: 'string',
             initialValue: null,
           },
@@ -436,6 +455,11 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
             type: 'string',
             initialValue: null,
           },
+          status: {
+            constraints: {},
+            type: 'string',
+            initialValue: null,
+          },
         },
         initialValue: streamsIv,
       },
@@ -452,6 +476,11 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
             type: 'string',
             initialValue: null,
           },
+          status: {
+            constraints: {},
+            type: 'string',
+            initialValue: null,
+          },
         },
         initialValue: opsIv,
       },
@@ -463,8 +492,10 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
   addOp(op?: Partial<ProjectTargetReleaseParamsStore['state']['ops'][number]>, index?: number) {
     const newOp = {
       id: op?.id ?? nextId(),
+      assigneeUserId: op?.assigneeUserId ?? null,
       description: op?.description,
       flows: op?.flows ?? [],
+      status: op?.status ?? null,
     };
 
     if (index != null && index >= 0 && index < this.state.ops.length - 1) {
@@ -702,18 +733,21 @@ export class ProjectStore extends BaseStore {
               type: 'stream',
               description: stream.description,
               flows: null,
+              status: stream.status,
             })),
             ...projectTargetReleaseParamsStore.state.ops.map((op) => ({
               id: op.id,
               type: 'op',
               description: op.description,
               flows: op.flows,
+              status: op.status,
             })),
             ...projectTargetReleaseParamsStore.state.notes.map((note) => ({
               id: note.id,
               type: 'note',
               description: note.description,
               flows: null,
+              status: note.status,
             })),
           ],
         };
@@ -724,7 +758,7 @@ export class ProjectStore extends BaseStore {
           payload,
         );
         this.getTargetStoreByTargetId(targetId).targetState.release = updated;
-console.log(this.getTargetStoreByTargetId(targetId).targetState.release);
+
         break;
       }
   }

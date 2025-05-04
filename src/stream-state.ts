@@ -32,7 +32,7 @@ export class StreamState<
       type: string;
   
       author?: { name?: string; link?: string };
-      description?: string;
+      description?: string | { level: string; value: string };
       link?: string;
       metadata?: HistoryActionMetadata;
       steps?: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
@@ -44,7 +44,7 @@ export class StreamState<
       type: string;
   
       author?: { name?: string; link?: string };
-      description?: string;
+      description?: string | { level: string; value: string };
       link?: string;
       metadata?: Record<string, any>;
       steps?: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;
@@ -56,7 +56,7 @@ export class StreamState<
       type: string;
   
       author?: { name?: string; link?: string };
-      description?: string;
+      description?: string | { level: string; value: string };
       link?: string;
       metadata?: HistoryChangeMetadata;
       steps?: Record<IStreamHistoryStep['id'], IStreamHistoryStep>;

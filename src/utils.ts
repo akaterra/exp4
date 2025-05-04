@@ -24,7 +24,15 @@ export class AwaitableContainer {
   private selectedRunAsync: boolean = false;
 
   constructor(private max: number = 3, private runInBatch: boolean = true) {
+    const exec = async () => {
+      for (const [ bucketId, bucket ] of this.buckets.entries()) {
+        if (!bucket.executor) {
+          bucket.executor = this.exec(bucketId);
+        }
+      }
+    }
 
+    setInterval(exec, 2000);
   }
 
   get async() {

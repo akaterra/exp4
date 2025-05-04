@@ -234,7 +234,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
     await storage.varSetTarget(
       targetState,
       [ 'release', targetState.target.ref.projectId, this.config?.namespace ?? targetState.target.id, targetVersion ],
-      targetState.release.toJSON(),
+      targetState.release.toJSON(targetState.release.ver + 1),
       true,
     );
   }

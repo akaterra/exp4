@@ -320,25 +320,6 @@ export class Project implements IProject {
     return this.flows[typeof mixed === 'string' ? mixed : mixed.id];
   }
 
-  async getTargetStateByTarget(mixed: IProjectTargetDef['id'] | IProjectTargetDef): Promise<TargetState> {
-    return await this.env.targets.getState(this.getTargetByTarget(mixed));
-  }
-
-  async getStreamStateByTargetAndStream(
-    targetMixed: IProjectTargetDef['id'] | IProjectTargetDef,
-    streamMixed: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef,
-    scopes?: Record<string, boolean>,
-    context?: IStreamStateContext,
-  ) {
-    const streamState = await this.env.streams.getState(
-      this.getTargetStreamByTargetAndStream(targetMixed, streamMixed),
-      scopes,
-      context,
-    );
-
-    return streamState;
-  }
-
   getTargetByTarget<S extends IProjectTargetDef = IProjectTargetDef>(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState, unsafe?: boolean): S {
     const id = typeof mixed === 'string' ? mixed : mixed.id;
     const target = this.targets[id] as S;
@@ -503,7 +484,7 @@ export class Project implements IProject {
     return true;
   }
 
-  async triggerEvent(eventId: string, params?: Record<string, any>) {
+  async raiseEvent(eventId: string, params?: Record<string, any>) {
     const targets = Object.keys(this.targets);
     const events = this.events?.[eventId];
 
@@ -527,7 +508,7 @@ export class Project implements IProject {
     }
   }
 
-  async triggerTargetEvent(mixed: IProjectTargetDef['id'] | IProjectTargetDef, eventId: string, params?: Record<string, any>) {
+  async raiseTargetEvent(mixed: IProjectTargetDef['id'] | IProjectTargetDef, eventId: string, params?: Record<string, any>) {
     const target = this.getTargetByTarget(mixed);
     const events = target.events?.[eventId];
 
@@ -551,12 +532,36 @@ export class Project implements IProject {
     }
   }
 
-  async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState) {
-    const target = typeof mixed === 'string'
-      ? this.getTargetByTarget(mixed)
-      : mixed;
+  async rereadTargetStateByTarget(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState): Promise<TargetState> {
+    const target = this.getTargetByTarget(mixed);
+    const targetState = await this.env.targets.getState(target);
+    this.state.setTargetState(target.id, targetState);
 
-    await this.projectsService.updateTargetState(await this.getTargetStateByTarget(target.id));
+    return targetState;
+  }
+
+  async rereadcStreamStateByTargetAndStream(
+    targetMixed: IProjectTargetDef['id'] | IProjectTargetDef,
+    streamMixed: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef,
+    scopes?: Record<string, boolean>,
+    context?: IStreamStateContext,
+  ) {
+    const stream = this.getTargetStreamByTargetAndStream(targetMixed, streamMixed);
+    const streamState = await this.env.streams.getState(stream, scopes, context);
+    this.state.setTargetStreamState(stream.ref.targetId, streamState);
+
+    return streamState;
+  }
+
+  async updateTargetState(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState) {
+    let targetState = this.state.getTargetState(mixed, true);
+
+    if (!targetState) {
+      return;
+    }
+
+    await this.projectsService.updateTargetState(targetState);
+    await this.raiseTargetEvent(targetState.id, 'targetUpdated');  
   }
 
   toJSON() {

@@ -24,12 +24,11 @@ export class ReleaseNotifyActionService extends EntityService implements IAction
     );
 
     for (const tIdOfTarget of sourceTargetIds) {
-      const targetState = await project.getTargetStateByTarget(tIdOfTarget);
+      const targetState = await project.rereadTargetStateByTarget(tIdOfTarget);
 
       await project
         .getEnvNotificationByNotification(action.config?.notification)
         .publishRelease(targetState);
-      await project.updateTargetState(targetState);
     }
   }
 }

@@ -35,5 +35,5 @@ export async function projectStateList(req, res) {
       }, {})
       : req.body?.scopes ?? null;
 
-  res.json(await projectsService.getState(req.params.projectId, targetStreams, scopes));
+  res.json(await projectsService.rereadState(req.params.projectId, targetStreams, scopes));
 }

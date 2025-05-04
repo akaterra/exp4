@@ -57,7 +57,7 @@ export const ProjectTargetReleaseNotesModalContent = ({
       id='date'
       label='Date'
       x={ 6 }
-      type='date'
+      type='datetime-local'
     /></Row>
     {
       ParamsElements
@@ -65,7 +65,7 @@ export const ProjectTargetReleaseNotesModalContent = ({
   </Fragment>;
 }
 
-export const ProjectTargetReleaseComponentsModalContent = ({
+export const ProjectTargetReleaseStreamsModalContent = ({
   projectTargetReleaseParamsStore,
   projectTargetStore,
 }: {
@@ -73,7 +73,7 @@ export const ProjectTargetReleaseComponentsModalContent = ({
   projectTargetStore?: ProjectTargetStore;
 }) => {
   if (!projectTargetReleaseParamsStore.state.streams?.length) {
-    return <Label>No components available</Label>;
+    return <Row><Label>No streams available</Label></Row>;
   }
 
   const tabs = projectTargetReleaseParamsStore.state.streams.map((stream, i) => ({
@@ -110,14 +110,21 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
   projectTargetReleaseParamsStore.state.ops.forEach((op, i) => {
     ParamsElements.push(
       <div key={ op.id ?? i }>
-        <div>
+        <Row>
           <FormInput
             store={ projectTargetReleaseParamsStore }
             id={ `ops.${i}.description` }
             label='Description'
-            x={ null }
+            x={ 14 }
           />
-        </div>
+          <FormSelect
+            store={ projectTargetReleaseParamsStore }
+            id={ `ops.${i}.status` }
+            items={ { 'pending': 'Pending', 'inProgress': 'In progress', 'completed': 'Completed' } }
+            label='Status'
+            x={ 4 }
+          />
+        </Row>
         <div className='flex flex-hor children-gap-hor'>
           {
             projectTargetStore.flows.map(({ flow }, j) => {
@@ -183,14 +190,14 @@ export const ProjectTargetReleaseModalContent = observer(({
   return <div className='flex flex-ver paragraph children-gap'>
     <Tabs
       selectedIndex={ 'notes' }
-      tabs={ [ { id: 'notes', title: 'Notes' }, { id: 'components', title: 'Components' }, { id: 'ops', title: 'Ops' } ] }
+      tabs={ [ { id: 'notes', title: 'Notes' }, { id: 'streams', title: 'Streams' }, { id: 'ops', title: 'Ops' } ] }
       tabsDecoration='default'
     >
       <ProjectTargetReleaseNotesModalContent
         projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
         projectTargetStore={ projectTargetStore }
       />
-      <ProjectTargetReleaseComponentsModalContent
+      <ProjectTargetReleaseStreamsModalContent
         projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
         projectTargetStore={ projectTargetStore }
       />

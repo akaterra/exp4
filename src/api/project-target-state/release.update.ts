@@ -9,7 +9,11 @@ export async function projectTargetReleaseUpdate(req, res) {
   logger.info({ message: 'projectTargetReleaseUpdate', data: req.data });
 
   const project = projectsService.get(req.params.projectId);
-  const targetState = await project.getTargetStateByTarget(req.params.targetId);
+  const targetState = await project.rereadTargetStateByTarget(req.params.targetId);
+
+  if (req.body.date) {
+    targetState.release.date = new Date(req.body.date);
+  }
 
   for (const section of req.body.sections) {
     if (section.type === 'note') {

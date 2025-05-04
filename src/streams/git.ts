@@ -40,7 +40,7 @@ export class GitStreamService extends EntityService implements IStreamService {
 
     const source = await this.projectsService
       .get(stream.ref?.projectId)
-      .getStreamStateByTargetAndStream(stream.ref?.targetId, stream.ref?.streamId, { change: true });
+      .rereadcStreamStateByTargetAndStream(stream.ref?.targetId, stream.ref?.streamId, { change: true });
 
     if (!source?.history?.change?.[0]?.id) {
       return;
@@ -158,7 +158,7 @@ export class GitStreamService extends EntityService implements IStreamService {
 
     const source = await this.projectsService
       .get(sourceStream.ref?.projectId)
-      .getStreamStateByTargetAndStream(sourceStream.ref?.targetId, sourceStream.ref?.streamId, { change: true });
+      .rereadcStreamStateByTargetAndStream(sourceStream.ref?.targetId, sourceStream.ref?.streamId, { change: true });
 
     if (!source?.history?.change?.[0]?.id) {
       return;

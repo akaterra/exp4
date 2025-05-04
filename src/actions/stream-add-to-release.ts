@@ -33,10 +33,10 @@ export class StreamAddToReleaseActionService extends EntityService implements IA
         const streamIds = targetsStreams?.[tIdOfSource] === true
           ? Object.keys(target.streams)
           : targetsStreams?.[tIdOfSource] as string[] ?? Object.keys(target.streams);
-        const targetState = await project.getTargetStateByTarget(tIdOfTarget);
+        const targetState = await project.rereadTargetStateByTarget(tIdOfTarget);
 
         for (const streamId of streamIds) {
-          const targetStreamState = await project.getStreamStateByTargetAndStream(tIdOfTarget, streamId);
+          const targetStreamState = await project.rereadcStreamStateByTargetAndStream(tIdOfTarget, streamId);
           targetState.setReleaseSectionByStreamId(streamId, targetStreamState.history.artifact);
         }
 

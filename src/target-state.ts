@@ -3,8 +3,8 @@ import { IReleaseStateSection, ReleaseState } from './release-state';
 import { StreamState } from './stream-state';
 
 export class TargetState {
-  id: string;
-  type: string;
+  id: IProjectTargetDef['id'];
+  type: IProjectTargetDef['type'];
 
   target: IProjectTargetDef;
 
@@ -31,16 +31,6 @@ export class TargetState {
     onlyExisting?: boolean,
   ) {
     return this.release.setSectionByStreamId(streamId, artifacts, notes, onlyExisting);
-  }
-
-  updateRelease(release: Partial<ReleaseState>) {
-    if (!this.release) {
-      this.release = new ReleaseState({ id: this.id, type: this.type });
-    } else {
-      this.release.update(release);
-    }
-
-    return this;
   }
 
   toJSON() {
