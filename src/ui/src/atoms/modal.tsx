@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { SubTitle } from './title';
 import { Button } from './button';
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 export const Modal = ({
   buttons = {
@@ -36,26 +37,24 @@ export const Modal = ({
 }) => {
   return <div className={ isShowing ? "ef-show" : "ef-hide" }><div className="modal ef-fade" onAnimationEnd={ onTransitionEnd }>
     <div className="modal-content f10 f14-s- bg-light shadow shadow-high pad-hor triple flex ef-slide">
-      <div className='w00 paragraph paragraph-lrg'>
-        <div className='c18'>
-          <div>
-            <div className='flex flex-hor'>
-              {
-                typeof title === 'string'
-                  ? <SubTitle>{ title }</SubTitle>
-                  : title
-              }
-              {
-                onClose
-                  ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose }><i className="fa-solid fa-xmark fa-lg"></i></Button>
-                  : null
-              }
-            </div>
+      <div className='w00 paragraph paragraph-lrg flex flex-ver'>
+        <div className='c18 flex flex-hor'>
+          {
+            typeof title === 'string'
+              ? <SubTitle>{ title }</SubTitle>
+              : title
+          }
+          {
+            onClose
+              ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose }><i className="fa-solid fa-xmark fa-lg"></i></Button>
+              : null
+          }
+        </div>
+        <OverlayScrollbarsComponent defer options={{ scrollbars: { autoHide: 'leave' } }}>
+          <div className='c18 children-gap'>
+            { children }
           </div>
-        </div>
-        <div className='c18 children-gap'>
-          { children }
-        </div>
+        </OverlayScrollbarsComponent>
         <div className='c18'>
           <div className='row flex-right'>
             {

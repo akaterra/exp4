@@ -78,23 +78,21 @@ export class ReleaseState {
     if (this.schema) {
       const schemaSection = this.schema.sections?.find((s) => s.id ? s.id === section.id : s.type === section.type);
 
-      if (schemaSection?.changelog?.artifacts) {
-        for (const schemaArtifact of schemaSection.changelog.artifacts) {
-          for (const changelog of releaseSection.changelog) {
-            if (!changelog.artifacts) {
-              continue;
-            }
-
-            changelog.artifacts = changelog.artifacts.filter((artifact) => artifact.id === schemaArtifact).map((artifact) => ({
-              id: artifact.id,
-              type: artifact.type,
-
-              description: artifact.description,
-              link: artifact.link,
-              status: artifact.status,
-              time: artifact.time,
-            }));
+      if (schemaSection?.changelog?.artifacts?.length) {
+        for (const changelog of releaseSection.changelog) {
+          if (!changelog.artifacts) {
+            continue;
           }
+
+          changelog.artifacts = changelog.artifacts.filter((artifact) => schemaSection.changelog.artifacts.includes(artifact.id)).map((artifact) => ({
+            id: artifact.id,
+            type: artifact.type,
+
+            description: artifact.description,
+            link: artifact.link,
+            status: artifact.status,
+            time: artifact.time,
+          }));
         }
       }
     }

@@ -12,6 +12,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
     ? <select
       autoComplete={ autoComplete }
       className={ className ? `control ${className}` : 'control' }
+      defaultValue={ value }
       disabled={ disabled }
       key={ id }
       onBlur={
@@ -34,6 +35,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
     >{ items.map((e, i) => <option key={ i } selected={ e === value } value={ e }>{ e }</option>) }</select>
     : <select
       className={ disabled ? `control ${decoration ?? ''} disabled` : `control ${decoration ?? ''}` }
+      defaultValue={ value }
       disabled={ disabled }
       key={ id }
       onBlur={
@@ -53,7 +55,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
         }
         : undefined
       }
-    >{ Object.entries<string>(items ?? {}).map(([ optionVal, optionTitle ], i) => <option key={ i } selected={ optionVal === value } value={ optionVal }>{ optionTitle }</option>) }</select>;
+    >{ Object.entries<string>(items ?? {}).map(([ optionVal, optionTitle ], i) => <option key={ i } value={ optionVal }>{ optionTitle }</option>) }</select>;
 
   return maybeLabeledControl(<div className='select'>{ control }</div>, x, label, error);
 }

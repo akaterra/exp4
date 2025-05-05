@@ -37,7 +37,7 @@ export class SlackNotificationService extends EntityService implements INotifica
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: notesSections.map((section) => section.description ?? '').map((note) => `${note}\n`).join('\n'),
+          text: notesSections.map((section) => section.description ?? '').map((note) => `${note}\n`).join('\n') || ' ',
         }
       });
     }
@@ -84,17 +84,16 @@ export class SlackNotificationService extends EntityService implements INotifica
           },
         },
         ...streamsSections.map((section) => {
-          const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id);
-          const i = 0;
+          const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id, true);
 
           return {
             type: 'section',
             fields: [ {
               type: 'mrkdwn',
-              text: `*${stream?.title ?? section.id}*\n\n${section.description ?? ''}`,
+              text: `*${stream?.title ?? section.id}*\n_${section.description ?? ''}_`,
             }, {
               type: 'mrkdwn',
-              text: section.changelog.map((changelog) => changelog.artifacts?.map((artifact) => `${artifact.id}\n*${getDescriptionValue(artifact.description) ?? ''}*\n`)).flat().join('\n'),
+              text: section.changelog.map((changelog) => changelog.artifacts?.map((artifact) => `${artifact.id}\n*${getDescriptionValue(artifact.description) ?? ''}*\n`)).flat().join('\n') || ' ',
             } ]
           };
         }).flat(),
@@ -116,7 +115,7 @@ export class SlackNotificationService extends EntityService implements INotifica
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: opsSections.map((section, i) => `${section.description ?? ''}\n_${_.capitalize(section.status ?? 'pending')}_\n`).join('\n'),
+            text: opsSections.map((section, i) => `*${section.description ?? ''}*\n_${_.capitalize(section.status ?? 'pending')}_\n`).join('\n') || ' ',
           },
         },
       );

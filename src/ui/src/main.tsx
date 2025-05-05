@@ -3,6 +3,7 @@ import * as React from 'react';
 import './main.css';
 import './mini.min.css';
 import 'normalize.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { Navigation } from './blocks/navigation';
 import { ProjectsStore } from './stores/projects';
 import { Project } from './blocks/project';

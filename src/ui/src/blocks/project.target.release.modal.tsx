@@ -16,17 +16,18 @@ export const ProjectTargetReleaseModalTitle = ({
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  return <div>
-    <Title>
-      { projectTargetStore.target.title ?? projectTargetStore.target.id }&nbsp;
-      <span className='font-sml sup'>{projectTargetStore.targetState.version}</span>
-    </Title>
+  return <Title>
+    { projectTargetStore.target.title ?? projectTargetStore.target.id }&nbsp;
+    <span className='font-sml sup'>{projectTargetStore.targetState.version}</span>
     {
-      projectTargetStore.target.description
-        ? <Label>{ projectTargetStore.target.description }</Label>
+      projectTargetStore?.targetState?.isSyncing
+        ? <React.Fragment>
+          &nbsp;
+          <span className='span default font-sml sup'><i className='smaller fa-solid fa-hourglass-start' /></span>
+        </React.Fragment>
         : null
     }
-  </div>;
+  </Title>;
 };
 
 export const ProjectTargetReleaseNotesModalContent = ({
@@ -45,6 +46,7 @@ export const ProjectTargetReleaseNotesModalContent = ({
         id={ `notes.${i}.description` }
         label='Description'
         x={ null }
+        rows={ 10 }
       />
     </div>);
   });
@@ -61,7 +63,7 @@ export const ProjectTargetReleaseNotesModalContent = ({
       <FormSelect
         store={ projectTargetReleaseParamsStore }
         id='status'
-        items={ { 'scheduled': 'Scheduled', 'completed': 'Completed' } }
+        items={ { scheduled: 'Scheduled', completed: 'Completed', canceled: 'Canceled' } }
         label='Status'
         x={ 6 }
       />
@@ -93,6 +95,7 @@ export const ProjectTargetReleaseStreamsModalContent = ({
       id={ `streams.${i}.description` }
       label='Description'
       x={ null }
+      rows={ 10 }
     />
   </div>);
 
@@ -123,11 +126,12 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
             id={ `ops.${i}.description` }
             label='Description'
             x={ 14 }
+            rows={ 2 }
           />
           <FormSelect
             store={ projectTargetReleaseParamsStore }
             id={ `ops.${i}.status` }
-            items={ { 'pending': 'Pending', 'inProgress': 'In progress', 'completed': 'Completed' } }
+            items={ { pending: 'Pending', inProgress: 'In progress', completed: 'Completed', canceled: 'Canceled' } }
             label='Status'
             x={ 4 }
           />

@@ -93,10 +93,8 @@ export async function saveContent(content, contentType, target: 'clipboard' | 'd
   }
 }
 
-let nextIdCounter = 1000000;
-
-export function nextId(): string {
-  return String(nextIdCounter ++);
+export function nextId() {
+  return Math.random().toString(20).slice(2, 8) + Math.random().toString(20).slice(2, 8);
 }
 
 export function processing(target, prop, descriptor) {

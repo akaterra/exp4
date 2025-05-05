@@ -13,7 +13,7 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
     ? selectedIndex
     : tabs.findIndex((tab) => tab.id === selectedIndex);
   const [ currentSelectedIndex, setCurrentSelectedIndex ] = useState(tabIndex >= 0 ? tabIndex : 0);
-  const child = Array.isArray(children) ? children[currentSelectedIndex] : children;
+  const TabComponent = Array.isArray(children) ? children[currentSelectedIndex] : children;
 
   useEffect(() => {
     setCurrentSelectedIndex(tabIndex);
@@ -70,6 +70,6 @@ export const Tabs = ({ children = null, decoration = undefined, onlyTabs = false
         </C></Row>
         : null
     }
-    { !onlyTabs ? child : null }
+    { !onlyTabs ? TabComponent : null }
   </Fragment>;
 }
