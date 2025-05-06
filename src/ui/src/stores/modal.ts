@@ -26,6 +26,7 @@ export class ModalStore {
       type?: 'active' | null;
     }>;
     content?: React.Component | React.FunctionComponent | string;
+    maxHeight?: boolean;
     props?: Record<string, any>;
     onBeforeSelect?: ((action?: string) => boolean);
     onClose?: () => void;

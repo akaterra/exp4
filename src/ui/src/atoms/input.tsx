@@ -113,7 +113,7 @@ export const Input = ({ autoComplete = undefined, className = undefined, current
     autoComplete={ autoComplete }
     className={ className ? `control ${className}` : 'control' }
     disabled={ disabled }
-    key={ id }
+    // key={ id }
     min={ min }
     placeholder={ placeholder }
     style={ style }

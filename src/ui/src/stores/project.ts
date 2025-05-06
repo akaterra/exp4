@@ -1,4 +1,4 @@
-import { makeObservable, observable, computed, flow } from 'mobx';
+import { makeObservable, observable, computed, flow, IComputedFactory, IObservableFactory } from 'mobx';
 import { IProject, IProjectFlow, IProjectTarget, IProjectTargetStream } from "./dto/project";
 import { IProjectState, IProjectTargetState, IProjectTargetStreamState } from './dto/project-state';
 import { ProjectsStore } from './projects';
@@ -13,6 +13,7 @@ import * as _ from 'lodash';
 import { FormStore } from './form';
 import { ProjectTargetReleaseModalContent, ProjectTargetReleaseModalTitle } from '../blocks/project.target.release.modal';
 import { Status } from '../enums/status';
+import {getDescriptionValue} from '../blocks/utils';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -369,49 +370,173 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
   date: Date;
   notes: {
     id: string;
+    artifacts: {
+      id: string;
+      description: string;
+    }[];
     assigneeUserId: string;
     description: string;
     flows: string[];
-    status: null;
+    metadata: {
+      streamId?: IProjectTargetStream['id'];
+    };
+    status: Status;
   }[];
   streams: {
     id: string;
+    artifacts: {
+      id: string;
+      description: string;
+    }[];
     assigneeUserId: string;
-    flows: string[];
     description: string;
-    status: null;
+    flows: string[];
+    metadata: {
+      streamId?: IProjectTargetStream['id'];
+    };
+    status: Status;
   }[];
   ops: {
     id: string;
+    artifacts: {
+      id: string;
+      description: string;
+    }[];
     assigneeUserId: string;
     description: string;
     flows: string[];
-    status: null;
+    metadata: {
+      streamId?: IProjectTargetStream['id'];
+    };
+    status: Status;
   }[];
   status: Status;
 }> {
+  get dto(): IProjectTargetState['release'] {
+    const release = this.projectStore.getTargetStoreByTargetId(this.projectTarget.id)?.targetState?.release;
+
+    function updateChangelog(changelog, streamId, artifacts) {
+      const existing = changelog.find((change) => change.id === streamId);
+
+      if (!existing?.artifacts) {
+        return [ {
+          id: streamId,
+          artifacts,
+          changes: [],
+        } ];
+      }
+
+      existing.artifacts = existing.artifacts = artifacts;
+
+      return changelog;
+    }
+
+    return {
+      date: this.state.date,
+      sections: [
+        ...this.state.notes.map((note) => ({
+          id: note.id,
+          type: 'note',
+
+          changelog: [],
+          description: note.description,
+          flows: [],
+          metadata: {},
+          status: note.status,
+        })),
+        ...this.state.streams.map((stream) => ({
+          id: stream.id,
+          type: 'stream',
+
+          changelog: updateChangelog(release.sections?.find((section) => section.id === stream.id)?.changelog, stream.id, stream.artifacts),
+          description: stream.description,
+          flows: [],
+          metadata: {},
+          status: stream.status,
+        })),
+        ...this.state.ops.map((op) => ({
+          id: op.id,
+          type: 'op',
+
+          changelog: [],
+          description: op.description,
+          flows: op.flows ?? [],
+          metadata: op.metadata ?? {},
+          status: op.status,
+        })),
+      ],
+      status: this.state.status,
+    };
+  }
+
+  get streamsForSelect(): Record<IProjectTargetStream['id'], IProjectTargetStream['title']> {
+    const release = this.projectStore.getTargetStoreByTargetId(this.projectTarget.id)?.targetState?.release;
+
+    return release?.sections?.reduce((acc, section) => {
+      if (section.type === 'stream') {
+        acc[section.id] = this.projectTarget.streams[section.id]?.title ?? section.id;
+      }
+
+      return acc;
+    }, { null: 'None' });
+  }
+
+  protected extra = { streamsForSelect: computed }
+
+  static cloneStreamArtifact(artifact?: Partial<ProjectTargetReleaseParamsStore['state']['streams'][number]['artifacts'][number]>) {
+    return {
+      id: artifact?.id ?? '',
+      description: artifact?.description ?? '',
+    };
+  }
+
+  static cloneOp(op?: Partial<ProjectTargetReleaseParamsStore['state']['ops'][number]>) {
+    return {
+      id: op?.id ?? nextId(),
+      artifacts: op.artifacts?.map((artifact) => ProjectTargetReleaseParamsStore.cloneStreamArtifact(artifact)) ?? [],
+      assigneeUserId: op?.assigneeUserId ?? null,
+      description: op?.description ?? '',
+      flows: op?.flows ?? [],
+      metadata: op?.metadata ?? {},
+      status: op?.status ?? null,
+    };
+  }
+
   constructor(public projectStore: ProjectStore, public projectTarget: IProjectTarget) {
     const release = projectStore.getTargetStoreByTargetId(projectTarget.id)?.targetState?.release;
 
+    function mapArtifacts(atrifacts) {
+      return atrifacts.map((artifact) => ({
+        ...artifact,
+        description: getDescriptionValue(artifact.description),
+      }));
+    }
+
     const notesIv = release.sections?.filter((section) => section.type === 'note').map((section) => ({
       id: section.id ?? nextId(),
+      artifacts: section.changelog?.map(({ artifacts }) => mapArtifacts(artifacts ?? []))?.flat() ?? [],
       assigneeUserId: section.assingeeUserId ?? null,
       description: section.description,
       flows: section.flows ?? [],
+      metadata: section.metadata ?? {},
       status: section.status ?? null,
     })) ?? [];
     const streamsIv = release.sections?.filter((section) => section.type === 'stream').map((section) => ({
       id: section.id ?? nextId(),
+      artifacts: section.changelog?.map(({ artifacts }) => mapArtifacts(artifacts ?? []))?.flat() ?? [],
       assigneeUserId: section.assingeeUserId ?? null,
       description: section.description,
       flows: section.flows ?? [],
+      metadata: section.metadata ?? {},
       status: section.status ?? null,
     })) ?? [];
     const opsIv = release.sections?.filter((section) => section.type === 'op').map((section) => ({
       id: section.id ?? nextId(),
+      artifacts: section.changelog?.map(({ artifacts }) => mapArtifacts(artifacts ?? []))?.flat() ?? [],
       assigneeUserId: section.assingeeUserId ?? null,
       description: section.description,
       flows: section.flows ?? [],
+      metadata: section.metadata ?? {},
       status: section.status ?? null,
     })) ?? [];
 
@@ -434,6 +559,22 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
             type: 'const',
             initialValue: null,
           },
+          artifacts: {
+            constraints: {},
+            type: {
+              id: {
+                constraints: { maxLength: 100 },
+                type: 'string',
+                initialValue: null,
+              },
+              description: {
+                constraints: { maxLength: 100 },
+                type: 'string',
+                initialValue: null,
+              },
+            },
+            initialValue: [],
+          },
           description: {
             constraints: { maxLength: 1000 },
             type: 'string',
@@ -454,6 +595,22 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
             constraints: {},
             type: 'const',
             initialValue: null,
+          },
+          artifacts: {
+            constraints: {},
+            type: {
+              id: {
+                constraints: { maxLength: 100 },
+                type: 'string',
+                initialValue: null,
+              },
+              description: {
+                constraints: { maxLength: 100 },
+                type: 'string',
+                initialValue: null,
+              },
+            },
+            initialValue: [],
           },
           description: {
             constraints: { maxLength: 1000 },
@@ -476,6 +633,22 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
             type: 'string',
             initialValue: [],
           },
+          artifacts: {
+            constraints: {},
+            type: {
+              id: {
+                constraints: { maxLength: 100 },
+                type: 'string',
+                initialValue: null,
+              },
+              description: {
+                constraints: { maxLength: 100 },
+                type: 'string',
+                initialValue: null,
+              },
+            },
+            initialValue: [],
+          },
           description: {
             constraints: { maxLength: 100 },
             type: 'string',
@@ -494,57 +667,96 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
     super(schema);
   }
 
-  addOp(op?: Partial<ProjectTargetReleaseParamsStore['state']['ops'][number]>, index?: number) {
-    const newOp = {
-      id: op?.id ?? nextId(),
-      assigneeUserId: op?.assigneeUserId ?? null,
-      description: op?.description,
-      flows: op?.flows ?? [],
-      status: op?.status ?? null,
-    };
+  opAdd(op?: Partial<ProjectTargetReleaseParamsStore['state']['ops'][number]>, index?: number) {
+    const newOp = ProjectTargetReleaseParamsStore.cloneOp(op);
+    const items = this.state.ops;
 
     if (index != null && index >= 0 && index < this.state.ops.length - 1) {
-      this.state.ops.splice(index + 1, 0, newOp);
+      items.splice(index + 1, 0, newOp);
     } else {
-      this.state.ops.push(newOp);
+      items.push(newOp);
     }
   }
 
-  delOp(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
-    this.state.ops = this.state.ops.filter((o) => o.id !== op.id);
+  opDel(index: number) {
+    const items = this.state.ops;
+
+    items.splice(index, 1);
   }
 
-  moveOpUp(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
-    const index = this.state.ops.findIndex((o) => o.id === op.id);
+  opMoveUp(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
+    const items = this.state.ops;
+    const index = items.findIndex((o) => o.id === op.id);
 
     if (index > 0) {
-      const tmp = this.state.ops[index - 1];
-      this.state.ops[index - 1] = this.state.ops[index];
-      this.state.ops[index] = tmp;
+      const tmp = items[index - 1];
+      items[index - 1] = items[index];
+      items[index] = tmp;
     }
   }
 
-  moveOpDown(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
-    const index = this.state.ops.findIndex((o) => o.id === op.id);
+  opMoveDown(op: ProjectTargetReleaseParamsStore['state']['ops'][number]) {
+    const items = this.state.ops;
+    const index = items.findIndex((o) => o.id === op.id);
 
-    if (index < this.state.ops.length - 1) {
-      const tmp = this.state.ops[index + 1];
-      this.state.ops[index + 1] = this.state.ops[index];
-      this.state.ops[index] = tmp;
+    if (index < items.length - 1) {
+      const tmp = items[index + 1];
+      items[index + 1] = items[index];
+      items[index] = tmp;
     }
   }
 
-  toggleOpFlow(op: ProjectTargetReleaseParamsStore['state']['ops'][number], flowId: string) {
-    const index = this.state.ops.findIndex((o) => o.id === op.id);
+  opToggleFlow(op: ProjectTargetReleaseParamsStore['state']['ops'][number], flowId: string) {
+    const items = this.state.ops;
+    const index = items.findIndex((o) => o.id === op.id);
 
     if (index >= 0) {
-      const flowIndex = this.state.ops[index].flows.findIndex((flow) => flow === flowId);
+      const flowIndex = items[index].flows.findIndex((flow) => flow === flowId);
 
       if (flowIndex >= 0) {
-        this.state.ops[index].flows.splice(flowIndex, 1);
+        items[index].flows.splice(flowIndex, 1);
       } else {
-        this.state.ops[index].flows.push(flowId);
+        items[index].flows.push(flowId);
       }
+    }
+  }
+
+  streamArtifactAdd(stream: ProjectTargetReleaseParamsStore['state']['streams'][number], artifact?: Partial<ProjectTargetReleaseParamsStore['state']['streams'][number]['artifacts'][number]>, index?: number) {
+    const newArtifact = ProjectTargetReleaseParamsStore.cloneStreamArtifact(artifact);
+    const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
+
+    if (index != null && index >= 0 && index < items.length - 1) {
+      items.splice(index + 1, 0, newArtifact);
+    } else {
+      items.push(newArtifact);
+    }
+  }
+
+  streamArtifactDel(stream: ProjectTargetReleaseParamsStore['state']['streams'][number], index: number) {
+    const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
+
+    items.splice(index, 1);
+  }
+
+  streamArtifactMoveUp(stream: ProjectTargetReleaseParamsStore['state']['streams'][number], index: number) {
+    const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
+    // const index = items.findIndex((a) => a.id === artifact.id);
+
+    if (index > 0) {
+      const tmp = items[index - 1];
+      items[index - 1] = items[index];
+      items[index] = tmp;
+    }
+  }
+
+  streamArtifactMoveDown(stream: ProjectTargetReleaseParamsStore['state']['streams'][number], index: number) {
+    const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
+    // const index = items.findIndex((a) => a.id === artifact.id);
+
+    if (index < items.length - 1) {
+      const tmp = items[index + 1];
+      items[index + 1] = items[index];
+      items[index] = tmp;
     }
   }
 }
@@ -717,6 +929,7 @@ export class ProjectStore extends BaseStore {
 
     const action = yield modalStore.show({
       content: ProjectTargetReleaseModalContent,
+      maxHeight: true,
       props: {
         projectTargetReleaseParamsStore,
         projectTargetStore: this.getTargetStoreByTargetId(targetId),
@@ -730,38 +943,10 @@ export class ProjectStore extends BaseStore {
     case 'cancel':
       break;
     case 'ok':
-      const payload: IProjectTargetState['release'] = {
-        date: projectTargetReleaseParamsStore.state.date,
-        sections: [
-          ...projectTargetReleaseParamsStore.state.streams.map((stream) => ({
-            id: stream.id,
-            type: 'stream',
-            description: stream.description,
-            flows: null,
-            status: stream.status,
-          })),
-          ...projectTargetReleaseParamsStore.state.ops.map((op) => ({
-            id: op.id,
-            type: 'op',
-            description: op.description,
-            flows: op.flows,
-            status: op.status,
-          })),
-          ...projectTargetReleaseParamsStore.state.notes.map((note) => ({
-            id: note.id,
-            type: 'note',
-            description: note.description,
-            flows: null,
-            status: note.status,
-          })),
-        ],
-        status: projectTargetReleaseParamsStore.state.status,
-      };
-
       const updated = yield this.projectsStore.service.releaseUpdate(
         this.project.id,
         targetId,
-        payload,
+        projectTargetReleaseParamsStore.dto,
       );
       this.getTargetStoreByTargetId(targetId).targetState.release = updated;
 

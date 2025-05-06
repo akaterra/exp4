@@ -8,6 +8,57 @@ import { Tabs } from '../atoms/tabs';
 import { observer } from 'mobx-react-lite';
 import { Button } from '../atoms/button';
 import { Row } from '../atoms/row';
+import {nextSeqId} from '../stores/utils';
+
+export const StreamArtifactLineControlPanel = ({ store, stream, i }: { store: ProjectTargetReleaseParamsStore, stream, i: number }) => {
+  return <div className='flex flex-hor children-gap-hor'>
+    <Button
+      className='button-sml default w-auto'
+      x={ null }
+      onClick={ () => store.streamArtifactAdd(stream, null, i) }
+    ><i className="fa-solid fa-plus fa-lg"></i></Button>
+    <Button
+      className='button-sml default w-auto'
+      x={ null }
+      onClick={ () => store.streamArtifactMoveUp(stream, i) }
+    ><i className="fa-solid fa-arrow-down fa-lg"></i></Button>
+    <Button
+      className='button-sml default w-auto'
+      x={ null }
+      onClick={ () => store.streamArtifactMoveDown(stream, i) }
+    ><i className="fa-solid fa-arrow-up fa-lg"></i></Button>
+    <Button
+      className='button-sml w-auto'
+      x={ null }
+      onClick={ () => store.streamArtifactDel(stream, i) }
+    ><i className="fa-solid fa-trash fa-lg"></i></Button>
+  </div>
+}
+
+export const OpLineControlPanel = ({ store, op, i }: { store: ProjectTargetReleaseParamsStore, op, i: number }) => {
+  return <div className='flex flex-hor children-gap-hor'>
+    <Button
+      className='button-sml default w-auto'
+      x={ null }
+      onClick={ () => store.opAdd(null, i) }
+    ><i className="fa-solid fa-plus fa-lg"></i></Button>
+    <Button
+      className='button-sml default w-auto'
+      x={ null }
+      onClick={ () => store.opMoveDown(op) }
+    ><i className="fa-solid fa-arrow-down fa-lg"></i></Button>
+    <Button
+      className='button-sml default w-auto'
+      x={ null }
+      onClick={ () => store.opMoveUp(op) }
+    ><i className="fa-solid fa-arrow-up fa-lg"></i></Button>
+    <Button
+      className='button-sml w-auto'
+      x={ null }
+      onClick={ () => store.opDel(i) }
+    ><i className="fa-solid fa-trash fa-lg"></i></Button>
+  </div>
+}
 
 export const ProjectTargetReleaseModalTitle = ({
   projectTargetReleaseParamsStore,
@@ -30,34 +81,31 @@ export const ProjectTargetReleaseModalTitle = ({
   </Title>;
 };
 
-export const ProjectTargetReleaseNotesModalContent = ({
+export const ProjectTargetReleaseNotesModalContent = observer(({
   projectTargetReleaseParamsStore,
   projectTargetStore,
 }: {
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  const ParamsElements: React.ReactElement[] = [];
-
-  projectTargetReleaseParamsStore.state.notes.forEach((note, i) => {
-    ParamsElements.push(<div key={ note.id ?? i }>
-      <FormTextInput
-        store={ projectTargetReleaseParamsStore }
-        id={ `notes.${i}.description` }
-        label='Description'
-        x={ null }
-        rows={ 10 }
-      />
-    </div>);
-  });
-
   return <Fragment>
+    {
+      projectTargetReleaseParamsStore.state.notes.map((note, i) => <div key={ note.id ?? i }>
+        <FormTextInput
+          store={ projectTargetReleaseParamsStore }
+          id={ `notes.${i}.description` }
+          label={ i === 0 ? 'Description' : null }
+          x={ null }
+          rows={ 10 }
+        />
+      </div>)
+    }
     <Row>
       <FormInput
         store={ projectTargetReleaseParamsStore }
         id='date'
         label='Date'
-        x={ 6 }
+        x={ 'c-6 c-9-s-' }
         type='datetime-local'
       />
       <FormSelect
@@ -65,16 +113,13 @@ export const ProjectTargetReleaseNotesModalContent = ({
         id='status'
         items={ { scheduled: 'Scheduled', completed: 'Completed', canceled: 'Canceled' } }
         label='Status'
-        x={ 6 }
+        x={ 'c-6 c-9-s-' }
       />
     </Row>
-    {
-      ParamsElements
-    }
   </Fragment>;
-}
+});
 
-export const ProjectTargetReleaseStreamsModalContent = ({
+export const ProjectTargetReleaseStreamsModalContent = observer(({
   projectTargetReleaseParamsStore,
   projectTargetStore,
 }: {
@@ -89,15 +134,47 @@ export const ProjectTargetReleaseStreamsModalContent = ({
     id: String(i),
     title: projectTargetStore.target.streams[stream.id]?.title ?? stream.id,
   }));
-  const tabsContents = projectTargetReleaseParamsStore.state.streams.map((stream, i) => <div key={ i }>
-    <FormTextInput
-      store={ projectTargetReleaseParamsStore }
-      id={ `streams.${i}.description` }
-      label='Description'
-      x={ null }
-      rows={ 10 }
-    />
-  </div>);
+  const tabsContents = projectTargetReleaseParamsStore.state.streams.map((stream, i) => <Fragment key={ i }>
+    <div>
+      <FormTextInput
+        store={ projectTargetReleaseParamsStore }
+        id={ `streams.${i}.description` }
+        label='Description'
+        x={ null }
+        rows={ 10 }
+      />
+    </div>
+    {
+      !stream.artifacts.length
+        ? <div key={ 0 }><Button
+          className='button-sml default w-auto'
+          label='No artifacts available'
+          x={ null }
+          onClick={ () => projectTargetReleaseParamsStore.streamArtifactAdd(stream) }
+        ><i className="fa-solid fa-plus fa-lg"></i></Button></div>
+        : stream.artifacts.map((artifact, j) => <div key={ nextSeqId() }>
+          <Row>
+            <FormInput
+              store={ projectTargetReleaseParamsStore }
+              id={ `streams.${i}.artifacts.${j}.id` }
+              label={ j === 0 ? 'Artifact ID' : null }
+              x={ 'c-6 c-9-s-' }
+            />
+            <FormInput
+              store={ projectTargetReleaseParamsStore }
+              id={ `streams.${i}.artifacts.${j}.description` }
+              label={ j === 0 ? 'Artifact value' : null }
+              x={ 'c-6 c-9-s-' }
+            />
+          </Row>
+          <StreamArtifactLineControlPanel
+            store={ projectTargetReleaseParamsStore }
+            stream={ stream }
+            i={ j }
+          />
+        </div>)
+    }
+  </Fragment>);
 
   return <Tabs
     selectedIndex={ '0' }
@@ -106,7 +183,7 @@ export const ProjectTargetReleaseStreamsModalContent = ({
   >
     { tabsContents }
   </Tabs>;
-}
+});
 
 export const ProjectTargetReleaseOpsModalContent = observer(({
   projectTargetReleaseParamsStore,
@@ -115,80 +192,62 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
   projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
   projectTargetStore?: ProjectTargetStore;
 }) => {
-  const ParamsElements: React.ReactElement[] = [];
-
-  projectTargetReleaseParamsStore.state.ops.forEach((op, i) => {
-    ParamsElements.push(
-      <div key={ op.id ?? i }>
-        <Row>
-          <FormInput
-            store={ projectTargetReleaseParamsStore }
-            id={ `ops.${i}.description` }
-            label='Description'
-            x={ 14 }
-            rows={ 2 }
-          />
-          <FormSelect
-            store={ projectTargetReleaseParamsStore }
-            id={ `ops.${i}.status` }
-            items={ { pending: 'Pending', inProgress: 'In progress', completed: 'Completed', canceled: 'Canceled' } }
-            label='Status'
-            x={ 4 }
-          />
-        </Row>
-        <div className='flex flex-hor children-gap-hor'>
-          {
-            projectTargetStore.flows.map(({ flow }, j) => {
-              const isSet = op.flows.includes(flow.id);
-
-              return <FormButton
-                store={ projectTargetReleaseParamsStore }
-                id={ `ops.${i}.flows` }
-                key={ `ops.${i}.flows.${j}` }
-                className={ isSet ? 'button-sml success w-auto' : 'button-sml default w-auto' }
-                x={ null }
-                onClick={ () => projectTargetReleaseParamsStore.toggleOpFlow(op, flow.id) }
-              >{ flow.title ?? flow.id }</FormButton>;
-            })
-          }
-        </div>
-        <div className='flex flex-hor children-gap-hor'>
-          <Button
-            className='button-sml default w-auto'
-            x={ null }
-            onClick={ () => projectTargetReleaseParamsStore.addOp(null, i) }
-          ><i className="fa-solid fa-plus fa-lg"></i></Button>
-          <Button
-            className='button-sml default w-auto'
-            x={ null }
-            onClick={ () => projectTargetReleaseParamsStore.moveOpDown(op) }
-          ><i className="fa-solid fa-arrow-down fa-lg"></i></Button>
-          <Button
-            className='button-sml default w-auto'
-            x={ null }
-            onClick={ () => projectTargetReleaseParamsStore.moveOpUp(op) }
-          ><i className="fa-solid fa-arrow-up fa-lg"></i></Button>
-          <Button
-            className='button-sml w-auto'
-            x={ null }
-            onClick={ () => projectTargetReleaseParamsStore.delOp(op) }
-          ><i className="fa-solid fa-trash fa-lg"></i></Button>
-        </div>
-      </div>
-    );
-  });
-
   if (projectTargetReleaseParamsStore.state.ops.length === 0) {
     return <div>
       <Button
         className='button-sml default w-auto'
+        label='No ops available'
         x={ null }
-        onClick={ () => projectTargetReleaseParamsStore.addOp() }
+        onClick={ () => projectTargetReleaseParamsStore.opAdd() }
       ><i className="fa-solid fa-plus fa-lg"></i></Button>
     </div>;
   }
 
-  return ParamsElements;
+  return projectTargetReleaseParamsStore.state.ops.map((op, i) => <div key={ op.id ?? i }>
+    <Row>
+      <FormInput
+        id={ `ops.${i}.description` }
+        label={ i === 0 ? 'Description' : null }
+        rows={ 2 }
+        store={ projectTargetReleaseParamsStore }
+        x={ 'c10 c10-s-' }
+      />
+      <FormSelect
+        id={ `ops.${i}.params.streamId` }
+        items={ projectTargetReleaseParamsStore.streamsForSelect }
+        label={ i === 0 ? 'Stream' : null }
+        store={ projectTargetReleaseParamsStore }
+        x={ 'c-4 c-4-s-' }
+      />
+      <FormSelect
+        id={ `ops.${i}.status` }
+        items={ { pending: 'Pending', inProgress: 'In progress', completed: 'Completed', canceled: 'Canceled' } }
+        label={ i === 0 ? 'Status' : null }
+        store={ projectTargetReleaseParamsStore }
+        x={ 'c-4 c-4-s-' }
+      />
+    </Row>
+    <div className='flex flex-hor children-gap-hor'>
+      {
+        projectTargetStore.flows.map(({ flow }, j) => {
+          const isSet = op.flows.includes(flow.id);
+
+          return <Button
+            className={ isSet ? 'button-sml success w-auto' : 'button-sml default w-auto' }
+            key={ `ops.${i}.flows.${j}` }
+            store={ projectTargetReleaseParamsStore }
+            x={ null }
+            onClick={ () => projectTargetReleaseParamsStore.opToggleFlow(op, flow.id) }
+          >{ flow.title ?? flow.id }</Button>;
+        })
+      }
+    </div>
+    <OpLineControlPanel
+      store={ projectTargetReleaseParamsStore }
+      op={ op }
+      i={ i }
+    />
+  </div>);
 });
 
 export const ProjectTargetReleaseModalContent = observer(({

@@ -1,4 +1,4 @@
-import { makeObservable, observable } from 'mobx';
+import { computed, makeObservable, observable } from 'mobx';
 import * as _ from 'lodash';
 
 export type FormStoreSchemaDef = {
@@ -25,6 +25,7 @@ export class FormStore<
   isValid: boolean = false;
   state: T;
 
+  protected extra: Record<string, typeof observable | typeof computed>;
   protected isErrorCheck: Record<string, null | string> = {};
   protected schemaKeysRefs: Record<string, FormStoreSchemaDef> = {};
 
@@ -37,6 +38,10 @@ export class FormStore<
       return acc;
     }, {}));
     makeObservable(this, { isError: observable, isValid: observable });
+
+    if (this.extra) {
+      makeObservable(this, this.extra);
+    }
   }
 
   setError(fields: Record<string, string>) {

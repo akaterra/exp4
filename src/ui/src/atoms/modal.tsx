@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SubTitle } from './title';
 import { Button } from './button';
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 
 export const Modal = ({
   buttons = {
@@ -22,6 +22,7 @@ export const Modal = ({
   },
   children,
   isShowing = true,
+  maxHeight = false,
   title = undefined,
   onClose = undefined,
   onSelect = undefined,
@@ -30,13 +31,20 @@ export const Modal = ({
   buttons?: Record<string, { action?: string; disabled?: boolean; onSelect?: (action?) => void, title?: string, type?: string }>;
   children,
   isShowing?: boolean;
+  maxHeight?: boolean;
   title: React.ReactElement | string;
   onClose?: () => void,
   onSelect?: (action?: string) => void,
   onTransitionEnd?: () => void,
 }) => {
-  return <div className={ isShowing ? "ef-show" : "ef-hide" }><div className="modal ef-fade" onAnimationEnd={ onTransitionEnd }>
-    <div className="modal-content f10 f14-s- bg-light shadow shadow-high pad-hor triple flex ef-slide">
+  let contentClassName = 'modal-content f10 f14-s- bg-light shadow shadow-high pad-hor triple flex ef-slide';
+
+  if (maxHeight) {
+    contentClassName += ' modal-content-max';
+  }
+
+  return <div className={ isShowing ? 'ef-show' : 'ef-hide' }><div className='modal ef-fade' onAnimationEnd={ onTransitionEnd }>
+    <div className={ contentClassName }>
       <div className='w00 paragraph paragraph-lrg flex flex-ver'>
         <div className='c18 flex flex-hor'>
           {
@@ -46,7 +54,7 @@ export const Modal = ({
           }
           {
             onClose
-              ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose }><i className="fa-solid fa-xmark fa-lg"></i></Button>
+              ? <Button className='button-sml default transparent w-auto' x={ null } onClick={ onClose }><i className='fa-solid fa-xmark fa-lg'></i></Button>
               : null
           }
         </div>

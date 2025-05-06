@@ -97,6 +97,12 @@ export function nextId() {
   return Math.random().toString(20).slice(2, 8) + Math.random().toString(20).slice(2, 8);
 }
 
+let nid = 0;
+
+export function nextSeqId() {
+  return nid += 1;
+}
+
 export function processing(target, prop, descriptor) {
   const fn = descriptor.value;
 

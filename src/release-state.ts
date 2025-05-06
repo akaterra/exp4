@@ -25,6 +25,7 @@ export interface IReleaseStateSection {
   }[];
   flows?: IProjectFlowDef['id'][];
   level?: number;
+  metadata?: Record<string, unknown>;
   status?: string;
 }
 

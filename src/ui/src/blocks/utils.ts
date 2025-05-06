@@ -1,3 +1,7 @@
+export function getDescriptionValue(description) {
+  return description?.value ?? description;
+}
+
 export function modalOnShow(isShown) {
   return;
   const el = document.getElementById('mini');

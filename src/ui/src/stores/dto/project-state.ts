@@ -93,7 +93,8 @@ export type IReleaseStateSection = {
   }[];
   flows?: IProject['id'][];
   level?: number;
-  status?: string;
+  metadata?: Record<string, unknown>;
+  status?: Status;
 }
 
 export type IProjectTargetState = {

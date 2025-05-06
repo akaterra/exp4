@@ -2,12 +2,9 @@
   max-height: calc(100vh - 200px);
 }
 
-/* .scrollable-container {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: scroll;
-  scrollbar-width: none;
-} */
+.modal-content-max {
+  min-height: calc(100vh - 200px);
+}
 
 .os-theme-dark {
   --os-handle-bg: rgba(0, 0, 0, 0.3);

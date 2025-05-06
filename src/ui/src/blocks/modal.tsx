@@ -22,6 +22,7 @@ export const Modal = observer(({ store }: { store?: ModalStore }) => {
     buttons={ store?.optsState?.buttons }
     title={ TitleComponent ? <TitleComponent { ...store.optsState?.props } store={ store } /> : undefined }
     isShowing={ store?.isShowing }
+    maxHeight={ store?.optsState?.maxHeight }
     onClose={ store?.optsState?.onClose }
     onSelect={ store?.optsState?.onSelect }
     onTransitionEnd={ store?.onTransitionEnd.bind(store) }
