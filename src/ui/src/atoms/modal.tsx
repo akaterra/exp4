@@ -50,7 +50,7 @@ export const Modal = ({
               : null
           }
         </div>
-        <OverlayScrollbarsComponent defer options={{ scrollbars: { autoHide: 'leave' } }}>
+        <OverlayScrollbarsComponent defer options={{ overflow: { x: 'hidden', y: 'scroll' }, scrollbars: { autoHide: 'leave' } }}>
           <div className='c18 children-gap'>
             { children }
           </div>

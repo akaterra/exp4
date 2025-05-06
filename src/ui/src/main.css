@@ -2,11 +2,17 @@
   max-height: calc(100vh - 200px);
 }
 
-.scrollable-container {
+/* .scrollable-container {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: scroll;
   scrollbar-width: none;
+} */
+
+.os-theme-dark {
+  --os-handle-bg: rgba(0, 0, 0, 0.3);
+  --os-handle-bg-hover: rgba(0, 0, 0, 0.5);
+  --os-handle-bg-active: rgba(0, 0, 0, 0.5);
 }
 
 svg.fa-lg {

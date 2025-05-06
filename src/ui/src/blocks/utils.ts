@@ -1,4 +1,5 @@
 export function modalOnShow(isShown) {
+  return;
   const el = document.getElementById('mini');
 
   if (el) {

@@ -2,7 +2,7 @@ import * as React from 'react-dom';
 import { observer } from "mobx-react-lite";
 import { ModalStore } from "../stores/modal";
 import { Modal as ModalAtom } from "../atoms/modal";
-import {modalOnShow} from './utils';
+import { modalOnShow } from './utils';
 
 export const modalStore = new ModalStore(modalOnShow);
 

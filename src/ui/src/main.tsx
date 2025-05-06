@@ -20,6 +20,7 @@ import {
 import { IProject } from './stores/dto/project';
 import { Statistics } from './blocks/statistics';
 import { Landing } from './blocks/landing';
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 export const RouteProject = observer(({ projects }: { projects: ProjectsStore }) => {
   return <Project project={ projects.selectedProjectStore } />;
@@ -44,18 +45,22 @@ let router;
 
 export const App = () => {
   return <React.Fragment>
-    <Landing store={ rootStore } />
     <div className="container med square">
       <GlobalAlerts />
       <GlobalDetailsPanel />
       <GlobalModal />
     </div>
-    <div className='paragraph paragraph-lrg'>
-      <div className="container med square pad-hor triple">
-        <div className='row'>
-          <RouterProvider router={ router } />
+    <div className='flex flex-ver frame-fixed'>
+      <Landing store={ rootStore } />
+      <OverlayScrollbarsComponent defer options={{ overflow: { x: 'hidden', y: 'scroll' }, scrollbars: { autoHide: 'leave' } }}>
+        <div className='paragraph paragraph-lrg'>
+          <div className="container med square pad-hor triple">
+            <div className='row'>
+              <RouterProvider router={ router } />
+            </div>
+          </div>
         </div>
-      </div>
+      </OverlayScrollbarsComponent>
     </div>
   </React.Fragment>;
 }

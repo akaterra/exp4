@@ -11,6 +11,7 @@ import { SLOGAN } from '../const';
 
 const style = {
   container: {
+    flex: 0,
     position: 'relative',
   } as React.CSSProperties,
   containerProfile: {
