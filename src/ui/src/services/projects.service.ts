@@ -100,7 +100,7 @@ export class ProjectsService {
   flowRun(
     projectId: IProject['id'],
     flowId: IProjectFlow['id'],
-    targetsStreams?: Record<string, [ string, ...string[] ] | true>,
+    targetsStreams?: Record<string, string[] | true>,
     params?: Record<string, any>,
   ) {
     return this.rest.post(`projects/${projectId}/flow/${flowId}/run`, {

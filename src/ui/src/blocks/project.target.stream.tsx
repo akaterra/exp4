@@ -37,9 +37,10 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
           projectTarget.streamsWithStates.map(({ stream, streamState, isSelected }, i) => {
             const lastChange = streamState?.history?.change?.[0];
 
-            return <div key={i} className={ lastChange ? '' : 'opacity-med' }>
+            return <div key={ i } className={ lastChange ? '' : 'opacity-med' }>
               <Checkbox
-                currentValue={isSelected}
+                currentValue={ isSelected }
+                x={ null }
                 onChange={() => projectTarget.applyStreamSelection(stream.id)}
               >
                 <div className='overflow'>

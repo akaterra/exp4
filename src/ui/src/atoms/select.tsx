@@ -32,7 +32,7 @@ export const Select = ({ autoComplete = undefined, className = undefined, curren
         }
         : undefined
       }
-    >{ items.map((e, i) => <option key={ i } selected={ e === value } value={ e }>{ e }</option>) }</select>
+    >{ items.map((e, i) => <option key={ i } value={ e }>{ e }</option>) }</select>
     : <select
       className={ disabled ? `control ${decoration ?? ''} disabled` : `control ${decoration ?? ''}` }
       defaultValue={ value }

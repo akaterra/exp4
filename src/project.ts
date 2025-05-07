@@ -104,6 +104,8 @@ export interface IProjectTarget<C extends Record<string, unknown>> extends IProj
 
       changelog?: {
         artifacts?: IProjectArtifact['id'][];
+        changes?: IProjectArtifact['id'][];
+        isSystem?: boolean;
       };
       flows?: IProjectFlowDef['id'][];
     }[];
@@ -540,7 +542,7 @@ export class Project implements IProject {
     return targetState;
   }
 
-  async rereadcStreamStateByTargetAndStream(
+  async rereadStreamStateByTargetAndStream(
     targetMixed: IProjectTargetDef['id'] | IProjectTargetDef,
     streamMixed: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef,
     scopes?: Record<string, boolean>,

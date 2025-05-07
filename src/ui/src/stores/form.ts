@@ -25,7 +25,7 @@ export class FormStore<
   isValid: boolean = false;
   state: T;
 
-  protected extra: Record<string, typeof observable | typeof computed>;
+  protected extra: Record<string, typeof observable | typeof computed | boolean>;
   protected isErrorCheck: Record<string, null | string> = {};
   protected schemaKeysRefs: Record<string, FormStoreSchemaDef> = {};
 
@@ -40,7 +40,17 @@ export class FormStore<
     makeObservable(this, { isError: observable, isValid: observable });
 
     if (this.extra) {
-      makeObservable(this, this.extra);
+      const extra = Object.entries(this.extra).reduce((acc, [ key, val ]) => {
+        if (val === true) {
+          acc[key] = observable;
+        } else if (typeof val === 'function') {
+          acc[key] = val;
+        }
+
+        return acc;
+      }, {});
+
+      makeObservable(this, extra);
     }
   }
 
@@ -121,7 +131,7 @@ export class FormStore<
 
         for (let i = 0, l = keys.length; i < l; i ++) {
           if (i === l - 1) {
-            schemaKey = schema[keys[i]];
+            schemaKey = schema?.[keys[i]];
           } else if (isNaN(keys[i])) {
             schema = schema?.[keys[i]]?.type as FormStoreSchema;
           }

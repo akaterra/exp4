@@ -96,12 +96,14 @@ export class ProjectsService extends EntitiesService<Project> {
 
               if (stream) {
                 this.tasksContainer.onGroup('streamState').async.push(async () => {
-                  const streamState = await project.rereadcStreamStateByTargetAndStream(tId, sId, scopes);
+                  const streamState = await project.rereadStreamStateByTargetAndStream(tId, sId, scopes);
 
                   projectState.getTargetState(tId).setReleaseSectionByStreamId(
                     sId,
                     streamState.history.artifact,
+                    streamState.history.change,
                     null,
+                    true,
                     true,
                   );
                 });

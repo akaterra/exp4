@@ -14,14 +14,14 @@ export interface IReleaseStateSection {
     id?: IProjectDef['id'];
     notes?: { id: string; text: string }[];
 
-    artifacts?: Pick<
+    artifacts?: Array<Pick<
       StreamState['history']['artifact'][number],
-      'id' | 'type' | 'description' | 'link' | 'status' | 'time'
-    >[];
-    changes?: Pick<
+      'id' | 'type' | 'description' | 'link' | 'metadata' | 'status' | 'time'
+    > & { isSystem?: boolean }>;
+    changes?: Array<Pick<
       StreamState['history']['change'][number],
-      'id' | 'type' | 'description' | 'link' | 'status' | 'time'
-    >[];
+      'id' | 'type' | 'description' | 'link' | 'metadata' | 'status' | 'time'
+    > & { isSystem?: boolean }>;
   }[];
   flows?: IProjectFlowDef['id'][];
   level?: number;
@@ -85,15 +85,39 @@ export class ReleaseState {
             continue;
           }
 
-          changelog.artifacts = changelog.artifacts.filter((artifact) => schemaSection.changelog.artifacts.includes(artifact.id)).map((artifact) => ({
-            id: artifact.id,
-            type: artifact.type,
+          changelog.artifacts = changelog.artifacts
+            .filter((artifact) => schemaSection.changelog.artifacts.includes(artifact.id) || schemaSection.changelog.isSystem !== artifact.isSystem)
+            .map((artifact) => ({
+              id: artifact.id,
+              type: artifact.type,
 
-            description: artifact.description,
-            link: artifact.link,
-            status: artifact.status,
-            time: artifact.time,
-          }));
+              description: artifact.description,
+              link: artifact.link,
+              metadata: artifact.metadata,
+              status: artifact.status,
+              time: artifact.time,
+            }));
+        }
+      }
+
+      if (schemaSection?.changelog?.changes?.length) {
+        for (const changelog of releaseSection.changelog) {
+          if (!changelog.changes) {
+            continue;
+          }
+
+          changelog.changes = changelog.changes
+            .filter((change) => schemaSection.changelog.changes.includes(change.id) || schemaSection.changelog.isSystem !== change.isSystem)
+            .map((change) => ({
+              id: change.id,
+              type: change.type,
+
+              description: change.description,
+              link: change.link,
+              metadata: change.metadata,
+              status: change.status,
+              time: change.time,
+            }));
         }
       }
     }
@@ -126,7 +150,9 @@ export class ReleaseState {
   setSectionByStreamId(
     streamId: IProjectTargetStreamDef['id'],
     artifacts?: IReleaseStateSection['changelog'][0]['artifacts'],
+    changes?: IReleaseStateSection['changelog'][0]['changes'],
     notes?: IReleaseStateSection['changelog'][0]['notes'],
+    isSystem?: boolean,
     onlyExisting?: boolean,
   ): this {
     const existingSection = this.getSection(streamId, 'stream');
@@ -145,8 +171,11 @@ export class ReleaseState {
         {
           id: streamId,
           artifacts: artifacts
-            ? _.unionBy(artifacts, existingSectionChangelog?.artifacts ?? [], 'id') ?? []
+            ? _.unionBy(artifacts.map((e) => ({ ...e, isSystem })), existingSectionChangelog?.artifacts ?? [], 'id') ?? []
             : existingSectionChangelog?.artifacts ?? [],
+          changes: changes
+            ? _.unionBy(changes.map((e) => ({ ...e, isSystem })), existingSectionChangelog?.changes ?? [], 'id') ?? []
+            : existingSectionChangelog?.changes ?? [],
           notes: notes
             ? _.unionBy(notes, existingSectionChangelog?.notes ?? [], 'id') ?? []
             : existingSectionChangelog?.notes ?? [],

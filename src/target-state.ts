@@ -27,10 +27,12 @@ export class TargetState {
   setReleaseSectionByStreamId(
     streamId: IProjectTargetStreamDef['id'],
     artifacts?: IReleaseStateSection['changelog'][0]['artifacts'],
+    changes? : IReleaseStateSection['changelog'][0]['changes'],
     notes?: IReleaseStateSection['changelog'][0]['notes'],
+    isSystem?: boolean,
     onlyExisting?: boolean,
   ) {
-    return this.release.setSectionByStreamId(streamId, artifacts, notes, onlyExisting);
+    return this.release.setSectionByStreamId(streamId, artifacts, changes, notes, isSystem, onlyExisting);
   }
 
   toJSON() {

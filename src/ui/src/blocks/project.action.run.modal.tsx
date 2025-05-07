@@ -4,54 +4,40 @@ import { ProjectFlowParamsStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
 import { FormInput, FormSelect } from './form';
+import {Checkbox} from '../atoms/input';
+import {ProjectTargetStreamTitle} from './project.shared';
 
 export const ProjectActionRunModalTitle = ({
-  // store,
-  projectFlow,
-  // projectFlowActionParamsStore,
-  // projectTarget,
-  // projectTargetStreams,
+  externalStore,
 }: {
-  // store: ModalStore;
-  projectFlow?: IProjectFlow;
-  // projectFlowActionParamsStore?: ProjectFlowActionParamsStore;
-  // projectTarget?: IProjectTarget;
-  // projectTargetStreams?: IProjectTargetStream[];
+  externalStore: ProjectFlowParamsStore;
 }) => {
   return <div>
-    <Title>{ projectFlow?.title ?? projectFlow?.id }</Title>
+    <Title>{ externalStore.projectFlow?.title ?? externalStore.projectFlow?.id }</Title>
     {
-      projectFlow?.description
-        ? <Label>{ projectFlow?.description }</Label>
+      externalStore.projectFlow?.description
+        ? <Label>{ externalStore.projectFlow?.description }</Label>
         : null
     }
   </div>;
 };
 
 export const ProjectActionRunModalContent = ({
-  // store,
-  projectFlow,
-  projectFlowParamsStore,
-  projectTarget,
-  projectTargetStreams,
+  externalStore,
 }: {
-  // store: ModalStore;
-  projectFlow?: IProjectFlow;
-  projectFlowParamsStore?: ProjectFlowParamsStore;
-  projectTarget?: IProjectTarget;
-  projectTargetStreams?: IProjectTargetStream[];
+  externalStore: ProjectFlowParamsStore;
 }) => {
   let ParamsElements: React.ReactElement[] | null = null;
 
-  if (projectFlowParamsStore?.__schema) {
+  if (externalStore?.__schema) {
     ParamsElements = [];
 
-    for (const [ key, param ] of Object.entries(projectFlowParamsStore.__schema)) {
+    for (const [ key, param ] of Object.entries(externalStore.__schema)) {
       switch (param.type) {
       case 'enum':
-        ParamsElements.push(<div>
+        ParamsElements.push(<div key={ key }>
           <FormSelect
-            store={ projectFlowParamsStore }
+            store={ externalStore }
             items={ param.constraints?.enum ?? [] }
             id={ key }
             label={ param.title ?? key }
@@ -63,9 +49,9 @@ export const ProjectActionRunModalContent = ({
 
       case 'string':
       case 'value':
-        ParamsElements.push(<div>
+        ParamsElements.push(<div key={ key }>
           <FormInput
-            store={ projectFlowParamsStore }
+            store={ externalStore }
             id={ key }
             label={ param.title ?? key }
             x={ null }
@@ -80,13 +66,22 @@ export const ProjectActionRunModalContent = ({
   return <React.Fragment>
     <div className='flex flex-ver paragraph children-gap'>
       <div>
-          Are you sure to run flow <span className='bold'>"{ projectFlow?.title ?? projectFlow?.id }"</span> for
-        <ul>
+        Confirm flow running <span className='bold'>"{ externalStore.projectFlow?.title ?? externalStore.projectFlow?.id }"</span> for
+        <div className='row paragraph'>
           {
-            projectTargetStreams?.map((stream) => <li>{ stream.title ?? stream.id }</li>)
+            externalStore.projectTargetStreams?.map((stream, i) => <Checkbox
+              currentValue={ stream.isSelected }
+              key={ i }
+              x={ 9 }
+              onChange={ () => stream.isSelected = !stream.isSelected }
+            >
+              <div className='overflow'>
+                { stream.title ?? stream.id }
+              </div>
+            </Checkbox>)
           }
-        </ul>
-          on <span className='bold'>{ projectTarget?.title ?? projectTarget?.id }</span>?
+        </div>
+        on <span className='bold'>{ externalStore.projectTarget?.title ?? externalStore.projectTarget?.id }</span>
       </div>
       {
         ParamsElements

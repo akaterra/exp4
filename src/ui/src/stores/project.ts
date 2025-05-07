@@ -762,8 +762,31 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
 }
 
 export class ProjectFlowParamsStore extends FormStore {
-  constructor(public projectsStore: ProjectsStore, public projectFlow: IProjectFlow) {
+  projectFlow: IProjectFlow;
+  projectTarget: IProjectTarget;
+  projectTargetStreams: { id: IProjectTargetStream['id']; title: IProjectTargetStream['title']; isSelected: boolean }[];
+
+  get streamIds() {
+    return this.projectTargetStreams.filter((stream) => stream.isSelected).map((stream) => stream.id);
+  }
+
+  constructor(
+    public projectStore: ProjectStore,
+    public flowId?: IProjectFlow['id'],
+    public targetId?: string,
+    public selectedStreamIds?: IProjectTargetStream['id'][],
+  ) {
+    const projectFlow = flowId ? projectStore.project?.flows[flowId] : Object
+      .values(projectStore.project?.flows)
+      .find((flow) => flow.targets.includes(targetId));
+
     super(projectFlow.params ?? {});
+
+    this.projectFlow = projectFlow;
+    this.projectTarget = projectStore.getTargetByTargetId(targetId),
+    this.projectTargetStreams = Object.values(this.projectTarget.streams)
+      .filter((stream) => !selectedStreamIds || selectedStreamIds?.includes(stream.id))
+      .map((stream) => ({ id: stream.id, title: stream.title, isSelected: true }));
   }
 }
 
@@ -880,22 +903,16 @@ export class ProjectStore extends BaseStore {
         ?.find((action) => action.flow.id === flowId)?.streamIds ?? [];
     }
 
-    const projectFlow = flowId ? this.project?.flows[flowId] : Object
-      .values(this.project?.flows)
-      .find((flow) => flow.targets.includes(targetId));
     const projectFlowParamsStore = new ProjectFlowParamsStore(
-      this.projectsStore,
-      projectFlow,
+      this,
+      flowId,
+      targetId,
+      selectedStreamIds,
     );
     const action = yield modalStore.show({
       content: ProjectActionRunModalContent,
       props: {
-        projectFlow: projectFlow,
-        projectFlowParamsStore,
-        projectTarget: this.getTargetByTargetId(targetId),
-        projectTargetStreams: Object
-          .values(this.getTargetByTargetId(targetId).streams)
-          .filter((stream) => selectedStreamIds.includes(stream.id)),
+        externalStore: projectFlowParamsStore,
       },
       onBeforeSelect: (action) => action === 'ok' ? projectFlowParamsStore.validateAll() : true,
       title: ProjectActionRunModalTitle,
@@ -908,10 +925,8 @@ export class ProjectStore extends BaseStore {
     case 'ok':
       yield this.projectsStore.service.flowRun(
         this.project.id,
-        projectFlow?.id,
-        {
-          [targetId]: selectedStreamIds as [ string, ...string[] ],
-        },
+        projectFlowParamsStore.flowId,
+        { [targetId]: projectFlowParamsStore.streamIds },
         projectFlowParamsStore.state,
       );
       yield this.fetchState();
