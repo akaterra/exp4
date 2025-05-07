@@ -1,5 +1,5 @@
 import { Status } from './enums/status';
-import { IProjectDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectFlowDef, IProjectReleaseDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { StreamState } from './stream-state';
 import * as _ from 'lodash';
 
@@ -36,7 +36,7 @@ export class ReleaseState {
   date?: Date;
   metadata: Record<string, any>;
   sections: IReleaseStateSection[] = [];
-  schema: IProjectTargetDef['release'];
+  schema: IProjectReleaseDef;
   status: Status;
   statusUpdateAt?: Date;
 

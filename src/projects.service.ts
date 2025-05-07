@@ -89,23 +89,13 @@ export class ProjectsService extends EntitiesService<Project> {
 
           await this.tasksContainer.onGroup('streamState').wait();
 
-
           for (const [ tId, streamIds, scopes ] of syncEntries) {
             for (const sId of streamIds) {
               const stream = project.getTargetStreamByTargetAndStream(tId, sId, true);
 
               if (stream) {
                 this.tasksContainer.onGroup('streamState').async.push(async () => {
-                  const streamState = await project.rereadStreamStateByTargetAndStream(tId, sId, scopes);
-
-                  projectState.getTargetState(tId).setReleaseSectionByStreamId(
-                    sId,
-                    streamState.history.artifact,
-                    streamState.history.change,
-                    null,
-                    true,
-                    true,
-                  );
+                  await project.rereadStreamStateByTargetAndStream(tId, sId, scopes);
                 });
               }
             }
@@ -130,13 +120,15 @@ export class ProjectsService extends EntitiesService<Project> {
   }
 
   async updateTargetState(targetState: TargetState) {
-    await this.tasksContainer.async.push(async () => {
-      await this.get(targetState.target.ref.projectId)
-        .getEnvVersioningByTarget(targetState.target)
-        .setCurrentRelease(targetState);
-
-      targetState.release.ver += 1;
-    });
+    if (targetState.release) {
+      await this.tasksContainer.async.push(async () => {
+        await this.get(targetState.target.ref.projectId)
+          .getEnvVersioningByTarget(targetState.target)
+          .setCurrentRelease(targetState);
+  
+        targetState.release.ver += 1;
+      });
+    }
   }
 
   async runStatesResync() {

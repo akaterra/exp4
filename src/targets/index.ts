@@ -27,13 +27,16 @@ export class TargetHolderService {
         return null;
       }
 
-      const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
+      if (project.getReleaseByTarget(target)) {
+        const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
 
-      if (!entity.release || (release && release.ver > entity.release.ver)) {
-        entity.release = release;
+        if (!entity.release || (release && release.ver > entity.release.ver)) {
+          entity.release = release;
+        }
+
+        entity.release.schema = project.getReleaseByTarget(target);
       }
 
-      entity.release.schema = target.release;
       entity.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 
       this.cache.set(key, entity);

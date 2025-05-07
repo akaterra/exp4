@@ -1,13 +1,15 @@
 import { Service } from 'typedi';
-import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectReleaseDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { ProjectsService } from './projects.service';
 import { StreamState } from './stream-state';
 import { Autowired } from './utils';
 import { TargetState } from './target-state';
+import { ReleaseState } from './release-state';
 
 @Service()
 export class ProjectState {
   syncQueue: [ IProjectTargetDef['id'], IProjectTargetStreamDef['id'][], Record<string, boolean>? ][] = [];
+  targetsStates: Record<IProjectTargetDef['id'], TargetState> = {};
   updatedAt: Date = null;
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
@@ -16,10 +18,7 @@ export class ProjectState {
     return Object.values(this.targetsStates).some((target) => target.isSyncing);
   }
 
-  constructor(
-    public id: IProjectDef['id'] = null,
-    public targetsStates: Record<IProjectTargetDef['id'], TargetState> = {},
-  ) {
+  constructor(public id: IProjectDef['id'] = null) {
   }
 
   getDirtyTargetIds(): IProjectTargetDef['id'][] {

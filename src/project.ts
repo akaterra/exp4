@@ -32,10 +32,11 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
 
 export interface IProjectRef {
   // actionId?: IProjectFlowActionDef['id'],
-  flowId?: IProjectFlowDef['id'],
-  projectId?: IProjectDef['id'],
-  streamId?: IProjectTargetStreamDef['id'],
-  targetId?: IProjectTargetDef['id'],
+  flowId?: IProjectFlowDef['id'];
+  projectId?: IProjectDef['id'];
+  releaseId?: IProjectReleaseDef['id'];
+  streamId?: IProjectTargetStreamDef['id'];
+  targetId?: IProjectTargetDef['id'];
 }
 
 export interface IProjectArtifact<C extends Record<string, any> = Record<string, any>> extends IProjectDef<C> {
@@ -81,12 +82,29 @@ export interface IProjectFlow<C extends Record<string, unknown>> extends IProjec
 
 export type IProjectFlowDef = IProjectFlow<Record<string, unknown>>;
 
+export interface IProjectRelease<C extends Record<string, unknown>> extends IProjectDef<C> {
+  sections: {
+    id?: string;
+    type?: string;
+
+    changelog?: {
+      artifacts?: IProjectArtifact['id'][];
+      changes?: IProjectArtifact['id'][];
+      isSystem?: boolean;
+    };
+    flows?: IProjectFlowDef['id'][];
+  }[];
+  targets: IProjectTargetDef['id'][];
+}
+
+export type IProjectReleaseDef = IProjectRelease<Record<string, unknown>>;
+
 export interface IProjectTargetStream<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
+  // targets?: IProjectTargetDef['id'][];
+  events?: Record<string, IProjectDef[]>;
   artifacts?: IProjectArtifact['id'][];
-  tags?: string[];
-  targets?: IProjectTargetDef['id'][];
 }
 
 export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknown>>;
@@ -94,23 +112,8 @@ export type IProjectTargetStreamDef = IProjectTargetStream<Record<string, unknow
 export interface IProjectTarget<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;
 
-  artifacts?: IProjectArtifact['id'][];
   streams: Record<string, IProjectTargetStream<C>>;
   events?: Record<string, IProjectDef[]>;
-  release?: {
-    sections: {
-      id?: string;
-      type?: string;
-
-      changelog?: {
-        artifacts?: IProjectArtifact['id'][];
-        changes?: IProjectArtifact['id'][];
-        isSystem?: boolean;
-      };
-      flows?: IProjectFlowDef['id'][];
-    }[];
-  };
-  tags?: string[];
   versioning?: IProjectVersioning['id'];
 }
 
@@ -148,6 +151,7 @@ export interface IProjectManifest extends IProjectDef {
   flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDefInput>;
   notifications?: Record<string, IProjectDefInput>;
+  releases?: Record<string, IProjectReleaseDef>;
   storages?: Record<string, IProjectDefInput>;
   targets: Record<string, IProjectTargetInput & { streams: Record<string, IProjectTargetStreamInput & { use?: string }> }>;
   versionings: Record<string, IProjectDefInput>;
@@ -188,6 +192,7 @@ export class Project implements IProject {
   events: Record<string, IProjectDef[]> = {};
   flows: Record<string, IProjectFlowDef> = {};
   integrations?: Record<string, IProjectDef>;
+  releases?: Record<string, IProjectReleaseDef>;
   storages?: Record<string, IProjectDef>;
   targets: Record<string, IProjectTargetDef> = {};
   versionings: Record<string, Record<string, unknown>>;
@@ -241,6 +246,8 @@ export class Project implements IProject {
           title: flowDef.title,
           description: flowDef.description,
 
+          config: this.getDefinition(flowDef.config),
+
           params: flowDef.params,
           actions: flowDef.actions.map((stepDef, i) => {
             const stepId = stepDef.id ?? String(i);
@@ -256,9 +263,10 @@ export class Project implements IProject {
               description: stepDef.description,
   
               config: this.getDefinition(stepDef.config),
+
+              targets: stepDef.targets ?? [],
               bypassErrorCodes: stepDef.bypassErrorCodes,
               params: stepDef.params,
-              targets: stepDef.targets ?? [],
             };
           }),
           targets: flowDef.targets ?? [],
@@ -266,22 +274,27 @@ export class Project implements IProject {
       }
     }
 
+    if (config.releases) {
+      this.releases = config.releases;
+    }
+
     if (config.targets) {
       for (const [ targetKey, targetDef ] of Object.entries(config.targets)) {
         const targetId = targetDef.id ?? targetKey;
         this.assertKey(targetId);
+        const release = this.getReleaseByTarget(targetKey);
 
         this.targets[targetId] = {
           id: targetId,
           type: 'target',
 
-          ref: { projectId: this.id },
+          ref: { projectId: this.id, releaseId: release?.id, targetId },
 
           title: targetDef.title,
           description: targetDef.description,
 
-          artifacts: targetDef.artifacts,
-          events: targetDef.events,
+          config: this.getDefinition(targetDef.config),
+
           streams: Object
             .entries(targetDef.streams ?? {})
             .reduce((acc, [ streamKey, streamDef ]) => {
@@ -292,22 +305,23 @@ export class Project implements IProject {
                 id: streamId,
                 type: streamDef.type,
 
-                ref: { projectId: this.id, streamId, targetId },
+                ref: { projectId: this.id, releaseId: release?.id, targetId, streamId },
 
                 title: streamDef.title,
                 description: streamDef.description,
 
                 config: this.getDefinition(streamDef.config),
+
+                // targets: streamDef.targets ?? [],
+                events: streamDef.events,
                 artifacts: streamDef.artifacts,
-                tags: streamDef.tags ?? [],
-                targets: streamDef.targets ?? [],
 
                 ver: 0,
               };
 
               return acc;
             }, {}),
-          release: targetDef.release,
+          events: targetDef.events,
           versioning: targetDef.versioning,
         };
       }
@@ -320,6 +334,18 @@ export class Project implements IProject {
 
   getFlowByFlow(mixed: IProjectFlowDef['id'] | IProjectFlowDef): IProjectFlowDef {
     return this.flows[typeof mixed === 'string' ? mixed : mixed.id];
+  }
+
+  getReleaseByTarget(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
+    if (!this.releases) {
+      return null;
+    }
+
+    if (typeof mixed === 'string') {
+      return Object.values(this.releases).find((release) => release.targets?.includes(mixed));
+    }
+
+    return this.releases[mixed.ref?.releaseId];
   }
 
   getTargetByTarget<S extends IProjectTargetDef = IProjectTargetDef>(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState, unsafe?: boolean): S {
@@ -551,6 +577,17 @@ export class Project implements IProject {
     const stream = this.getTargetStreamByTargetAndStream(targetMixed, streamMixed);
     const streamState = await this.env.streams.getState(stream, scopes, context);
     this.state.setTargetStreamState(stream.ref.targetId, streamState);
+
+    if (this.releases?.[stream.ref.releaseId]) {
+      this.state.getTargetState(targetMixed).setReleaseSectionByStreamId(
+        stream.id,
+        streamState.history.artifact,
+        streamState.history.change,
+        null,
+        true,
+        true,
+      );
+    }
 
     return streamState;
   }
