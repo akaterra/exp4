@@ -19,6 +19,10 @@ export async function projectTargetReleaseUpdate(req, res) {
     targetState.release.setStatus(req.body.status);
   }
 
+  if (req.body.sections) {
+    targetState.release.sections = targetState.release.sections.filter((section) => section.type !== 'op');
+  }
+
   for (const section of req.body.sections) {
     if (section.type === 'note') {
       section.level = 0;
