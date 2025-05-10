@@ -32,7 +32,9 @@ export class VersionOverrideActionService extends EntityService implements IActi
         const source = project.getTargetByTarget(sIdOfSource);
         const target = project.getTargetByTarget(tIdOfTarget);
 
-        await project.getEnvVersioningByTarget(target).override(source, target);
+        await project
+          .getEnvVersioningByTarget(target)
+          .override(source, target);
 
         markDirty(source, target);
       }

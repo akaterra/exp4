@@ -29,12 +29,12 @@ export class StreamHistoryRollbackActionService extends EntityService implements
         ? Object.keys(target.streams)
         : targetsStreams?.[tIdOfTarget] as string[] ?? Object.keys(target.streams);
 
-      for (const streamId of streamIds) {
-        const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, streamId);
+      for (const sId of streamIds) {
+        const targetStream = project.getTargetStreamByTargetAndStream(tIdOfTarget, sId);
 
-        await project.getEnvVersioningByTarget(target).rollbackStream(
-          targetStream,
-        );
+        await project
+          .getEnvVersioningByTarget(target)
+          .rollbackStream(targetStream);
 
         markDirty(targetStream);
       }

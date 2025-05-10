@@ -27,7 +27,9 @@ export class VersionReleaseActionService extends EntityService implements IActio
     for (const tIdOfTarget of sourceTargetIds) {
       const target = project.getTargetByTarget(tIdOfTarget);
 
-      await project.getEnvVersioningByTarget(target).release(target, params);
+      await project
+        .getEnvVersioningByTarget(target)
+        .release(target, params);
 
       markDirty(target);
     }

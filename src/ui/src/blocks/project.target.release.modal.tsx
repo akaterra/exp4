@@ -127,7 +127,7 @@ export const ProjectTargetReleaseStreamsModalContent = observer(({
   projectTargetStore?: ProjectTargetStore;
 }) => {
   if (!projectTargetReleaseParamsStore.state.streams?.length) {
-    return <Row><Label>No streams available</Label></Row>;
+    return <Label>No streams available</Label>;
   }
 
   const tabs = projectTargetReleaseParamsStore.state.streams.map((stream, i) => ({
@@ -213,7 +213,7 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
         x={ 'c10 c10-s-' }
       />
       <FormSelect
-        id={ `ops.${i}.params.streamId` }
+        id={ `ops.${i}.metadata.streamId` }
         items={ projectTargetReleaseParamsStore.streamsForSelect }
         label={ i === 0 ? 'Stream' : null }
         store={ projectTargetReleaseParamsStore }

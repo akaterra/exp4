@@ -335,7 +335,7 @@ export class ProjectTargetStore extends BaseStore {
       selectedStreamIds = [ streamId ];
     }
 
-    yield this.projectStore.applyActionRun(this.target?.id, selectedStreamIds, flowId);
+    yield this.projectStore.applyActionRun(this.target?.id, selectedStreamIds, flowId, !streamId);
   }
 
   @flow @processing
@@ -493,7 +493,7 @@ export class ProjectTargetReleaseParamsStore extends FormStore<{
   static cloneOp(op?: Partial<ProjectTargetReleaseParamsStore['state']['ops'][number]>) {
     return {
       id: op?.id ?? nextId(),
-      artifacts: op.artifacts?.map((artifact) => ProjectTargetReleaseParamsStore.cloneStreamArtifact(artifact)) ?? [],
+      artifacts: op?.artifacts?.map((artifact) => ProjectTargetReleaseParamsStore.cloneStreamArtifact(artifact)) ?? [],
       assigneeUserId: op?.assigneeUserId ?? null,
       description: op?.description ?? '',
       flows: op?.flows ?? [],
@@ -788,6 +788,16 @@ export class ProjectFlowParamsStore extends FormStore {
       .filter((stream) => !selectedStreamIds || selectedStreamIds?.includes(stream.id))
       .map((stream) => ({ id: stream.id, title: stream.title, isSelected: true }));
   }
+
+  useAllTargetStreams() {
+    Object.values(this.projectTarget.streams).forEach((stream) => {
+      if (!this.projectTargetStreams.find((s) => s.id === stream.id)) {
+        this.projectTargetStreams.push({ id: stream.id, title: stream.title, isSelected: false });
+      }
+    });
+
+    return this;
+  }
 }
 
 export enum ProjectStoreMode {
@@ -890,7 +900,7 @@ export class ProjectStore extends BaseStore {
   }
 
   @flow @processing
-  *applyActionRun(targetId: string, streamId: string | string[] | null, flowId?: string) {
+  *applyActionRun(targetId: string, streamId: string | string[] | null, flowId?: string, useAllTargetStreams?: boolean) {
     let selectedStreamIds: IProjectTargetStream['id'][];
 
     if (streamId) {
@@ -909,6 +919,11 @@ export class ProjectStore extends BaseStore {
       targetId,
       selectedStreamIds,
     );
+
+    if (useAllTargetStreams) {
+      projectFlowParamsStore.useAllTargetStreams();
+    }
+
     const action = yield modalStore.show({
       content: ProjectActionRunModalContent,
       props: {

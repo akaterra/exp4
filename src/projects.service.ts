@@ -61,20 +61,20 @@ export class ProjectsService extends EntitiesService<Project> {
 
     const isSyncing = projectState.isSyncing;
 
-    for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
-      const target = project.getTargetByTarget(tId);
-      const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
-        ? targetStreams[tId] === true
-          ? Object.keys(target.streams)
-          : targetStreams[tId] as IProjectTargetStreamDef['id'][]
-        : scopes
-          ? Object.keys(target.streams)
-          : projectState.getDirtyTargetStreamIds(tId);
-
-      projectState.addTargetSync(tId, streamIds, scopes);
-    }
-
     if (!isSyncing) {
+      for (const [ ,tId ] of iter(targetStreams ? Object.keys(targetStreams) : Object.keys(project.targets))) {
+        const target = project.getTargetByTarget(tId);
+        const streamIds: IProjectTargetStreamDef['id'][] = targetStreams?.[tId]
+          ? targetStreams[tId] === true
+            ? Object.keys(target.streams)
+            : targetStreams[tId] as IProjectTargetStreamDef['id'][]
+          : scopes
+            ? Object.keys(target.streams)
+            : projectState.getDirtyTargetStreamIds(tId);
+
+        projectState.addTargetSync(tId, streamIds, scopes);
+      }
+
       (async () => {
         let syncEntries;
 
@@ -172,6 +172,6 @@ export class ProjectsService extends EntitiesService<Project> {
       this.statisticsService.set('general.statesResyncAt', new Date());
     }
 
-    setTimeout(() => this.runStatesResync(), 30000);
+    setTimeout(() => this.runStatesResync(), 5000);
   }
 }

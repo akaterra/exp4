@@ -5,7 +5,7 @@ export interface IProjectRef {
   targetId?: IProjectTarget['id'],
 }
 
-export interface IProjectFlowActionStep {
+export interface IProjectFlowAction {
   id: string;
   type: string;
 
@@ -13,7 +13,9 @@ export interface IProjectFlowActionStep {
   
   title: string;
   description: string;
+
   targets: string[];
+  ui?: Array<string | Array<string>>;
 }
 
 export interface IProjectFlowActionParam {
@@ -42,9 +44,10 @@ export interface IProjectFlow {
   title: string;
   description: string;
 
-  params?: Record<string, IProjectFlowActionParam>;
-  steps: IProjectFlowActionStep[];
   targets: string[];
+  actions: IProjectFlowAction[];
+  params?: Record<string, IProjectFlowActionParam>;
+  ui?: Array<string | Array<string>>;
 }
 
 export interface IProjectTargetStream {

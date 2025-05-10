@@ -27,7 +27,9 @@ export class VersionPatchActionService extends EntityService implements IActionS
     for (const tIdOfTarget of sourceTargetIds) {
       const target = project.getTargetByTarget(tIdOfTarget);
 
-      await project.getEnvVersioningByTarget(target).patch(target, params);
+      await project
+        .getEnvVersioningByTarget(target)
+        .patch(target, params);
 
       markDirty(target);
     }

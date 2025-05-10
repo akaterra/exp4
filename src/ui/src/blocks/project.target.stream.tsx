@@ -25,7 +25,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
                   className='button-sml success auto'
                   disabled={ streamIds ? !streamIds.length : false }
                   x={ null }
-                  onClick={() => projectTarget.applyRunFlow(null, flow.id)}
+                  onClick={ () => projectTarget.applyRunFlow(null, flow.id) }
                 >{ flow.title ?? flow.id }</Button>
               </div>;
             })

@@ -32,6 +32,10 @@ export class TargetState {
     isSystem?: boolean,
     onlyExisting?: boolean,
   ) {
+    if (!this.target.release) {
+      return;
+    }
+
     if (!this.release) {
       this.release = new ReleaseState({ id: this.id, type: this.type });
     }
