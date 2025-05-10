@@ -27,6 +27,7 @@ import cookieParser from 'cookie-parser';
 import { authLogout } from './api/auth/logout';
 import SourceMapSupport from 'source-map-support';
 import { projectTargetReleaseUpdate } from './api/project-target-state/release.update';
+import {HTTP_PORT} from './const';
 
 SourceMapSupport.install({
   environment: 'node',
@@ -158,7 +159,7 @@ function auth(req, res, next) {
 
   app.use(error);
   
-  app.listen(7000, () => {
+  app.listen(HTTP_PORT, () => {
 
   });
 

@@ -2,10 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import { IUser } from './user';
 import { v4 } from 'uuid';
 import { AwaitedCache } from './cache';
-
-const AUTH_DOMAIN = process.env.AUTH_DOMAIN || null;
-const AUTH_MODE = process.env.AUTH_MODE || 'header';
-const JWT_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
+import { AUTH_DOMAIN, AUTH_MODE, JWT_SECRET } from './const';
 
 export function authorize(accessToken: string): IUser {
   try {
