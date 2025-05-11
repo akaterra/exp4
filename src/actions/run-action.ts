@@ -1,5 +1,4 @@
 import { Service } from 'typedi';
-import { IProjectActionDef, IProjectFlowDef, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { IActionService } from '.';
 import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
@@ -11,10 +10,6 @@ export class RunActionActionService extends EntityService implements IActionServ
 
   @Autowired() protected projectsService: ProjectsService;
 
-  async run(
-    flow: IProjectFlowDef,
-    action: IProjectActionDef,
-    targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
-  ): Promise<void> {
+  async run(): Promise<void> {
   }
 }

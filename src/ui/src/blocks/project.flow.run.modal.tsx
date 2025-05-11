@@ -1,14 +1,13 @@
 import * as React from 'react';
-import { IProjectFlow, IProjectTarget, IProjectTargetStream } from '../stores/dto/project';
-import { ProjectFlowParamsStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
 import { FormInput, FormSelect } from './form';
-import {Checkbox} from '../atoms/input';
-import {ProjectTargetStreamTitle} from './project.shared';
-import {nextSeqId} from '../stores/utils';
+import { Checkbox } from '../atoms/input';
+import { nextSeqId } from '../stores/utils';
+import { ProjectFlowParamsStore } from '../stores/project.flow.run.store';
+import {Row} from '../atoms/row';
 
-export const ProjectActionRunModalTitle = ({
+export const ProjectFlowRunModalTitle = ({
   externalStore,
 }: {
   externalStore: ProjectFlowParamsStore;
@@ -23,30 +22,30 @@ export const ProjectActionRunModalTitle = ({
   </div>;
 };
 
-export const ProjectActionRunModalContent = ({
+export const ProjectFlowRunModalContent = ({
   externalStore,
 }: {
   externalStore: ProjectFlowParamsStore;
 }) => {
   let Elements: React.ReactElement[] | null = null;
 
-  if (externalStore?.__schema) {
+  if (externalStore?.schema) {
     Elements = [];
 
     if (externalStore.projectFlow?.ui) {
       for (const el of externalStore.projectFlow.ui) {
         if (Array.isArray(el)) {
           Elements.push(<div key={ nextSeqId() } className='row flex'>
-            { el.map((key) => getControl(externalStore.__schema[key], externalStore, key, 'ccc flex-1')) }
+            { el.map((key) => getControl(externalStore.schema[key], externalStore, key, 'ccc flex-1')) }
           </div>);
         } else {
-          Elements.push(getControl(externalStore.__schema[el], externalStore, el));
+          Elements.push(getControl(externalStore.schema[el], externalStore, el));
         }
       }
     } else {
-      Elements.push(<div className='row'>
-        { Object.entries(externalStore.__schema).map(([ key, param ]) => getControl(param, externalStore, key)) }
-      </div>);
+      Elements.push(...Object.entries(externalStore.schema).map(([ key, param ], i) => <Row key={ i }>
+        { getControl(param, externalStore, key, 18) }
+      </Row>));
     }
   }
 

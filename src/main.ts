@@ -10,7 +10,7 @@ import { StreamHolderService } from './streams';
 import express from 'express';
 import { projectStateList } from './api/project-state/list';
 import { projectList } from './api/project/list';
-import { projectFlowRun } from './api/project-flow/action.run';
+import { projectFlowRun } from './api/project-flow/flow.run';
 import { createGeneral } from './loaders/general-loader';
 import { AuthStrategyHolderService } from './auth/index';
 import { GithubAuthStrategyService } from './auth/github';
@@ -27,7 +27,8 @@ import cookieParser from 'cookie-parser';
 import { authLogout } from './api/auth/logout';
 import SourceMapSupport from 'source-map-support';
 import { projectTargetReleaseUpdate } from './api/project-target-state/release.update';
-import {HTTP_PORT} from './const';
+import { HTTP_PORT } from './const';
+import { projectTargetReleaseOpFlowRun } from './api/project-target-state/release.op.flow.run';
 
 SourceMapSupport.install({
   environment: 'node',
@@ -152,6 +153,9 @@ function auth(req, res, next) {
   );
   app.put(
     '/projects/:projectId/target/:targetId/release', err(auth), err(projectTargetReleaseUpdate),
+  );
+  app.post(
+    '/projects/:projectId/target/:targetId/release/op/:opId/flow/:flowId/run', err(auth), err(projectTargetReleaseOpFlowRun),
   );
   app.get(
     '/statistics', err(auth), err(statisticsList),

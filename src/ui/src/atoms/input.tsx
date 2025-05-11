@@ -9,7 +9,7 @@ export const componentSingleStyle = {
 
 };
 
-export const Checkbox = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, label = undefined, x = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
+export const Checkbox = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, x = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
   if (error) {
     className = className ? `${className} failure` : 'failure';
   }
@@ -69,7 +69,7 @@ export const CheckboxControl = ({ children, className = undefined, currentValue 
   return maybeLabeledControl(Element, x, label, error);
 }
 
-export const RadioGroup = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, label = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
+export const RadioGroup = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, onBlur = undefined, onChange = undefined, placeholder = '', style = undefined }: any) => {
   if (error) {
     className = className ? `${className} failure` : 'failure';
   }

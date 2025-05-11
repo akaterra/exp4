@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import { ProjectTargetReleaseParamsStore, ProjectTargetStore } from '../stores/project';
+import { ProjectTargetReleaseParamsStore } from '../stores/project';
 import { Label } from '../atoms/label';
 import { Title } from '../atoms/title';
-import { FormButton, FormInput, FormSelect, FormTextInput } from './form';
+import { FormInput, FormSelect, FormTextInput } from './form';
 import { Tabs } from '../atoms/tabs';
 import { observer } from 'mobx-react-lite';
 import { Button } from '../atoms/button';
 import { Row } from '../atoms/row';
-import {nextSeqId} from '../stores/utils';
+import { nextSeqId } from '../stores/utils';
 
 export const StreamArtifactLineControlPanel = ({ store, stream, i }: { store: ProjectTargetReleaseParamsStore, stream, i: number }) => {
   return <div className='flex flex-hor children-gap-hor'>
@@ -61,17 +61,15 @@ export const OpLineControlPanel = ({ store, op, i }: { store: ProjectTargetRelea
 }
 
 export const ProjectTargetReleaseModalTitle = ({
-  projectTargetReleaseParamsStore,
-  projectTargetStore,
+  externalStore,
 }: {
-  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
-  projectTargetStore?: ProjectTargetStore;
+  externalStore: ProjectTargetReleaseParamsStore;
 }) => {
   return <Title>
-    { projectTargetStore.target.title ?? projectTargetStore.target.id }&nbsp;
-    <span className='font-sml sup'>{projectTargetStore.targetState.version}</span>
+    { externalStore.projectTarget.title ?? externalStore.projectTarget.id }&nbsp;
+    <span className='font-sml sup'>{externalStore.projectTargetStore.targetState.version}</span>
     {
-      projectTargetStore?.targetState?.isSyncing
+      externalStore.projectTargetStore.targetState?.isSyncing
         ? <React.Fragment>
           &nbsp;
           <span className='span default font-sml sup'><i className='smaller fa-solid fa-hourglass-start' /></span>
@@ -82,17 +80,15 @@ export const ProjectTargetReleaseModalTitle = ({
 };
 
 export const ProjectTargetReleaseNotesModalContent = observer(({
-  projectTargetReleaseParamsStore,
-  projectTargetStore,
+  externalStore,
 }: {
-  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
-  projectTargetStore?: ProjectTargetStore;
+  externalStore: ProjectTargetReleaseParamsStore;
 }) => {
   return <Fragment>
     {
-      projectTargetReleaseParamsStore.state.notes.map((note, i) => <div key={ note.id ?? i }>
+      externalStore.state.notes.map((note, i) => <div key={ note.id ?? i }>
         <FormTextInput
-          store={ projectTargetReleaseParamsStore }
+          store={ externalStore }
           id={ `notes.${i}.description` }
           label={ i === 0 ? 'Description' : null }
           x={ null }
@@ -102,14 +98,14 @@ export const ProjectTargetReleaseNotesModalContent = observer(({
     }
     <Row>
       <FormInput
-        store={ projectTargetReleaseParamsStore }
+        store={ externalStore }
         id='date'
         label='Date'
         x={ 'c-6 c-9-s-' }
         type='datetime-local'
       />
       <FormSelect
-        store={ projectTargetReleaseParamsStore }
+        store={ externalStore }
         id='status'
         items={ { scheduled: 'Scheduled', completed: 'Completed', canceled: 'Canceled' } }
         label='Status'
@@ -120,24 +116,22 @@ export const ProjectTargetReleaseNotesModalContent = observer(({
 });
 
 export const ProjectTargetReleaseStreamsModalContent = observer(({
-  projectTargetReleaseParamsStore,
-  projectTargetStore,
+  externalStore,
 }: {
-  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
-  projectTargetStore?: ProjectTargetStore;
+  externalStore: ProjectTargetReleaseParamsStore;
 }) => {
-  if (!projectTargetReleaseParamsStore.state.streams?.length) {
+  if (!externalStore.state.streams?.length) {
     return <Label>No streams available</Label>;
   }
 
-  const tabs = projectTargetReleaseParamsStore.state.streams.map((stream, i) => ({
+  const tabs = externalStore.state.streams.map((stream, i) => ({
     id: String(i),
-    title: projectTargetStore.target.streams[stream.id]?.title ?? stream.id,
+    title: externalStore.projectTarget.streams[stream.id]?.title ?? stream.id,
   }));
-  const tabsContents = projectTargetReleaseParamsStore.state.streams.map((stream, i) => <Fragment key={ i }>
+  const tabsContents = externalStore.state.streams.map((stream, i) => <Fragment key={ i }>
     <div>
       <FormTextInput
-        store={ projectTargetReleaseParamsStore }
+        store={ externalStore }
         id={ `streams.${i}.description` }
         label='Description'
         x={ null }
@@ -150,25 +144,25 @@ export const ProjectTargetReleaseStreamsModalContent = observer(({
           className='button-sml default w-auto'
           label='No artifacts available'
           x={ null }
-          onClick={ () => projectTargetReleaseParamsStore.streamArtifactAdd(stream) }
+          onClick={ () => externalStore.streamArtifactAdd(stream) }
         ><i className="fa-solid fa-plus fa-lg"></i></Button></div>
         : stream.artifacts.map((artifact, j) => <div key={ nextSeqId() }>
           <Row>
             <FormInput
-              store={ projectTargetReleaseParamsStore }
+              store={ externalStore }
               id={ `streams.${i}.artifacts.${j}.id` }
               label={ j === 0 ? 'Artifact ID' : null }
               x={ 'c-6 c-9-s-' }
             />
             <FormInput
-              store={ projectTargetReleaseParamsStore }
+              store={ externalStore }
               id={ `streams.${i}.artifacts.${j}.description` }
               label={ j === 0 ? 'Artifact value' : null }
               x={ 'c-6 c-9-s-' }
             />
           </Row>
           <StreamArtifactLineControlPanel
-            store={ projectTargetReleaseParamsStore }
+            store={ externalStore }
             stream={ stream }
             i={ j }
           />
@@ -186,64 +180,62 @@ export const ProjectTargetReleaseStreamsModalContent = observer(({
 });
 
 export const ProjectTargetReleaseOpsModalContent = observer(({
-  projectTargetReleaseParamsStore,
-  projectTargetStore,
+  externalStore,
 }: {
-  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
-  projectTargetStore?: ProjectTargetStore;
+  externalStore: ProjectTargetReleaseParamsStore;
 }) => {
-  if (projectTargetReleaseParamsStore.state.ops.length === 0) {
+  if (externalStore.state.ops.length === 0) {
     return <div>
       <Button
         className='button-sml default w-auto'
         label='No ops available'
         x={ null }
-        onClick={ () => projectTargetReleaseParamsStore.opAdd() }
+        onClick={ () => externalStore.opAdd() }
       ><i className="fa-solid fa-plus fa-lg"></i></Button>
     </div>;
   }
 
-  return projectTargetReleaseParamsStore.state.ops.map((op, i) => <div key={ op.id ?? i }>
+  return externalStore.state.ops.map((op, i) => <div key={ op.id ?? i }>
     <Row>
       <FormInput
         id={ `ops.${i}.description` }
         label={ i === 0 ? 'Description' : null }
         rows={ 2 }
-        store={ projectTargetReleaseParamsStore }
+        store={ externalStore }
         x={ 'c10 c10-s-' }
       />
       <FormSelect
         id={ `ops.${i}.metadata.streamId` }
-        items={ projectTargetReleaseParamsStore.streamsForSelect }
+        items={ externalStore.streamsForSelect }
         label={ i === 0 ? 'Stream' : null }
-        store={ projectTargetReleaseParamsStore }
+        store={ externalStore }
         x={ 'c-4 c-4-s-' }
       />
       <FormSelect
         id={ `ops.${i}.status` }
         items={ { pending: 'Pending', inProgress: 'In progress', completed: 'Completed', canceled: 'Canceled' } }
         label={ i === 0 ? 'Status' : null }
-        store={ projectTargetReleaseParamsStore }
+        store={ externalStore }
         x={ 'c-4 c-4-s-' }
       />
     </Row>
     <div className='flex flex-hor children-gap-hor'>
       {
-        projectTargetStore.flows.map(({ flow }, j) => {
+        externalStore.projectTargetStore.flows.map(({ flow }, j) => {
           const isSet = op.flows.includes(flow.id);
 
           return <Button
             className={ isSet ? 'button-sml success w-auto' : 'button-sml default w-auto' }
             key={ `ops.${i}.flows.${j}` }
-            store={ projectTargetReleaseParamsStore }
+            store={ externalStore }
             x={ null }
-            onClick={ () => projectTargetReleaseParamsStore.opToggleFlow(op, flow.id) }
+            onClick={ () => externalStore.opToggleFlow(op, flow.id) }
           >{ flow.title ?? flow.id }</Button>;
         })
       }
     </div>
     <OpLineControlPanel
-      store={ projectTargetReleaseParamsStore }
+      store={ externalStore }
       op={ op }
       i={ i }
     />
@@ -251,11 +243,9 @@ export const ProjectTargetReleaseOpsModalContent = observer(({
 });
 
 export const ProjectTargetReleaseModalContent = observer(({
-  projectTargetReleaseParamsStore,
-  projectTargetStore,
+  externalStore,
 }: {
-  projectTargetReleaseParamsStore?: ProjectTargetReleaseParamsStore;
-  projectTargetStore?: ProjectTargetStore;
+  externalStore: ProjectTargetReleaseParamsStore;
 }) => {
   return <div className='flex flex-ver paragraph children-gap'>
     <Tabs
@@ -263,18 +253,9 @@ export const ProjectTargetReleaseModalContent = observer(({
       tabs={ [ { id: 'notes', title: 'Notes' }, { id: 'streams', title: 'Streams' }, { id: 'ops', title: 'Ops' } ] }
       tabsDecoration='default'
     >
-      <ProjectTargetReleaseNotesModalContent
-        projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
-        projectTargetStore={ projectTargetStore }
-      />
-      <ProjectTargetReleaseStreamsModalContent
-        projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
-        projectTargetStore={ projectTargetStore }
-      />
-      <ProjectTargetReleaseOpsModalContent
-        projectTargetReleaseParamsStore={ projectTargetReleaseParamsStore }
-        projectTargetStore={ projectTargetStore }
-      />
+      <ProjectTargetReleaseNotesModalContent externalStore={ externalStore } />
+      <ProjectTargetReleaseStreamsModalContent externalStore={ externalStore } />
+      <ProjectTargetReleaseOpsModalContent externalStore={ externalStore } />
     </Tabs>
   </div>;
 });

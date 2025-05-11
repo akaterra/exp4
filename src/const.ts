@@ -5,6 +5,15 @@ export const MANIFESTS = [
   MANIFEST_PROJECT_TYPE,
 ];
 export const HTTP_PORT = 7000;
-export const AUTH_DOMAIN = process.env.AUTH_DOMAIN || 'http://localhost:7000';
+export const HTTP_HOST = process.env.HTTP_HOST || 'localhost';
+export const AUTH_HOST = process.env.AUTH_HOST || HTTP_HOST;
+export const AUTH_JWT_SECRET = process.env.AUTH_JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 export const AUTH_MODE = process.env.AUTH_MODE || 'header';
-export const JWT_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET ?? 'secret';
+
+export function getHostWithSchema(host: string): string {
+  return host.startsWith('http') ? host : `http://${host}`;
+}
+
+export function getHost(host: string): string {
+  return host.startsWith('http://') ? host.slice(7) : host.startsWith('https://') ? host.slice(8) : host;
+}

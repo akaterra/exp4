@@ -1,5 +1,5 @@
 import { Status } from './enums/status';
-import { IProjectDef, IProjectFlowDef, IProjectReleaseDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectFlowDef, IProjectReleaseDef, IProjectTargetStreamDef } from './project';
 import { StreamState } from './stream-state';
 import * as _ from 'lodash';
 

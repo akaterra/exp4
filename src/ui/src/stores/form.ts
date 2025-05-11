@@ -29,10 +29,10 @@ export class FormStore<
   protected isErrorCheck: Record<string, null | string> = {};
   protected schemaKeysRefs: Record<string, FormStoreSchemaDef> = {};
 
-  constructor(public readonly __schema: U) {
+  constructor(public readonly schema: U) {
     this.clear();
 
-    makeObservable(this.state, Object.keys(__schema).reduce((acc, key) => {
+    makeObservable(this.state, Object.keys(schema).reduce((acc, key) => {
       acc[key] = observable;
 
       return acc;
@@ -61,8 +61,8 @@ export class FormStore<
   }
 
   clear() {
-    this.state = Object.keys(this.__schema).reduce((acc, key) => {
-      const def = this.__schema[key];
+    this.state = Object.keys(this.schema).reduce((acc, key) => {
+      const def = this.schema[key];
       
       if (def?.initialValue !== undefined) {
         acc[key] = def.initialValue;
@@ -75,7 +75,7 @@ export class FormStore<
 
     this.validateAll(true);
 
-    if (!Object.keys(this.__schema).length) {
+    if (!Object.keys(this.schema).length) {
       this.isValid = true; 
     }
   }
@@ -85,7 +85,7 @@ export class FormStore<
   }
 
   onChange(key, val) {
-    const optsKey = this.__schema[key];
+    const optsKey = this.schema[key];
     let isConst = false;
 
     switch (optsKey?.type) {
@@ -103,7 +103,9 @@ export class FormStore<
       break;
     }
 
-    _.set(this.state, key, val);
+    if (!isConst) {
+      _.set(this.state, key, val);
+    }
 
     this.validate(key, val, true);
   }
@@ -124,7 +126,7 @@ export class FormStore<
     let schemaKey = this.schemaKeysRefs[key];
 
     if (!schemaKey) {
-      schema = schema ?? this.__schema;
+      schema = schema ?? this.schema;
 
       if (key.includes('.')) {
         const keys = key.split('.');
@@ -224,7 +226,7 @@ export class FormStore<
   }
 
   validateAll(onlyCheck?, schema?: FormStoreSchema): boolean {
-    for (const key of Object.keys(schema ?? this.__schema)) {
+    for (const key of Object.keys(schema ?? this.schema)) {
       this.validate(key, undefined, onlyCheck);
     }
 

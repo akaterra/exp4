@@ -2,11 +2,11 @@ import * as jwt from 'jsonwebtoken';
 import { IUser } from './user';
 import { v4 } from 'uuid';
 import { AwaitedCache } from './cache';
-import { AUTH_DOMAIN, AUTH_MODE, JWT_SECRET } from './const';
+import { AUTH_HOST, AUTH_MODE, AUTH_JWT_SECRET } from './const';
 
 export function authorize(accessToken: string): IUser {
   try {
-    return jwt.verify(accessToken, JWT_SECRET);
+    return jwt.verify(accessToken, AUTH_JWT_SECRET);
   } catch (err) {
     throw new Error('Unauthorized');
   }
@@ -17,7 +17,7 @@ export function prepareAuthData(user: IUser) {
     id: user.id,
     name: user.name,
   };
-  const accessToken = jwt.sign(tokenPayload, JWT_SECRET);
+  const accessToken = jwt.sign(tokenPayload, AUTH_JWT_SECRET);
 
   return {
     accessToken,
@@ -42,8 +42,8 @@ export function authorizeByOneTimeToken(id: string): IUser {
 export function authSendData(req, res, data) {
   switch (AUTH_MODE) {
   case 'cookie':
-    for (const domain of (AUTH_DOMAIN ?? '').split(',')) {
-      res.cookie('authorization', data.accessToken, { domain: domain || null, httpOnly: true, sameSite: 'none', secure: true });
+    for (const domain of (AUTH_HOST ?? '').split(',')) {
+      res.cookie('authorization', data.accessToken, { domain: domain || null, httpOnly: true, sameSite: 'strict', secure: true });
     }
 
     res.json({ accessToken: 'null', user: data.user });
@@ -57,7 +57,7 @@ export function authSendData(req, res, data) {
 export function authLogout(req, res) {
   switch (AUTH_MODE) {
   case 'cookie':
-    for (const domain of (AUTH_DOMAIN ?? '').split(',')) {
+    for (const domain of (AUTH_HOST ?? '').split(',')) {
       res.clearCookie('authorization', { domain: domain || null, sameSite: 'none', secure: true });
     }
 

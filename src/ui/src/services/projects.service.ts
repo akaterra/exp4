@@ -109,6 +109,10 @@ export class ProjectsService {
     });
   }
 
+  releaseOpFlowRun(projectId: IProject['id'], targetId: IProjectTarget['id'], opId: IProjectTargetState['release']['sections'][number]['id'], flowId: IProjectFlow['id'], params?: Record<string, any>) {
+    return this.rest.post(`projects/${projectId}/target/${targetId}/release/op/${opId}/flow/${flowId}/run`, params);
+  }
+
   releaseUpdate(projectId: IProject['id'], targetId: IProjectTarget['id'], release: IProjectTargetState['release']) {
     return this.rest.put(`projects/${projectId}/target/${targetId}/release`, release);
   }

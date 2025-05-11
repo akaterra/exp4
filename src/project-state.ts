@@ -1,10 +1,9 @@
 import { Service } from 'typedi';
-import { IProjectDef, IProjectReleaseDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { ProjectsService } from './projects.service';
 import { StreamState } from './stream-state';
 import { Autowired } from './utils';
 import { TargetState } from './target-state';
-import { ReleaseState } from './release-state';
 
 @Service()
 export class ProjectState {

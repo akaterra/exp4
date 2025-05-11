@@ -2,7 +2,7 @@ import React from 'react';
 import './input.css';
 import { maybeLabeledControl } from './utils';
 
-export const Textarea = ({ children, className = undefined, currentValue = undefined, disabled = undefined, error = undefined, id = undefined, label = undefined, onBlur = undefined, onChange = undefined, placeholder='', rows = 5, x = undefined, style = undefined }: any) => {
+export const Textarea = ({ className = undefined, currentValue = undefined, disabled = undefined, error = undefined, id = undefined, label = undefined, onBlur = undefined, onChange = undefined, placeholder='', rows = 5, x = undefined, style = undefined }: any) => {
   if (error) {
     className = className ? `${className} failure` : 'failure';
   }

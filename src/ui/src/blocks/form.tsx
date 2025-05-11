@@ -13,7 +13,7 @@ export const FormButton = observer(({ store, id, ...props }: { store: FormStore;
   return <Button
     { ...props }
     error={ id ? store.isError[id] : null }
-    label={ id ? store.__schema[id]?.title ?? props.label : props.label }
+    label={ id ? store.schema[id]?.title ?? props.label : props.label }
     onBlur={ () => store.validate(id) }
     onClick={ () => formOnClick(store, props.onClick) }
   />;
@@ -23,7 +23,7 @@ export const FormInput = observer(({ store, id, ...props }: { store: FormStore, 
   return <Input
     { ...props } currentValue={ store.get(id) ?? '' }
     error={ store.isError[id] }
-    label={ store.__schema[id]?.title ?? props.label }
+    label={ store.schema[id]?.title ?? props.label }
     onBlur={ () => store.validate(id) }
     onChange={ (val) => store.onChange(id, val) }
   />;
@@ -33,7 +33,7 @@ export const FormTextInput = observer(({ store, id, ...props }: { store: FormSto
   return <Textarea
     { ...props } currentValue={ store.get(id) ?? '' }
     error={ store.isError[id] }
-    label={ store.__schema[id]?.title ?? props.label }
+    label={ store.schema[id]?.title ?? props.label }
     onBlur={ () => store.validate(id) }
     onChange={ (val) => store.onChange(id, val) }
   />;
@@ -43,7 +43,7 @@ export const FormSelect = observer(({ store, id, ...props }: { store: FormStore,
   return <Select
     { ...props } currentValue={ store.get(id) }
     error={ store.isError[id] }
-    label={ store.__schema[id]?.title ?? props.label }
+    label={ store.schema[id]?.title ?? props.label }
     onBlur={ () => store.validate(id) }
     onChange={ (val) => store.onChange(id, val) }
   />;
@@ -54,7 +54,7 @@ export const FormSubmit = observer(({ store, id, ...props }: { store: FormStore,
     { ...props }
     disabled={ false }
     error={ id ? store.isError[id] : null }
-    label={ id ? store.__schema[id]?.title ?? props.label : props.label }
+    label={ id ? store.schema[id]?.title ?? props.label : props.label }
     preventDefault={ true }
     type='submit'
     onBlur={ () => store.validate(id) }
@@ -67,7 +67,7 @@ export const FormSubmitActive = observer(({ store, id, ...props }: { store: Form
     { ...props }
     disabled={ !store.isValid }
     error={ id ? store.isError[id] : null }
-    label={ id ? store.__schema[id]?.title ?? props.label : props.label }
+    label={ id ? store.schema[id]?.title ?? props.label : props.label }
     preventDefault={ true }
     type='submit'
     onBlur={ () => store.validate(id) }

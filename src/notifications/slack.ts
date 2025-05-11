@@ -7,7 +7,7 @@ import { ProjectsService } from '../projects.service';
 import { SlackIntegrationService } from '../integrations/slack';
 import { Status } from '../enums/status';
 import * as _ from 'lodash';
-import { AUTH_DOMAIN } from '../const';
+import { AUTH_HOST, getHostWithSchema } from '../const';
 
 @Service()
 export class SlackNotificationService extends EntityService implements INotificationService {
@@ -88,9 +88,9 @@ export class SlackNotificationService extends EntityService implements INotifica
           const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id, true);
           const streamFlows = targetState.release.sections
             .filter((s) => s.type === 'op' && s.metadata?.streamId === stream.id)
-            .map((s) => s.flows)
-            .flat()
-            .map((flowId) => `<${AUTH_DOMAIN || 'http://sourceflow'}/projects/${project.id}/target/${stream.ref?.targetId}/stream/${stream.id}/flow/${flowId}/run|${project.getFlowByFlow(flowId)?.title}>`).join(' ');
+            .map((s) => s.flows.map((flow) => [ flow, s.id ])).flat()
+            .filter(([ flowId, ]) => project.getFlowByFlow(flowId))
+            .map(([ flowId, opId ]) => `<${getHostWithSchema(AUTH_HOST || 'sourceflow')}/projects/${project.id}/target/${stream.ref?.targetId}/release/op/${opId}/flow/${flowId}/run|${project.getFlowByFlow(flowId)?.title}>`).join(' ');
 
           return {
             type: 'section',
@@ -121,7 +121,7 @@ export class SlackNotificationService extends EntityService implements INotifica
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: opsSections.map((section, i) => new Md().b(section.description).i(_.capitalize(section.status ?? 'pending')).valueOf()).join('\n') || ' ',
+            text: opsSections.map((section) => new Md().b(section.description).i(_.capitalize(section.status ?? 'pending')).valueOf()).join('\n') || ' ',
           },
         },
       );
@@ -183,10 +183,10 @@ function getDescriptionValue(description) {
   return description?.value ?? description;
 }
 
-function getTzOffsetMin(timeZone = 'UTC') {
-  return (
-    new Date(new Date().toLocaleString('en-US', { timeZone: 'UTC' })).getTime()
-    -
-    new Date(new Date().toLocaleString('en-US', { timeZone })).getTime()
-  ) / 6e4;
-}
+// function getTzOffsetMin(timeZone = 'UTC') {
+//   return (
+//     new Date(new Date().toLocaleString('en-US', { timeZone: 'UTC' })).getTime()
+//     -
+//     new Date(new Date().toLocaleString('en-US', { timeZone })).getTime()
+//   ) / 6e4;
+// }

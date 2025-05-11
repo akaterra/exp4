@@ -387,7 +387,7 @@ function checkGte(condition, val) {
 
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (condition <= val) {
+      if (condition <= item) {
         return true;
       }
     }
@@ -423,7 +423,7 @@ function checkLte(condition, val) {
 
   if (Array.isArray(val)) {
     for (const item of val) {
-      if (condition >= val) {
+      if (condition >= item) {
         return true;
       }
     }

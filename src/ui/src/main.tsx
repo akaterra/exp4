@@ -81,6 +81,19 @@ export const App = () => {
           return null;
         },
       }, {
+        path: '/projects/:id/target/:targetId/release/op/:opId/flow/:flowId/run',
+        element: <div />,
+        loader: async ({ params }) => {
+          await rootStore.isReady;
+          await rootStore.projectsStore.fetchProject(params.id as IProject['id']);
+
+          if (rootStore.projectsStore.selectedProjectStore) {
+            await rootStore.projectsStore.selectedProjectStore.applyReleaseOpFlowRun(params.targetId, params.opId, params.flowId);
+          }
+  
+          return null;
+        },
+      }, {
         path: '/projects/:id/:tab?',
         element: <RouteProject projects={ rootStore.projectsStore } />,
         loader: async ({ params }) => {
