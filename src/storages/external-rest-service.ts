@@ -10,6 +10,7 @@ import { RestApiService } from '../services/rest-api.service';
 import { IGeneralManifest } from '../general';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
+import { getKeyOfType } from './utils';
 
 @Service()
 export class ExternalRestServiceStorageService extends EntityService implements IStorageService {
@@ -67,7 +68,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
 
   @Log('debug')
   async varGetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], def: D = null): Promise<D> {
-    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, target.id, 'target');
+    const intKey = getKeyOfType(key, target.id, 'target');
     
     if (!this.config?.noCache && this.cache.has(intKey)) {
       return this.cache.get(intKey);
@@ -87,7 +88,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
 
   @Log('debug')
   async varSetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], val: D = null): Promise<void> {
-    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, target.id, 'target');
+    const intKey = getKeyOfType(key, target.id, 'target');
 
     await this.restApiService.post(
       this.getUrl('var'),
@@ -146,7 +147,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
 
   @Log('debug')
   async varGetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], def: D = null): Promise<D> {
-    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, stream.id);
+    const intKey = getKeyOfType(key, stream.id);
 
     if (!this.config?.noCache && this.cache.has(intKey)) {
       return this.cache.get(intKey);
@@ -165,7 +166,7 @@ export class ExternalRestServiceStorageService extends EntityService implements 
   }
 
   async varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D = null): Promise<void> {
-    const intKey = ExternalRestServiceStorageService.getKeyOfType(key, stream.id);
+    const intKey = getKeyOfType(key, stream.id);
 
     await this.restApiService.post(
       this.getUrl('var/stream'),
@@ -226,18 +227,6 @@ export class ExternalRestServiceStorageService extends EntityService implements 
     await this.restApiService.delete(
       this.getUrl('all'),
     );
-  }
-
-  protected static getKey(key: string | string[]): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `sf__${key}`.toLowerCase().replace(/\-/g, '_');
-  }
-
-  protected static getKeyOfType(key: string | string[], id: IProjectTargetStreamDef['id'], type?: string): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `sf__${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected getUrl(resource: string) {

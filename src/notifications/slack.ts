@@ -129,11 +129,11 @@ export class SlackNotificationService extends EntityService implements INotifica
 
     console.log(JSON.stringify(payload,undefined,2));
 
-    const metadata = await this.getIntegrationService(targetState).send(payload, targetState.release.metadata.messageId);
+    // const metadata = await this.getIntegrationService(targetState).send(payload, targetState.release.metadata.messageId);
 
-    if (metadata?.messageId) {
-      targetState.release.metadata.messageId = metadata.messageId;
-    }
+    // if (metadata?.messageId) {
+    //   targetState.release.metadata.messageId = metadata.messageId;
+    // }
   }
 
   private getIntegrationService(targetState: TargetState) {

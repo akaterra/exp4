@@ -181,6 +181,48 @@ export class AwaitableContainer {
   }
 }
 
+export class CallbacksContainer {
+  protected callbacks: Record<string, { fn: (...args) => any, isAsync: boolean }[]> = {};
+
+  register(event: string, fn: (...args) => any, isAsync: boolean = false) {
+    if (!this.callbacks[event]) {
+      this.callbacks[event] = [];
+    }
+
+    this.callbacks[event].push({ fn, isAsync });
+  }
+
+  unregister(event: string, fn: (...args) => any) {
+    if (!this.callbacks[event]) {
+      return;
+    }
+
+    this.callbacks[event] = this.callbacks[event].filter((cb) => cb.fn !== fn);
+  }
+
+  run(event: string, ...args) {
+    if (!this.callbacks[event]) {
+      return;
+    }
+
+    const promises = [];
+
+    for (const cb of this.callbacks[event]) {
+      if (cb.isAsync) {
+        promises.push(cb.fn(...args));
+      } else {
+        cb.fn(...args);
+      }
+    }
+
+    return Promise.all(promises);
+  }
+
+  clear() {
+    this.callbacks = {};
+  }
+}
+
 export function loadModules(path, symbolPostfix?) {
   function findSymbol(module) {
     if (module.module) {

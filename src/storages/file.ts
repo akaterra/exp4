@@ -13,6 +13,7 @@ import { iter } from '../utils';
 import YAML from 'yaml'
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
+import { getKeyOfType } from './utils';
 
 @Service()
 export class FileStorageService extends EntityService implements IStorageService {
@@ -113,7 +114,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async varGetTarget<D>(target: Pick<IProjectTargetDef | TargetState, 'id'>, key: string | string[], def: D = null): Promise<D> {
-    const intKey = FileStorageService.getKeyOfType(key, target.id, 'target');
+    const intKey = getKeyOfType(key, target.id, 'target');
     const cacheKey = `${intKey}:target`;
     
     if (this.cache.has(cacheKey)) {
@@ -125,7 +126,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async varSetTarget<D>(target: Pick<IProjectTargetDef | TargetState, 'id'>, key: string | string[], val: D = null): Promise<void> {
-    const intKey = FileStorageService.getKeyOfType(key, target.id, 'target');
+    const intKey = getKeyOfType(key, target.id, 'target');
 
     await this.putJson(intKey, val);
 
@@ -179,7 +180,7 @@ export class FileStorageService extends EntityService implements IStorageService
   }
 
   async varGetStream<D>(stream: Pick<IProjectTargetStreamDef | StreamState, 'id'>, key: string | string[], def: D = null): Promise<D> {
-    const intKey = FileStorageService.getKeyOfType(key, stream.id);
+    const intKey = getKeyOfType(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
     if (this.cache.has(cacheKey)) {
@@ -191,7 +192,7 @@ export class FileStorageService extends EntityService implements IStorageService
 
   @Log('debug')
   async varSetStream<D>(stream: Pick<IProjectTargetStreamDef | StreamState, 'id'>, key: string | string[], val: D = null): Promise<void> {
-    const intKey = FileStorageService.getKeyOfType(key, stream.id);
+    const intKey = getKeyOfType(key, stream.id);
 
     await this.putJson(intKey, val);
 
@@ -254,18 +255,6 @@ export class FileStorageService extends EntityService implements IStorageService
         await unlink(name);
       }
     }
-  }
-
-  protected static getKey(key: string | string[]): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `${key}`.toLowerCase().replace(/\-/g, '_');
-  }
-
-  protected static getKeyOfType(key: string | string[], id: IProjectTargetStreamDef['id'], type?: string): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected getJsonPath(file: string): string {

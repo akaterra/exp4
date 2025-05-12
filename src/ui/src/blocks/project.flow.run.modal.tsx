@@ -5,7 +5,7 @@ import { FormInput, FormSelect } from './form';
 import { Checkbox } from '../atoms/input';
 import { nextSeqId } from '../stores/utils';
 import { ProjectFlowParamsStore } from '../stores/project.flow.run.store';
-import {Row} from '../atoms/row';
+import { Row } from '../atoms/row';
 
 export const ProjectFlowRunModalTitle = ({
   externalStore,

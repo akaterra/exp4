@@ -3,7 +3,7 @@ export enum Status {
   COMPLETED = 'completed',
   FAILED = 'failed',
   PENDING = 'pending',
-  PROCESSING = 'processing',
+  IN_PROGRESS = 'inProgress',
   QUEUED = 'queued',
   SCHEDULED = 'scheduled',
   SUCCESS = 'success',

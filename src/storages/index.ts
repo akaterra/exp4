@@ -16,9 +16,9 @@ export interface IStorageService extends IService {
 
   userSetByKeyAndType(id: string, type: string, data: Record<string, unknown>): Promise<void>;
 
-  varGetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
+  varGetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], def: D, isObject?: boolean): Promise<D>;
 
-  varSetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
+  varSetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], val: D, isObject?: boolean): Promise<void>;
 
   varAddTarget<D>(
     target: IProjectTargetDef | TargetState,
@@ -30,9 +30,9 @@ export interface IStorageService extends IService {
 
   varIncTarget(target: IProjectTargetDef | TargetState, key: string | string[], add: number): Promise<number>;
 
-  varGetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], def: D, isComplex?: boolean): Promise<D>;
+  varGetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], def: D, isObject?: boolean): Promise<D>;
 
-  varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
+  varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D, isObject?: boolean): Promise<void>;
 
   varAddStream<D>(
     stream: IProjectTargetStreamDef | StreamState,

@@ -1,6 +1,6 @@
 import { Inject, Service } from 'typedi';
 import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
-import { AwaitableContainer, iter } from './utils';
+import { AwaitableContainer, CallbacksContainer, iter } from './utils';
 import { EntitiesService } from './entities.service';
 import { AwaitedCache } from './cache';
 import { ProjectState } from './project-state';
@@ -13,6 +13,7 @@ import { TargetState } from './target-state';
 export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => StatisticsService) protected statisticsService: StatisticsService;
 
+  private callbacksContainer = new CallbacksContainer();
   private statesCache = new AwaitedCache<ProjectState>();
   private tasksContainer = new AwaitableContainer(2);
 
@@ -120,15 +121,12 @@ export class ProjectsService extends EntitiesService<Project> {
   }
 
   async updateTargetState(targetState: TargetState) {
-    if (targetState.release) {
-      await this.tasksContainer.async.push(async () => {
-        await this.get(targetState.target.ref.projectId)
-          .getEnvVersioningByTarget(targetState.target)
-          .setCurrentRelease(targetState);
-  
-        targetState.release.ver += 1;
+    await this.tasksContainer.async.push(async () => {
+      await this.get(targetState.target.ref.projectId).callbacksContainer.run('targetState:update', {
+        target: targetState.target,
+        targetState,
       });
-    }
+    });
   }
 
   async runStatesResync() {

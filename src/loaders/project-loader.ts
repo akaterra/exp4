@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from '../const';
 import { ValidatorService } from '../services/validator.service';
 import { NotificationHolderService } from '../notifications';
+import { ExtensionHolderService } from '../extensions';
 
 export async function createProject(
   manifest: IProjectManifest & { env?: Project['env'] },
@@ -28,6 +29,7 @@ export async function createProject(
   manifest.env = {
     actions: new ActionHolderService(),
     artifacts: new ArtifactHolderService(),
+    extensions: new ExtensionHolderService(),
     integrations: new IntegrationHolderService(),
     notifications: new NotificationHolderService(),
     storages: new StorageHolderService(),
@@ -49,6 +51,10 @@ export async function createProject(
     manifest.env.artifacts.addFactory(artifact);
   }
 
+  for (const extension of await loadModules(__dirname + '/../extensions', 'ExtensionService')) {
+    manifest.env.extensions.addFactory(extension);
+  }
+
   for (const notification of await loadModules(__dirname + '/../notifications', 'NotificationService')) {
     manifest.env.notifications.addFactory(notification);
   }
@@ -67,6 +73,7 @@ export async function createProject(
 
   resolveUse(manifest.artifacts, manifest);
   resolveUse(manifest.definitions, manifest);
+  resolveUse(manifest.extensions, manifest);
   resolveUse(manifest.flows, manifest);
   resolveUse(manifest.integrations, manifest);
   resolveUse(manifest.notifications, manifest);
@@ -76,11 +83,20 @@ export async function createProject(
 
   const actionsService = manifest.env.actions;
   const artifactsService = manifest.env.artifacts;
+  const extensionsService = manifest.env.extensions;
   const integrationsService = manifest.env.integrations;
   const notificationsService = manifest.env.notifications;
   const storagesService = manifest.env.storages;
   const streamsService = manifest.env.streams;
   const versioningsService = manifest.env.versionings;
+
+  if (manifest.extensions) {
+    for (const [ defId, defConfig ] of Object.entries(manifest.extensions)) {
+      const instance = extensionsService.getInstance(defConfig.type, defConfig.config);
+      instance.registerCallbacks(this.callbacks);
+      extensionsService.add(instance, defId);
+    }
+  }
 
   if (manifest.integrations) {
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {

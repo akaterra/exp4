@@ -10,6 +10,7 @@ import { IGeneralManifest } from '../general';
 import { iter } from '../utils';
 import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
+import { getKeyOfType } from './utils';
 
 @Service()
 export class MongodbStorageService extends EntityService implements IStorageService {
@@ -77,7 +78,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   @Log('debug')
   async varGetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], def: D = null): Promise<D> {
-    const intKey = MongodbStorageService.getKeyOfType(key, target.id, 'target');
+    const intKey = getKeyOfType(key, target.id, 'target');
     const cacheKey = `${intKey}:target`;
     
     if (this.cache.has(cacheKey)) {
@@ -91,7 +92,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   @Log('debug')
   async varSetTarget<D>(target: IProjectTargetDef | TargetState, key: string | string[], val: D = null): Promise<void> {
-    const intKey = MongodbStorageService.getKeyOfType(key, target.id, 'target');
+    const intKey = getKeyOfType(key, target.id, 'target');
     const collection = await this.getCollectionVars();
 
     await collection.updateOne({ key: intKey, type: 'target' }, { $set: { val } }, { upsert: true });
@@ -146,7 +147,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   }
 
   async varGetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], def: D = null): Promise<D> {
-    const intKey = MongodbStorageService.getKeyOfType(key, stream.id);
+    const intKey = getKeyOfType(key, stream.id);
     const cacheKey = `${intKey}:stream`;
     
     if (this.cache.has(cacheKey)) {
@@ -160,7 +161,7 @@ export class MongodbStorageService extends EntityService implements IStorageServ
 
   @Log('debug')
   async varSetStream<D>(stream: IProjectTargetStreamDef | StreamState, key: string | string[], val: D = null): Promise<void> {
-    const intKey = MongodbStorageService.getKeyOfType(key, stream.id);
+    const intKey = getKeyOfType(key, stream.id);
     const collection = await this.getCollectionVars();
 
     await collection.updateOne({ key: intKey, type: 'stream' }, { $set: { val } }, { upsert: true });
@@ -217,18 +218,6 @@ export class MongodbStorageService extends EntityService implements IStorageServ
   async truncateAll(): Promise<void> {
     await (await this.getCollectionUsers()).deleteMany();
     await (await this.getCollectionVars()).deleteMany();
-  }
-
-  protected static getKey(key: string | string[]): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `${key}`.toLowerCase().replace(/\-/g, '_');
-  }
-
-  protected static getKeyOfType(key: string | string[], id: IProjectTargetStreamDef['id'], type?: string): string {
-    key = Array.isArray(key) ? key.join('__') : key;
-
-    return `${key}__${type ?? 'stream'}__${id}`.toLowerCase().replace(/\-/g, '_');
   }
 
   protected async getClient() {

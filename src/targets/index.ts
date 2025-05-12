@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import { IProjectTargetDef } from '../project';
 import { AwaitedCache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
-import { Autowired } from '../utils';
+import { Autowired, CallbacksContainer } from '../utils';
 import { TargetState } from '../target-state';
 
 @Service()
@@ -15,7 +15,11 @@ export class TargetHolderService {
     return 'Target';
   }
 
-  async getState(target: IProjectTargetDef) {
+  constructor(public readonly callbacksContainer: CallbacksContainer = new CallbacksContainer()) {
+
+  }
+
+  async rereadState(target: IProjectTargetDef) {
     const project = this.projectsService.get(target.ref?.projectId);
     const key = `${target.ref.projectId}:${target.id}`;
     const release = await this.mutex.acquire(key);
@@ -27,15 +31,17 @@ export class TargetHolderService {
         return null;
       }
 
-      if (project.getReleaseByTarget(target)) {
-        const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
+      await this.callbacksContainer.run('targetState:reread', { target, targetState: entity });
 
-        if (!entity.release || (release && release.ver > entity.release.ver)) {
-          entity.release = release;
-        }
+      // if (project.getReleaseByTarget(target)) {
+      //   const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
 
-        entity.release.schema = project.getReleaseByTarget(target);
-      }
+      //   if (!entity.release || (release && release.ver > entity.release.ver)) {
+      //     entity.release = release;
+      //   }
+
+      //   entity.release.schema = project.getReleaseByTarget(target);
+      // }
 
       entity.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 

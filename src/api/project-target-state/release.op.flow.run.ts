@@ -1,7 +1,7 @@
 import Container from 'typedi';
 import { ProjectsService } from '../../projects.service';
 import { logger } from '../../logger';
-import {IProjectTargetStreamDef} from '../../project';
+import { IProjectTargetStreamDef } from '../../project';
 
 const projectsService = Container.get(ProjectsService);
 

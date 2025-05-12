@@ -7,8 +7,6 @@ import { IStorageService } from '../storages';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';
-import { ReleaseState } from '../release-state';
-import { TargetState } from '../target-state';
 
 export interface ISemverConfig {
   format?: string;
@@ -215,29 +213,29 @@ export class SemverVersioningService extends EntityService implements IVersionin
     return version;
   }
 
-  async getCurrentRelease(target: IProjectTargetDef): Promise<ReleaseState> {
-    const storage = this.getStorage(target);
-    const targetVersion = await this.getCurrent(target, false);
+  // async getCurrentRelease(target: IProjectTargetDef): Promise<ReleaseState> {
+  //   const storage = this.getStorage(target);
+  //   const targetVersion = await this.getCurrent(target, false);
 
-    return new ReleaseState(await storage.varGetTarget(
-      target,
-      [ 'release', target.ref.projectId, this.config?.namespace ?? target.id, targetVersion ],
-      null,
-      true,
-    ) ?? {});
-  }
+  //   return new ReleaseState(await storage.varGetTarget(
+  //     target,
+  //     [ 'release', target.ref.projectId, this.config?.namespace ?? target.id, targetVersion ],
+  //     null,
+  //     true,
+  //   ) ?? {});
+  // }
 
-  async setCurrentRelease(targetState: TargetState): Promise<void> {
-    const storage = this.getStorage(targetState.target);
-    const targetVersion = await this.getCurrent(targetState.target, false);
+  // async setCurrentRelease(targetState: TargetState): Promise<void> {
+  //   const storage = this.getStorage(targetState.target);
+  //   const targetVersion = await this.getCurrent(targetState.target, false);
 
-    await storage.varSetTarget(
-      targetState,
-      [ 'release', targetState.target.ref.projectId, this.config?.namespace ?? targetState.target.id, targetVersion ],
-      targetState.release.toJSON(targetState.release.ver + 1),
-      true,
-    );
-  }
+  //   await storage.varSetTarget(
+  //     targetState,
+  //     [ 'release', targetState.target.ref.projectId, this.config?.namespace ?? targetState.target.id, targetVersion ],
+  //     targetState.release.toJSON(targetState.release.ver + 1),
+  //     true,
+  //   );
+  // }
 
   @Log('debug')
   async exec(source: IProjectTargetDef, target: IProjectTargetDef, action: string): Promise<string> {

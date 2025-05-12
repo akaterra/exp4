@@ -1,3 +1,4 @@
+import {CallbacksContainer} from './utils';
 
 export interface IService {
   id: string;
@@ -7,6 +8,10 @@ export interface IService {
 
   readonly assertType: string;
   readonly type: string;
+}
+
+export interface IEntityService extends IService {
+  registerCallbacks(callbacks: CallbacksContainer): void;
 }
 
 export class EntityService {
@@ -33,6 +38,10 @@ export class EntityService {
 
   get type() {
     return (this.constructor as any).type;
+  }
+
+  registerCallbacks(callbacks: CallbacksContainer) {
+
   }
 
   withContext(context) {

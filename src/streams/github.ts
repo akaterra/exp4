@@ -14,13 +14,13 @@ import { ProjectsService } from '../projects.service';
 
 const JOB_CONSLUSION_TO_STATUS_MAP = {
   failure: Status.FAILED,
-  in_progress: Status.PROCESSING,
+  in_progress: Status.IN_PROGRESS,
   skipped: Status.COMPLETED,
   success: Status.COMPLETED,
 }
 const JOB_STATUS_TO_STATUS_MAP = {
   completed: Status.SUCCESS,
-  in_progress: Status.PROCESSING,
+  in_progress: Status.IN_PROGRESS,
 }
 
 export type IGithubTargetStream = IProjectTargetStream<{
