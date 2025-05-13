@@ -10,6 +10,9 @@ export const AUTH_HOST = process.env.AUTH_HOST || HTTP_HOST;
 export const AUTH_JWT_SECRET = process.env.AUTH_JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 export const AUTH_MODE = process.env.AUTH_MODE || 'header';
 
+export const EVENT_TARGET_STATE_REREAD_STARTED = 'targetState:reread:started';
+export const EVENT_TARGET_STATE_REREAD_FINISHED = 'targetState:reread:finished';
+
 export function getHostWithSchema(host: string): string {
   return host.startsWith('http') ? host : `http://${host}`;
 }

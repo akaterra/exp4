@@ -10,7 +10,6 @@ import { ArtifactHolderService } from '../artifacts';
 import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from '../const';
 import { ValidatorService } from '../services/validator.service';
-import { NotificationHolderService } from '../notifications';
 import { ExtensionHolderService } from '../extensions';
 
 export async function createProject(
@@ -31,7 +30,6 @@ export async function createProject(
     artifacts: new ArtifactHolderService(),
     extensions: new ExtensionHolderService(),
     integrations: new IntegrationHolderService(),
-    notifications: new NotificationHolderService(),
     storages: new StorageHolderService(),
     streams: new StreamHolderService(),
     targets: new TargetHolderService(),
@@ -55,10 +53,6 @@ export async function createProject(
     manifest.env.extensions.addFactory(extension);
   }
 
-  for (const notification of await loadModules(__dirname + '/../notifications', 'NotificationService')) {
-    manifest.env.notifications.addFactory(notification);
-  }
-
   for (const storage of await loadModules(__dirname + '/../storages', 'StorageService')) {
     manifest.env.storages.addFactory(storage);
   }
@@ -76,7 +70,6 @@ export async function createProject(
   resolveUse(manifest.extensions, manifest);
   resolveUse(manifest.flows, manifest);
   resolveUse(manifest.integrations, manifest);
-  resolveUse(manifest.notifications, manifest);
   resolveUse(manifest.storages, manifest);
   resolveUse(manifest.targets, manifest);
   resolveUse(manifest.versionings, manifest);
@@ -85,7 +78,6 @@ export async function createProject(
   const artifactsService = manifest.env.artifacts;
   const extensionsService = manifest.env.extensions;
   const integrationsService = manifest.env.integrations;
-  const notificationsService = manifest.env.notifications;
   const storagesService = manifest.env.storages;
   const streamsService = manifest.env.streams;
   const versioningsService = manifest.env.versionings;
@@ -101,12 +93,6 @@ export async function createProject(
   if (manifest.integrations) {
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
       integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
-    }
-  }
-
-  if (manifest.notifications) {
-    for (const [ defId, defConfig ] of Object.entries(manifest.notifications)) {
-      notificationsService.add(notificationsService.getInstance(defConfig.type, defConfig.config), defId);
     }
   }
 

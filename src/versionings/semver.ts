@@ -7,6 +7,7 @@ import { IStorageService } from '../storages';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';
+import {TargetState} from '../target-state';
 
 export interface ISemverConfig {
   format?: string;
@@ -43,6 +44,38 @@ export class SemverVersioningService extends EntityService implements IVersionin
     }
 
     return version;
+  }
+
+  async getTargetVar<D>(target: IProjectTargetDef, key: string | string[], def: D, isComplex?: boolean): Promise<D> {
+    return await this.getStorage(target).varGetTarget(
+      target,
+      [
+        ...Array.isArray(key) ? key : [ key ],
+        target.ref.projectId,
+        this.config?.namespace ?? target.id,
+        await this.getCurrent(target),
+        'target',
+        target.id,
+      ],
+      def,
+      isComplex,
+    );
+  }
+
+  async setTargetVar<D>(target: IProjectTargetDef, key: string | string[], val: D, isComplex?: boolean): Promise<void> {
+    return await this.getStorage(target).varSetTarget(
+      target,
+      [
+        ...Array.isArray(key) ? key : [ key ],
+        target.ref.projectId,
+        this.config?.namespace ?? target.id,
+        await this.getCurrent(target),
+        'target',
+        target.id,
+      ],
+      val,
+      isComplex,
+    );    
   }
 
   async format(version: string, format?: string) {
@@ -266,7 +299,7 @@ export class SemverVersioningService extends EntityService implements IVersionin
   }
 
   private getStorage(target: IProjectTargetDef): IStorageService {
-    return this.projectsService.get(target.ref.projectId).getEnvStorageByStorageId(this.config?.storage ?? 'default');
+    return this.projectsService.get(target.ref.projectId).getEnvStorageByStorageId(this.config?.storage ?? target.config?.storage ?? 'default');
   }
 
   private async setTargetVersion(target: IProjectTargetDef, storage: IStorageService, version: string) {

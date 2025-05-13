@@ -21,11 +21,11 @@ function assertKeyParts(key: string | string[], unsafe?: boolean) {
     return;
   }
 
-  if (Array.isArray(key) && key.some((k) => k == null)) {
-    throw new Error('Key part cannot be null or undefined');
+  if (Array.isArray(key) && key.some((k) => k == null || k === '')) {
+    throw new Error(`Key part "${key}" must have a value`);
   }
 
   if (key == null) {
-    throw new Error('Key part cannot be null or undefined');
+    throw new Error(`Key part "${key}" must have a value`);
   }
 }

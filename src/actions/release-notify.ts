@@ -5,6 +5,7 @@ import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { getPossibleTargetIds, notEmptyArray } from './utils';
+import {INotificationService} from '../extensions';
 
 @Service()
 export class ReleaseNotifyActionService extends EntityService implements IActionService {
@@ -12,7 +13,7 @@ export class ReleaseNotifyActionService extends EntityService implements IAction
 
   @Autowired() protected projectsService: ProjectsService;
 
-  async run(
+  async exec(
     flow: IProjectFlowDef,
     action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
@@ -26,8 +27,12 @@ export class ReleaseNotifyActionService extends EntityService implements IAction
     for (const tIdOfTarget of sourceTargetIds) {
       const targetState = await project.rereadTargetStateByTarget(tIdOfTarget);
 
+      if (!targetState.extensions?.notification) {
+        continue;
+      }
+
       await project
-        .getEnvNotificationByNotification(action.config?.notification)
+        .getEnvExtensionByExtension<INotificationService>(targetState.extensions?.notification, 'notification')
         .publishRelease(targetState);
     }
   }

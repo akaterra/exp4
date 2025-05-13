@@ -1,17 +1,59 @@
 // import {Status} from './enums/status';
-import { IProjectTargetDef, IProjectTargetStreamDef } from './project';
+import {IService} from './entities.service';
+import {createError} from './error';
+import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 // import { IReleaseStateSection, ReleaseState } from './release-state';
 import { StreamState } from './stream-state';
 
-export class TargetState {
+export class TargetState implements IService {
   id: IProjectTargetDef['id'];
   type: IProjectTargetDef['type'];
 
+  assertType = 'target';
+
   target: IProjectTargetDef;
 
-  extensions: Record<string, any> = {};
+  extensions: Record<string, IService> = {};
   streams: Record<IProjectTargetStreamDef['id'], StreamState> = {};
   version?: string;
+
+  getExtension<T extends IService>(id: IProjectDef['id'], assertType?: IProjectDef['type'], unsafe?: boolean): T {
+    if (!this.extensions[id]) {
+      if (unsafe) {
+        return null;
+      }
+
+      throw new Error(`Extension "${id}" not found`);
+    }
+
+    if (assertType && this.extensions[id].type !== assertType) {
+      if (unsafe) {
+        return null;
+      }
+
+      throw new Error(`Extension "${id}" is not of type "${assertType}"`);
+    }
+
+    return this.extensions[id] as T;
+  }
+
+  getExtensionOfTarget<T extends IService>(id: IProjectDef['id'], assertType?: IProjectDef['type'], unsafe?: boolean): T {
+    const extensionId = typeof this.target.extensions?.[id] === 'string'
+      ? this.target.extensions?.[id]
+      : this.target.extensions?.[id]?.id;
+
+    return this.getExtension<T>(extensionId, assertType, unsafe);
+  }
+
+  setExtension<T extends IService>(id: IProjectDef['id'], extension: T) {
+    this.extensions[id ?? extension.id] = extension;
+
+    return this;
+  }
+
+  hasTargetExtension(id: IProjectDef['id'], assertType?: IProjectDef['type'], unsafe?: boolean): boolean {
+    return !!this.target.extensions?.[id];
+  }
 
   get isSyncing(): boolean {
     return Object.values(this.streams).some((stream) => stream.isSyncing);

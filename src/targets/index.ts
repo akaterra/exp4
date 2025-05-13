@@ -4,6 +4,7 @@ import { AwaitedCache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { Autowired, CallbacksContainer } from '../utils';
 import { TargetState } from '../target-state';
+import {EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_FINISHED} from '../const';
 
 @Service()
 export class TargetHolderService {
@@ -31,7 +32,7 @@ export class TargetHolderService {
         return null;
       }
 
-      await this.callbacksContainer.run('targetState:reread', { target, targetState: entity });
+      await this.callbacksContainer.run(EVENT_TARGET_STATE_REREAD_STARTED, { target, targetState: entity });
 
       // if (project.getReleaseByTarget(target)) {
       //   const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
@@ -46,6 +47,8 @@ export class TargetHolderService {
       entity.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 
       this.cache.set(key, entity);
+
+      await this.callbacksContainer.run(EVENT_TARGET_STATE_REREAD_FINISHED, { target, targetState: entity });
 
       return entity;
     } finally {

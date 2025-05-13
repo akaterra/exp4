@@ -11,6 +11,14 @@ export class StubVersioningService extends EntityService implements IVersioningS
     return null;
   }
 
+  async getTargetVar<D>(target: IProjectTargetDef, key: string | string[], def: D, isComplex?: boolean): Promise<D> { // eslint-disable-line
+    return def;
+  }
+
+  async setTargetVar<D>(target: IProjectTargetDef, key: string | string[], val: D, isComplex?: boolean): Promise<void> {
+    return;
+  }
+  
   async format(version: string, format?: string) { // eslint-disable-line
     return version;
   }

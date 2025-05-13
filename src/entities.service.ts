@@ -3,8 +3,8 @@ import {CallbacksContainer} from './utils';
 export interface IService {
   id: string;
 
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
 
   readonly assertType: string;
   readonly type: string;
@@ -65,15 +65,19 @@ export class EntitiesService<T extends IService = IService> {
           return;
         }
 
-        throw new Error(`${this.domain} requested entity "${id ?? '?'}" (${assertTypeA}) with incompatible type (${assertTypeB})`);
+        throw new Error(`${this.domain} requested entity "${id ?? '?'}" (${assertTypeA}) with incompatible type "${assertTypeB}"`);
       }
     }
   }
 
-  get(id: string, assertType: T['type'] = null, assertTypeNonStrict: boolean = true): T {
+  get(id: string, assertType: T['type'] = null, assertTypeNonStrict: boolean = true, unsafe: boolean = false): T {
     const entity = this.entities[id];
 
     if (!entity) {
+      if (unsafe) {
+        return null;
+      }
+
       throw new Error(`${this.domain} "${id ?? '?'}" not found`);
     }
 

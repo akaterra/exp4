@@ -23,7 +23,7 @@ export class ArgocdSyncActionService extends EntityService implements IActionSer
   }
 
   @Log('debug')
-  async run(
+  async exec(
     flow: IProjectFlowDef,
     action: IProjectAction<IArgocdSyncStepConfig>,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,

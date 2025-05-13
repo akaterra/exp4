@@ -6,6 +6,10 @@ import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 export interface IVersioningService extends IService {
   getCurrent(target: IProjectTargetDef, format?: false | string): Promise<string>;
 
+  getTargetVar<D>(target: IProjectTargetDef, key: string | string[], def?: D, isComplex?: boolean): Promise<D>;
+
+  setTargetVar<D>(target: IProjectTargetDef, key: string | string[], val: D, isComplex?: boolean): Promise<void>;
+
   format(version: string, format?: string): Promise<any>;
 
   override(source: IProjectTargetDef, target: IProjectTargetDef): Promise<string>;

@@ -1,3 +1,4 @@
+import { IService } from './entities.service';
 import { Status } from './enums/status';
 import { IProjectTargetStreamDef } from './project';
 
@@ -20,9 +21,11 @@ export class StreamState<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
   HistoryActionMetadata extends Record<string, unknown> = Metadata,
   HistoryChangeMetadata extends Record<string, unknown> = Metadata,
-> {
+> implements IService {
   id: string;
   type: string;
+
+  assertType = 'stream';
 
   stream: IProjectTargetStreamDef;
 

@@ -2,6 +2,7 @@ import Container from 'typedi';
 import { ProjectsService } from '../../projects.service';
 import { logger } from '../../logger';
 import { IProjectTargetStreamDef } from '../../project';
+import { ReleaseState } from '../../release-state';
 
 const projectsService = Container.get(ProjectsService);
 
@@ -11,7 +12,13 @@ export async function projectTargetReleaseOpFlowRun(req, res) {
 
   const project = projectsService.get(req.params.projectId);
   const targetState = await project.rereadTargetStateByTarget(req.params.targetId);
-  const targetStateReleaseSection = targetState.release.getSection(req.params.opId, 'op');
+  const targetReleaseState = targetState.getExtension<ReleaseState>('release', 'release', true);
+
+  if (!targetReleaseState) {
+    return res.status(404).json({ message: 'Release extension not found' });
+  }
+
+  const targetStateReleaseSection = targetReleaseState.getSection(req.params.opId, 'op');
 
   res.json(await project.flowRun(
     req.params.flowId,

@@ -15,7 +15,7 @@ export class MoveActionService extends EntityService implements IActionService {
 
   description = 'Moves selected streams between targets';
 
-  async run(
+  async exec(
     flow: IProjectFlowDef,
     action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,

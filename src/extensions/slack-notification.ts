@@ -1,37 +1,68 @@
 import { Service } from 'typedi';
-import { INotificationService } from '.';
+import { INotificationService } from '../notifications';
 import { EntityService } from '../entities.service';
 import { TargetState } from '../target-state';
-import { Autowired } from '../utils';
+import { Autowired, CallbacksContainer } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { SlackIntegrationService } from '../integrations/slack';
 import { Status } from '../enums/status';
 import * as _ from 'lodash';
-import { AUTH_HOST, getHostWithSchema } from '../const';
+import { AUTH_HOST, EVENT_TARGET_STATE_REREAD_FINISHED, getHostWithSchema } from '../const';
+import { ReleaseState } from '../release-state';
+
+export interface ISlackNotificationConfig {
+  integration?: string;
+  locale?: string;
+  tz?: string;
+}
 
 @Service()
-export class SlackNotificationService extends EntityService implements INotificationService {
-  static readonly type: string = 'slack';
+export class SlackNotificationExtensionService extends EntityService implements INotificationService {
+  static readonly type: string = 'notification:slack';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(protected config?: { integration?: string; locale?: string; tz?: string }) {
+  constructor(protected config?: ISlackNotificationConfig) {
     super();
   }
 
+  async exec() {}
+
+  registerCallbacks(callbacks: CallbacksContainer): void {
+    callbacks.register(EVENT_TARGET_STATE_REREAD_FINISHED, async ({ target, targetState }) => {
+      if (!targetState?.target?.extensions?.release) {
+        return;
+      }
+
+      if (!(targetState instanceof TargetState)) {
+        return;
+      }
+
+      if (targetState.target.extensions?.notification === this.id) {
+        await this.publishRelease(targetState);
+      }
+    });
+  }
+
   async publishRelease(targetState: TargetState): Promise<void> {
+    const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
+
+    if (!targetStateRelease) {
+      return;
+    }
+
     const project = this.projectsService.get(targetState.target.ref?.projectId);
     const payload: { blocks: any[] } = {
       blocks: [ {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: `⭐ Release ${targetState.version}`,
+          text: `⭐ Release ${targetState.version || ''}`.trim(),
         }
       } ],
     };
 
-    const notesSections = targetState.release.sections.filter((section) => section.type === 'note');
+    const notesSections = targetStateRelease.sections.filter((section) => section.type === 'note');
 
     if (notesSections.length) {
       payload.blocks.push({
@@ -43,37 +74,37 @@ export class SlackNotificationService extends EntityService implements INotifica
       });
     }
 
-    if (targetState.release.date) {
+    if (targetStateRelease.date) {
       payload.blocks.push({
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: new Md().i(`Scheduled for ${new Date(targetState.release.date).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}`).valueOf(),
+          text: new Md().i(`Scheduled for ${new Date(targetStateRelease.date).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}`).valueOf(),
         },
       });
     }
 
-    if (targetState.release.status && targetState.release.status === Status.COMPLETED) {
+    if (targetStateRelease.status && targetStateRelease.status === Status.COMPLETED) {
       payload.blocks.push({
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: new Md().i(`Completed at ${new Date(targetState.release.statusUpdateAt).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}`).valueOf(),
+          text: new Md().i(`Completed at ${new Date(targetStateRelease.statusUpdateAt).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}`).valueOf(),
         },
       });
     }
 
-    if (targetState.release.status && targetState.release.status === Status.CANCELED) {
+    if (targetStateRelease.status && targetStateRelease.status === Status.CANCELED) {
       payload.blocks.push({
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: new Md().i(`Canceled at ${new Date(targetState.release.statusUpdateAt).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}`).valueOf(),
+          text: new Md().i(`Canceled at ${new Date(targetStateRelease.statusUpdateAt).toLocaleString(this.config?.locale ?? 'en-US', { timeZone: this.config?.tz ?? 'UTC' })}`).valueOf(),
         },
       });
     }
 
-    const streamsSections = targetState.release.sections.filter((section) => section.type === 'stream');
+    const streamsSections = targetStateRelease.sections.filter((section) => section.type === 'stream');
 
     if (streamsSections.length) {
       payload.blocks.push(
@@ -86,7 +117,7 @@ export class SlackNotificationService extends EntityService implements INotifica
         },
         ...streamsSections.map((section) => {
           const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id, true);
-          const streamFlows = targetState.release.sections
+          const streamFlows = targetStateRelease.sections
             .filter((s) => s.type === 'op' && s.metadata?.streamId === stream.id)
             .map((s) => s.flows.map((flow) => [ flow, s.id ])).flat()
             .filter(([ flowId, ]) => project.getFlowByFlow(flowId))
@@ -106,7 +137,7 @@ export class SlackNotificationService extends EntityService implements INotifica
       );
     }
 
-    const opsSections = targetState.release.sections.filter((section) => section.type === 'op' && section.description);
+    const opsSections = targetStateRelease.sections.filter((section) => section.type === 'op' && section.description);
 
     if (opsSections.length) {
       payload.blocks.push(
@@ -129,10 +160,10 @@ export class SlackNotificationService extends EntityService implements INotifica
 
     console.log(JSON.stringify(payload,undefined,2));
 
-    // const metadata = await this.getIntegrationService(targetState).send(payload, targetState.release.metadata.messageId);
+    // const metadata = await this.getIntegrationService(targetState).send(payload, targetStateRelease.metadata.messageId);
 
     // if (metadata?.messageId) {
-    //   targetState.release.metadata.messageId = metadata.messageId;
+    //   targetStateRelease.metadata.messageId = metadata.messageId;
     // }
   }
 

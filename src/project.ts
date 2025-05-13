@@ -16,7 +16,7 @@ import { TargetState } from './target-state';
 import { StatisticsService } from './statistics.service';
 import { logger } from './logger';
 import { INotificationService, NotificationHolderService } from './notifications';
-import { ExtensionHolderService } from './extensions';
+import { ExtensionHolderService, IExtensionService } from './extensions';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
   id?: string;
@@ -138,7 +138,6 @@ export interface IProjectManifest extends IProjectDef {
   events: Record<string, IProjectDefInput[]>;
   flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDefInput>;
-  notifications?: Record<string, IProjectDefInput>;
   storages?: Record<string, IProjectDefInput>;
   targets: Record<string, IProjectTargetInput & { streams: Record<string, IProjectTargetStreamInput & { use?: string }> }>;
   versionings: Record<string, IProjectDefInput>;
@@ -159,7 +158,6 @@ export class Project implements IProject {
     artifacts?: ArtifactHolderService;
     extensions?: ExtensionHolderService;
     integrations?: IntegrationHolderService;
-    notifications?: NotificationHolderService;
     storages?: StorageHolderService;
     streams?: StreamHolderService;
     targets?: TargetHolderService;
@@ -417,20 +415,20 @@ export class Project implements IProject {
     return this.env.actions.get(actionStep.type);
   }
 
-  getEnvIntegraionByIntegration<T extends IIntegrationService>(mixed: IProjectDef['id'] | IProjectDef, assertType?: IProjectTargetStreamDef['type']): T {
+  getEnvExtensionByExtension<T extends IExtensionService>(mixed: IProjectDef['id'] | IProjectDef, assertType?: IProjectDef['type'], unsafe?: boolean): T {
+    return this.env.extensions.get(typeof mixed === 'string' ? mixed : mixed?.id, assertType, true, unsafe) as T;
+  }
+
+  getEnvIntegraionByIntegration<T extends IIntegrationService>(mixed: IProjectDef['id'] | IProjectDef, assertType?: IProjectDef['type']): T {
     return this.env.integrations.get(typeof mixed === 'string' ? mixed : mixed?.id, assertType) as T;
   }
 
-  getEnvIntegraionByTargetAndStream<T extends IIntegrationService>(mixedTarget: IProjectTargetDef['id'] | IProjectTargetDef, mixedStream: IProjectTargetStreamDef['id'] | IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
+  getEnvIntegraionByTargetAndStream<T extends IIntegrationService>(mixedTarget: IProjectTargetDef['id'] | IProjectTargetDef, mixedStream: IProjectDef['id'] | IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']): T {
     return this.getEnvIntegraionByTargetStream(this.getTargetStreamByTargetAndStream<T>(mixedTarget, mixedStream), assertType) as T;
   }
 
-  getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef, assertType?: IProjectTargetStreamDef['type']) {
+  getEnvIntegraionByTargetStream<T extends IIntegrationService>(stream: IProjectTargetStreamDef, assertType?: IProjectDef['type']) {
     return this.env.integrations.get(stream.config?.integration as string, assertType) as T;
-  }
-
-  getEnvNotificationByNotification<T extends INotificationService>(mixed: IProjectDef['id'] | IProjectDef, assertType?: IProjectTargetStreamDef['type']): T {
-    return this.env.notifications.get(typeof mixed === 'string' ? mixed : mixed?.id, assertType) as T;
   }
 
   getEnvStorageByStorageId(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
@@ -494,7 +492,7 @@ export class Project implements IProject {
         });
 
         try {
-          await this.env.actions.get(action.type).run(flow, action, targetsStreams, params);
+          await this.env.actions.get(action.type).exec(flow, action, targetsStreams, params);
         } catch (err) {
           this.statisticsService.add(`projects.${this.id}.errors`, {
             message: err?.message ?? err ?? null,

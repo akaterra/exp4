@@ -1,3 +1,4 @@
+import {IService} from './entities.service';
 import { Status } from './enums/status';
 import {IReleaseConfig} from './extensions/release';
 import { IProjectDef, IProjectFlowDef, IProjectTargetStreamDef } from './project';
@@ -30,18 +31,20 @@ export interface IReleaseStateSection {
   status?: string;
 }
 
-export class ReleaseState {
+export class ReleaseState implements IService {
   id: string;
   type: string;
-
+  
+  assertType = 'release';
+  
+  config: IReleaseConfig;
+  ver?: number;
+  
   date?: Date;
   metadata: Record<string, any>;
   sections: IReleaseStateSection[] = [];
-  schema: IReleaseConfig;
   status: Status;
   statusUpdateAt?: Date;
-
-  ver?: number;
 
   constructor(props: Partial<ReleaseState>) {
     if (!props.metadata) {
@@ -77,8 +80,8 @@ export class ReleaseState {
       changelog: section.changelog ?? [],
     } as IReleaseStateSection;
 
-    if (this.schema) {
-      const schemaSection = this.schema.sections?.find((s) => s.id ? s.id === section.id : s.type === section.type);
+    if (this.config) {
+      const schemaSection = this.config.sections?.find((s) => s.id ? s.id === section.id : s.type === section.type);
 
       if (schemaSection?.changelog?.artifacts?.length) {
         for (const changelog of releaseSection.changelog) {

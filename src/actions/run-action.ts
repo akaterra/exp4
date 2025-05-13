@@ -10,6 +10,6 @@ export class RunActionActionService extends EntityService implements IActionServ
 
   @Autowired() protected projectsService: ProjectsService;
 
-  async run(): Promise<void> {
+  async exec(): Promise<void> {
   }
 }

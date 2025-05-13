@@ -4,7 +4,7 @@ import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';
 
 export interface IActionService extends IService {
-  run(
+  exec(
     flow: IProjectFlowDef,
     action: IProjectActionDef,
     targetsStreams?: Record<string, [ string, ...string[] ] | true>,

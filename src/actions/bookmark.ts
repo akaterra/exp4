@@ -12,7 +12,7 @@ export class BookmarkActionService extends EntityService implements IActionServi
 
   @Autowired() protected projectsService: ProjectsService;
 
-  async run(
+  async exec(
     flow: IProjectFlowDef,
     action: IProjectActionDef,
     targetsStreams?: Record<IProjectTargetDef['id'], [ IProjectTargetStreamDef['id'], ...IProjectTargetStreamDef['id'][] ] | true>,
