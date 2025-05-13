@@ -1,4 +1,4 @@
-import {CallbacksContainer} from './utils';
+import { CallbacksContainer } from './utils';
 
 export interface IService {
   id: string;
@@ -11,7 +11,9 @@ export interface IService {
 }
 
 export interface IEntityService extends IService {
+  events: Record<string, boolean>;
   registerCallbacks(callbacks: CallbacksContainer): void;
+  registerEvents(events: Record<string, boolean> | string[]): void;
 }
 
 export class EntityService {
@@ -22,6 +24,8 @@ export class EntityService {
 
   title: string;
   description: string;
+
+  events: Record<string, boolean> = {};
 
   private _context: Record<string, unknown>;
 
@@ -40,8 +44,20 @@ export class EntityService {
     return (this.constructor as any).type;
   }
 
-  registerCallbacks(callbacks: CallbacksContainer) {
+  registerCallbacks(callbacks: CallbacksContainer) { // eslint-disable-line
 
+  }
+
+  registerEvents(events: Record<string, boolean> | string[]) {
+    if (Array.isArray(events)) {
+      events.forEach((event) => {
+        this.events[event] = true;
+      });
+    } else {
+      Object.keys(events).forEach((event) => {
+        this.events[event] = events[event];
+      });
+    }
   }
 
   withContext(context) {

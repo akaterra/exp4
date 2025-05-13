@@ -29,20 +29,24 @@ export class SlackNotificationExtensionService extends EntityService implements 
   async exec() {}
 
   registerCallbacks(callbacks: CallbacksContainer): void {
-    callbacks.register(EVENT_TARGET_STATE_REREAD_FINISHED, async ({ target, targetState }) => {
-      if (!targetState?.target?.extensions?.release) {
-        return;
-      }
+    if (this.events['targetState:reread'] !== false) {
+      callbacks.register(EVENT_TARGET_STATE_REREAD_FINISHED, async ({ target, targetState }) => {
+        if (!targetState?.target?.extensions?.release) {
+          return;
+        }
 
-      if (!(targetState instanceof TargetState)) {
-        return;
-      }
+        if (!(targetState instanceof TargetState)) {
+          return;
+        }
 
-      if (targetState.target.extensions?.notification === this.id) {
-        await this.publishRelease(targetState);
-      }
-    });
+        if (targetState.target.extensions?.notification === this.id) {
+          await this.publishRelease(targetState);
+        }
+      });
+    }
   }
+
+  // extra methods
 
   async publishRelease(targetState: TargetState): Promise<void> {
     const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);

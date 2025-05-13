@@ -85,6 +85,11 @@ export async function createProject(
   if (manifest.extensions) {
     for (const [ defId, defConfig ] of Object.entries(manifest.extensions)) {
       const instance = extensionsService.getInstance(defConfig.type, defConfig.config);
+
+      if (defConfig.events) {
+        instance.registerEvents(defConfig.events);
+      }
+
       instance.registerCallbacks(this.callbacks);
       extensionsService.add(instance, defId);
     }

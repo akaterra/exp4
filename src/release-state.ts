@@ -1,6 +1,6 @@
-import {IService} from './entities.service';
+import { IService } from './entities.service';
 import { Status } from './enums/status';
-import {IReleaseConfig} from './extensions/release';
+import { IReleaseConfig } from './extensions/release';
 import { IProjectDef, IProjectFlowDef, IProjectTargetStreamDef } from './project';
 import { StreamState } from './stream-state';
 import * as _ from 'lodash';

@@ -4,7 +4,7 @@ import { AwaitedCache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { Autowired, CallbacksContainer } from '../utils';
 import { TargetState } from '../target-state';
-import {EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_UPDATE_STARTED, EVENT_TARGET_STATE_UPDATE_FINISHED} from '../const';
+import { EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_UPDATE_STARTED, EVENT_TARGET_STATE_UPDATE_FINISHED } from '../const';
 
 @Service()
 export class TargetHolderService {
@@ -59,7 +59,7 @@ export class TargetHolderService {
   }
 
   async updateState(targetState: TargetState) {
-    const project = this.projectsService.get(targetState.target.ref?.projectId);
+    // const project = this.projectsService.get(targetState.target.ref?.projectId);
     const key = `${targetState.target.ref.projectId}:${targetState.target.id}`;
     const release = await this.mutex.acquire(key);
 

@@ -8,7 +8,6 @@ import { StatisticsService } from './statistics.service';
 import moment from 'moment-timezone';
 import { Log, logger } from './logger';
 import { TargetState } from './target-state';
-import {EVENT_TARGET_STATE_UPDATE_FINISHED, EVENT_TARGET_STATE_UPDATE_STARTED} from './const';
 
 @Service()
 export class ProjectsService extends EntitiesService<Project> {

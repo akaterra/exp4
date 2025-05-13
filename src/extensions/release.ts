@@ -1,7 +1,7 @@
 import { IExtensionService } from '.';
-import { EVENT_TARGET_STATE_REREAD_STARTED } from '../const';
+import { EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_UPDATE_FINISHED } from '../const';
 import { EntityService } from '../entities.service';
-import { IProjectArtifact, IProjectDef, IProjectFlowDef, IProjectTargetStreamDef } from '../project';
+import { IProjectArtifact, IProjectFlowDef, IProjectTargetStreamDef } from '../project';
 import { ProjectsService } from '../projects.service';
 import { IReleaseStateSection, ReleaseState } from '../release-state';
 import { TargetState } from '../target-state';
@@ -33,29 +33,54 @@ export class ReleaseExtensionService extends EntityService implements IExtension
   async exec() {}
 
   registerCallbacks(callbacks: CallbacksContainer): void {
-    callbacks.register(EVENT_TARGET_STATE_REREAD_STARTED, async ({ target, targetState }) => {
-      if (!targetState?.target?.extensions?.release) {
-        return;
-      }
-
-      if (!(targetState instanceof TargetState)) {
-        return;
-      }
-
-      if (targetState.target.extensions?.release === this.id) {
-        const project = this.projectsService.get(target.ref?.projectId);
-        const versioning = project.getEnvVersioningByTarget(target);
-        const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
-        const release = await versioning.getTargetVar(target, 'release', null, true);
-
-        if (!targetStateRelease || !release || targetStateRelease.ver < release.ver) {
-          targetState.setExtension(
-            'release',
-            new ReleaseState({ ...release, id: this.id, type: this.type, config: this.config }),
-          );
+    if (this.events['targetState:reread'] !== false) {
+      callbacks.register(EVENT_TARGET_STATE_REREAD_STARTED, async ({ target, targetState }) => {
+        if (!targetState?.target?.extensions?.release) {
+          return;
         }
-      }
-    });
+
+        if (!(targetState instanceof TargetState)) {
+          return;
+        }
+
+        if (targetState.hasTargetExtension('release', this.id)) {
+          const project = this.projectsService.get(target.ref?.projectId);
+          const versioning = project.getEnvVersioningByTarget(target);
+          const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
+          const release = await versioning.getTargetVar(target, 'release', null, true);
+
+          if (!targetStateRelease || (release && targetStateRelease.ver < release.ver)) {
+            targetState.setExtension(
+              'release',
+              new ReleaseState({ ...release, id: this.id, type: this.type, config: this.config }),
+            );
+          }
+        }
+      });
+    }
+
+    if (this.events['targetState:update'] !== false) {
+      callbacks.register(EVENT_TARGET_STATE_UPDATE_FINISHED, async ({ target, targetState }) => {
+        if (!targetState?.target?.extensions?.release) {
+          return;
+        }
+
+        if (!(targetState instanceof TargetState)) {
+          return;
+        }
+
+        if (targetState.hasTargetExtension('release', this.id)) {
+          const project = this.projectsService.get(target.ref?.projectId);
+          const versioning = project.getEnvVersioningByTarget(target);
+          const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
+          const release = await versioning.getTargetVar(target, 'release', null, true);
+
+          if (targetStateRelease && (!release || targetStateRelease.ver >= release.ver)) {
+            // await versioning.setTargetVar(target, 'release', targetStateRelease.toJSON(), true);
+          }
+        }
+      });
+    }
   }
 
   setTargetStateExtensionReleaseSection(

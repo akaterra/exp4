@@ -1,41 +1,47 @@
 import Container from 'typedi';
 import { ProjectsService } from '../../projects.service';
 import { logger } from '../../logger';
+import { ReleaseState } from '../../release-state';
 
 const projectsService = Container.get(ProjectsService);
 
 // /projects/:projectId/target/:targetId/release
 export async function projectTargetReleaseUpdate(req, res) {
-  // logger.info({ message: 'projectTargetReleaseUpdate', data: req.data });
+  logger.info({ message: 'projectTargetReleaseUpdate', data: req.data });
 
-  // const project = projectsService.get(req.params.projectId);
-  // const targetState = await project.rereadTargetStateByTarget(req.params.targetId);
+  const project = projectsService.get(req.params.projectId);
+  const targetState = await project.rereadTargetStateByTarget(req.params.targetId);
+  const targetReleaseState = targetState.getExtension<ReleaseState>('release', 'release', true);
 
-  // if (req.body.date) {
-  //   targetState.release.date = new Date(req.body.date);
-  // }
+  if (!targetReleaseState) {
+    return res.status(404).json({ message: 'Release extension not found' });
+  }
 
-  // if (req.body.status) {
-  //   targetState.release.setStatus(req.body.status);
-  // }
+  if (req.body.date) {
+    targetReleaseState.date = new Date(req.body.date);
+  }
 
-  // if (req.body.sections) {
-  //   targetState.release.sections = targetState.release.sections.filter((section) => section.type !== 'op');
-  // }
+  if (req.body.status) {
+    targetReleaseState.setStatus(req.body.status);
+  }
 
-  // for (const section of req.body.sections) {
-  //   if (section.type === 'note') {
-  //     section.level = 0;
-  //   } else if (section.type === 'stream') {
-  //     section.level = 1;
-  //   } else if (section.type === 'op') {
-  //     section.level = 2;
-  //   }
+  if (req.body.sections) {
+    targetReleaseState.sections = targetReleaseState.sections.filter((section) => section.type !== 'op');
+  }
 
-  //   targetState.release.setSection(section);
-  // }
+  for (const section of req.body.sections) {
+    if (section.type === 'note') {
+      section.level = 0;
+    } else if (section.type === 'stream') {
+      section.level = 1;
+    } else if (section.type === 'op') {
+      section.level = 2;
+    }
 
-  // await project.updateTargetState(targetState);
+    targetReleaseState.setSection(section);
+  }
 
-  // res.json(targetState.release.toJSON());
+  await project.updateTargetState(targetState);
+
+  res.json(targetReleaseState.toJSON());
 }

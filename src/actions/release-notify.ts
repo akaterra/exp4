@@ -5,7 +5,7 @@ import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { getPossibleTargetIds, notEmptyArray } from './utils';
-import {INotificationService} from '../extensions';
+import { INotificationService } from '../extensions';
 
 @Service()
 export class ReleaseNotifyActionService extends EntityService implements IActionService {

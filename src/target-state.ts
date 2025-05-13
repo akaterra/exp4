@@ -1,6 +1,5 @@
 // import {Status} from './enums/status';
-import {IService} from './entities.service';
-import {createError} from './error';
+import { IService } from './entities.service';
 import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 // import { IReleaseStateSection, ReleaseState } from './release-state';
 import { StreamState } from './stream-state';
@@ -51,8 +50,12 @@ export class TargetState implements IService {
     return this;
   }
 
-  hasTargetExtension(id: IProjectDef['id'], assertType?: IProjectDef['type'], unsafe?: boolean): boolean {
-    return !!this.target.extensions?.[id];
+  hasTargetExtension(id: IProjectDef['id'], compareToId?: IProjectDef['id']): boolean {
+    const extensionId = typeof this.target.extensions?.[id] === 'string'
+      ? this.target.extensions?.[id]
+      : this.target.extensions?.[id]?.id;
+
+    return compareToId ? extensionId === compareToId : !!extensionId;
   }
 
   get isSyncing(): boolean {

@@ -7,7 +7,6 @@ import { IStorageService } from '../storages';
 import { Autowired, resolvePlaceholders } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { Log } from '../logger';
-import {TargetState} from '../target-state';
 
 export interface ISemverConfig {
   format?: string;

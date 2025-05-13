@@ -15,7 +15,6 @@ import { ValidatorService } from './services/validator.service';
 import { TargetState } from './target-state';
 import { StatisticsService } from './statistics.service';
 import { logger } from './logger';
-import { INotificationService, NotificationHolderService } from './notifications';
 import { ExtensionHolderService, IExtensionService } from './extensions';
 
 export interface IProjectDef<C extends Record<string, any> | string = Record<string, any>, T extends string = string> {
@@ -24,6 +23,8 @@ export interface IProjectDef<C extends Record<string, any> | string = Record<str
 
   title?: string;
   description?: string;
+
+  events?: Record<string, any>;
 
   isSyncing?: boolean;
   ref?: IProjectRef;
@@ -117,6 +118,7 @@ export interface IProject extends IProjectDef {
 
   artifacts: Record<string, IProjectArtifact<Record<string, unknown>>>;
   definitions: Record<string, Record<string, unknown>>;
+  extensions?: Record<string, IProjectDef>;
   flows: Record<string, IProjectFlowDef>;
   integrations?: Record<string, IProjectDef>;
   storages?: Record<string, IProjectDef>;
@@ -124,9 +126,9 @@ export interface IProject extends IProjectDef {
   versionings: Record<string, Record<string, unknown>>;
 }
 
-export type IProjectDefInput = Omit<IProjectDef, 'isSyncing'>;
-export type IProjectTargetInput = Omit<IProjectTargetDef, 'isSyncing'>;
-export type IProjectTargetStreamInput = Omit<IProjectTargetStreamDef, 'isSyncing'>;
+export type IProjectDefInput = Omit<IProjectDef, 'events' | 'isSyncing'> & { events?: Record<string, any> | string[] };
+export type IProjectTargetInput = Omit<IProjectTargetDef, 'events' | 'isSyncing'> & { events?: Record<string, any> | string[] };
+export type IProjectTargetStreamInput = Omit<IProjectTargetStreamDef, 'events' | 'isSyncing'> & { events?: Record<string, any> | string[] };
 
 export interface IProjectManifest extends IProjectDef {
   info?: IProject['info'];
@@ -274,6 +276,14 @@ export class Project implements IProject {
           title: extensionDef.title,
           description: extensionDef.description,
 
+          events: Array.isArray(extensionDef.events as string[])
+            ? extensionDef.events.reduce((acc, event) => {
+              acc[event] = true;
+
+              return acc;
+            }, {})
+            : extensionDef.events,
+
           config: this.getDefinition(extensionDef.config),
         };
       }
@@ -334,22 +344,6 @@ export class Project implements IProject {
 
   getFlowByFlow(mixed: IProjectFlowDef['id'] | IProjectFlowDef): IProjectFlowDef {
     return this.flows[typeof mixed === 'string' ? mixed : mixed?.id];
-  }
-
-  // getReleaseByReleaseId(mixed: IProjectReleaseDef['id'] | IProjectReleaseDef): IProjectReleaseDef {
-  //   // return this.extensions[typeof mixed === 'string' ? mixed : mixed?.id];
-  // }
-
-  getReleaseByTarget(mixed: IProjectTargetDef['id'] | IProjectTargetDef) {
-    // if (!this.extensions) {
-    //   return null;
-    // }
-
-    // if (typeof mixed === 'string') {
-    //   return this.extensions[this.getTargetByTarget(mixed, true)?.release];
-    // }
-
-    // return this.extensions[mixed.release];
   }
 
   getTargetByTarget<S extends IProjectTargetDef = IProjectTargetDef>(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState, unsafe?: boolean): S {
@@ -514,54 +508,6 @@ export class Project implements IProject {
     }
 
     return true;
-  }
-
-  async raiseEvent(eventId: string, params?: Record<string, any>) {
-    const targets = Object.keys(this.targets);
-    const events = this.events?.[eventId];
-
-    if (!events) {
-      logger.warn(`Project "${this.id}" event "${eventId}" not found`);
-
-      return;
-    }
-
-    for (const event of events) {
-      switch (event.type) {
-      default:
-        await this.flowRun(
-          event.config?.flowId,
-          targets,
-          params,
-        );
-
-        break;
-      }
-    }
-  }
-
-  async raiseTargetEvent(mixed: IProjectTargetDef['id'] | IProjectTargetDef, eventId: string, params?: Record<string, any>) {
-    // const target = this.getTargetByTarget(mixed);
-    // const events = target.events?.[eventId];
-
-    // if (!events) {
-    //   logger.warn(`Project "${this.id}" target "${target.id}" event "${eventId}" not found`);
-
-    //   return;
-    // }
-
-    // for (const event of events) {
-    //   switch (event.type) {
-    //   default:
-    //     await this.flowRun(
-    //       event.config?.flowId,
-    //       [ target.id ],
-    //       params,
-    //     );
-
-    //     break;
-    //   }
-    // }
   }
 
   async rereadTargetStateByTarget(mixed: IProjectTargetDef['id'] | IProjectTargetDef | TargetState): Promise<TargetState> {
