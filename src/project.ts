@@ -607,8 +607,14 @@ export class Project implements IProject {
       return;
     }
 
-    await this.projectsService.updateTargetState(targetState);
-    await this.raiseTargetEvent(targetState.id, 'targetUpdated');  
+    await this.env.targets.updateState(targetState);
+
+    // if (!targetState) {
+    //   return;
+    // }
+
+    // await this.projectsService.updateTargetState(targetState);
+    // // await this.raiseTargetEvent(targetState.id, 'targetUpdated');
   }
 
   toJSON() {

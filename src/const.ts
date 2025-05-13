@@ -12,6 +12,8 @@ export const AUTH_MODE = process.env.AUTH_MODE || 'header';
 
 export const EVENT_TARGET_STATE_REREAD_STARTED = 'targetState:reread:started';
 export const EVENT_TARGET_STATE_REREAD_FINISHED = 'targetState:reread:finished';
+export const EVENT_TARGET_STATE_UPDATE_STARTED = 'targetState:update:started';
+export const EVENT_TARGET_STATE_UPDATE_FINISHED = 'targetState:update:finished';
 
 export function getHostWithSchema(host: string): string {
   return host.startsWith('http') ? host : `http://${host}`;
