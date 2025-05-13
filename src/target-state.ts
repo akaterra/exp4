@@ -1,7 +1,5 @@
-// import {Status} from './enums/status';
 import { IService } from './entities.service';
 import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
-// import { IReleaseStateSection, ReleaseState } from './release-state';
 import { StreamState } from './stream-state';
 
 export class TargetState implements IService {
@@ -65,6 +63,7 @@ export class TargetState implements IService {
   constructor(props: Partial<TargetState>) {
     Reflect.setPrototypeOf(props, TargetState.prototype);
 
+    props.extensions = {};
     props.streams = props.streams ?? {};
 
     return props as TargetState;

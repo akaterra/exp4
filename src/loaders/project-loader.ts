@@ -5,7 +5,7 @@ import { StreamHolderService } from '../streams';
 import { ActionHolderService } from '../actions';
 import { VersioningHolderService } from '../versionings';
 import { TargetHolderService } from '../targets';
-import { iter, loadModules } from '../utils';
+import { CallbacksContainer, iter, loadModules } from '../utils';
 import { ArtifactHolderService } from '../artifacts';
 import * as _ from 'lodash';
 import { MANIFEST_PROJECT_TYPE } from '../const';
@@ -25,14 +25,17 @@ export async function createProject(
     throw new Error('Invalid project manifest');
   }
 
+  const callbacksContainer = new CallbacksContainer();
+
   manifest.env = {
     actions: new ActionHolderService(),
     artifacts: new ArtifactHolderService(),
-    extensions: new ExtensionHolderService(),
+    callbacksContainer,
+    extensions: new ExtensionHolderService(callbacksContainer),
     integrations: new IntegrationHolderService(),
     storages: new StorageHolderService(),
-    streams: new StreamHolderService(),
-    targets: new TargetHolderService(),
+    streams: new StreamHolderService(callbacksContainer),
+    targets: new TargetHolderService(callbacksContainer),
     validator: new ValidatorService(),
     versionings: new VersioningHolderService(),
   }
@@ -90,7 +93,8 @@ export async function createProject(
         instance.registerEvents(defConfig.events);
       }
 
-      instance.registerCallbacks(this.callbacks);
+      instance.registerCallbacks(callbacksContainer);
+
       extensionsService.add(instance, defId);
     }
   }

@@ -13,7 +13,6 @@ import { TargetState } from './target-state';
 export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => StatisticsService) protected statisticsService: StatisticsService;
 
-  private callbacksContainer = new CallbacksContainer();
   private statesCache = new AwaitedCache<ProjectState>();
   private tasksContainer = new AwaitableContainer(2);
 

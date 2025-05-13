@@ -33,16 +33,6 @@ export class TargetHolderService {
         { target, targetState },
       );
 
-      // if (project.getReleaseByTarget(target)) {
-      //   const release = await project.getEnvVersioningByTarget(target).getCurrentRelease(target);
-
-      //   if (!entity.release || (release && release.ver > entity.release.ver)) {
-      //     entity.release = release;
-      //   }
-
-      //   entity.release.schema = project.getReleaseByTarget(target);
-      // }
-
       targetState.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
 
       this.cache.set(key, targetState);

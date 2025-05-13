@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 import { AwaitedCache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { EntitiesServiceWithFactory } from '../entities.service';
-import { Autowired } from '../utils';
+import { Autowired, CallbacksContainer } from '../utils';
 import { logError } from '../logger';
 
 export enum StreamServiceStreamMoveOptsStrategy {
@@ -40,6 +40,10 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
 
   get domain() {
     return 'Stream';
+  }
+
+  constructor(public readonly callbacksContainer: CallbacksContainer = new CallbacksContainer()) {
+    super();
   }
 
   async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState> {

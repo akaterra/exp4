@@ -103,8 +103,8 @@ function auth(req, res, next) {
   const authStrategies = Container.get(AuthStrategyHolderService);
   authStrategies.addFactory(GithubAuthStrategyService);
 
-  const ss = Container.get(StreamHolderService);
-  ss.addFactory(GithubStreamService);
+  // const ss = Container.get(StreamHolderService);
+  // ss.addFactory(GithubStreamService);
 
   const app = express();
   app.use(cors({ credentials: true, origin: 'http://localhost:9002' }));

@@ -146,7 +146,6 @@ export interface IProjectManifest extends IProjectDef {
 }
 
 export class Project implements IProject {
-  readonly callbacksContainer = new CallbacksContainer();
   @Autowired() readonly projectsService: ProjectsService;
   @Autowired() readonly statisticsService: StatisticsService;
 
@@ -158,6 +157,7 @@ export class Project implements IProject {
   env: {
     actions?: ActionHolderService;
     artifacts?: ArtifactHolderService;
+    callbacksContainer?: CallbacksContainer;
     extensions?: ExtensionHolderService;
     integrations?: IntegrationHolderService;
     storages?: StorageHolderService;
@@ -315,7 +315,7 @@ export class Project implements IProject {
                 id: streamId,
                 type: streamDef.type,
 
-                ref: { projectId: this.id, extensionIds: targetDef.extensions ? Object.keys(streamDef.extensions) : [], targetId, streamId },
+                ref: { projectId: this.id, extensionIds: streamDef.extensions ? Object.keys(streamDef.extensions) : [], targetId, streamId },
 
                 title: streamDef.title,
                 description: streamDef.description,
