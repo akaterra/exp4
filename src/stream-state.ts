@@ -72,6 +72,7 @@ export class StreamState<
   metadata?: Metadata;
   version?: string;
 
+  isDirty: boolean = false;
   ver: number = 0;
 
   constructor(props: Partial<StreamState>) {

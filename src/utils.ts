@@ -10,17 +10,19 @@ const MS_WAIT = 1000;
 export class AwaitableContainer {
   private buckets = new Map<string, {
     awaitables: [
-      Promise<any> | ((...args: any[]) => Promise<any>),
-      any[],
-      string,
+      Promise<any> | ((...args: any[]) => Promise<any>), // awaitable
+      any[], // args
+      string, // group
+      string, // id
     ][];
     awaitablesNextId?: number;
     executor?: Promise<void>,
     onResolve?;
   }>();
-  private resolve: (...args: any[]) => void = null;
   private selectedBucketId: string = null;
   private selectedGroupId: string = null;
+  private selectedId: string = null;
+  private selectedResolve: (...args: any[]) => void = null;
   private selectedRunAsync: boolean = false;
 
   constructor(private max: number = 3, private runInBatch: boolean = true) {
@@ -41,20 +43,20 @@ export class AwaitableContainer {
     return this;
   }
 
-  onResolve(resolve: (...args: any[]) => void) {
-    this.resolve = resolve;
-
-    return this;
-  }
-
-  onBucket(bucketId: string) {
+  withBucket(bucketId: string) {
     this.selectedBucketId = bucketId;
 
     return this;
   }
 
-  onGroup(groupId: string) {
+  withGroup(groupId: string) {
     this.selectedGroupId = groupId;
+
+    return this;
+  }
+
+  withResolve(resolve: (...args: any[]) => void) {
+    this.selectedResolve = resolve;
 
     return this;
   }
@@ -64,10 +66,12 @@ export class AwaitableContainer {
     this.selectedBucketId = null;
     const group = this.selectedGroupId;
     this.selectedGroupId = null;
+    const id = this.selectedId;
+    this.selectedId = null;
+    const resolve = this.selectedResolve;
+    this.selectedResolve = null;
     const runAsync = this.selectedRunAsync;
     this.selectedRunAsync = false;
-    const resolve = this.resolve;
-    this.resolve = null;
     let bucket = this.buckets.get(bucketId);
 
     if (!bucket) {
@@ -76,7 +80,7 @@ export class AwaitableContainer {
       this.buckets.set(bucketId, bucket);
     }
 
-    bucket.awaitables.push([ awaitable, args, group ]);
+    bucket.awaitables.push([ awaitable, args, group, id ]);
 
     if (!bucket.executor) {
       if (this.runInBatch && bucket.awaitables.length < this.max) {
@@ -85,6 +89,23 @@ export class AwaitableContainer {
 
       bucket.executor = this.exec(bucketId);
     }
+
+    return this.runInBatch && !runAsync ? bucket.executor : null;
+  }
+
+  pushUniq(id: string, awaitable: Promise<any> | ((...args: any[]) => Promise<any>), ...args: any[]) {
+    const bucketId = this.selectedBucketId;
+    const bucket = this.buckets.get(bucketId);
+
+    if (!bucket) {
+      return this.push(awaitable, ...args);
+    }
+
+    if (!bucket.awaitables.some((a) => a?.[3] === id)) {
+      return this.push(awaitable, ...args);
+    }
+
+    const runAsync = this.selectedRunAsync;
 
     return this.runInBatch && !runAsync ? bucket.executor : null;
   }
@@ -147,11 +168,12 @@ export class AwaitableContainer {
             : awaitable[0];
           const awaitedInd = i + j;
 
-          if (awaited instanceof Promise) {
-            awaited.finally(() => bucket.awaitables[awaitedInd] = null);
-          } else {
-            bucket.awaitables[awaitedInd] = null;
-          }
+          // if (awaited instanceof Promise) {
+          //   awaited.finally(() => bucket.awaitables[awaitedInd] = null);
+          // } else {
+          //   bucket.awaitables[awaitedInd] = null;
+          // }
+          bucket.awaitables[awaitedInd] = null;
 
           promises.push(awaited);
         }

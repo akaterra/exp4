@@ -525,7 +525,7 @@ export class Project implements IProject {
     context?: IStreamStateContext,
   ) {
     const stream = this.getTargetStreamByTargetAndStream(targetMixed, streamMixed);
-    const streamState = await this.env.streams.getState(stream, scopes, context);
+    const streamState = await this.env.streams.rereadState(stream, scopes, context);
     this.state.setTargetStreamState(stream.ref.targetId, streamState);
 
     // if (this.extensions?.[stream.ref?.releaseId]) {

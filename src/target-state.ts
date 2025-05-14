@@ -11,8 +11,33 @@ export class TargetState implements IService {
   target: IProjectTargetDef;
 
   extensions: Record<string, IService> = {};
+  metadata: Record<string, unknown> = {};
   streams: Record<IProjectTargetStreamDef['id'], StreamState> = {};
   version?: string;
+
+  isDirty: boolean = false;
+  ver: number = 0;
+
+  get isSyncing(): boolean {
+    return Object.values(this.streams).some((stream) => stream.isSyncing);
+  }
+
+  get state() {
+    return {
+      metadata: this.metadata,
+      ver: this.ver,
+    };
+  }
+
+  constructor(props: Partial<TargetState>) {
+    Reflect.setPrototypeOf(props, TargetState.prototype);
+
+    props.extensions = {};
+    props.metadata = props.metadata ?? {};
+    props.streams = props.streams ?? {};
+
+    return props as TargetState;
+  }
 
   getExtension<T extends IService>(id: IProjectDef['id'], assertType?: IProjectDef['type'], unsafe?: boolean): T {
     if (!this.extensions[id]) {
@@ -59,38 +84,6 @@ export class TargetState implements IService {
 
     return compareToId ? extensionId === compareToId : !!extensionId;
   }
-
-  get isSyncing(): boolean {
-    return Object.values(this.streams).some((stream) => stream.isSyncing);
-  }
-
-  constructor(props: Partial<TargetState>) {
-    Reflect.setPrototypeOf(props, TargetState.prototype);
-
-    props.extensions = {};
-    props.streams = props.streams ?? {};
-
-    return props as TargetState;
-  }
-
-  // setReleaseSectionByStreamId(
-  //   streamId: IProjectTargetStreamDef['id'],
-  //   artifacts?: IReleaseStateSection['changelog'][0]['artifacts'],
-  //   changes? : IReleaseStateSection['changelog'][0]['changes'],
-  //   notes?: IReleaseStateSection['changelog'][0]['notes'],
-  //   isSystem?: boolean,
-  //   onlyExisting?: boolean,
-  // ) {
-  //   if (!this.target.release) {
-  //     return;
-  //   }
-
-  //   if (!this.release) {
-  //     this.release = new ReleaseState({ id: this.id, type: this.type });
-  //   }
-
-  //   return this.release.setSectionByStreamId(streamId, artifacts, changes, notes, isSystem, onlyExisting);
-  // }
 
   toJSON() {
     return {

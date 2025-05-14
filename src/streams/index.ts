@@ -47,7 +47,7 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
     super();
   }
 
-  async getState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState> {
+  async rereadState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState> {
     context = context ? { ...context } : {};
 
     const project = this.projectsService.get(stream.ref?.projectId);
@@ -81,7 +81,7 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
             scopes,
           );
         } catch (err) {
-          logError(err, 'StreamsService.getState', { ref: stream.ref, scopes });
+          logError(err, 'StreamsService.rereadState', { ref: stream.ref, scopes });
         } finally {
           streamState.isSyncing = false;
         }
@@ -94,6 +94,7 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
       stream.isDirty = false;
 
       this.cache.set(key, streamState);
+      streamState.isDirty = false;
 
       await this.callbacksContainer.run(
         EVENT_STREAM_STATE_REREAD_FINISHED,

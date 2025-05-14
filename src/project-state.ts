@@ -11,6 +11,9 @@ export class ProjectState {
   targetsStates: Record<IProjectTargetDef['id'], TargetState> = {};
   updatedAt: Date = null;
 
+  isDirty: boolean = false;
+  ver: number = 0;
+
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
   get isSyncing(): boolean {

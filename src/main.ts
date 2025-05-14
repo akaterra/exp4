@@ -168,6 +168,7 @@ function auth(req, res, next) {
   });
 
   projects.runStatesResync();
+  projects.runStatesSave();
 })().catch((err) => {
   logError(err);
 });

@@ -18,7 +18,7 @@ export interface ISlackNotificationConfig {
 
 @Service()
 export class SlackNotificationExtensionService extends EntityService implements INotificationService {
-  static readonly type: string = 'notification:slack';
+  static readonly type: string = 'slack:notification';
 
   @Autowired() protected projectsService: ProjectsService;
 
@@ -170,7 +170,7 @@ export class SlackNotificationExtensionService extends EntityService implements 
   private getIntegrationService(targetState: TargetState) {
     return this.projectsService
       .get(targetState.target.ref.projectId)
-      .getEnvIntegraionByIntegration<SlackIntegrationService>(this.config?.integration, this.type);
+      .getEnvIntegraionByIntegration<SlackIntegrationService>(this.config?.integration, 'slack');
   }
 }
 

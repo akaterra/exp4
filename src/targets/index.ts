@@ -26,16 +26,26 @@ export class TargetHolderService {
     const release = await this.mutex.acquire(key);
 
     try {
-      const targetState = await this.cache.get(key) ?? new TargetState({ id: target.id, type: null, target });
+      const targetState =
+        await this.cache.get(key) ??
+        new TargetState({
+          ...await project.getEnvVersioningByTarget(target).getTargetVar(target, 'state', null, true),
+          id: target.id,
+          type: null,
+          target,
+        });
 
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_REREAD_STARTED,
         { target, targetState },
       );
 
-      targetState.version = await project.getEnvVersioningByTarget(target).getCurrent(target);
+      targetState.version = targetState.version ?? await project
+        .getEnvVersioningByTarget(target)
+        .getCurrent(target);
 
       this.cache.set(key, targetState);
+      targetState.isDirty = false;
 
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_REREAD_FINISHED,
@@ -49,7 +59,7 @@ export class TargetHolderService {
   }
 
   async updateState(targetState: TargetState) {
-    // const project = this.projectsService.get(targetState.target.ref?.projectId);
+    const project = this.projectsService.get(targetState.target.ref?.projectId);
     const key = `${targetState.target.ref.projectId}:${targetState.target.id}`;
     const release = await this.mutex.acquire(key);
 
@@ -59,7 +69,10 @@ export class TargetHolderService {
         { target: targetState.target, targetState },
       );
 
+      await project.getEnvVersioningByTarget(targetState.target).setTargetVar(targetState.target, 'state', targetState.state, true);
+
       this.cache.set(key, targetState);
+      targetState.isDirty = false;
 
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_UPDATE_FINISHED,

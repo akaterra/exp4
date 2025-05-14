@@ -38,13 +38,15 @@ export class ReleaseState implements IService {
   assertType = 'release';
   
   config: IReleaseConfig;
-  ver?: number;
   
   date?: Date;
   metadata: Record<string, any>;
   sections: IReleaseStateSection[] = [];
   status: Status;
   statusUpdateAt?: Date;
+
+  isDirty: boolean = false;
+  ver: number = 0;
 
   constructor(props: Partial<ReleaseState>) {
     if (!props.metadata) {

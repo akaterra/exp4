@@ -82,34 +82,34 @@ export class ProjectsService extends EntitiesService<Project> {
           syncEntries = projectState.popTargetSync(100);
 
           for (const [ tId, ] of syncEntries) {
-            this.tasksContainer.onGroup('streamState').async.push(async () => {
+            this.tasksContainer.withGroup('streamState').async.push(async () => {
               await project.rereadTargetStateByTarget(tId);
             });
           }
 
-          await this.tasksContainer.onGroup('streamState').wait();
+          await this.tasksContainer.withGroup('streamState').wait();
 
           for (const [ tId, streamIds, scopes ] of syncEntries) {
             for (const sId of streamIds) {
               const stream = project.getTargetStreamByTargetAndStream(tId, sId, true);
 
               if (stream) {
-                this.tasksContainer.onGroup('streamState').async.push(async () => {
+                this.tasksContainer.withGroup('streamState').async.push(async () => {
                   await project.rereadStreamStateByTargetAndStream(tId, sId, scopes);
                 });
               }
             }
           }
 
-          await this.tasksContainer.onGroup('streamState').wait();
+          await this.tasksContainer.withGroup('streamState').wait();
 
           for (const [ tId, ] of syncEntries) {
-            this.tasksContainer.onGroup('streamState').async.push(async () => {
+            this.tasksContainer.withGroup('streamState').async.push(async () => {
               await project.updateTargetState(tId);
             });
           }
 
-          await this.tasksContainer.onGroup('streamState').wait();
+          await this.tasksContainer.withGroup('streamState').wait();
         } while (syncEntries.length);
       })();
     }
@@ -167,5 +167,23 @@ export class ProjectsService extends EntitiesService<Project> {
     }
 
     setTimeout(() => this.runStatesResync(), 5000);
+  }
+
+  async runStatesSave() {
+    for (let [ , projectState ] of this.statesCache) {
+      projectState = await projectState;
+
+      for (const targetState of Object.values(projectState.targetsStates)) {
+        if (targetState.isDirty) {
+          await this.updateTargetState(targetState);
+        }
+      }
+    }
+
+    setTimeout(() => this.runStatesSave(), 2000);
+  }
+
+  pushTask(id: string, awaitable: Promise<any> | ((...args: any[]) => Promise<any>)) {
+    this.tasksContainer.pushUniq(id, awaitable);
   }
 }

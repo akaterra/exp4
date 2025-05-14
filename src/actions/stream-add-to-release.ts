@@ -47,7 +47,7 @@ export class StreamAddToReleaseActionService extends EntityService implements IA
           // );
         }
 
-        await project.updateTargetState(target);
+        // await project.updateTargetState(target);
       }
     }
   }

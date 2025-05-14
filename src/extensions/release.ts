@@ -1,4 +1,5 @@
 import { IExtensionService } from '.';
+import {markDirty} from '../actions/utils';
 import { EVENT_STREAM_STATE_REREAD, EVENT_STREAM_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_REREAD, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_UPDATE, EVENT_TARGET_STATE_UPDATE_FINISHED } from '../const';
 import { EntityService } from '../entities.service';
 import {Status} from '../enums/status';
@@ -44,7 +45,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
         const targetState = this.projectsService.get(stream.ref?.projectId).state.getTargetState(stream.ref?.targetId);
 
         if (targetState.hasExtension('release')) {
-          const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
+          const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release');
 
           if (targetStateRelease.status !== Status.COMPLETED) {
             targetStateRelease.setSectionByStreamId(
@@ -79,7 +80,8 @@ export class ReleaseExtensionService extends EntityService implements IExtension
         }
 
         if (targetState.hasExtension('release')) {
-          // await versioning.setTargetVar(target, 'release', targetStateRelease.toJSON(), true);
+          // this.projectsService.
+          // await versioning.setTargetVar(target, 'ext_release', targetStateRelease.toJSON(), true);
         }
       });
     }
@@ -111,7 +113,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
     const project = this.projectsService.get(targetState.target.ref?.projectId);
     const versioning = project.getEnvVersioningByTarget(targetState.target);
     const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
-    const release = await versioning.getTargetVar(targetState.target, 'release', null, true);
+    const release = await versioning.getTargetVar(targetState.target, 'ext_release', null, true);
 
     if (!targetStateRelease || (release && targetStateRelease.ver < release.ver)) {
       const targetStateRelease = new ReleaseState({

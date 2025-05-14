@@ -1,6 +1,12 @@
-export class AwaitedCache<T = any, K = string> {
+export class AwaitedCache<T = any, K = string> implements Iterable<[K, T | Promise<T>]> {
   protected autoInvalidateTimeout;
   protected cache = new Map<K, [ number, number, T | Promise<T> ]>(); // expire, version, val
+
+  *[Symbol.iterator](): IterableIterator<[K, T | Promise<T>]> {
+    for (const keyVal of this.cache.entries()) {
+      yield [ keyVal[0], keyVal[1][2] ];
+    }
+  }
 
   del(key: K) {
     this.cache.delete(key);

@@ -2,6 +2,7 @@ import Container from 'typedi';
 import { ProjectsService } from '../../projects.service';
 import { logger } from '../../logger';
 import { ReleaseState } from '../../release-state';
+import {markDirty} from '../../actions/utils';
 
 const projectsService = Container.get(ProjectsService);
 
@@ -41,7 +42,7 @@ export async function projectTargetReleaseUpdate(req, res) {
     targetReleaseState.setSection(section);
   }
 
-  await project.updateTargetState(targetState);
+  markDirty(targetState);
 
   res.json(targetReleaseState.toJSON());
 }
