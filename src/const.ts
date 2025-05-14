@@ -10,8 +10,13 @@ export const AUTH_HOST = process.env.AUTH_HOST || HTTP_HOST;
 export const AUTH_JWT_SECRET = process.env.AUTH_JWT_ACCESS_TOKEN_SECRET ?? 'secret';
 export const AUTH_MODE = process.env.AUTH_MODE || 'header';
 
+export const EVENT_STREAM_STATE_REREAD = 'streamState:reread';
+export const EVENT_STREAM_STATE_REREAD_STARTED = 'streamState:reread:started';
+export const EVENT_STREAM_STATE_REREAD_FINISHED = 'streamState:reread:finished';
+export const EVENT_TARGET_STATE_REREAD = 'targetState:reread';
 export const EVENT_TARGET_STATE_REREAD_STARTED = 'targetState:reread:started';
 export const EVENT_TARGET_STATE_REREAD_FINISHED = 'targetState:reread:finished';
+export const EVENT_TARGET_STATE_UPDATE = 'targetState:update';
 export const EVENT_TARGET_STATE_UPDATE_STARTED = 'targetState:update:started';
 export const EVENT_TARGET_STATE_UPDATE_FINISHED = 'targetState:update:finished';
 

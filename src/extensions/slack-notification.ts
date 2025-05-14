@@ -7,7 +7,7 @@ import { ProjectsService } from '../projects.service';
 import { SlackIntegrationService } from '../integrations/slack';
 import { Status } from '../enums/status';
 import * as _ from 'lodash';
-import { AUTH_HOST, EVENT_TARGET_STATE_REREAD_FINISHED, getHostWithSchema } from '../const';
+import { AUTH_HOST, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_UPDATE, EVENT_TARGET_STATE_UPDATE_FINISHED, getHostWithSchema } from '../const';
 import { ReleaseState } from '../release-state';
 
 export interface ISlackNotificationConfig {
@@ -29,17 +29,13 @@ export class SlackNotificationExtensionService extends EntityService implements 
   async exec() {}
 
   registerCallbacks(callbacks: CallbacksContainer): void {
-    if (this.events['targetState:reread'] !== false) {
-      callbacks.register(EVENT_TARGET_STATE_REREAD_FINISHED, async ({ target, targetState }) => {
-        if (!targetState?.target?.extensions?.release) {
-          return;
-        }
-
+    if (this.events[EVENT_TARGET_STATE_UPDATE] !== false) {
+      callbacks.register(EVENT_TARGET_STATE_UPDATE_FINISHED, async ({ target, targetState }) => {
         if (!(targetState instanceof TargetState)) {
           return;
         }
 
-        if (targetState.target.extensions?.notification === this.id) {
+        if (targetState.hasTargetExtension('notification', this.id)) {
           await this.publishRelease(targetState);
         }
       });
@@ -122,7 +118,7 @@ export class SlackNotificationExtensionService extends EntityService implements 
         ...streamsSections.map((section) => {
           const stream = project.getTargetStreamByTargetAndStream(targetState.id, section.id, true);
           const streamFlows = targetStateRelease.sections
-            .filter((s) => s.type === 'op' && s.metadata?.streamId === stream.id)
+            .filter((s) => s.type === 'op' && s.metadata?.streamId === stream?.id)
             .map((s) => s.flows.map((flow) => [ flow, s.id ])).flat()
             .filter(([ flowId, ]) => project.getFlowByFlow(flowId))
             .map(([ flowId, opId ]) => `<${getHostWithSchema(AUTH_HOST || 'sourceflow')}/projects/${project.id}/target/${stream.ref?.targetId}/release/op/${opId}/flow/${flowId}/run|${project.getFlowByFlow(flowId)?.title}>`).join(' ');

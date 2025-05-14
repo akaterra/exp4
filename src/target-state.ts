@@ -48,6 +48,10 @@ export class TargetState implements IService {
     return this;
   }
 
+  hasExtension(id: IProjectDef['id']): boolean {
+    return !!this.extensions[id];
+  }
+
   hasTargetExtension(id: IProjectDef['id'], compareToId?: IProjectDef['id']): boolean {
     const extensionId = typeof this.target.extensions?.[id] === 'string'
       ? this.target.extensions?.[id]

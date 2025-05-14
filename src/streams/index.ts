@@ -8,6 +8,7 @@ import { ProjectsService } from '../projects.service';
 import { EntitiesServiceWithFactory } from '../entities.service';
 import { Autowired, CallbacksContainer } from '../utils';
 import { logError } from '../logger';
+import {EVENT_STREAM_STATE_REREAD_FINISHED, EVENT_STREAM_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_STARTED} from '../const';
 
 export enum StreamServiceStreamMoveOptsStrategy {
   APPROVE = 'approve',
@@ -54,42 +55,52 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
     const release = await this.mutex.acquire(key);
 
     try {
-      const entity = stream.isDirty || scopes
+      const streamState = stream.isDirty || scopes
         ? await this.get(stream.type).streamGetState(stream, scopes, context)
         : await this.cache.get(key) ?? await this.get(stream.type).streamGetState(stream, scopes, context);
 
-      if (!entity) {
+      if (!streamState) {
         return null;
       }
 
-      entity.stream = stream;
+      await this.callbacksContainer.run(
+        EVENT_STREAM_STATE_REREAD_STARTED,
+        { stream, streamState },
+      );
+
+      streamState.stream = stream;
 
       if (context.artifact) {
         try {
-          entity.isSyncing = true;
+          streamState.isSyncing = true;
 
           await project.env.artifacts.run(
             { artifacts: stream.artifacts, ref: stream.ref },
-            entity,
+            streamState,
             context.artifact,
             scopes,
           );
         } catch (err) {
           logError(err, 'StreamsService.getState', { ref: stream.ref, scopes });
         } finally {
-          entity.isSyncing = false;
+          streamState.isSyncing = false;
         }
       }
 
-      entity.version = entity.version ?? await project
+      streamState.version = streamState.version ?? await project
         .getEnvVersioningByTargetStream(stream)
         .getCurrent(project.getTargetByTargetStream(stream));
 
       stream.isDirty = false;
 
-      this.cache.set(key, entity);
+      this.cache.set(key, streamState);
 
-      return entity;
+      await this.callbacksContainer.run(
+        EVENT_STREAM_STATE_REREAD_FINISHED,
+        { stream, streamState },
+      );
+
+      return streamState;
     } finally {
       release();
     }

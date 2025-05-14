@@ -554,13 +554,6 @@ export class Project implements IProject {
     }
 
     await this.env.targets.updateState(targetState);
-
-    // if (!targetState) {
-    //   return;
-    // }
-
-    // await this.projectsService.updateTargetState(targetState);
-    // // await this.raiseTargetEvent(targetState.id, 'targetUpdated');
   }
 
   toJSON() {
