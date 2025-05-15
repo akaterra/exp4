@@ -9,6 +9,7 @@ const MS_WAIT = 1000;
 
 export class Ctx {
   calls: number = 0;
+  callsRunning = new Set<string>();
 }
 
 export class AwaitablesContainer {
@@ -208,10 +209,14 @@ export class AwaitablesContainer {
 }
 
 export class CallbacksContainer {
-  protected callbacks: Record<string, { fn: (...args) => any, isAsync: boolean }[]> = {};
+  protected callbacks: Record<string, { fn: (ctx?: Ctx, ...args) => any, isAsync: boolean }[]> = {};
   protected callbacksRunning = new Set<string>();
 
-  register(event: string, fn: (...args) => any, isAsync: boolean = false) {
+  get ctx() {
+    return new Ctx();
+  }
+
+  register(event: string, fn: (ctx?: Ctx, ...args) => any, isAsync: boolean = false) {
     if (!this.callbacks[event]) {
       this.callbacks[event] = [];
     }
@@ -219,7 +224,7 @@ export class CallbacksContainer {
     this.callbacks[event].push({ fn, isAsync });
   }
 
-  unregister(event: string, fn: (...args) => any) {
+  unregister(event: string, fn: (ctx?: Ctx, ...args) => any) {
     if (!this.callbacks[event]) {
       return;
     }
@@ -232,10 +237,17 @@ export class CallbacksContainer {
       return;
     }
 
+    const hasCtx = args.length && args[0] instanceof Ctx;
+    const ctx = hasCtx ? args[0] as Ctx : new Ctx();
+
     try {
-      // if (this.callbacksRunning.has(event)) {
-      //   return;
-      // }
+      if (ctx.callsRunning.has(event)) {
+        return;
+      }
+
+      if (!hasCtx) {
+        args.unshift(ctx);
+      }
 
       this.callbacksRunning.add(event);
       const promises = [];
@@ -250,7 +262,7 @@ export class CallbacksContainer {
 
       return await Promise.all(promises);
     } finally {
-      this.callbacksRunning.delete(event);
+      ctx.callsRunning.delete(event);
     }
   }
 

@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import { IProjectTargetDef } from '../project';
 import { Cache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
-import { Autowired, CallbacksContainer } from '../utils';
+import { Autowired, CallbacksContainer, Ctx } from '../utils';
 import { TargetState } from '../target-state';
 import { EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_UPDATE_STARTED, EVENT_TARGET_STATE_UPDATE_FINISHED } from '../const';
 
@@ -20,7 +20,8 @@ export class TargetHolderService {
 
   }
 
-  async rereadState(target: IProjectTargetDef) {
+  async rereadState(target: IProjectTargetDef, ctx?: Ctx) {
+    ctx = ctx ?? this.callbacksContainer.ctx;
     const project = this.projectsService.get(target.ref?.projectId);
     const key = `${target.ref.projectId}:${target.id}`;
     const release = await this.mutex.acquire(key);
@@ -37,6 +38,7 @@ export class TargetHolderService {
 
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_REREAD_STARTED,
+        ctx,
         { target, targetState },
       );
 
@@ -49,6 +51,7 @@ export class TargetHolderService {
 
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_REREAD_FINISHED,
+        ctx,
         { target, targetState },
       );
 
@@ -58,7 +61,8 @@ export class TargetHolderService {
     }
   }
 
-  async updateState(targetState: TargetState) {
+  async updateState(targetState: TargetState, ctx?: Ctx) {
+    ctx = ctx ?? this.callbacksContainer.ctx;
     const project = this.projectsService.get(targetState.target.ref?.projectId);
     const key = `${targetState.target.ref.projectId}:${targetState.target.id}`;
     const release = await this.mutex.acquire(key);
@@ -66,6 +70,7 @@ export class TargetHolderService {
     try {
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_UPDATE_STARTED,
+        ctx,
         { target: targetState.target, targetState },
       );
 
@@ -78,6 +83,7 @@ export class TargetHolderService {
 
       await this.callbacksContainer.run(
         EVENT_TARGET_STATE_UPDATE_FINISHED,
+        ctx,
         { target: targetState.target, targetState },
       );
     } finally {

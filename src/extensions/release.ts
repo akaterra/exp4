@@ -8,7 +8,7 @@ import { ProjectsService } from '../projects.service';
 import { IReleaseStateSection, ReleaseState } from '../release-state';
 import {StreamState} from '../stream-state';
 import { TargetState } from '../target-state';
-import { Autowired, CallbacksContainer } from '../utils';
+import { Autowired, CallbacksContainer, Ctx } from '../utils';
 
 export interface IReleaseConfig {
   sections: {
@@ -37,7 +37,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
 
   registerCallbacks(callbacks: CallbacksContainer): void {
     if (this.events[EVENT_STREAM_STATE_REREAD] !== false) {
-      callbacks.register(EVENT_STREAM_STATE_REREAD_FINISHED, async ({ stream, streamState }: { stream: IProjectTargetStreamDef; streamState: StreamState }) => {
+      callbacks.register(EVENT_STREAM_STATE_REREAD_FINISHED, async (ctx, { stream, streamState }: { stream: IProjectTargetStreamDef; streamState: StreamState }) => {
         if (!(streamState instanceof StreamState)) {
           return;
         }
@@ -62,7 +62,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
     }
 
     if (this.events[EVENT_TARGET_STATE_REREAD] !== false) {
-      callbacks.register(EVENT_TARGET_STATE_REREAD_STARTED, async ({ target, targetState }: { target: IProjectTargetDef; targetState: TargetState }) => {
+      callbacks.register(EVENT_TARGET_STATE_REREAD_STARTED, async (ctx, { target, targetState }: { target: IProjectTargetDef; targetState: TargetState }) => {
         if (!(targetState instanceof TargetState)) {
           return;
         }
@@ -74,7 +74,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
     }
 
     if (this.events[EVENT_TARGET_STATE_UPDATE] !== false) {
-      callbacks.register(EVENT_TARGET_STATE_UPDATE_FINISHED, async ({ target, targetState }) => {
+      callbacks.register(EVENT_TARGET_STATE_UPDATE_FINISHED, async (ctx, { target, targetState }) => {
         if (!(targetState instanceof TargetState)) {
           return;
         }

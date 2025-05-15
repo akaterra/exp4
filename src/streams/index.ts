@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 import { Cache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { EntitiesServiceWithFactory } from '../entities.service';
-import { Autowired, CallbacksContainer } from '../utils';
+import { Autowired, CallbacksContainer, Ctx } from '../utils';
 import { logError } from '../logger';
 import {EVENT_STREAM_STATE_REREAD_FINISHED, EVENT_STREAM_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_STARTED} from '../const';
 
@@ -47,9 +47,10 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
     super();
   }
 
-  async rereadState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext): Promise<StreamState> {
+  async rereadState(stream: IProjectTargetStreamDef, scopes?: Record<string, boolean>, context?: IStreamStateContext, ctx?: Ctx): Promise<StreamState> {
     context = context ? { ...context } : {};
 
+    ctx = ctx ?? this.callbacksContainer.ctx;
     const project = this.projectsService.get(stream.ref?.projectId);
     const key = `${stream.ref.projectId}:${stream.ref.targetId}:${stream.id}`;
     const release = await this.mutex.acquire(key);
@@ -65,6 +66,7 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
 
       await this.callbacksContainer.run(
         EVENT_STREAM_STATE_REREAD_STARTED,
+        ctx,
         { stream, streamState },
       );
 
@@ -98,6 +100,7 @@ export class StreamHolderService extends EntitiesServiceWithFactory<IStreamServi
 
       await this.callbacksContainer.run(
         EVENT_STREAM_STATE_REREAD_FINISHED,
+        ctx,
         { stream, streamState },
       );
 

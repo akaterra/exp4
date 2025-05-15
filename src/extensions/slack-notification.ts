@@ -31,7 +31,7 @@ export class SlackNotificationExtensionService extends EntityService implements 
 
   registerCallbacks(callbacks: CallbacksContainer): void {
     if (this.events[EVENT_TARGET_STATE_UPDATE] !== false) {
-      callbacks.register(EVENT_TARGET_STATE_UPDATE_STARTED, async ({ target, targetState }) => {
+      callbacks.register(EVENT_TARGET_STATE_UPDATE_STARTED, async (ctx, { target, targetState }) => {
         if (!(targetState instanceof TargetState)) {
           return;
         }
