@@ -6,7 +6,7 @@ import { FormStore } from './form';
 import { ProjectStore, ProjectTargetStore } from './project';
 import { nextId } from './utils';
 
-export class ProjectTargetReleaseStore extends FormStore<{
+export class ProjectTargetExtensionReleaseStore extends FormStore<{
   date: Date;
   notes: {
     id: string;
@@ -55,8 +55,8 @@ export class ProjectTargetReleaseStore extends FormStore<{
   projectTarget: IProjectTarget;
   projectTargetStore: ProjectTargetStore;
 
-  get dto(): IProjectTargetState['release'] {
-    const release = this.projectStore.getTargetStoreByTargetId(this.projectTarget.id)?.targetState?.release;
+  get dto(): IProjectTargetState['extensions']['release'] {
+    const release = this.projectStore.getTargetStoreByTargetId(this.projectTarget.id)?.targetState?.extensions?.release;
 
     function updateChangelog(changelog, streamId, artifacts) {
       const existing = changelog.find((change) => change.id === streamId);
@@ -113,7 +113,7 @@ export class ProjectTargetReleaseStore extends FormStore<{
   }
 
   get streamsForSelect(): Record<IProjectTargetStream['id'], IProjectTargetStream['title']> {
-    const release = this.projectStore.getTargetStoreByTargetId(this.projectTarget.id)?.targetState?.release;
+    const release = this.projectStore.getTargetStoreByTargetId(this.projectTarget.id)?.targetState?.extensions?.release;
 
     return release?.sections?.reduce((acc, section) => {
       if (section.type === 'stream') {
@@ -126,17 +126,17 @@ export class ProjectTargetReleaseStore extends FormStore<{
 
   protected extra = { streamsForSelect: true }
 
-  static cloneStreamArtifact(artifact?: Partial<ProjectTargetReleaseStore['state']['streams'][number]['artifacts'][number]>) {
+  static cloneStreamArtifact(artifact?: Partial<ProjectTargetExtensionReleaseStore['state']['streams'][number]['artifacts'][number]>) {
     return {
       id: artifact?.id ?? '',
       description: artifact?.description ?? '',
     };
   }
 
-  static cloneOp(op?: Partial<ProjectTargetReleaseStore['state']['ops'][number]>) {
+  static cloneOp(op?: Partial<ProjectTargetExtensionReleaseStore['state']['ops'][number]>) {
     return {
       id: op?.id ?? nextId(),
-      artifacts: op?.artifacts?.map((artifact) => ProjectTargetReleaseStore.cloneStreamArtifact(artifact)) ?? [],
+      artifacts: op?.artifacts?.map((artifact) => ProjectTargetExtensionReleaseStore.cloneStreamArtifact(artifact)) ?? [],
       assigneeUserId: op?.assigneeUserId ?? null,
       description: op?.description ?? '',
       flows: op?.flows ?? [],
@@ -148,7 +148,7 @@ export class ProjectTargetReleaseStore extends FormStore<{
   constructor(public projectStore: ProjectStore, public targetId: IProjectTarget['id']) {
     const projectTarget = projectStore.getTargetByTargetId(targetId);
     const projectTargetStore = projectStore.getTargetStoreByTargetId(targetId);
-    const release = projectTargetStore?.targetState?.release;
+    const release = projectTargetStore?.targetState?.extensions?.release;
 
     function mapArtifacts(atrifacts) {
       return atrifacts.map((artifact) => ({
@@ -315,8 +315,8 @@ export class ProjectTargetReleaseStore extends FormStore<{
     this.projectTargetStore = projectTargetStore;
   }
 
-  opAdd(op?: Partial<ProjectTargetReleaseStore['state']['ops'][number]>, index?: number) {
-    const newOp = ProjectTargetReleaseStore.cloneOp(op);
+  opAdd(op?: Partial<ProjectTargetExtensionReleaseStore['state']['ops'][number]>, index?: number) {
+    const newOp = ProjectTargetExtensionReleaseStore.cloneOp(op);
     const items = this.state.ops;
 
     if (index != null && index >= 0 && index < this.state.ops.length - 1) {
@@ -332,7 +332,7 @@ export class ProjectTargetReleaseStore extends FormStore<{
     items.splice(index, 1);
   }
 
-  opMoveUp(op: ProjectTargetReleaseStore['state']['ops'][number]) {
+  opMoveUp(op: ProjectTargetExtensionReleaseStore['state']['ops'][number]) {
     const items = this.state.ops;
     const index = items.findIndex((o) => o.id === op.id);
 
@@ -343,7 +343,7 @@ export class ProjectTargetReleaseStore extends FormStore<{
     }
   }
 
-  opMoveDown(op: ProjectTargetReleaseStore['state']['ops'][number]) {
+  opMoveDown(op: ProjectTargetExtensionReleaseStore['state']['ops'][number]) {
     const items = this.state.ops;
     const index = items.findIndex((o) => o.id === op.id);
 
@@ -354,7 +354,7 @@ export class ProjectTargetReleaseStore extends FormStore<{
     }
   }
 
-  opToggleFlow(op: ProjectTargetReleaseStore['state']['ops'][number], flowId: string) {
+  opToggleFlow(op: ProjectTargetExtensionReleaseStore['state']['ops'][number], flowId: string) {
     const items = this.state.ops;
     const index = items.findIndex((o) => o.id === op.id);
 
@@ -369,8 +369,8 @@ export class ProjectTargetReleaseStore extends FormStore<{
     }
   }
 
-  streamArtifactAdd(stream: ProjectTargetReleaseStore['state']['streams'][number], artifact?: Partial<ProjectTargetReleaseStore['state']['streams'][number]['artifacts'][number]>, index?: number) {
-    const newArtifact = ProjectTargetReleaseStore.cloneStreamArtifact(artifact);
+  streamArtifactAdd(stream: ProjectTargetExtensionReleaseStore['state']['streams'][number], artifact?: Partial<ProjectTargetExtensionReleaseStore['state']['streams'][number]['artifacts'][number]>, index?: number) {
+    const newArtifact = ProjectTargetExtensionReleaseStore.cloneStreamArtifact(artifact);
     const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
 
     if (index != null && index >= 0 && index < items.length - 1) {
@@ -380,13 +380,13 @@ export class ProjectTargetReleaseStore extends FormStore<{
     }
   }
 
-  streamArtifactDel(stream: ProjectTargetReleaseStore['state']['streams'][number], index: number) {
+  streamArtifactDel(stream: ProjectTargetExtensionReleaseStore['state']['streams'][number], index: number) {
     const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
 
     items.splice(index, 1);
   }
 
-  streamArtifactMoveUp(stream: ProjectTargetReleaseStore['state']['streams'][number], index: number) {
+  streamArtifactMoveUp(stream: ProjectTargetExtensionReleaseStore['state']['streams'][number], index: number) {
     const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
     // const index = items.findIndex((a) => a.id === artifact.id);
 
@@ -397,7 +397,7 @@ export class ProjectTargetReleaseStore extends FormStore<{
     }
   }
 
-  streamArtifactMoveDown(stream: ProjectTargetReleaseStore['state']['streams'][number], index: number) {
+  streamArtifactMoveDown(stream: ProjectTargetExtensionReleaseStore['state']['streams'][number], index: number) {
     const items = this.state.streams.find((s) => s.id === stream.id)?.artifacts ?? [];
     // const index = items.findIndex((a) => a.id === artifact.id);
 

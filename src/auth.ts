@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { IUser } from './user';
 import { v4 } from 'uuid';
-import { AwaitedCache } from './cache';
+import { Cache } from './cache';
 import { AUTH_HOST, AUTH_MODE, AUTH_JWT_SECRET } from './const';
 
 export function authorize(accessToken: string): IUser {
@@ -25,7 +25,7 @@ export function prepareAuthData(user: IUser) {
   };
 }
 
-const OTT_DATA = new AwaitedCache<IUser>().runAutoInvalidate();
+const OTT_DATA = new Cache<IUser>().runAutoInvalidate();
 
 export function generateOneTimeToken(user: IUser) {
   const id = v4();

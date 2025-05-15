@@ -2,16 +2,18 @@ import { IService } from './entities.service';
 import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef } from './project';
 import { StreamState } from './stream-state';
 
-export class TargetState implements IService {
+export class TargetState<
+  Metadata extends Record<string, unknown> = Record<string, unknown>
+> implements IService {
   id: IProjectTargetDef['id'];
   type: IProjectTargetDef['type'];
 
-  assertType = 'target';
+  readonly assertType = 'target';
 
   target: IProjectTargetDef;
 
   extensions: Record<string, IService> = {};
-  metadata: Record<string, unknown> = {};
+  metadata: Metadata;
   streams: Record<IProjectTargetStreamDef['id'], StreamState> = {};
   version?: string;
 
@@ -30,13 +32,15 @@ export class TargetState implements IService {
   }
 
   constructor(props: Partial<TargetState>) {
-    Reflect.setPrototypeOf(props, TargetState.prototype);
-
-    props.extensions = {};
-    props.metadata = props.metadata ?? {};
-    props.streams = props.streams ?? {};
-
-    return props as TargetState;
+    this.id = props.id ?? null;
+    this.type = props.type ?? null;
+    this.extensions = {};
+    this.metadata = (props.metadata ?? {}) as Metadata;
+    this.streams = props.streams ?? {};
+    this.target = props.target ?? null;
+    this.version = props.version ?? null;
+    this.isDirty = props.isDirty ?? false;
+    this.ver = props.ver ?? 0;
   }
 
   getExtension<T extends IService>(id: IProjectDef['id'], assertType?: IProjectDef['type'], unsafe?: boolean): T {
@@ -85,11 +89,23 @@ export class TargetState implements IService {
     return compareToId ? extensionId === compareToId : !!extensionId;
   }
 
+  incVer() {
+    this.ver ++;
+
+    return this;
+  }
+
   toJSON() {
     return {
-      ...this,
-      projectsService: undefined,
-      target: undefined,
-    };
+      id: this.id,
+      type: this.type,
+
+      extensions: this.extensions,
+      metadata: this.metadata,
+      streams: this.streams,
+      version: this.version,
+
+      ver: this.ver,
+    }
   }
 }

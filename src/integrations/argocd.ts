@@ -1,7 +1,7 @@
 import { IIntegrationService, IncStatistics } from '.';
 import { Service } from 'typedi';
 import { EntityService } from '../entities.service';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { iter, request, resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
 import { Log } from '../logger';
@@ -36,7 +36,7 @@ export interface IArgocdServiceSync {
 @Service()
 export class ArgocdIntegrationService extends EntityService implements IIntegrationService {
   protected accessToken: string = null;
-  protected cache = new AwaitedCache<unknown>();
+  protected cache = new Cache<unknown>();
 
   static readonly type: string = 'argocd';
 

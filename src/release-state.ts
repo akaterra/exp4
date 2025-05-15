@@ -31,16 +31,18 @@ export interface IReleaseStateSection {
   status?: string;
 }
 
-export class ReleaseState implements IService {
+export class ReleaseState<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+> implements IService {
   id: string;
   type: string;
   
-  assertType = 'release';
+  readonly assertType = 'release';
   
   config: IReleaseConfig;
   
   date?: Date;
-  metadata: Record<string, any>;
+  metadata: Metadata;
   sections: IReleaseStateSection[] = [];
   status: Status;
   statusUpdateAt?: Date;
@@ -48,22 +50,30 @@ export class ReleaseState implements IService {
   isDirty: boolean = false;
   ver: number = 0;
 
+  isSyncing?: boolean;
+
+  get state() {
+    return {
+      date: this.date,
+      metadata: this.metadata,
+      sections: this.sections,
+      status: this.status,
+      statusUpdateAt: this.statusUpdateAt,
+      ver: this.ver,
+    };
+  }
+
   constructor(props: Partial<ReleaseState>) {
-    if (!props.metadata) {
-      props.metadata = {};
-    }
-
-    if (!props.sections) {
-      props.sections = [];
-    }
-
-    if (!props.ver) {
-      props.ver = 0;
-    }
-
-    Reflect.setPrototypeOf(props, ReleaseState.prototype);
-
-    return props as ReleaseState;
+    this.id = props.id ?? null;
+    this.type = props.type ?? null;
+    this.config = props.config ?? null;
+    this.date = props.date ?? null;
+    this.metadata = (props.metadata ?? {}) as Metadata;
+    this.sections = props.sections ?? [];
+    this.status = props.status ?? Status.PENDING;
+    this.statusUpdateAt = props.statusUpdateAt ?? null;
+    this.isDirty = props.isDirty ?? false;
+    this.ver = props.ver ?? 0;
   }
 
   getSection(id: string, type: string): IReleaseStateSection | null {
@@ -203,15 +213,16 @@ export class ReleaseState implements IService {
   }
 
   toJSON(ver?: number) {
-    const obj = {
-      ...this,
-      schema: undefined,
+    return {
+      id: this.id,
+      type: this.type,
+
+      date: this.date,
+      metadata: this.metadata,
+      sections: this.sections,
+      status: this.status,
+      statusUpdateAt: this.statusUpdateAt,
+      ver: ver ?? this.ver,
     };
-
-    if (ver != null) {
-      obj.ver = ver;
-    }
-
-    return obj;
   }
 }

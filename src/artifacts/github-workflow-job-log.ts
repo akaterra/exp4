@@ -6,7 +6,7 @@ import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { Status } from '../enums/status';
 
 export interface IGithubWorkflowJobLogArtifactConfig {
@@ -20,7 +20,7 @@ export class GithubWorkflowJobLogArtifactService extends EntityService implement
   static readonly type: string = 'github:workflowJob:log';
 
   @Autowired() protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache();
+  protected cache = new Cache();
 
   constructor(public readonly config?: IGithubWorkflowJobLogArtifactConfig) {
     super();

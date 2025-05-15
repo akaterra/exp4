@@ -1,4 +1,4 @@
-export class AwaitedCache<T = any, K = string> implements Iterable<[K, T | Promise<T>]> {
+export class Cache<T = any, K = string> implements Iterable<[K, T | Promise<T>]> {
   protected autoInvalidateTimeout;
   protected cache = new Map<K, [ number, number, T | Promise<T> ]>(); // expire, version, val
 

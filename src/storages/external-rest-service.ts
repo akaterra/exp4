@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { IStorageService } from '.';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { Autowired, iter } from '../utils';
@@ -16,7 +16,7 @@ import { getKeyOfType } from './utils';
 export class ExternalRestServiceStorageService extends EntityService implements IStorageService {
   static readonly type: string = 'externalRestService';
 
-  protected cache = new AwaitedCache();
+  protected cache = new Cache();
   @Autowired() protected restApiService: RestApiService;
 
   constructor(protected config?: {

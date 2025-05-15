@@ -7,7 +7,7 @@ import { EntityService } from '../entities.service';
 import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GithubIntegrationService } from '../integrations/github';
 import { Status } from '../enums/status';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { Log, logError } from '../logger';
 import moment from 'moment-timezone';
 import { ProjectsService } from '../projects.service';
@@ -36,7 +36,7 @@ export class GithubStreamService extends EntityService implements IStreamService
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
-  protected cache = new AwaitedCache<StreamState>();
+  protected cache = new Cache<StreamState>();
 
   actionRun(id: string) { // eslint-disable-line
 

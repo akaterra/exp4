@@ -103,7 +103,8 @@ export type IProjectTargetState = {
 
   ref: IProjectTarget['ref'];
 
-  release: { date: Date; sections: IReleaseStateSection[]; status: Status };
+  extensions: { release?: { date: Date; sections: IReleaseStateSection[]; status: Status } };
+  metadata?: Record<string, unknown>;
   streams: Record<string, IProjectTargetStreamState>;
   version: string;
 

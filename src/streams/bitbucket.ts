@@ -6,7 +6,7 @@ import { TargetState } from '../target-state';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitlabIntegrationService } from '../integrations/gitlab';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { Log, logError } from '../logger';
 import { BitbucketIntegrationService } from '../integrations/bitbucket';
 import { ProjectsService } from '../projects.service';
@@ -38,7 +38,7 @@ export class BitbucketStreamService extends EntityService implements IStreamServ
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
-  protected cache = new AwaitedCache<StreamState>();
+  protected cache = new Cache<StreamState>();
 
   actionRun(id: string) { // eslint-disable-line
 

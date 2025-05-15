@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { IProjectTargetDef } from '../project';
-import { AwaitedCache, Mutex } from '../cache';
+import { Cache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { Autowired, CallbacksContainer } from '../utils';
 import { TargetState } from '../target-state';
@@ -9,7 +9,7 @@ import { EVENT_TARGET_STATE_REREAD_STARTED, EVENT_TARGET_STATE_REREAD_FINISHED, 
 @Service()
 export class TargetHolderService {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache<TargetState>();
+  protected cache = new Cache<TargetState>();
   protected mutex = new Mutex();
 
   get domain() {
@@ -69,7 +69,9 @@ export class TargetHolderService {
         { target: targetState.target, targetState },
       );
 
-      await project.getEnvVersioningByTarget(targetState.target).setTargetVar(targetState.target, 'state', targetState.state, true);
+      await project
+        .getEnvVersioningByTarget(targetState.target)
+        .setTargetVar(targetState.target, 'state', targetState.state, true);
 
       this.cache.set(key, targetState);
       targetState.isDirty = false;

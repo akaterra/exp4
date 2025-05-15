@@ -62,7 +62,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
     }
 
     if (this.events[EVENT_TARGET_STATE_REREAD] !== false) {
-      callbacks.register(EVENT_TARGET_STATE_REREAD_FINISHED, async ({ target, targetState }: { target: IProjectTargetDef; targetState: TargetState }) => {
+      callbacks.register(EVENT_TARGET_STATE_REREAD_STARTED, async ({ target, targetState }: { target: IProjectTargetDef; targetState: TargetState }) => {
         if (!(targetState instanceof TargetState)) {
           return;
         }
@@ -81,7 +81,7 @@ export class ReleaseExtensionService extends EntityService implements IExtension
 
         if (targetState.hasExtension('release')) {
           // this.projectsService.
-          // await versioning.setTargetVar(target, 'ext_release', targetStateRelease.toJSON(), true);
+          // await versioning.setTargetVar(target, 'ext_release', targetStateRelease.state, true);
         }
       });
     }

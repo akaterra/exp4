@@ -7,8 +7,9 @@ import { ProjectsService } from '../projects.service';
 import { SlackIntegrationService } from '../integrations/slack';
 import { Status } from '../enums/status';
 import * as _ from 'lodash';
-import { AUTH_HOST, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_UPDATE, EVENT_TARGET_STATE_UPDATE_FINISHED, getHostWithSchema } from '../const';
+import { AUTH_HOST, EVENT_TARGET_STATE_REREAD_FINISHED, EVENT_TARGET_STATE_UPDATE, EVENT_TARGET_STATE_UPDATE_FINISHED, EVENT_TARGET_STATE_UPDATE_STARTED, getHostWithSchema } from '../const';
 import { ReleaseState } from '../release-state';
+import {markDirty} from '../actions/utils';
 
 export interface ISlackNotificationConfig {
   integration?: string;
@@ -22,7 +23,7 @@ export class SlackNotificationExtensionService extends EntityService implements 
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(protected config?: ISlackNotificationConfig) {
+  constructor(protected config: ISlackNotificationConfig) {
     super();
   }
 
@@ -30,11 +31,11 @@ export class SlackNotificationExtensionService extends EntityService implements 
 
   registerCallbacks(callbacks: CallbacksContainer): void {
     if (this.events[EVENT_TARGET_STATE_UPDATE] !== false) {
-      callbacks.register(EVENT_TARGET_STATE_UPDATE_FINISHED, async ({ target, targetState }) => {
+      callbacks.register(EVENT_TARGET_STATE_UPDATE_STARTED, async ({ target, targetState }) => {
         if (!(targetState instanceof TargetState)) {
           return;
         }
-
+console.log({targetState,id: this.id});
         if (targetState.hasTargetExtension('notification', this.id)) {
           await this.publishRelease(targetState);
         }
@@ -160,17 +161,17 @@ export class SlackNotificationExtensionService extends EntityService implements 
 
     console.log(JSON.stringify(payload,undefined,2));
 
-    // const metadata = await this.getIntegrationService(targetState).send(payload, targetStateRelease.metadata.messageId);
+    // const metadata = await this.getIntegrationService(targetState).send(payload, targetState.metadata.releaseExternalMessageId);
 
     // if (metadata?.messageId) {
-    //   targetStateRelease.metadata.messageId = metadata.messageId;
+    //   targetState.metadata.releaseExternalMessageId = metadata.messageId;
     // }
   }
 
   private getIntegrationService(targetState: TargetState) {
     return this.projectsService
       .get(targetState.target.ref.projectId)
-      .getEnvIntegraionByIntegration<SlackIntegrationService>(this.config?.integration, 'slack');
+      .getEnvIntegraionByIntegration<SlackIntegrationService>(this.config.integration, 'slack');
   }
 }
 

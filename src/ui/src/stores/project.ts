@@ -12,7 +12,7 @@ import { alertsStore } from '../blocks/alerts';
 import * as _ from 'lodash';
 import { ProjectTargetReleaseModalContent, ProjectTargetReleaseModalTitle } from '../blocks/project.target.release.modal';
 import { ProjectFlowParamsStore } from './project.flow.run.store';
-import { ProjectTargetReleaseStore } from './project.target.release.store';
+import { ProjectTargetExtensionReleaseStore } from './project.target.extension.release.store';
 
 export class ProjectTargetStore extends BaseStore {
   @observable
@@ -509,7 +509,7 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *applyRelease(targetId: string) {
-    const formStore = new ProjectTargetReleaseStore(this, targetId);
+    const formStore = new ProjectTargetExtensionReleaseStore(this, targetId);
 
     const action = yield modalStore.show({
       content: ProjectTargetReleaseModalContent,
@@ -529,7 +529,7 @@ export class ProjectStore extends BaseStore {
         targetId,
         formStore.dto,
       );
-      this.getTargetStoreByTargetId(targetId).targetState.release = updated;
+      this.getTargetStoreByTargetId(targetId).targetState.extensions.release = updated;
 
       break;
     default:
@@ -539,7 +539,7 @@ export class ProjectStore extends BaseStore {
 
   @flow @processing
   *applyReleaseOpFlowRun(targetId: string, opId: string, flowId: string) {
-    const formStore = new ProjectFlowParamsStore(this, flowId, targetId, [ this.getTargetStoreByTargetId(targetId).targetState.release?.sections.find((e) => e.id === opId)?.metadata?.streamId as IProjectTargetStream['id'] ]);
+    const formStore = new ProjectFlowParamsStore(this, flowId, targetId, [ this.getTargetStoreByTargetId(targetId).targetState.extensions?.release?.sections.find((e) => e.id === opId)?.metadata?.streamId as IProjectTargetStream['id'] ]);
 
     const action = yield modalStore.show({
       content: ProjectFlowRunModalContent,

@@ -5,7 +5,7 @@ import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
 import { ArgocdIntegrationService } from '../integrations/argocd';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { IStreamStateContext, StreamState } from '../stream-state';
 
 export interface IArgocdApplicationArtifactConfig {
@@ -18,7 +18,7 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
   static readonly type: string = 'argocd:application';
 
   @Autowired() protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache();
+  protected cache = new Cache();
 
   constructor(public readonly config?: IArgocdApplicationArtifactConfig) {
     super();
@@ -52,10 +52,6 @@ export class ArgocdApplicationArtifactService extends EntityService implements I
         .getEnvIntegraionByIntegration<ArgocdIntegrationService>(this.config?.integration, 'argocd')
       : this.projectsService
         .get(ref?.projectId)
-        .getEnvIntegraionByTargetAndStream<ArgocdIntegrationService>(
-          ref?.targetId,
-          ref?.streamId,
-          'argocd',
-        );
+        .getEnvIntegraionByTargetAndStream<ArgocdIntegrationService>(ref?.targetId, ref?.streamId, 'argocd');
   }
 }

@@ -7,7 +7,11 @@ import { rest } from './services/rest-api.service';
 export const IS_TEST = process.env.NODE_ENV === 'test';
 const MS_WAIT = 1000;
 
-export class AwaitableContainer {
+export class Ctx {
+  calls: number = 0;
+}
+
+export class AwaitablesContainer {
   private buckets = new Map<string, {
     awaitables: [
       Promise<any> | ((...args: any[]) => Promise<any>), // awaitable
@@ -205,6 +209,7 @@ export class AwaitableContainer {
 
 export class CallbacksContainer {
   protected callbacks: Record<string, { fn: (...args) => any, isAsync: boolean }[]> = {};
+  protected callbacksRunning = new Set<string>();
 
   register(event: string, fn: (...args) => any, isAsync: boolean = false) {
     if (!this.callbacks[event]) {
@@ -222,22 +227,31 @@ export class CallbacksContainer {
     this.callbacks[event] = this.callbacks[event].filter((cb) => cb.fn !== fn);
   }
 
-  run(event: string, ...args) {
+  async run(event: string, ...args) {
     if (!this.callbacks[event]) {
       return;
     }
 
-    const promises = [];
+    try {
+      // if (this.callbacksRunning.has(event)) {
+      //   return;
+      // }
 
-    for (const cb of this.callbacks[event]) {
-      if (cb.isAsync) {
-        promises.push(cb.fn(...args));
-      } else {
-        cb.fn(...args);
+      this.callbacksRunning.add(event);
+      const promises = [];
+
+      for (const cb of this.callbacks[event]) {
+        if (cb.isAsync) {
+          promises.push(cb.fn(...args));
+        } else {
+          cb.fn(...args);
+        }
       }
-    }
 
-    return Promise.all(promises);
+      return await Promise.all(promises);
+    } finally {
+      this.callbacksRunning.delete(event);
+    }
   }
 
   clear() {

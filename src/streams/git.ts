@@ -6,7 +6,7 @@ import { TargetState } from '../target-state';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope, hasStrictScope } from '../utils';
 import { GitIntegrationService } from '../integrations/git';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { Log, logError } from '../logger';
 import { ProjectsService } from '../projects.service';
 
@@ -26,7 +26,7 @@ export class GitStreamService extends EntityService implements IStreamService {
 
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
 
-  protected cache = new AwaitedCache<StreamState>();
+  protected cache = new Cache<StreamState>();
 
   actionRun(id: string) { // eslint-disable-line
 

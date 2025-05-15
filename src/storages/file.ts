@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { IStorageService } from '.';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { EntityService } from '../entities.service';
 import { IUser } from '../user';
@@ -19,7 +19,7 @@ import { getKeyOfType } from './utils';
 export class FileStorageService extends EntityService implements IStorageService {
   static readonly type: string = 'file';
 
-  protected cache = new AwaitedCache();
+  protected cache = new Cache();
 
   constructor(protected config?: { dir? }) {
     super();

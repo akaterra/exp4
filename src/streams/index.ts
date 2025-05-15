@@ -3,7 +3,7 @@ import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { TargetState } from '../target-state';
 import { IService } from '../entities.service';
 import { Service } from 'typedi';
-import { AwaitedCache, Mutex } from '../cache';
+import { Cache, Mutex } from '../cache';
 import { ProjectsService } from '../projects.service';
 import { EntitiesServiceWithFactory } from '../entities.service';
 import { Autowired, CallbacksContainer } from '../utils';
@@ -36,7 +36,7 @@ export interface IStreamService extends IService {
 @Service()
 export class StreamHolderService extends EntitiesServiceWithFactory<IStreamService> {
   @Autowired(() => ProjectsService) protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache<StreamState>();
+  protected cache = new Cache<StreamState>();
   protected mutex = new Mutex();
 
   get domain() {

@@ -67,7 +67,7 @@ export const ProjectTargetStreams = observer(({ projectTarget }: { projectTarget
         </SubTitle>
       </div>
       {
-        projectTarget.targetState?.release
+        projectTarget.targetState?.extensions?.release
           ? <Button className='button-sml default transparent w-auto' x={null} onClick={ () => projectTarget.applyRelease() }><i className="fa-solid fa-cube fa-lg"></i></Button>
           : null
       }

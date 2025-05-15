@@ -1,8 +1,8 @@
 import { Inject, Service } from 'typedi';
 import { IProjectDef, IProjectTargetDef, IProjectTargetStreamDef, Project } from './project';
-import { AwaitableContainer, CallbacksContainer, iter } from './utils';
+import { AwaitablesContainer, CallbacksContainer, iter } from './utils';
 import { EntitiesService } from './entities.service';
-import { AwaitedCache } from './cache';
+import { Cache } from './cache';
 import { ProjectState } from './project-state';
 import { StatisticsService } from './statistics.service';
 import moment from 'moment-timezone';
@@ -13,8 +13,8 @@ import { TargetState } from './target-state';
 export class ProjectsService extends EntitiesService<Project> {
   @Inject(() => StatisticsService) protected statisticsService: StatisticsService;
 
-  private statesCache = new AwaitedCache<ProjectState>();
-  private tasksContainer = new AwaitableContainer(2);
+  private statesCache = new Cache<ProjectState>();
+  private tasksContainer = new AwaitablesContainer(2);
 
   get domain() {
     return 'Project';
@@ -119,12 +119,6 @@ export class ProjectsService extends EntitiesService<Project> {
     return projectState;
   }
 
-  async updateTargetState(targetState: TargetState) {
-    await this.tasksContainer.async.push(async () => {
-      await this.get(targetState.target.ref.projectId).updateTargetState(targetState);
-    });
-  }
-
   async runStatesResync() {
     const now = moment();
     let resynced;
@@ -175,7 +169,9 @@ export class ProjectsService extends EntitiesService<Project> {
 
       for (const targetState of Object.values(projectState.targetsStates)) {
         if (targetState.isDirty) {
-          await this.updateTargetState(targetState);
+          await this.tasksContainer.async.push(async () => {
+            await this.get(targetState.target.ref.projectId).updateTargetState(targetState);
+          });
         }
       }
     }

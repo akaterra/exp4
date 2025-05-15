@@ -6,7 +6,7 @@ import { GithubIntegrationService } from '../integrations/github';
 import { EntityService } from '../entities.service';
 import { Autowired, hasScope } from '../utils';
 import { ProjectsService } from '../projects.service';
-import { AwaitedCache } from '../cache';
+import { Cache } from '../cache';
 import { Status } from '../enums/status';
 import AdmZip from 'adm-zip';
 
@@ -23,7 +23,7 @@ export class GithubWorkflowArtifactArtifactService extends EntityService impleme
   static readonly type: string = 'github:workflowArtifact';
 
   @Autowired() protected projectsService: ProjectsService;
-  protected cache = new AwaitedCache();
+  protected cache = new Cache();
 
   constructor(public readonly config?: IGithubWorkflowArtifactArtifactConfig) {
     super();
