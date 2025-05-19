@@ -6,6 +6,7 @@ import { iter, request, resolvePlaceholders } from '../utils';
 import * as _ from 'lodash';
 import { Log } from '../logger';
 import { maybeReplaceEnvVars } from './utils';
+import {IValidationSchemaDef} from '../services/validator.service';
 
 export interface IArgocdConfig {
   applicationName?: string;
@@ -34,9 +35,18 @@ export interface IArgocdServiceSync {
 }
 
 @Service()
-export class ArgocdIntegrationService extends EntityService implements IIntegrationService {
+export class ArgocdIntegrationService extends EntityService<IArgocdConfig> implements IIntegrationService {
   protected accessToken: string = null;
   protected cache = new Cache<unknown>();
+
+  protected _validationSchema = {
+    applicationName: { type: 'string', required: true },
+    cacheTtlSec: { type: 'number', required: false, constraints: { min: 0, max: 3600 } },
+    host: { type: 'string', required: true, constraints: { minLength: 1 } },
+    username: { type: 'string', required: false, constraints: { minLength: 1 } },
+    password: { type: 'string', required: false, constraints: { minLength: 1 } },
+    token: { type: 'string', required: false, constraints: { minLength: 1 } },
+  }
 
   static readonly type: string = 'argocd';
 
@@ -44,16 +54,32 @@ export class ArgocdIntegrationService extends EntityService implements IIntegrat
     return !!this.accessToken;
   }
 
-  constructor(public readonly config: IArgocdConfig) {
-    super();
+  // constructor(public readonly config: IArgocdConfig) {
+  //   super();
 
-    this.config = {
-      ...this.config,
-      host: maybeReplaceEnvVars(this.config.host) || process.env.ARGOCD_HOST,
-      username: maybeReplaceEnvVars(this.config.username) || process.env.ARGOCD_USERNAME,
-      password: maybeReplaceEnvVars(this.config.password) || process.env.ARGOCD_PASSWORD,
-      token: maybeReplaceEnvVars(this.config.token) || process.env.ARGOCD_TOKEN,
+  //   this.config = {
+  //     ...this.config,
+  //     host: maybeReplaceEnvVars(this.config.host) || process.env.ARGOCD_HOST,
+  //     username: maybeReplaceEnvVars(this.config.username) || process.env.ARGOCD_USERNAME,
+  //     password: maybeReplaceEnvVars(this.config.password) || process.env.ARGOCD_PASSWORD,
+  //     token: maybeReplaceEnvVars(this.config.token) || process.env.ARGOCD_TOKEN,
+  //   };
+
+  //   setInterval(() => this.login(), 1000 * 60 * 30); // every 30 minutes
+  // }
+
+  onConfigBefore(config: IArgocdConfig): IArgocdConfig {
+    return {
+      ...config,
+      host: maybeReplaceEnvVars(config.host) || process.env.ARGOCD_HOST,
+      username: maybeReplaceEnvVars(config.username) || process.env.ARGOCD_USERNAME,
+      password: maybeReplaceEnvVars(config.password) || process.env.ARGOCD_PASSWORD,
+      token: maybeReplaceEnvVars(config.token) || process.env.ARGOCD_TOKEN,
     };
+  }
+
+  onConfigAfter(config: IArgocdConfig): IArgocdConfig {
+    return config;
   }
 
   @Log('debug') @IncStatistics()

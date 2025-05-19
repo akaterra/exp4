@@ -16,20 +16,39 @@ export interface IGithubConfig {
 }
 
 @Service()
-export class GithubIntegrationService extends EntityService implements IIntegrationService {
+export class GithubIntegrationService extends EntityService<IGithubConfig> implements IIntegrationService {
   protected client: Octokit;
 
   static readonly type: string = 'github';
 
-  constructor(public readonly config?: IGithubConfig) {
-    super();
+  // constructor(public readonly config?: IGithubConfig) {
+  //   super();
 
+  //   this.client = new Octokit({
+  //     auth: maybeReplaceEnvVars(config?.token) ?? process.env.GITHUB_TOKEN,
+  //     request: {
+  //       fetch,
+  //     },
+  //   });
+  // }
+
+  onConfigBefore(config: IGithubConfig): IGithubConfig {
+    return {
+      ...config,
+      org: maybeReplaceEnvVars(config.org) || process.env.GITHUB_ORG,
+      repository: maybeReplaceEnvVars(config.repository) || process.env.GITHUB_REPOSITORY,
+    };
+  }
+
+  onConfigAfter(config: IGithubConfig): IGithubConfig {
     this.client = new Octokit({
-      auth: maybeReplaceEnvVars(config?.token) ?? process.env.GITHUB_TOKEN,
+      auth: maybeReplaceEnvVars(config.token) ?? process.env.GITHUB_TOKEN,
       request: {
         fetch,
       },
     });
+
+    return config;
   }
 
   @IncStatistics() @Log('debug')

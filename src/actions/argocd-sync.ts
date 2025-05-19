@@ -8,19 +8,19 @@ import { ArgocdIntegrationService } from '../integrations/argocd';
 import { getPossibleTargetIds, markDirty, notEmptyArray } from './utils';
 import { Log } from '../logger';
 
-export interface IArgocdSyncStepConfig extends Record<string, unknown> {
+export interface IArgocdSyncStepConfig {
   integration: string;
 }
 
 @Service()
-export class ArgocdSyncActionService extends EntityService implements IActionService {
+export class ArgocdSyncActionService<IArgocdSyncStepConfig> extends EntityService implements IActionService {
   static readonly type = 'argocd:sync';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(public readonly config?: IArgocdSyncStepConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IArgocdSyncStepConfig) {
+  //   super();
+  // }
 
   @Log('debug')
   async exec(

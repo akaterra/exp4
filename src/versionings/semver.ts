@@ -21,14 +21,14 @@ export interface ISemverHistoryItem {
 }
 
 @Service()
-export class SemverVersioningService extends EntityService implements IVersioningService {
+export class SemverVersioningService extends EntityService<ISemverConfig> implements IVersioningService {
   static readonly type: string = 'semver';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(public readonly config?: ISemverConfig) {
-    super();
-  }
+  // constructor(public readonly config?: ISemverConfig) {
+  //   super();
+  // }
 
   @Log('debug')
   async getCurrent(target: IProjectTargetDef, format?: false | string): Promise<string> {

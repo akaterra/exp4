@@ -16,18 +16,35 @@ export interface IGitlabConfig {
 }
 
 @Service()
-export class GitlabIntegrationService extends EntityService implements IIntegrationService {
+export class GitlabIntegrationService extends EntityService<IGitlabConfig> implements IIntegrationService {
   protected client: Resources.Gitlab;
 
   static readonly type: string = 'gitlab';
 
-  constructor(public readonly config?: IGitlabConfig) {
-    super();
+  // constructor(public readonly config?: IGitlabConfig) {
+  //   super();
 
+  //   this.client = new Gitlab({
+  //     host: maybeReplaceEnvVars(this.config?.host) ?? process.env.GITLAB_HOST,
+  //     token: maybeReplaceEnvVars(this.config?.token) ?? process.env.GITLAB_TOKEN,
+  //   });
+  // }
+
+  onConfigBefore(config: IGitlabConfig): IGitlabConfig {
+    return {
+      ...config,
+      org: maybeReplaceEnvVars(config.org) || process.env.GITLAB_ORG,
+      repository: maybeReplaceEnvVars(config.repository) || process.env.GITLAB_REPOSITORY,
+    };
+  }
+
+  onConfigAfter(config: IGitlabConfig): IGitlabConfig {
     this.client = new Gitlab({
-      host: maybeReplaceEnvVars(this.config?.host) ?? process.env.GITLAB_HOST,
-      token: maybeReplaceEnvVars(this.config?.token) ?? process.env.GITLAB_TOKEN,
+      host: maybeReplaceEnvVars(config.host) ?? process.env.GITLAB_HOST,
+      token: maybeReplaceEnvVars(config.token) ?? process.env.GITLAB_TOKEN,
     });
+
+    return config;
   }
 
   @IncStatistics() @Log('debug')

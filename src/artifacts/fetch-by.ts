@@ -59,13 +59,13 @@ export type FetchByArtifactConfig = Record<string, {
 }>;
 
 @Service()
-export class FetchByArtifactService extends EntityService implements IArtifactService {
+export class FetchByArtifactService extends EntityService<FetchByArtifactConfig> implements IArtifactService {
   static readonly assertType: string = '*';
   static readonly type: string = 'fetchBy';
 
-  constructor(public readonly config?: FetchByArtifactConfig) {
-    super();
-  }
+  // constructor(public readonly config?: FetchByArtifactConfig) {
+  //   super();
+  // }
 
   async run(
     entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },

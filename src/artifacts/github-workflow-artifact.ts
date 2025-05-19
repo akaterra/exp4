@@ -19,15 +19,15 @@ export interface IGithubWorkflowArtifactArtifactConfig {
 };
 
 @Service()
-export class GithubWorkflowArtifactArtifactService extends EntityService implements IArtifactService {
+export class GithubWorkflowArtifactArtifactService extends EntityService<IGithubWorkflowArtifactArtifactConfig> implements IArtifactService {
   static readonly type: string = 'github:workflowArtifact';
 
   @Autowired() protected projectsService: ProjectsService;
   protected cache = new Cache();
 
-  constructor(public readonly config?: IGithubWorkflowArtifactArtifactConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IGithubWorkflowArtifactArtifactConfig) {
+  //   super();
+  // }
 
   // @Log('debug')
   async run(

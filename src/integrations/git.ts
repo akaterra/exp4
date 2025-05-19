@@ -14,20 +14,39 @@ export interface IGitConfig {
 }
 
 @Service()
-export class GitIntegrationService extends EntityService implements IIntegrationService {
+export class GitIntegrationService extends EntityService<IGitConfig> implements IIntegrationService {
   protected client: SimpleGit;
 
   static readonly type: string = 'git';
 
-  constructor(public readonly config?: IGitConfig) {
-    super();
+  // constructor(public readonly config?: IGitConfig) {
+  //   super();
 
+  //   this.client = simpleGit({
+  //     baseDir: maybeReplaceEnvVars(this.config?.dir) ?? process.cwd(),
+  //     binary: maybeReplaceEnvVars(this.config?.binary) ?? 'git',
+  //     maxConcurrentProcesses: this.config?.maxConcurrentProcesses ?? 6,
+  //     trimmed: this.config?.trimmed ?? false,
+  //   });
+  // }
+
+  onConfigBefore(config: IGitConfig): IGitConfig {
+    return {
+      ...config,
+      binary: maybeReplaceEnvVars(config.binary) || process.env.GIT_BINARY,
+      dir: maybeReplaceEnvVars(config.dir) || process.env.GIT_DIR,
+    };
+  }
+
+  onConfigAfter(config: IGitConfig): IGitConfig {
     this.client = simpleGit({
-      baseDir: maybeReplaceEnvVars(this.config?.dir) ?? process.cwd(),
-      binary: maybeReplaceEnvVars(this.config?.binary) ?? 'git',
-      maxConcurrentProcesses: this.config?.maxConcurrentProcesses ?? 6,
-      trimmed: this.config?.trimmed ?? false,
+      baseDir: maybeReplaceEnvVars(config.dir) ?? process.cwd(),
+      binary: maybeReplaceEnvVars(config.binary) ?? 'git',
+      maxConcurrentProcesses: config?.maxConcurrentProcesses ?? 6,
+      trimmed: config?.trimmed ?? false,
     });
+
+    return config;
   }
 
   @IncStatistics() @Log('debug')

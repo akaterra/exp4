@@ -14,15 +14,15 @@ export interface IJenkinsJobHistoryArtifactConfig {
 };
 
 @Service()
-export class JenkinsJobHistoryArtifactService extends EntityService implements IArtifactService {
+export class JenkinsJobHistoryArtifactService extends EntityService<IJenkinsJobHistoryArtifactConfig> implements IArtifactService {
   static readonly type: string = 'jenkins:jobHistory';
 
   @Autowired() protected projectsService: ProjectsService;
   protected cache = new Cache();
 
-  constructor(public readonly config?: IJenkinsJobHistoryArtifactConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IJenkinsJobHistoryArtifactConfig) {
+  //   super();
+  // }
 
   async run(
     entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },

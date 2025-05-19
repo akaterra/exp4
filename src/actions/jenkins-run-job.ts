@@ -17,14 +17,14 @@ export interface IJenkinsJobRunStepConfig extends Record<string, unknown> {
 }
 
 @Service()
-export class JenkinsJobRunActionService extends EntityService implements IActionService {
+export class JenkinsJobRunActionService extends EntityService<IJenkinsJobRunStepConfig> implements IActionService {
   static readonly type = 'jenkins:jobRun';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(public readonly config?: IJenkinsJobRunStepConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IJenkinsJobRunStepConfig) {
+  //   super();
+  // }
 
   @Log('debug')
   async exec(

@@ -1,10 +1,10 @@
-import { IService } from '../entities.service';
+import { IEntityService, IService } from '../entities.service';
 import { statistics } from '../statistics.service';
 import { IS_TEST } from '../utils';
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';
 
-export interface IIntegrationService extends IService {
+export interface IIntegrationService extends IEntityService {
 
 }
 

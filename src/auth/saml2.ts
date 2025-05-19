@@ -9,8 +9,26 @@ import { authSendData as execAuthSendData, authorizeByOneTimeToken, generateOneT
 import { Log } from '../logger';
 import { Saml2Service } from '../services/saml2.service';
 
+export interface ISaml2AuthStrategyServiceConfig {
+  publicDomain?: string;
+  paths?: {
+    crt?: string;
+    pem?: string;
+    metadata?: string;
+  };
+  urls?: {
+    login?: string;
+    logout?: string;
+    callbackUrl?: string;
+  };
+  extra?: {
+    entityId?: string;
+  };
+  storage?: string;
+}
+
 @Service()
-export class Saml2AuthStrategyService extends EntityService implements IAuthStrategyService {
+export class Saml2AuthStrategyService extends EntityService<ISaml2AuthStrategyServiceConfig> implements IAuthStrategyService {
   static readonly type: string = 'saml2';
 
   protected client: Saml2Service;
@@ -20,30 +38,40 @@ export class Saml2AuthStrategyService extends EntityService implements IAuthStra
     return this.storagesService.get(this.config?.storage ?? 'default');
   }
 
-  constructor(protected config?: {
-    publicDomain?: string;
-    paths?: {
-      crt?: string;
-      pem?: string;
-      metadata?: string;
-    };
-    urls?: {
-      login?: string;
-      logout?: string;
-      callbackUrl?: string;
-    };
-    extra?: {
-      entityId?: string;
-    };
-    storage?: string;
-  }) {
-    super();
+  // constructor(protected config?: {
+  //   publicDomain?: string;
+  //   paths?: {
+  //     crt?: string;
+  //     pem?: string;
+  //     metadata?: string;
+  //   };
+  //   urls?: {
+  //     login?: string;
+  //     logout?: string;
+  //     callbackUrl?: string;
+  //   };
+  //   extra?: {
+  //     entityId?: string;
+  //   };
+  //   storage?: string;
+  // }) {
+  //   super();
 
+  //   this.client = new Saml2Service(
+  //     config?.publicDomain,
+  //     config?.paths,
+  //     config?.urls,
+  //   );
+  // }
+
+  onConfigAfter(config: ISaml2AuthStrategyServiceConfig): ISaml2AuthStrategyServiceConfig {
     this.client = new Saml2Service(
       config?.publicDomain,
       config?.paths,
       config?.urls,
     );
+
+    return config;
   }
 
   @Log('debug')

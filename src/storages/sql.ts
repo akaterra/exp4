@@ -13,20 +13,26 @@ import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 import { getKeyOfType } from './utils';
 
+export interface ISqlStorageServiceConfig {
+  uri?: string;
+  tableNameUsers?: string;
+  tableNameVars?: string;
+}
+
 @Service()
-export class SqlStorageService extends EntityService implements IStorageService {
+export class SqlStorageService extends EntityService<ISqlStorageServiceConfig> implements IStorageService {
   static readonly type: string = 'sql';
 
   protected cache = new Cache();
   protected client: Knex;
 
-  constructor(protected config?: {
-    uri?: string,
-    tableNameUsers?: string,
-    tableNameVars?: string,
-  }) {
-    super();
-  }
+  // constructor(protected config?: {
+  //   uri?: string,
+  //   tableNameUsers?: string,
+  //   tableNameVars?: string,
+  // }) {
+  //   super();
+  // }
 
   @Log('debug')
   async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {

@@ -18,14 +18,14 @@ export interface ISlackNotificationConfig {
 }
 
 @Service()
-export class SlackNotificationExtensionService extends EntityService implements INotificationService {
+export class SlackNotificationExtensionService extends EntityService<ISlackNotificationConfig> implements INotificationService {
   static readonly type: string = 'slack:notification';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(protected config: ISlackNotificationConfig) {
-    super();
-  }
+  // constructor(protected config: ISlackNotificationConfig) {
+  //   super();
+  // }
 
   async exec() {}
 

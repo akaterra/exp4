@@ -18,22 +18,42 @@ export interface IBitbucketConfig {
 }
 
 @Service()
-export class BitbucketIntegrationService extends EntityService implements IIntegrationService {
+export class BitbucketIntegrationService extends EntityService<IBitbucketConfig> implements IIntegrationService {
   protected client: APIClient;
 
   static readonly type: string = 'bitbucket';
 
-  constructor(public readonly config?: IBitbucketConfig) {
-    super();
+  // constructor(public readonly config?: IBitbucketConfig) {
+  //   super();
 
+  //   const isAuthMethodPassword = !config?.authMethod || config?.authMethod === 'password';
+  //   const password = maybeReplaceEnvVars(config?.username) ?? process.env.BITBUCKET_PASSWORD;
+  //   const token = maybeReplaceEnvVars(config?.token) ?? process.env.BITBUCKET_TOKEN;
+  //   const username = maybeReplaceEnvVars(config?.username) ?? process.env.BITBUCKET_USERNAME;
+
+  //   this.client = password && username && isAuthMethodPassword
+  //     ? new Bitbucket({ auth: { password, username } })
+  //     : new Bitbucket({ auth: { token } });
+  // }
+
+  onConfigBefore(config: IBitbucketConfig): IBitbucketConfig {
+    return {
+      ...config,
+      host: maybeReplaceEnvVars(config.host) || process.env.BITBUCKET_HOST,
+      password: maybeReplaceEnvVars(config.password) || process.env.BITBUCKET_PASSWORD,
+      token: maybeReplaceEnvVars(config.token) || process.env.BITBUCKET_TOKEN,
+      username: maybeReplaceEnvVars(config.username) || process.env.BITBUCKET_USERNAME,
+    };
+  }
+
+  onConfigAfter(config: IBitbucketConfig): IBitbucketConfig {
     const isAuthMethodPassword = !config?.authMethod || config?.authMethod === 'password';
-    const password = maybeReplaceEnvVars(config?.username) ?? process.env.BITBUCKET_PASSWORD;
-    const token = maybeReplaceEnvVars(config?.token) ?? process.env.BITBUCKET_TOKEN;
-    const username = maybeReplaceEnvVars(config?.username) ?? process.env.BITBUCKET_USERNAME;
 
-    this.client = password && username && isAuthMethodPassword
-      ? new Bitbucket({ auth: { password, username } })
-      : new Bitbucket({ auth: { token } });
+    this.client = config.password && config.username && isAuthMethodPassword
+      ? new Bitbucket({ auth: { password: config.password, username: config.username } })
+      : new Bitbucket({ auth: { token: config.token } });
+
+    return config;
   }
 
   @IncStatistics() @Log('debug')

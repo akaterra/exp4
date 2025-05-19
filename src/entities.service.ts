@@ -1,3 +1,4 @@
+import {IValidationSchemaDef, ValidatorService} from './services/validator.service';
 import { CallbacksContainer } from './utils';
 
 export interface IService {
@@ -10,13 +11,14 @@ export interface IService {
   readonly type: string;
 }
 
-export interface IEntityService extends IService {
+export interface IEntityService<C extends Record<string, any> = Record<string, any>> extends IService {
   events: Record<string, boolean>;
+  configure(config: C): void;
   registerCallbacks(callbacks: CallbacksContainer): void;
   registerEvents(events: Record<string, boolean> | string[]): void;
 }
 
-export class EntityService {
+export class EntityService<C extends Record<string, any> = Record<string, any>> implements IEntityService {
   static readonly assertType: string = null;
   static readonly type: string = 'unknown';
 
@@ -25,9 +27,11 @@ export class EntityService {
   title: string;
   description: string;
 
+  config: C;
   events: Record<string, boolean> = {};
 
-  private _context: Record<string, unknown>;
+  protected _context: Record<string, unknown>;
+  protected _validationSchema: IValidationSchemaDef;
 
   get assertType() {
     return (this.constructor as any).assertType ?? (this.constructor as any).type;
@@ -42,6 +46,21 @@ export class EntityService {
 
   get type() {
     return (this.constructor as any).type;
+  }
+
+  configure(config: C) {
+    config = this.onConfigBefore(config) ?? config;
+
+    if (this._validationSchema) {
+      try {
+        new ValidatorService().addSchemaFromDef(this._validationSchema, '_').validate(config, '_');
+      } catch (err) {
+        throw new Error(`Invalid config for ${this.type} "${this.id ?? '?'}": ${err.message}`);
+      }
+    }
+
+    this.config = config;
+    this.onConfigAfter(config);
   }
 
   registerCallbacks(callbacks: CallbacksContainer) { // eslint-disable-line
@@ -64,6 +83,14 @@ export class EntityService {
     this._context = context;
 
     return this;
+  }
+
+  onConfigBefore(config: C) {
+    return config;
+  }
+
+  onConfigAfter(config: C) {
+    return config;
   }
 }
 

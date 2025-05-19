@@ -9,8 +9,13 @@ import { authSendData as execAuthSendData, prepareAuthData } from '../auth';
 import { Log } from '../logger';
 const { compare } = require('bcrypt');
 
+export interface IPasswordAuthStrategyServiceConfig {
+  saltRoutes?: number;
+  storage?: string;
+}
+
 @Service()
-export class PasswordAuthStrategyService extends EntityService implements IAuthStrategyService {
+export class PasswordAuthStrategyService extends EntityService<IPasswordAuthStrategyServiceConfig> implements IAuthStrategyService {
   static readonly type: string = 'password';
 
   @Autowired() protected storagesService: StorageHolderService;
@@ -19,12 +24,12 @@ export class PasswordAuthStrategyService extends EntityService implements IAuthS
     return this.storagesService.get(this.config?.storage ?? 'default');
   }
 
-  constructor(protected config?: {
-    saltRoutes?: number;
-    storage?: string;
-  }) {
-    super();
-  }
+  // constructor(protected config?: {
+  //   saltRoutes?: number;
+  //   storage?: string;
+  // }) {
+  //   super();
+  // }
 
   @Log('debug')
   async authorize(data: Record<string, any>): Promise<IUser> { // eslint-disable-line

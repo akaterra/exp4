@@ -13,18 +13,28 @@ export interface ISlackConfig {
 }
 
 @Service()
-export class SlackIntegrationService extends EntityService implements IIntegrationService {
+export class SlackIntegrationService extends EntityService<ISlackConfig> implements IIntegrationService {
   static readonly type: string = 'slack';
 
-  constructor(public readonly config: ISlackConfig) {
-    super();
+  // constructor(public readonly config: ISlackConfig) {
+  //   super();
 
-    this.config = {
-      ...this.config,
-      oauthToken: maybeReplaceEnvVars(this.config.oauthToken) || process.env.SLACK_OAUTH_TOKEN,
-      channelId: maybeReplaceEnvVars(this.config.channelId) || process.env.SLACK_CHANNEL_ID,
-      channelMessageId: maybeReplaceEnvVars(this.config.channelMessageId) || process.env.SLACK_CHANNEL_MESSAGE_ID,
-      webhookUrl: maybeReplaceEnvVars(this.config.webhookUrl) || process.env.SLACK_WEBHOOK_URL,
+  //   this.config = {
+  //     ...this.config,
+  //     oauthToken: maybeReplaceEnvVars(this.config.oauthToken) || process.env.SLACK_OAUTH_TOKEN,
+  //     channelId: maybeReplaceEnvVars(this.config.channelId) || process.env.SLACK_CHANNEL_ID,
+  //     channelMessageId: maybeReplaceEnvVars(this.config.channelMessageId) || process.env.SLACK_CHANNEL_MESSAGE_ID,
+  //     webhookUrl: maybeReplaceEnvVars(this.config.webhookUrl) || process.env.SLACK_WEBHOOK_URL,
+  //   };
+  // }
+
+  onConfigBefore(config: ISlackConfig): ISlackConfig {
+    return {
+      ...config,
+      oauthToken: maybeReplaceEnvVars(config.oauthToken) || process.env.SLACK_OAUTH_TOKEN,
+      channelId: maybeReplaceEnvVars(config.channelId) || process.env.SLACK_CHANNEL_ID,
+      channelMessageId: maybeReplaceEnvVars(config.channelMessageId) || process.env.SLACK_CHANNEL_MESSAGE_ID,
+      webhookUrl: maybeReplaceEnvVars(config.webhookUrl) || process.env.SLACK_WEBHOOK_URL,
     };
   }
 

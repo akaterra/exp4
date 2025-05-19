@@ -24,14 +24,14 @@ export interface IReleaseConfig {
   }[];
 }
 
-export class ReleaseExtensionService extends EntityService implements IExtensionService {
+export class ReleaseExtensionService extends EntityService<IReleaseConfig> implements IExtensionService {
   static readonly type: string = 'release';
 
   @Autowired() protected projectsService: ProjectsService;
 
-  constructor(public readonly config?: IReleaseConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IReleaseConfig) {
+  //   super();
+  // }
 
   async exec() {}
 

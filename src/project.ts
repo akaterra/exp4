@@ -63,7 +63,7 @@ export interface IProjectFlowActionParam extends IProjectDef {
   validationSchema?: Record<string, any>;
 }
 
-export interface IProjectAction<C extends Record<string, unknown>, T extends string = string> extends IProjectDef<C, T> {
+export interface IProjectAction<C extends Record<string, any>, T extends string = string> extends IProjectDef<C, T> {
   isDirty?: boolean;
 
   params?: Record<string, IProjectFlowActionParam>;
@@ -72,7 +72,7 @@ export interface IProjectAction<C extends Record<string, unknown>, T extends str
   targets?: IProjectTargetDef['id'][];
 }
 
-export type IProjectActionDef = IProjectAction<Record<string, unknown>>;
+export type IProjectActionDef = IProjectAction<Record<string, any>>;
 
 export interface IProjectFlow<C extends Record<string, unknown>> extends IProjectDef {
   isDirty?: boolean;

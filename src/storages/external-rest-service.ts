@@ -12,18 +12,20 @@ import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 import { getKeyOfType } from './utils';
 
+export interface IExternalRestServiceStorageServiceConfig {
+  baseUrl: string;
+  headers: Record<string, string>;
+  noCache: boolean;
+}
+
 @Service()
-export class ExternalRestServiceStorageService extends EntityService implements IStorageService {
+export class ExternalRestServiceStorageService extends EntityService<IExternalRestServiceStorageServiceConfig> implements IStorageService {
   static readonly type: string = 'externalRestService';
 
   protected cache = new Cache();
   @Autowired() protected restApiService: RestApiService;
 
-  constructor(protected config?: {
-    baseUrl: string;
-    headers: Record<string, string>;
-    noCache: boolean;
-  }) {
+  constructor() {
     super();
 
     this.restApiService.configure({

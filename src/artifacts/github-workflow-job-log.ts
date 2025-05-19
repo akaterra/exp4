@@ -16,15 +16,15 @@ export interface IGithubWorkflowJobLogArtifactConfig {
 };
 
 @Service()
-export class GithubWorkflowJobLogArtifactService extends EntityService implements IArtifactService {
+export class GithubWorkflowJobLogArtifactService extends EntityService<IGithubWorkflowJobLogArtifactConfig> implements IArtifactService {
   static readonly type: string = 'github:workflowJob:log';
 
   @Autowired() protected projectsService: ProjectsService;
   protected cache = new Cache();
 
-  constructor(public readonly config?: IGithubWorkflowJobLogArtifactConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IGithubWorkflowJobLogArtifactConfig) {
+  //   super();
+  // }
 
   // @Log('debug')
   async run(

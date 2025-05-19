@@ -22,23 +22,39 @@ export interface IJenkinsConfig {
 }
 
 @Service()
-export class JenkinsIntegrationService extends EntityService implements IIntegrationService {
+export class JenkinsIntegrationService extends EntityService<IJenkinsConfig> implements IIntegrationService {
   protected cache = new Cache<unknown>();
   protected hostUrl: URL;
 
   static readonly type: string = 'jenkins';
 
-  constructor(public readonly config: IJenkinsConfig) {
-    super();
+  // constructor(public readonly config: IJenkinsConfig) {
+  //   super();
 
-    this.config = {
-      ...this.config,
-      host: maybeReplaceEnvVars(this.config.host) || process.env.JENKINS_HOST,
-      username: maybeReplaceEnvVars(this.config.username) || process.env.JENKINS_USERNAME,
-      password: maybeReplaceEnvVars(this.config.password) || process.env.JENKINS_PASSWORD,
-      token: maybeReplaceEnvVars(this.config.token) || process.env.JENKINS_TOKEN,
+  //   this.config = {
+  //     ...this.config,
+  //     host: maybeReplaceEnvVars(this.config.host) || process.env.JENKINS_HOST,
+  //     username: maybeReplaceEnvVars(this.config.username) || process.env.JENKINS_USERNAME,
+  //     password: maybeReplaceEnvVars(this.config.password) || process.env.JENKINS_PASSWORD,
+  //     token: maybeReplaceEnvVars(this.config.token) || process.env.JENKINS_TOKEN,
+  //   };
+  //   this.hostUrl = new URL(this.config.host);
+  // }
+
+  onConfigBefore(config: IJenkinsConfig): IJenkinsConfig {
+    return {
+      ...config,
+      host: maybeReplaceEnvVars(config.host) || process.env.JENKINS_HOST,
+      username: maybeReplaceEnvVars(config.username) || process.env.JENKINS_USERNAME,
+      password: maybeReplaceEnvVars(config.password) || process.env.JENKINS_PASSWORD,
+      token: maybeReplaceEnvVars(config.token) || process.env.JENKINS_TOKEN,
     };
+  }
+
+  onConfigAfter(config: IJenkinsConfig): IJenkinsConfig {
     this.hostUrl = new URL(this.config.host);
+
+    return config;
   }
 
   @Log('debug') @IncStatistics()

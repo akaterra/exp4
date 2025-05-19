@@ -14,15 +14,15 @@ export interface IArgocdApplicationArtifactConfig {
 };
 
 @Service()
-export class ArgocdApplicationArtifactService extends EntityService implements IArtifactService {
+export class ArgocdApplicationArtifactService extends EntityService<IArgocdApplicationArtifactConfig> implements IArtifactService {
   static readonly type: string = 'argocd:application';
 
   @Autowired() protected projectsService: ProjectsService;
   protected cache = new Cache();
 
-  constructor(public readonly config?: IArgocdApplicationArtifactConfig) {
-    super();
-  }
+  // constructor(public readonly config?: IArgocdApplicationArtifactConfig) {
+  //   super();
+  // }
 
   async run(
     entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },

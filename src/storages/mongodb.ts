@@ -12,21 +12,27 @@ import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 import { getKeyOfType } from './utils';
 
+export interface IMongodbStorageServiceConfig {
+  uri?: string;
+  collectionUsersName?: string;
+  collectionVarsName?: string;
+}
+
 @Service()
-export class MongodbStorageService extends EntityService implements IStorageService {
+export class MongodbStorageService extends EntityService<IMongodbStorageServiceConfig> implements IStorageService {
   static readonly type: string = 'mongodb';
 
   protected cache = new Cache();
   protected client: MongoClient;
   protected db: Db;
 
-  constructor(protected config?: {
-    uri?: string,
-    collectionUsersName?: string,
-    collectionVarsName?: string,
-  }) {
-    super();
-  }
+  // constructor(protected config?: {
+  //   uri?: string,
+  //   collectionUsersName?: string,
+  //   collectionVarsName?: string,
+  // }) {
+  //   super();
+  // }
 
   @Log('debug')
   async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {

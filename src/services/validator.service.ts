@@ -1,6 +1,18 @@
 import { Service } from 'typedi';
 import Ajv from 'ajv';
 
+export type IValidationSchemaDef = Record<string, {
+  type?: string;
+  constraints?: {
+    enum?: unknown[];
+    min?: number;
+    max?: number;
+    minLength?: number;
+    maxLength?: number;
+    optional?: boolean;
+  };
+}>;
+
 @Service()
 export class ValidatorService {
   protected ajv = new Ajv();
@@ -12,17 +24,7 @@ export class ValidatorService {
     return this;
   }
 
-  addSchemaFromDef(def: Record<string, {
-    type?: string;
-    constraints?: {
-      enum?: unknown[];
-      max?: number;
-      min?: number;
-      maxLength?: number;
-      minLength?: number;
-      optional?: boolean;
-    };
-  }>, id: string) {
+  addSchemaFromDef(def: IValidationSchemaDef, id: string) {
     const schema: Record<string, any> = {
       type: 'object',
       properties: {},

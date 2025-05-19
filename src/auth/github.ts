@@ -8,8 +8,17 @@ import { StorageHolderService } from '../storages';
 import { authSendData as execAuthSendData, prepareAuthData } from '../auth';
 import { Log } from '../logger';
 
+export interface IGithubAuthStrategyServiceConfig {
+  credentials?: {
+    clientId?: string;
+    clientSecret?: string;
+    callbackUrl?: string;
+  };
+  storage?: string;
+}
+
 @Service()
-export class GithubAuthStrategyService extends EntityService implements IAuthStrategyService {
+export class GithubAuthStrategyService extends EntityService<IGithubAuthStrategyServiceConfig> implements IAuthStrategyService {
   static readonly type: string = 'github';
 
   @Autowired() protected storagesService: StorageHolderService;
@@ -18,33 +27,53 @@ export class GithubAuthStrategyService extends EntityService implements IAuthStr
     return this.storagesService.get(this.config?.storage ?? 'default');
   }
 
-  constructor(protected config?: {
-    credentials?: {
-      clientId?: string;
-      clientSecret?: string;
-      callbackUrl?: string;
-    };
-    storage?: string;
-  }) {
-    super();
+  // constructor(protected config?: {
+  //   credentials?: {
+  //     clientId?: string;
+  //     clientSecret?: string;
+  //     callbackUrl?: string;
+  //   };
+  //   storage?: string;
+  // }) {
+  //   super();
 
-    if (config) {
-      if (!this.config.credentials) {
-        this.config.credentials = {};
-      }
+  //   if (config) {
+  //     if (!this.config.credentials) {
+  //       this.config.credentials = {};
+  //     }
 
-      if (!this.config.credentials.clientId) {
-        this.config.credentials.clientId = process.env.GITHUB_CLIENT_ID;
-      }
+  //     if (!this.config.credentials.clientId) {
+  //       this.config.credentials.clientId = process.env.GITHUB_CLIENT_ID;
+  //     }
 
-      if (!this.config.credentials.clientSecret) {
-        this.config.credentials.clientSecret = process.env.GITHUB_CLIENT_SECRET;
-      }
+  //     if (!this.config.credentials.clientSecret) {
+  //       this.config.credentials.clientSecret = process.env.GITHUB_CLIENT_SECRET;
+  //     }
 
-      if (!this.config.credentials.callbackUrl) {
-        this.config.credentials.callbackUrl = process.env.GITHUB_CALLBACK_URL;
-      }
+  //     if (!this.config.credentials.callbackUrl) {
+  //       this.config.credentials.callbackUrl = process.env.GITHUB_CALLBACK_URL;
+  //     }
+  //   }
+  // }
+
+  onConfigBefore(config: IGithubAuthStrategyServiceConfig): IGithubAuthStrategyServiceConfig {
+    if (!config.credentials) {
+      config.credentials = {};
     }
+
+    if (!config.credentials.clientId) {
+      config.credentials.clientId = process.env.GITHUB_CLIENT_ID;
+    }
+
+    if (!config.credentials.clientSecret) {
+      config.credentials.clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    }
+
+    if (!config.credentials.callbackUrl) {
+      config.credentials.callbackUrl = process.env.GITHUB_CALLBACK_URL;
+    }
+
+    return config;
   }
 
   @Log('debug')

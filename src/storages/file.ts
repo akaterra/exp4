@@ -15,15 +15,19 @@ import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 import { getKeyOfType } from './utils';
 
+export interface IFileStorageServiceConfig {
+  dir?: string;
+}
+
 @Service()
-export class FileStorageService extends EntityService implements IStorageService {
+export class FileStorageService extends EntityService<IFileStorageServiceConfig> implements IStorageService {
   static readonly type: string = 'file';
 
   protected cache = new Cache();
 
-  constructor(protected config?: { dir? }) {
-    super();
-  }
+  // constructor(protected config?: { dir? }) {
+  //   super();
+  // }
 
   @Log('debug')
   async manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>> {

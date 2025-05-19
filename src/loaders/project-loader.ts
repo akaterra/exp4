@@ -101,7 +101,11 @@ export async function createProject(
 
   if (manifest.integrations) {
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
-      integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
+      const instance = integrationsService.getInstance(defConfig.type);
+
+      instance.configure(defConfig.config);
+
+      integrationsService.add(instance, defId);
     }
   }
 

@@ -13,8 +13,13 @@ import { TargetState } from '../target-state';
 import { StreamState } from '../stream-state';
 import { getKeyOfType } from './utils';
 
+export interface IGithubStorageServiceConfig {
+  integration?: string;
+  noCache?: boolean;
+}
+
 @Service()
-export class GithubStorageService extends EntityService implements IStorageService {
+export class GithubStorageService extends EntityService<IGithubStorageServiceConfig> implements IStorageService {
   static readonly type: string = 'github';
 
   @Autowired() protected integrationsService: IntegrationHolderService;
@@ -27,9 +32,9 @@ export class GithubStorageService extends EntityService implements IStorageServi
     ) as GithubIntegrationService;
   }
 
-  constructor(protected config?: { integration?: string, noCache?: boolean }) {
-    super();
-  }
+  // constructor(protected config?: { integration?: string, noCache?: boolean }) {
+  //   super();
+  // }
 
   @Log('debug')
   async manifestsLoad(): Promise<Array<IGeneralManifest | IProjectManifest>> {
