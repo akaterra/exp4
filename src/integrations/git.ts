@@ -17,6 +17,14 @@ export interface IGitConfig {
 export class GitIntegrationService extends EntityService<IGitConfig> implements IIntegrationService {
   protected client: SimpleGit;
 
+  protected _validationSchema = {
+    binary: { type: 'string', required: false, constraints: { minLength: 1 } },
+    branch: { type: 'string', required: false, constraints: { minLength: 1 } },
+    dir: { type: 'string', required: false, constraints: { minLength: 1 } },
+    maxConcurrentProcesses: { type: 'number', required: false, constraints: { min: 1, max: 20 } },
+    trimmed: { type: 'boolean', required: false },
+  };
+
   static readonly type: string = 'git';
 
   // constructor(public readonly config?: IGitConfig) {

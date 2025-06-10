@@ -23,7 +23,9 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
     }
 
     for (const [ defId, defConfig ] of Object.entries(manifest.auth)) {
-      authStrategiesService.add(authStrategiesService.getInstance(defConfig.type, defConfig.config), defId, defConfig.title, defConfig.description);
+      const instance = authStrategiesService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
+      authStrategiesService.add(instance, defId, defConfig.title, defConfig.description);
     }
   }
 
@@ -35,7 +37,9 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
     }
 
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
-      integrationsService.add(integrationsService.getInstance(defConfig.type, defConfig.config), defId);
+      const instance = integrationsService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
+      integrationsService.add(instance, defId);
     }
   }
 
@@ -47,7 +51,9 @@ export async function createGeneral(manifest: IGeneralManifest, notThrow?: boole
     }
 
     for (const [ defId, defConfig ] of Object.entries(manifest.storages)) {
-      storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
+      const instance = storagesService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
+      storagesService.add(instance, defId);
     }
   }
 }

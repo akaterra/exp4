@@ -26,6 +26,20 @@ export class JenkinsIntegrationService extends EntityService<IJenkinsConfig> imp
   protected cache = new Cache<unknown>();
   protected hostUrl: URL;
 
+  protected _validationSchema = {
+    cacheTtlSec: { type: 'number', required: false, constraints: { min: 0, max: 3600 } },
+
+    jobName: { type: 'string', required: false, constraints: { minLength: 1 } },
+    jobParams: { type: 'object', required: false },
+
+    host: { type: 'string', required: true, constraints: { minLength: 1 } },
+
+    username: { type: 'string', required: false, constraints: { minLength: 1 } },
+    password: { type: 'string', required: false, constraints: { minLength: 1 } },
+
+    token: { type: 'string', required: false, constraints: { minLength: 1 } },
+  };
+
   static readonly type: string = 'jenkins';
 
   // constructor(public readonly config: IJenkinsConfig) {

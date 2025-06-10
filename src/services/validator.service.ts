@@ -3,6 +3,7 @@ import Ajv from 'ajv';
 
 export type IValidationSchemaDef = Record<string, {
   type?: string;
+  required?: boolean;
   constraints?: {
     enum?: unknown[];
     min?: number;
@@ -34,7 +35,7 @@ export class ValidatorService {
     for (const [ key, options ] of Object.entries(def)) {
       schema.properties[key] = { type: options.type };
 
-      if (!options.constraints?.optional) {
+      if (!options.constraints?.optional && options.required !== false) {
         schema.required.push(key);
       }
 

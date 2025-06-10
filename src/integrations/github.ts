@@ -19,6 +19,14 @@ export interface IGithubConfig {
 export class GithubIntegrationService extends EntityService<IGithubConfig> implements IIntegrationService {
   protected client: Octokit;
 
+  protected _validationSchema = {
+    branch: { type: 'string', required: false, constraints: { minLength: 1 } },
+    org: { type: 'string', required: false, constraints: { minLength: 1 } },
+    repository: { type: 'string', required: false, constraints: { minLength: 1 } },
+    token: { type: 'string', required: false, constraints: { minLength: 1 } },
+    useRepositoryAsOrg: { type: 'boolean', required: false },
+  };
+
   static readonly type: string = 'github';
 
   // constructor(public readonly config?: IGithubConfig) {

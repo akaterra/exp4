@@ -1,4 +1,4 @@
-import { IService } from '../entities.service';
+import { IEntityService, IService } from '../entities.service';
 import { IGeneralManifest } from '../general';
 import { IProjectManifest, IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 import { StreamState } from '../stream-state';
@@ -7,7 +7,7 @@ import { IUser } from '../user';
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';
 
-export interface IStorageService extends IService {
+export interface IStorageService extends IEntityService {
   manifestsLoad(source: string | string[]): Promise<Array<IGeneralManifest | IProjectManifest>>;
 
   userGet(filter: Record<string, unknown>): Promise<IUser>;

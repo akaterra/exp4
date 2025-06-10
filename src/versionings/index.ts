@@ -1,9 +1,9 @@
 import { Service } from 'typedi';
-import { EntitiesServiceWithFactory } from '../entities.service';
+import { EntitiesServiceWithFactory, IEntityService } from '../entities.service';
 import { IService } from '../entities.service';
 import { IProjectTargetDef, IProjectTargetStreamDef } from '../project';
 
-export interface IVersioningService extends IService {
+export interface IVersioningService extends IEntityService {
   getCurrent(target: IProjectTargetDef, format?: false | string): Promise<string>;
 
   getTargetVar<D>(target: IProjectTargetDef, key: string | string[], def?: D, isComplex?: boolean): Promise<D>;

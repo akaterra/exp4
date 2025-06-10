@@ -19,6 +19,15 @@ export interface IGitlabConfig {
 export class GitlabIntegrationService extends EntityService<IGitlabConfig> implements IIntegrationService {
   protected client: Resources.Gitlab;
 
+  protected _validationSchema = {
+    branch: { type: 'string', required: false, constraints: { minLength: 1 } },
+    host: { type: 'string', required: false, constraints: { minLength: 1 } },
+    org: { type: 'string', required: false, constraints: { minLength: 1 } },
+    repository: { type: 'string', required: false, constraints: { minLength: 1 } },
+    token: { type: 'string', required: false, constraints: { minLength: 1 } },
+    useRepositoryAsOrg: { type: 'boolean', required: false },
+  };
+
   static readonly type: string = 'gitlab';
 
   // constructor(public readonly config?: IGitlabConfig) {

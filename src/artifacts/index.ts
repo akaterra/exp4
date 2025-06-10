@@ -1,4 +1,4 @@
-import { IService } from '../entities.service';
+import { IEntityService, IService } from '../entities.service';
 import { IProjectArtifact } from '../project';
 import { IStreamStateContext, StreamState } from '../stream-state';
 import { Service } from 'typedi';
@@ -6,7 +6,7 @@ import { EntitiesServiceWithFactory } from '../entities.service';
 import { Autowired } from '../utils';
 import { ProjectsService } from '../projects.service';
 
-export interface IArtifactService extends IService {
+export interface IArtifactService extends IEntityService {
   run(
     entity: { ref: IProjectArtifact['ref'], context?: IStreamStateContext },
     streamState: StreamState,

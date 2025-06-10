@@ -1,9 +1,9 @@
-import { IService } from '../entities.service';
+import { IEntityService, IService } from '../entities.service';
 import { IProjectActionDef, IProjectFlowDef } from '../project';
 import { Service } from 'typedi';
 import { EntitiesServiceWithFactory } from '../entities.service';
 
-export interface IActionService extends IService {
+export interface IActionService extends IEntityService {
   exec(
     flow: IProjectFlowDef,
     action: IProjectActionDef,

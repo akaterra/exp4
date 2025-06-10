@@ -55,7 +55,7 @@ export class EntityService<C extends Record<string, any> = Record<string, any>> 
       try {
         new ValidatorService().addSchemaFromDef(this._validationSchema, '_').validate(config, '_');
       } catch (err) {
-        throw new Error(`Invalid config for ${this.type} "${this.id ?? '?'}": ${err.message}`);
+        throw new Error(`Invalid config for entity "${this.id ?? '?'}" (${this.type}) with error: ${err.message || 'unknown error'}`);
       }
     }
 

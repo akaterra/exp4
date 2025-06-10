@@ -16,6 +16,13 @@ export interface ISlackConfig {
 export class SlackIntegrationService extends EntityService<ISlackConfig> implements IIntegrationService {
   static readonly type: string = 'slack';
 
+  protected _validationSchema = {
+    oauthToken: { type: 'string', required: false, constraints: { minLength: 1 } },
+    channelId: { type: 'string', required: false, constraints: { minLength: 1 } },
+    channelMessageId: { type: 'string', required: false, constraints: { minLength: 1 } },
+    webhookUrl: { type: 'string', required: false, constraints: { minLength: 1 } },
+  };
+
   // constructor(public readonly config: ISlackConfig) {
   //   super();
 

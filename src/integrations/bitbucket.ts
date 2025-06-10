@@ -21,6 +21,18 @@ export interface IBitbucketConfig {
 export class BitbucketIntegrationService extends EntityService<IBitbucketConfig> implements IIntegrationService {
   protected client: APIClient;
 
+  protected _validationSchema = {
+    authMethod: { type: 'string', required: false, constraints: { enum: [ 'password', 'token' ] } },
+    branch: { type: 'string', required: false, constraints: { minLength: 1 } },
+    host: { type: 'string', required: false, constraints: { minLength: 1 } },
+    password: { type: 'string', required: false, constraints: { minLength: 1 } },
+    repository: { type: 'string', required: false, constraints: { minLength: 1 } },
+    token: { type: 'string', required: false, constraints: { minLength: 1 } },
+    useRepositoryAsOrg: { type: 'boolean', required: false },
+    username: { type: 'string', required: false, constraints: { minLength: 1 } },
+    workspace: { type: 'string', required: false, constraints: { minLength: 1 } },
+  };
+
   static readonly type: string = 'bitbucket';
 
   // constructor(public readonly config?: IBitbucketConfig) {

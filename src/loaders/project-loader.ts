@@ -88,13 +88,13 @@ export async function createProject(
   if (manifest.extensions) {
     for (const [ defId, defConfig ] of Object.entries(manifest.extensions)) {
       const instance = extensionsService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
 
       if (defConfig.events) {
         instance.registerEvents(defConfig.events);
       }
 
       instance.registerCallbacks(callbacksContainer);
-
       extensionsService.add(instance, defId);
     }
   }
@@ -102,28 +102,32 @@ export async function createProject(
   if (manifest.integrations) {
     for (const [ defId, defConfig ] of Object.entries(manifest.integrations)) {
       const instance = integrationsService.getInstance(defConfig.type);
-
       instance.configure(defConfig.config);
-
       integrationsService.add(instance, defId);
     }
   }
 
   if (manifest.storages) {
     for (const [ defId, defConfig ] of Object.entries(manifest.storages)) {
-      storagesService.add(storagesService.getInstance(defConfig.type, defConfig.config), defId);
+      const instance = storagesService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
+      storagesService.add(instance, defId);
     }
   }
 
   if (manifest.versionings) {
     for (const [ defId, defConfig ] of Object.entries(manifest.versionings).concat([ [ null, { type: null } ] ])) {
-      versioningsService.add(versioningsService.getInstance(defConfig.type, defConfig.config), defId);
+      const instance = versioningsService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
+      versioningsService.add(instance, defId);
     }
   }
 
   if (manifest.artifacts) {
     for (const [ defId, defConfig ] of Object.entries(manifest.artifacts)) {
-      artifactsService.add(artifactsService.getInstance(defConfig.type, defConfig.config), defId);
+      const instance = artifactsService.getInstance(defConfig.type, defConfig.config);
+      instance.configure(defConfig.config);
+      artifactsService.add(instance, defId);
     }
   }
 
@@ -131,7 +135,9 @@ export async function createProject(
     for (const [ ,flow ] of Object.entries(manifest.flows)) {
       flow.actions?.forEach((action) => {
         if (!actionsService.has(action.type)) {
-          actionsService.add(actionsService.getInstance(action.type, action.config), action.type);
+          const instance = actionsService.getInstance(action.type, action.config);
+          instance.configure(action.config);
+          actionsService.add(instance, action.type);
         }
       });
     }
