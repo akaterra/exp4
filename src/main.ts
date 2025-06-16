@@ -40,7 +40,7 @@ process.on('uncaughtException', (err) => {
 });
 
 function auth(req, res, next) {
-  req.user = authorize(req.headers.authorization || req.cookies.authorization);
+  // req.user = authorize(req.headers.authorization || req.cookies.authorization);
 
   next();
 }

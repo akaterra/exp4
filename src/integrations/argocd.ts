@@ -46,7 +46,7 @@ export class ArgocdIntegrationService extends EntityService<IArgocdConfig> imple
     username: { type: 'string', required: false, constraints: { minLength: 1 } },
     password: { type: 'string', required: false, constraints: { minLength: 1 } },
     token: { type: 'string', required: false, constraints: { minLength: 1 } },
-  }
+  };
 
   static readonly type: string = 'argocd';
 

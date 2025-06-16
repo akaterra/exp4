@@ -31,6 +31,18 @@ export class PasswordAuthStrategyService extends EntityService<IPasswordAuthStra
   //   super();
   // }
 
+  onConfigBefore(config: IPasswordAuthStrategyServiceConfig): IPasswordAuthStrategyServiceConfig {
+    if (!config.saltRoutes) {
+      config.saltRoutes = 10; // default salt rounds for password hashing
+    }
+
+    if (!config.storage) {
+      config.storage = 'default'; // default storage
+    }
+
+    return config;
+  }
+
   @Log('debug')
   async authorize(data: Record<string, any>): Promise<IUser> { // eslint-disable-line
     return null;

@@ -3,6 +3,8 @@ import Ajv from 'ajv';
 
 export type IValidationSchemaDef = Record<string, {
   type?: string;
+  items?: IValidationSchemaDef;
+  properties?: IValidationSchemaDef;
   required?: boolean;
   constraints?: {
     enum?: unknown[];
@@ -25,7 +27,7 @@ export class ValidatorService {
     return this;
   }
 
-  addSchemaFromDef(def: IValidationSchemaDef, id: string) {
+  addSchemaFromDef(def: IValidationSchemaDef, id: string, returnSchema = false) {
     const schema: Record<string, any> = {
       type: 'object',
       properties: {},
@@ -34,6 +36,16 @@ export class ValidatorService {
 
     for (const [ key, options ] of Object.entries(def)) {
       schema.properties[key] = { type: options.type };
+
+      if (options.properties) {
+        schema.properties[key].type = 'object';
+        schema.properties[key].properties = this.addSchemaFromDef(options.properties, key, true);
+      }
+
+      if (options.items) {
+        schema.properties[key].type = 'array';
+        schema.properties[key].items = options.items.$ ? (this.addSchemaFromDef(options.items, key, true) as any).$ : this.addSchemaFromDef(options.items, key, true);
+      }
 
       if (!options.constraints?.optional && options.required !== false) {
         schema.required.push(key);
@@ -58,6 +70,10 @@ export class ValidatorService {
       if (typeof !options.constraints?.minLength === 'number') {
         schema.properties[key].minLength = options.constraints.minLength;
       }
+    }
+
+    if (returnSchema) {
+      return schema;
     }
 
     return this.addSchema(schema, id);

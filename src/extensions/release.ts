@@ -27,6 +27,26 @@ export interface IReleaseConfig {
 export class ReleaseExtensionService extends EntityService<IReleaseConfig> implements IExtensionService {
   static readonly type: string = 'release';
 
+  // protected _validationSchema = {
+  //   sections: {
+  //     type: 'array',
+  //     items: {
+  //       id: { type: 'string', required: false, constraints: { minLength: 1 } },
+  //       type: { type: 'string', required: false, constraints: { minLength: 1 } },
+  //       changelog: {
+  //         type: 'object',
+  //         properties: {
+  //           artifacts: { type: 'array', items: { $: { type: 'string', constraints: { minLength: 1 } } }, required: false },
+  //           changes: { type: 'array', items: { $: { type: 'string', constraints: { minLength: 1 } } }, required: false },
+  //           isSystem: { type: 'boolean', required: false },
+  //         },
+  //         required: false,
+  //       },
+  //       flows: { type: 'array', items: { $: { type: 'string', constraints: { minLength: 1 } } }, required: false },
+  //     },
+  //   },
+  // };
+
   @Autowired() protected projectsService: ProjectsService;
 
   // constructor(public readonly config?: IReleaseConfig) {
@@ -80,8 +100,7 @@ export class ReleaseExtensionService extends EntityService<IReleaseConfig> imple
         }
 
         if (targetState.hasExtension('release')) {
-          // this.projectsService.
-          // await versioning.setTargetVar(target, 'ext_release', targetStateRelease.state, true);
+          await this.updateReleaseExtension(targetState);
         }
       });
     }
@@ -129,5 +148,12 @@ export class ReleaseExtensionService extends EntityService<IReleaseConfig> imple
     }
 
     return targetStateRelease;
+  }
+
+  protected async updateReleaseExtension(targetState: TargetState) {
+    const project = this.projectsService.get(targetState.target.ref?.projectId);
+    const versioning = project.getEnvVersioningByTarget(targetState.target);
+    const targetStateRelease = targetState.getExtension<ReleaseState>('release', 'release', true);
+    await versioning.setTargetVar(targetState.target, 'ext_release', targetStateRelease.state, true);
   }
 }

@@ -44,7 +44,6 @@ export class GithubWorkflowJobLogArtifactService extends EntityService<IGithubWo
     let artifact = hasScope('artifact', scopes)
       ? null
       : this.cache.get(params.githubWorkflowJobId as string);
-    console.log(params);
 
     if (!artifact) {
       artifact = await this.getIntegration(entity.ref).workflowJobLogGet(

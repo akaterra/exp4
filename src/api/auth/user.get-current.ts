@@ -4,5 +4,5 @@ import { logger } from '../../logger';
 export async function authUserGetCurrent(req, res) {
   logger.info({ message: 'authUserGetCurrent', data: req.data });
 
-  res.json(req.user);
+  res.json(req.user ?? null);
 }

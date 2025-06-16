@@ -21,6 +21,12 @@ export interface ISlackNotificationConfig {
 export class SlackNotificationExtensionService extends EntityService<ISlackNotificationConfig> implements INotificationService {
   static readonly type: string = 'slack:notification';
 
+  protected _validationSchema = {
+    integration: { type: 'string', required: false, constraints: { minLength: 1 } },
+    locale: { type: 'string', required: false, constraints: { minLength: 1 } },
+    tz: { type: 'string', required: false, constraints: { minLength: 1 } },
+  };
+
   @Autowired() protected projectsService: ProjectsService;
 
   // constructor(protected config: ISlackNotificationConfig) {
@@ -35,7 +41,7 @@ export class SlackNotificationExtensionService extends EntityService<ISlackNotif
         if (!(targetState instanceof TargetState)) {
           return;
         }
-console.log({targetState,id: this.id});
+
         if (targetState.hasTargetExtension('notification', this.id)) {
           await this.publishRelease(targetState);
         }

@@ -26,6 +26,7 @@ export class TargetState<
 
   get state() {
     return {
+      extensions: this.extensions,
       metadata: this.metadata,
       ver: this.ver,
     };
@@ -34,7 +35,7 @@ export class TargetState<
   constructor(props: Partial<TargetState>) {
     this.id = props.id ?? null;
     this.type = props.type ?? null;
-    this.extensions = {};
+    this.extensions = {}; // props.extensions ?? {};
     this.metadata = (props.metadata ?? {}) as Metadata;
     this.streams = props.streams ?? {};
     this.target = props.target ?? null;

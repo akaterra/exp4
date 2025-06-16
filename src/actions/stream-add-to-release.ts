@@ -5,6 +5,8 @@ import { ProjectsService } from '../projects.service';
 import { EntityService } from '../entities.service';
 import { Autowired } from '../utils';
 import { getPossibleTargetIds } from './utils';
+import {ReleaseExtensionService} from '../extensions/release';
+import {ReleaseState} from '../release-state';
 
 @Service()
 export class StreamAddToReleaseActionService extends EntityService implements IActionService {
@@ -37,17 +39,17 @@ export class StreamAddToReleaseActionService extends EntityService implements IA
 
         for (const sId of streamIds) {
           const targetStreamState = await project.rereadStreamStateByTargetAndStream(tIdOfTarget, sId);
-          // targetState.setReleaseSectionByStreamId(
-          //   sId,
-          //   targetStreamState.history.artifact,
-          //   targetStreamState.history.change,
-          //   null,
-          //   true,
-          //   false,
-          // );
+          targetState.getExtensionOfTarget<ReleaseState>('release', 'release').setSectionByStreamId(
+            sId,
+            targetStreamState.history.artifact,
+            targetStreamState.history.change,
+            null,
+            true,
+            false,
+          );
         }
 
-        // await project.updateTargetState(target);
+        await project.updateTargetState(target);
       }
     }
   }
